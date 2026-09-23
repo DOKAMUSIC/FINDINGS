@@ -1396,7 +1396,7 @@ syncBpm();
 (function fromUrl(){
   const p = new URLSearchParams(location.search);
   const style = p.get("style"), sort = p.get("sort"), q = p.get("q"), play = p.get("play");
-  const mood = p.get("mood");
+  const mood = p.get("mood"), likes = p.get("likes");
   if (style && STYLE_NAME[style]) { S.styles.add(style); stylesOpen = true; renderStyleChips(); }
   if (sort && ["pertinence","vues","nouveautes","recent","bpm"].includes(sort)) {
     S.sort = sort;
@@ -1407,7 +1407,12 @@ syncBpm();
     S.moods.add(mood);
     elMoods.querySelector(`[data-mood="${CSS.escape(mood)}"]`)?.setAttribute("aria-pressed", "true");
   }
-  if (style || sort || q || mood) render();
+  if (likes === "1" && CRATE.size) {
+    S.crateOnly = true;
+    crateBtn.setAttribute("aria-pressed", "true");
+    crateBtn.classList.add("on");
+  }
+  if (style || sort || q || mood || likes) render();
   if (play) {
     const i = LAST.findIndex(b => b.id === play);
     if (i >= 0) playFrom(LAST, i);

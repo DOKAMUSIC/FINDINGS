@@ -152,7 +152,7 @@ button{font:inherit;background:none;border:0;padding:0;cursor:pointer;color:inhe
 .wrap{max-width:1220px;margin:0 auto;padding:0 22px}
 .sec{padding:56px 0}
 /* l'en-tête est collant : les ancres doivent s'arrêter en dessous, pas dessous */
-#dedans,#styles,#moods{scroll-margin-top:76px}
+#likes,#dedans,#styles,#moods{scroll-margin-top:76px}
 .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
 .sec-head h2{font-size:clamp(21px,3vw,30px);font-weight:700;letter-spacing:-.028em}
 .sec-head p{font-size:13.5px;color:var(--dim);margin-top:3px}
@@ -465,6 +465,17 @@ body.playing{padding-bottom:104px}
 </header>
 
 <main>
+  <section class="sec wrap" id="likes" hidden>
+    <div class="sec-head">
+      <div>
+        <h2>Tes prods likées</h2>
+        <p id="likesSub"></p>
+      </div>
+      <a href="app.html?likes=1">Tout voir →</a>
+    </div>
+    <div class="fresh" id="likewall"></div>
+  </section>
+
   <section class="sec wrap" id="dedans">
     <div class="sec-head">
       <div>
@@ -608,6 +619,43 @@ const FRESH = BEATS.slice().sort((a,b) =>
     dates.length ? `Ajoutées le ${new Date(dates[dates.length-1]+"T12:00:00Z").toLocaleDateString("fr-FR",{day:"numeric",month:"long"})}.` : "";
 })();
 
+/* ============ prods likées ============
+   Les likes vivent dans le stockage local du navigateur : chaque visiteur ne
+   voit que les siens, et rien ne remonte nulle part. La section reste masquée
+   tant qu'il n'y en a aucun — une étagère vide n'apprend rien à personne. */
+const LIKED = (function likes(){
+  let ids = [];
+  try {
+    const brut = localStorage.getItem("findings.crate")
+              || localStorage.getItem("prodyfind.crate")
+              || localStorage.getItem("diggr.crate") || "[]";
+    ids = JSON.parse(brut);
+  } catch (e) { ids = []; }
+  if (!Array.isArray(ids) || !ids.length) return [];
+  const parId = Object.fromEntries(BEATS.map(b => [b.id, b]));
+  // le plus récemment liké en premier
+  return ids.slice().reverse().map(id => parId[id]).filter(Boolean).slice(0, 8);
+})();
+
+(function murLikes(){
+  const section = document.getElementById("likes");
+  if (!LIKED.length) return;
+  section.hidden = false;
+  document.getElementById("likewall").innerHTML = LIKED.map(b => `
+    <a class="tile" data-id="${b.id}" href="app.html?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
+      <div class="art">
+        <img src="https://i.ytimg.com/vi/${b.id}/mqdefault.jpg" alt="" loading="lazy">
+        <span class="go"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+      </div>
+      <div class="body">
+        <p class="t">${esc(b.title)}</p>
+        <div class="s"><span class="pill">${esc(STYLE_NAME[b.style]||b.style)}</span><span>${esc(b.prod)}</span></div>
+      </div>
+    </a>`).join("");
+  document.getElementById("likesSub").textContent =
+    LIKED.length === 1 ? "Une prod mise de côté." : `${LIKED.length} prods mises de côté.`;
+})();
+
 /* ============ nuage de styles ============ */
 (function cloud(){
   // chaque style est illustré par ses prods les plus écoutées : quatre pochettes
@@ -688,6 +736,7 @@ const openApp = document.getElementById("openApp");
 
 let player = null, apiReady = false, pendingId = null, tick = null;
 let QI = -1, current = null, paused = false;
+let QUEUE = [];   // la section d'où part la lecture devient la file d'attente
 const FILE_MODE = location.protocol === "file:";
 let PLAIN = FILE_MODE, started = false, watchdog = null, gestured = false;
 addEventListener("pointerdown", () => gestured = true, { once:true, capture:true });
@@ -778,17 +827,20 @@ function startTick(){
   }, 300);
 }
 
-function play(i){
-  const b = FRESH[(i + FRESH.length) % FRESH.length];
+function play(i, file){
+  if (file && file.length) QUEUE = file;
+  const n = QUEUE.length;
+  if (!n) return;
+  QI = ((i % n) + n) % n;
+  const b = QUEUE[QI];
   if (!b) return;
-  QI = (i + FRESH.length) % FRESH.length;
   current = b; paused = false;
   bar.style.setProperty("--c", `var(--s-${b.style})`);
   elNowT.textContent = b.title;
   elNowD.innerHTML =
     `<span>par <b>${esc(b.prod)}</b></span>` +
     `<span>${esc(STYLE_NAME[b.style] || b.style)} · ${b.bpm} BPM</span>` +
-    `<span>${QI + 1}/${FRESH.length}</span>`;
+    `<span>${QI + 1}/${n}</span>`;
   elFill.style.width = "0%"; elKnob.style.left = "0%";
   elCur.textContent = "0:00"; elDur.textContent = fmtDur(b.dur || 0);
   tgIcon.innerHTML = ICON_PAUSE;
@@ -825,7 +877,16 @@ document.getElementById("fresh").addEventListener("click", e => {
   e.preventDefault();
   const i = FRESH.findIndex(b => b.id === a.dataset.id);
   if (i < 0) return;
-  (current && current.id === FRESH[i].id) ? toggle() : play(i);
+  (current && current.id === FRESH[i].id) ? toggle() : play(i, FRESH);
+});
+
+document.getElementById("likewall").addEventListener("click", e => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = e.target.closest(".tile"); if (!a) return;
+  e.preventDefault();
+  const i = LIKED.findIndex(b => b.id === a.dataset.id);
+  if (i < 0) return;
+  (current && current.id === LIKED[i].id) ? toggle() : play(i, LIKED);
 });
 document.getElementById("prev").addEventListener("click", prev);
 document.getElementById("next").addEventListener("click", next);
