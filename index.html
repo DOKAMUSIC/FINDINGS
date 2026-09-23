@@ -688,20 +688,41 @@ const FRESH = BEATS.slice().sort((a,b) =>
 })();
 
 /* ============ suggestions de recherche ============
-   Les artistes les plus cités par les prods du catalogue. Ce sont des liens :
-   ils fonctionnent au clic du milieu, au cmd-clic, et sans JavaScript. */
+   Cinq propositions tirées au sort à chaque chargement, et surtout de quatre
+   natures différentes : un style, un mood, un beatmaker et deux artistes cités.
+   Le but n'est pas de montrer le plus populaire — c'est de donner des pistes
+   auxquelles on n'aurait pas pensé. */
 (function suggestions(){
-  const tally = {};
-  BEATS.forEach(b => (b.refs || []).forEach(r => {
-    const k = r.trim(); if (k.length < 3) return;
-    tally[k] = (tally[k] || 0) + 1;
-  }));
-  const top = Object.entries(tally)
-    .sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]))
-    .filter(([,n]) => n > 1).slice(0, 5).map(([r]) => r);
-  const liste = top.length >= 3 ? top : ["Werenoi","Clams Casino","Morad"];
+  const compter = liste => {
+    const t = {};
+    liste.forEach(v => { const k = (v || "").trim(); if (k.length > 2) t[k] = (t[k] || 0) + 1; });
+    return t;
+  };
+  // on écarte ce qui n'apparaît qu'une fois : une seule prod derrière une
+  // suggestion, c'est une impasse plutôt qu'une piste
+  const refs   = Object.entries(compter(BEATS.flatMap(b => b.refs || []))).filter(([,n]) => n > 1).map(([r]) => r);
+  const prods  = Object.entries(compter(BEATS.map(b => b.prod))).filter(([,n]) => n > 1).map(([p]) => p);
+  const styles = [...new Set(BEATS.map(b => STYLE_NAME[b.style]).filter(Boolean))];
+  const moods  = [...new Set(BEATS.flatMap(b => b.moods || []))];
+
+  const piocher = (arr, n) => {
+    const c = arr.slice(), out = [];
+    while (c.length && out.length < n) out.push(c.splice(Math.floor(Math.random() * c.length), 1)[0]);
+    return out;
+  };
+
+  let choix = [...piocher(refs, 2), ...piocher(styles, 1), ...piocher(moods, 1), ...piocher(prods, 1)].filter(Boolean);
+  choix = piocher(choix, choix.length);          // l'ordre aussi est tiré au sort
+  if (choix.length < 3) choix = ["Werenoi", "amapiano", "sombre"];
+
   document.getElementById("hshot").innerHTML =
-    liste.map(r => `<a href="app.html?q=${encodeURIComponent(r)}">${esc(r)}</a>`).join("");
+    choix.map(r => `<a href="app.html?q=${encodeURIComponent(r)}">${esc(r)}</a>`).join("");
+
+  const ex = piocher(choix, 3);
+  if (ex.length === 3) {
+    document.getElementById("hq").placeholder =
+      `Un artiste, un style, un mood\u00a0: \u00ab\u00a0${ex[0]}\u00a0\u00bb, \u00ab\u00a0${ex[1]}\u00a0\u00bb, \u00ab\u00a0${ex[2]}\u00a0\u00bb\u2026`;
+  }
 })();
 
 /* ============ prods likées ============
