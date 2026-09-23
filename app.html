@@ -183,7 +183,6 @@ ul{margin:0;padding:0;list-style:none}
   .rail.open{display:grid}
 }
 .fset{display:grid;gap:10px}
-.fset .switch + .switch{margin-top:-2px}
 .fhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .eyebrow{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--dim)}
 .fhead button{font-size:11.5px;color:var(--accent)}
@@ -434,13 +433,16 @@ ul{margin:0;padding:0;list-style:none}
 }
 .bar.up{transform:none}
 .prog{position:absolute;top:0;left:0;right:0;height:14px;cursor:pointer;z-index:2}
+/* Le remplissage et la pastille se mesurent sur la piste elle-même, pas sur la
+   barre entière : un pourcentage calculé sur une largeur plus grande que la
+   piste fait déborder l'indicateur et décale le clic de déplacement. */
 .prog .rail2{position:absolute;top:6px;left:14px;right:14px;height:4px;border-radius:2px;background:rgba(0,0,0,.09)}
-.prog i{
-  position:absolute;top:6px;left:14px;height:4px;width:0;border-radius:2px;
+.prog .rail2 i{
+  position:absolute;left:0;top:0;height:100%;width:0;border-radius:2px;
   background:var(--c);transition:width .18s linear;
 }
-.prog .knob{
-  position:absolute;top:3px;left:14px;width:10px;height:10px;border-radius:50%;background:var(--c);
+.prog .rail2 .knob{
+  position:absolute;top:-3px;left:0;width:10px;height:10px;border-radius:50%;background:var(--c);
   margin-left:-5px;opacity:0;transition:opacity .12s;box-shadow:0 1px 3px rgba(0,0,0,.25);
 }
 .prog:hover .knob,.prog:focus-visible .knob{opacity:1}
@@ -534,8 +536,7 @@ ul{margin:0;padding:0;list-style:none}
 .btn.pri:hover{background:#e51f35}
 
 @media(max-width:1180px){ .vol{display:none} }
-@media(max-width:1160px){ .bar-acts .btn.ghost{display:none} }
-@media(max-width:900px){ .bar-acts #sameKey{display:none} }
+@media(max-width:1060px){ .bar-acts .btn.ghost{display:none} }
 @media(max-width:380px){
   .bar-in{gap:8px}
   .transport{gap:0}
@@ -598,11 +599,6 @@ ul{margin:0;padding:0;list-style:none}
     </div>
 
     <div class="fset">
-      <div class="fhead"><span class="eyebrow">Clé</span><button id="clearKey" hidden>tout effacer</button></div>
-      <div class="chips" id="keys"></div>
-    </div>
-
-    <div class="fset">
       <div class="fhead"><span class="eyebrow">Tempo</span><button id="clearBpm" hidden>réinitialiser</button></div>
       <div class="bpm-box">
         <div class="hist" id="hist" aria-hidden="true"></div>
@@ -630,16 +626,11 @@ ul{margin:0;padding:0;list-style:none}
     </div>
 
     <div class="fset">
-      <div class="fhead"><span class="eyebrow">Données fiables</span></div>
+      <div class="fhead"><span class="eyebrow">Tempo fiable</span></div>
       <label class="switch">
         <input type="checkbox" id="bpmSur">
         <span class="box"></span>
         <span class="lbl">Tempo vérifié uniquement</span>
-      </label>
-      <label class="switch">
-        <input type="checkbox" id="keySur">
-        <span class="box"></span>
-        <span class="lbl">Tonalité vérifiée uniquement</span>
       </label>
       <p class="mini" id="bpmSurN"></p>
     </div>
@@ -683,7 +674,7 @@ ul{margin:0;padding:0;list-style:none}
 
 <div class="bar" id="bar">
   <div class="prog" id="prog" role="slider" tabindex="0" aria-label="Position dans la prod" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-    <span class="rail2"></span><i id="progFill"></i><span class="knob" id="progKnob"></span>
+    <span class="rail2"><i id="progFill"></i><span class="knob" id="progKnob"></span></span>
   </div>
   <div class="bar-in">
     <div class="vid" id="vidWrap"><div id="ytplayer"></div><div class="shield" aria-hidden="true"></div><button class="zoom" id="vidZoom" aria-pressed="false" aria-label="Agrandir la vidéo" title="Agrandir la vidéo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4"/><path d="M15 3h4a2 2 0 0 1 2 2v4"/><path d="M9 21H5a2 2 0 0 1-2-2v-4"/><path d="M15 21h4a2 2 0 0 0 2-2v-4"/></svg></button></div>
@@ -714,7 +705,6 @@ ul{margin:0;padding:0;list-style:none}
         <input id="vol" type="range" min="0" max="100" value="100" aria-label="Volume">
       </span>
       <button class="btn ghost" id="ytLink">Ouvrir sur YouTube</button>
-      <button class="btn" id="sameKey" title="Afficher les prods dans la même tonalité">Même clé</button>
       <button class="btn pri" id="chanBtn" title="Voir la chaîne YouTube du beatmaker">Voir la chaîne</button>
     </div>
   </div>
@@ -756,7 +746,7 @@ const BEATS = CAT.beats.map(b => ({
 
 /* ============ état ============ */
 const S = {
-  q:"", styles:new Set(), moods:new Set(), keys:new Set(), bpm:[55,200], fr:false, bpmSur:false, keySur:false,
+  q:"", styles:new Set(), moods:new Set(), bpm:[55,200], fr:false, bpmSur:false,
   sort:"pertinence", crateOnly:false, playing:null, paused:false
 };
 let LAST = [];                 // resultats affiches = file d'attente potentielle
@@ -798,9 +788,7 @@ function filtered(){
     if(S.crateOnly && !CRATE.has(b.id)) return false;
     if(S.styles.size && !S.styles.has(b.style)) return false;
     if(S.fr && !b.fr) return false;
-    if(S.keys.size && !S.keys.has(b.key)) return false;
     if(S.bpmSur && !b.bpmSur) return false;
-    if(S.keySur && !b.keySur) return false;
     if(b.bpm < S.bpm[0] || b.bpm > S.bpm[1]) return false;
     if(S.moods.size && !b.moods.some(m => S.moods.has(m))) return false;
     if(terms.length && !terms.every(t => b._h.includes(t))) return false;
@@ -847,24 +835,6 @@ function renderStyleChips(){
       : "");
 }
 renderStyleChips();
-
-/* Les clés présentes dans le catalogue, de la plus fournie à la plus rare.
-   Au-delà de douze on replie : la longue traîne n'intéresse personne. */
-const elKeys = document.getElementById("keys");
-const KEY_N = {};
-BEATS.forEach(b => KEY_N[b.key] = (KEY_N[b.key] || 0) + 1);
-const LIVE_KEYS = Object.keys(KEY_N).sort((a,b) => KEY_N[b] - KEY_N[a]);
-const KFOLD = 12;
-let keysOpen = false;
-function renderKeyChips(){
-  const shown = keysOpen ? LIVE_KEYS : LIVE_KEYS.slice(0, KFOLD);
-  const rest = LIVE_KEYS.length - shown.length;
-  elKeys.innerHTML = shown.map(k =>
-    `<button class="chip" data-key="${esc(k)}" aria-pressed="${S.keys.has(k)}" style="--c:#1D1D1F">${esc(k)}<span class="n">${KEY_N[k]}</span></button>`
-  ).join("") + (LIVE_KEYS.length > KFOLD
-    ? `<button class="chip fold" data-kfold="1">${keysOpen ? "− replier" : `+ ${rest} clés`}</button>` : "");
-}
-renderKeyChips();
 
 const elMoods = document.getElementById("moods");
 elMoods.innerHTML = MOODS.map(m => {
@@ -948,7 +918,6 @@ function render(){
   const parts = [];
   if(S.crateOnly) parts.push("prods likées");
   if(S.styles.size) parts.push([...S.styles].map(s=>STYLE_NAME[s]).join(" + "));
-  if(S.keys.size) parts.push([...S.keys].join(" + "));
   if(S.moods.size) parts.push([...S.moods].join(" + "));
   if(S.fr) parts.push("scène FR");
   if(S.bpmSur) parts.push("tempo vérifié");
@@ -978,11 +947,10 @@ function render(){
 
   document.getElementById("clearStyle").hidden = !S.styles.size;
   document.getElementById("clearMood").hidden = !S.moods.size;
-  document.getElementById("clearKey").hidden = !S.keys.size;
   document.getElementById("clearBpm").hidden = !(S.bpm[0]>BMIN || S.bpm[1]<BMAX);
   document.getElementById("crateN").textContent = CRATE.size;
 
-  const active = S.styles.size + S.moods.size + S.keys.size + (S.fr?1:0) + (S.bpmSur?1:0) + (S.keySur?1:0) + ((S.bpm[0]>BMIN||S.bpm[1]<BMAX)?1:0);
+  const active = S.styles.size + S.moods.size + (S.fr?1:0) + (S.bpmSur?1:0) + ((S.bpm[0]>BMIN||S.bpm[1]<BMAX)?1:0);
   document.getElementById("ftogN").textContent = active
     ? `${active} filtre${active>1?"s":""} actif${active>1?"s":""}`
     : `${LIVE_STYLES.length} styles · ${MOODS.length} moods`;
@@ -1143,12 +1111,9 @@ function load(id){
 
   bar.style.setProperty("--c", cssVar(b.style));
   elNowT.textContent = b.title;
-  const cle = document.getElementById("sameKey");
-  cle.textContent = `Même clé · ${b.keySur ? "" : "~"}${b.key}`;
-  cle.hidden = !b.key;
   elNowD.innerHTML =
     `<span>par <b style="color:#aab3c6">${esc(b.prod)}</b></span>` +
-    `<span class="mono" style="font-size:11px">${esc(STYLE_NAME[b.style])} · ${b.bpmSur?"":"~"}${b.bpm} BPM · ${b.keySur?"":"~"}${esc(b.key)}</span>` +
+    `<span class="mono" style="font-size:11px">${esc(STYLE_NAME[b.style])} · ${b.bpmSur?"":"~"}${b.bpm} BPM</span>` +
     (QUEUE.length > 1 ? `<span class="mono" style="font-size:11px;color:var(--dimmer)">file ${QI+1}/${QUEUE.length}</span>` : "");
   elFill.style.width = "0%"; elKnob.style.left = "0%";
   elCur.textContent = "0:00"; elDur.textContent = fmtDur(b.dur);
@@ -1207,7 +1172,7 @@ document.getElementById("vol").addEventListener("input", e => {
 
 function seekFromEvent(e){
   if (!player || !player.getDuration) return;
-  const r = elProg.getBoundingClientRect();
+  const r = elProg.querySelector(".rail2").getBoundingClientRect();
   const pct = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
   player.seekTo(player.getDuration() * pct, true);
 }
@@ -1290,16 +1255,6 @@ function openChan(b){
 }
 
 document.getElementById("chanBtn").addEventListener("click", () => openChan(current));
-/* « Même clé » : le point de départ d'un projet cohérent — on garde la tonalité
-   de la prod en cours et on balaie tout le catalogue avec. */
-document.getElementById("sameKey").addEventListener("click", () => {
-  if (!current || !current.key) return;
-  S.keys = new Set([current.key]);
-  keysOpen = true;
-  renderKeyChips();
-  render();
-  window.scrollTo({ top:0, behavior:"smooth" });
-});
 
 /* ============ interactions ============ */
 list.addEventListener("click", e => {
@@ -1336,17 +1291,6 @@ elStyles.addEventListener("click", e => {
   btn.setAttribute("aria-pressed", S.styles.has(k));
   render();
 });
-elKeys.addEventListener("click", e => {
-  if (e.target.closest("[data-kfold]")) { keysOpen = !keysOpen; renderKeyChips(); return; }
-  const btn = e.target.closest("[data-key]"); if(!btn) return;
-  const k = btn.dataset.key;
-  S.keys.has(k) ? S.keys.delete(k) : S.keys.add(k);
-  btn.setAttribute("aria-pressed", S.keys.has(k));
-  render();
-});
-document.getElementById("clearKey").addEventListener("click", () => { S.keys.clear(); renderKeyChips(); render(); });
-document.getElementById("keySur").addEventListener("change", e => { S.keySur = e.target.checked; render(); });
-
 elMoods.addEventListener("click", e => {
   const btn = e.target.closest("[data-mood]"); if(!btn) return;
   const k = btn.dataset.mood;
@@ -1399,9 +1343,8 @@ document.getElementById("frOnly").addEventListener("change", e => { S.fr = e.tar
 document.getElementById("bpmSur").addEventListener("change", e => { S.bpmSur = e.target.checked; render(); });
 (function noteTempo(){
   const n = BEATS.filter(b => b.bpmSur).length;
-  const k = BEATS.filter(b => b.keySur).length;
   document.getElementById("bpmSurN").textContent =
-    `${n} prods annoncent leur tempo, ${k} leur tonalité, sur ${BEATS.length}. Pour les autres, la valeur affichée est une estimation, signalée par un ~.`;
+    `${n} prods sur ${BEATS.length} annoncent leur tempo. Pour les autres, la valeur affichée est une estimation, signalée par un ~.`;
 })();
 
 document.getElementById("sorts").addEventListener("click", e => {
