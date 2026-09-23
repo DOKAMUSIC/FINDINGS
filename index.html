@@ -240,6 +240,19 @@ button{font:inherit;background:none;border:0;padding:0;cursor:pointer;color:inhe
   display:block;font-size:clamp(10px,5cqw,12px);opacity:.92;font-variant-numeric:tabular-nums;
   text-shadow:0 1px 3px rgba(0,0,0,.6);
 }
+/* même pastille que sur les vignettes de sorties : elle monte et apparaît au
+   survol. Une flèche, pas un triangle de lecture — une carte de style ouvre le
+   catalogue filtré, elle ne joue rien. */
+.scard .go{
+  position:absolute;right:10px;bottom:10px;z-index:3;
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.92);color:var(--ink);
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+  opacity:0;transform:translateY(4px);transition:.18s;
+}
+.scard:hover .go{opacity:1;transform:none}
+@media(hover:none){ .scard .go{opacity:1;transform:none} }
+
 .scard.repliee{display:none}
 /* Mur des moods : format paysage et couleur dominante. Un mood est une
    ambiance, pas un rayon de bac — la teinte porte l'idée, la pochette n'est
@@ -675,6 +688,7 @@ const LIKED = (function likes(){
         <span class="nm">${esc(s.label)}</span>
         <span class="ct">${lot.length} prod${lot.length > 1 ? "s" : ""}</span>
       </div>
+      <span class="go"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg></span>
     </a>`;
   }).join("");
   document.getElementById("stylesSub").textContent =
