@@ -127,6 +127,39 @@ button{font:inherit;background:none;border:0;padding:0;cursor:pointer;color:inhe
   margin:0 0 26px;color:#0B0B0D;
   text-shadow:0 0 34px rgba(245,245,247,.92), 0 0 16px rgba(245,245,247,.95), 0 18px 46px rgba(0,0,0,.16);
 }
+/* Le champ n'a pas besoin de JavaScript : c'est un formulaire qui pointe sur la
+   page des prods, laquelle sait déjà lire ?q= dans son adresse. */
+.hsearch{
+  display:flex;align-items:center;gap:9px;
+  width:min(560px,100%);margin:0 auto 12px;padding:0 6px 0 15px;height:52px;
+  border-radius:999px;background:var(--glass-strong);
+  -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);box-shadow:var(--sh-2);
+  transition:box-shadow .16s,border-color .16s;
+}
+.hsearch:focus-within{box-shadow:var(--sh-3);border-color:rgba(0,0,0,.10)}
+.hsearch > svg{color:var(--dimmer);flex:0 0 auto}
+.hsearch input{
+  flex:1;min-width:0;height:100%;border:0;background:none;outline:none;
+  font-size:15px;letter-spacing:-.011em;color:var(--ink);
+}
+.hsearch input::placeholder{color:var(--dimmer)}
+.hsearch input::-webkit-search-cancel-button{-webkit-appearance:none}
+.hsearch button{
+  flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent);color:#fff;border:0;cursor:pointer;transition:.15s;
+}
+.hsearch button:hover{background:#e51f35;transform:scale(1.05)}
+
+.hs-hot{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:22px}
+.hs-hot a{
+  font-size:12px;color:var(--dim);background:var(--glass-strong);
+  -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);border-radius:999px;padding:4px 11px;transition:.14s;
+}
+.hs-hot a:hover{color:var(--ink);box-shadow:var(--sh-1);transform:translateY(-1px)}
+@media(max-width:520px){ .hs-hot{display:none} .hsearch{height:48px} }
+
 .cta-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
 .btn{
   display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 22px;border-radius:999px;
@@ -478,6 +511,16 @@ body.playing{padding-bottom:104px}
   <div class="hero-in">
     <p class="kicker">POWERED BY DOKA</p>
     <h1 class="wordmark">FINDINGS</h1>
+    <form class="hsearch" action="app.html" method="get" role="search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+      <input id="hq" name="q" type="search" autocomplete="off" aria-label="Rechercher une prod"
+             placeholder="Un artiste, un mood, un titre&nbsp;: &laquo;&nbsp;Werenoi&nbsp;&raquo;, &laquo;&nbsp;sombre&nbsp;&raquo;&hellip;">
+      <button type="submit" aria-label="Rechercher">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg>
+      </button>
+    </form>
+    <div class="hs-hot" id="hshot"></div>
+
     <div class="cta-row">
       <a class="btn pri" href="app.html">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
@@ -642,6 +685,23 @@ const FRESH = BEATS.slice().sort((a,b) =>
   const dates = recent.map(b => b.published).filter(Boolean).sort();
   document.getElementById("freshSub").textContent =
     dates.length ? `La plus récente est sortie le ${new Date(dates[dates.length-1]+"T12:00:00Z").toLocaleDateString("fr-FR",{day:"numeric",month:"long"})}.` : "";
+})();
+
+/* ============ suggestions de recherche ============
+   Les artistes les plus cités par les prods du catalogue. Ce sont des liens :
+   ils fonctionnent au clic du milieu, au cmd-clic, et sans JavaScript. */
+(function suggestions(){
+  const tally = {};
+  BEATS.forEach(b => (b.refs || []).forEach(r => {
+    const k = r.trim(); if (k.length < 3) return;
+    tally[k] = (tally[k] || 0) + 1;
+  }));
+  const top = Object.entries(tally)
+    .sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]))
+    .filter(([,n]) => n > 1).slice(0, 5).map(([r]) => r);
+  const liste = top.length >= 3 ? top : ["Werenoi","Clams Casino","Morad"];
+  document.getElementById("hshot").innerHTML =
+    liste.map(r => `<a href="app.html?q=${encodeURIComponent(r)}">${esc(r)}</a>`).join("");
 })();
 
 /* ============ prods likées ============
