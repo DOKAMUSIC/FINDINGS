@@ -4,82 +4,596 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FINDINGS</title>
-<meta name="description" content="Trouve tes prods sans perdre de temps. Des prods récentes, écoutables sur place, triées par style, tempo et mood.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <meta name="theme-color" content="#F5F5F7">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
 <style>
+/* ═══════════ FINDINGS — thème clair, verre dépoli ═══════════
+   Blanc dominant, hairlines, ombres courtes, flou saturé derrière les barres
+   fixes. Les couleurs de style viennent du catalogue : elles n'arrivent que par
+   la variable --c, mélangée à du blanc ou à de l'encre pour rester lisible. */
 :root{
   color-scheme:light;
+
   --bg:#F5F5F7;
   --surface:#FFFFFF;
+  --surface-2:#FBFBFD;
   --glass:rgba(255,255,255,.72);
   --glass-strong:rgba(255,255,255,.86);
   --glass-edge:rgba(255,255,255,.75);
+
   --ink:#1D1D1F;
   --ink-2:#3A3A3C;
   --dim:#6E6E73;
   --dimmer:#98989D;
+
   --line:rgba(0,0,0,.09);
   --line-soft:rgba(0,0,0,.055);
+  --hover:rgba(0,0,0,.035);
+
   --accent:#FA233B;
   --accent-2:#FB5C74;
+  --accent-soft:rgba(250,35,59,.10);
   --focus:#0A84FF;
-  --r-md:12px; --r-lg:18px; --r-xl:24px;
+  --ok:#34C759;
+
+  --r-sm:8px; --r-md:12px; --r-lg:18px; --r-xl:24px;
   --sh-1:0 1px 2px rgba(0,0,0,.05);
   --sh-2:0 2px 6px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.05);
   --sh-3:0 8px 24px rgba(0,0,0,.10),0 24px 64px rgba(0,0,0,.10);
   --blur:saturate(180%) blur(28px);
-  --accent-soft:rgba(250,35,59,.10);
+
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Helvetica Neue",Arial,sans-serif;
+  --display:var(--sans);
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,monospace;
+
   --bar-h:78px;
-  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display",Inter,"Helvetica Neue",Arial,sans-serif;
-  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;
 }
+
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;overflow-x:hidden;scroll-behavior:smooth}
+html{-webkit-text-size-adjust:100%;overflow-x:hidden}
 body{
   margin:0;background:var(--bg);color:var(--ink);
-  font-family:var(--sans);font-size:15px;line-height:1.5;letter-spacing:-.011em;
+  font-family:var(--sans);font-size:14px;line-height:1.45;
+  letter-spacing:-.011em;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
 }
+/* lavis de couleur très dilués : ce qui donne au blanc sa profondeur */
 body::before{
-  content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   background:
     radial-gradient(900px 620px at 10% -12%, rgba(250,35,59,.13), transparent 62%),
     radial-gradient(820px 600px at 92% -6%, rgba(10,132,255,.12), transparent 60%),
     radial-gradient(760px 560px at 48% 108%, rgba(175,82,222,.10), transparent 62%),
     var(--bg);
 }
-a{color:inherit;text-decoration:none}
+button,input,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+button{background:none;border:0;padding:0;cursor:pointer}
+a{color:inherit}
 h1,h2,h3,p{margin:0}
 ul{margin:0;padding:0;list-style:none}
-button{font:inherit;background:none;border:0;padding:0;cursor:pointer;color:inherit}
-:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:8px}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:6px}
+::selection{background:var(--accent-soft)}
 
+/* ─────────── en-tête ─────────── */
+.top{
+  position:sticky;top:0;z-index:40;
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border-bottom:1px solid var(--line-soft);
+  padding-top:env(safe-area-inset-top,0px);
+}
+.top-in{
+  max-width:1320px;margin:0 auto;padding:12px 22px;
+  display:flex;align-items:center;gap:22px;
+}
+.brand{display:flex;align-items:center;flex:0 0 auto;text-decoration:none}
+/* La note passe derrière le mot, comme sur l'accueil. Dimensions explicites :
+   en contexte flex, width:auto n'hérite pas du rapport du viewBox. */
+.logo{
+  font-size:17px;font-weight:800;letter-spacing:-.03em;line-height:1.2;color:var(--ink);
+}
+
+.search{position:relative;flex:1 1 auto;min-width:0;max-width:640px}
+.search > svg{position:absolute;left:12px;top:11px;color:var(--dimmer);pointer-events:none}
+.search input{
+  width:100%;height:38px;border:1px solid transparent;border-radius:11px;
+  background:rgba(118,118,128,.12);padding:0 14px 0 34px;font-size:13.5px;
+  transition:background .15s,border-color .15s,box-shadow .15s;
+}
+.search input::placeholder{color:var(--dimmer)}
+.search input:focus{outline:none;background:var(--surface);border-color:rgba(0,0,0,.08);box-shadow:var(--sh-2)}
+.search input::-webkit-search-cancel-button{-webkit-appearance:none}
+.hot{
+  display:flex;gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(90deg,#000 90%,transparent);
+  mask-image:linear-gradient(90deg,#000 90%,transparent);
+}
+.hot::-webkit-scrollbar{display:none}
+.hot button{
+  font-size:11.5px;color:var(--dim);background:var(--surface);
+  border:1px solid var(--line-soft);border-radius:999px;padding:3px 10px;
+  white-space:nowrap;transition:.14s;
+}
+.hot button:hover{color:var(--ink);border-color:var(--line);box-shadow:var(--sh-1)}
+
+.crate-btn{
+  display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;
+  height:38px;padding:0 14px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);
+  font-size:13px;font-weight:590;box-shadow:var(--sh-1);transition:.15s;
+}
+.crate-btn:hover{box-shadow:var(--sh-2)}
+.crate-btn span.mono{font-size:11.5px;color:var(--dim)}
+.crate-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.crate-btn.on span.mono{color:rgba(255,255,255,.85)}
+
+/* ─────────── ossature ─────────── */
+.shell{
+  max-width:1320px;margin:0 auto;padding:26px 22px 200px;
+  display:grid;grid-template-columns:250px minmax(0,1fr);gap:26px;align-items:start;
+}
+.shell > *{min-width:0}
+@media(max-width:1000px){ .shell{grid-template-columns:1fr;padding-top:16px} }
+
+.filters-toggle{display:none}
+@media(max-width:1000px){
+  .filters-toggle{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
+    padding:12px 16px;border-radius:var(--r-md);margin-bottom:14px;
+    background:var(--glass-strong);backdrop-filter:var(--blur);
+    border:1px solid var(--line-soft);box-shadow:var(--sh-1);
+    font-size:13.5px;font-weight:590;
+  }
+  .filters-toggle .n{font-size:11.5px;font-weight:400;color:var(--dim)}
+}
+
+.rail{
+  display:grid;gap:20px;align-content:start;
+  padding:18px;border-radius:var(--r-lg);
+  background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);box-shadow:var(--sh-2);
+}
+@media(min-width:1001px){
+  /* Collé sous l'en-tête, le panneau peut devenir plus haut que l'écran — et
+     tout ce qui dépasse serait alors hors d'atteinte. Il défile donc pour son
+     propre compte, et s'arrête au-dessus du lecteur quand celui-ci est monté. */
+  .rail{
+    position:sticky;top:calc(env(safe-area-inset-top,0px) + 112px);
+    max-height:calc(100vh - 136px);overflow-y:auto;overscroll-behavior:contain;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.2) transparent;
+  }
+  body.playing .rail{max-height:calc(100vh - 232px)}
+  .rail::-webkit-scrollbar{width:9px}
+  .rail::-webkit-scrollbar-track{background:transparent}
+  .rail::-webkit-scrollbar-thumb{
+    background:rgba(0,0,0,.18);border-radius:5px;
+    border:3px solid transparent;background-clip:content-box;
+  }
+  .rail:hover::-webkit-scrollbar-thumb{background:rgba(0,0,0,.28);background-clip:content-box}
+}
+/* sur petit écran le panneau ne s'ouvre qu'à la demande — règle placée après la
+   règle de base, sinon c'est la dernière déclarée qui l'emporte */
+@media(max-width:1000px){
+  .rail{display:none}
+  .rail.open{display:grid}
+}
+.fset{display:grid;gap:10px}
+.fhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--dim)}
+.fhead button{font-size:11.5px;color:var(--accent)}
+.fhead button:hover{text-decoration:underline}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:999px;font-size:12.5px;font-weight:500;
+  background:var(--surface);border:1px solid var(--line-soft);color:var(--ink-2);
+  transition:.14s;
+}
+.chip:hover{border-color:var(--line);box-shadow:var(--sh-1)}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--c);flex:0 0 auto}
+.chip .n{font-family:var(--mono);font-size:10.5px;color:var(--dimmer);font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{
+  background:color-mix(in srgb,var(--c) 13%,#fff);
+  border-color:color-mix(in srgb,var(--c) 40%,#fff);
+  color:color-mix(in srgb,var(--c) 58%,var(--ink));
+  font-weight:590;
+}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.65}
+.chip.fold{color:var(--dim);font-size:11.5px}
+
+.bpm-box{display:grid;gap:8px}
+.hist{display:flex;align-items:flex-end;gap:2px;height:38px}
+.hist i{flex:1;background:rgba(0,0,0,.10);border-radius:2px 2px 0 0;transition:background .14s}
+/* les colonnes comprises dans la plage choisie prennent la couleur d'accent :
+   on voit d'un coup d'œil quelle part du catalogue le tempo retenu couvre */
+.hist i.in{background:var(--accent)}
+.slider{position:relative;height:22px}
+.slider .track{position:absolute;top:9px;left:0;right:0;height:4px;border-radius:2px;background:rgba(0,0,0,.09)}
+.slider .fill{position:absolute;top:9px;height:4px;border-radius:2px;background:var(--ink)}
+.slider input{
+  -webkit-appearance:none;appearance:none;position:absolute;top:0;left:0;width:100%;height:22px;
+  background:none;pointer-events:none;margin:0;
+}
+.slider input::-webkit-slider-thumb{
+  -webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;
+  border:.5px solid rgba(0,0,0,.08);box-shadow:0 1px 3px rgba(0,0,0,.2);
+  pointer-events:auto;cursor:grab;
+}
+.slider input::-moz-range-thumb{
+  width:20px;height:20px;border-radius:50%;background:#fff;border:.5px solid rgba(0,0,0,.08);
+  box-shadow:0 1px 3px rgba(0,0,0,.2);pointer-events:auto;cursor:grab;
+}
+.bpm-read{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--dim)}
+
+.switch{display:flex;align-items:center;gap:10px;cursor:pointer}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.switch .box{
+  width:42px;height:25px;border-radius:999px;background:rgba(120,120,128,.20);
+  position:relative;transition:background .2s;flex:0 0 auto;
+}
+.switch .box::after{
+  content:"";position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s;
+}
+.switch input:checked + .box{background:var(--ok)}
+.switch input:checked + .box::after{transform:translateX(17px)}
+.switch input:focus-visible + .box{outline:2px solid var(--focus);outline-offset:2px}
+.switch .lbl{font-size:13px}
+
+.note{font-size:11.5px;line-height:1.5;color:var(--dim);padding-top:14px;border-top:1px solid var(--line-soft)}
+
+/* ─────────── bandeau de résultats ─────────── */
+.res-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  margin-bottom:14px;
+}
+.res-head h2{font-size:26px;font-weight:700;letter-spacing:-.025em;line-height:1.15}
+.res-head .sub{font-size:12.5px;color:var(--dim);margin-top:3px}
+
+.playall{
+  display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 15px;border-radius:999px;
+  background:var(--accent);color:#fff;font-size:13px;font-weight:600;box-shadow:var(--sh-1);
+  transition:.15s;
+}
+.playall:hover{background:#e51f35;box-shadow:var(--sh-2)}
+
+.head-acts{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0;max-width:100%}
+.sorts{
+  display:inline-flex;gap:2px;padding:2px;border-radius:999px;max-width:100%;
+  background:rgba(118,118,128,.10);border:1px solid var(--line-soft);
+  overflow-x:auto;scrollbar-width:none;
+}
+.sorts::-webkit-scrollbar{display:none}
+.sorts button{
+  padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:500;color:var(--dim);
+  transition:.14s;white-space:nowrap;
+}
+.sorts button:hover{color:var(--ink)}
+.sorts button[aria-pressed="true"]{background:#fff;color:var(--ink);font-weight:590;box-shadow:var(--sh-1)}
+
+/* ─────────── la liste ─────────── */
+.list{
+  background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);border-radius:var(--r-lg);box-shadow:var(--sh-2);
+  padding:6px;
+}
+.row{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;
+  padding:8px 10px;border-radius:var(--r-md);cursor:pointer;position:relative;
+  transition:background .14s;
+}
+.row + .row::before{
+  content:"";position:absolute;top:0;left:78px;right:10px;height:1px;background:var(--line-soft);
+}
+.row:hover{background:var(--hover)}
+.row:hover::before,.row:hover + .row::before{background:transparent}
+.row.playing{background:color-mix(in srgb,var(--c) 10%,#fff)}
+.row.playing::before,.row.playing + .row::before{background:transparent}
+.row.playing .title{color:color-mix(in srgb,var(--c) 62%,var(--ink))}
+
+.play{
+  position:relative;width:54px;height:54px;border-radius:9px;overflow:hidden;flex:0 0 auto;
+  background:#E8E8ED;box-shadow:0 1px 3px rgba(0,0,0,.12);
+}
+.play img{width:100%;height:100%;object-fit:cover;display:block}
+.play .glyph{
+  position:absolute;inset:0;display:grid;place-items:center;color:#fff;
+  background:rgba(0,0,0,.42);backdrop-filter:blur(2px);
+  opacity:0;transition:opacity .14s;
+}
+.row:hover .glyph,.row.playing .glyph{opacity:1}
+
+.meta{min-width:0}
+.title{
+  font-size:14.5px;font-weight:590;letter-spacing:-.015em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.sub2{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:2px;font-size:12px;color:var(--dim);min-width:0}
+.pill{
+  font-size:11px;font-weight:590;color:color-mix(in srgb,var(--c) 55%,var(--ink));
+  background:color-mix(in srgb,var(--c) 12%,#fff);
+  border-radius:5px;padding:1px 7px;
+}
+.new{
+  font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+  color:#fff;background:var(--accent);border-radius:5px;padding:1px 6px;
+}
+.fr{
+  font-size:10px;font-weight:700;letter-spacing:.03em;
+  color:#0A84FF;background:rgba(10,132,255,.12);border-radius:5px;padding:1px 6px;
+}
+.prod{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:100%}
+.prod b{font-weight:590;color:var(--ink-2)}
+.refs{display:flex;gap:5px;flex-wrap:wrap}
+.refs button{
+  font-size:11px;color:var(--dim);background:rgba(118,118,128,.10);
+  border-radius:999px;padding:1px 8px;transition:.14s;
+}
+.refs button:hover{background:rgba(118,118,128,.18);color:var(--ink)}
+
+.nums{display:flex;align-items:center;gap:20px;flex:0 0 auto}
+.num{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:34px}
+.num .v{font-family:var(--mono);font-size:12.5px;font-weight:500;font-variant-numeric:tabular-nums}
+.num .k{font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--dimmer)}
+/* valeur devinée : grisée et précédée d'un tilde, pour ne pas la faire passer
+   pour une mesure */
+.num .v.flou{color:var(--dimmer);font-weight:400;cursor:help}
+.mini{font-size:11px;line-height:1.45;color:var(--dim);margin:2px 0 0}
+.num.pop{min-width:62px;align-items:flex-end}
+.num.pop .bar{width:56px;height:3px;border-radius:2px;background:rgba(0,0,0,.09);margin-top:4px;overflow:hidden}
+.num.pop .bar i{display:block;height:100%;border-radius:2px;background:var(--dimmer)}
+.num.pop .k{display:none}   /* la barre suffit tant qu'elle est visible */
+.acts{display:flex;gap:2px;margin-left:4px}
+.icon{
+  width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--dimmer);
+  transition:.14s;position:relative;
+}
+
+/* ── le like : rebond du cœur, anneau qui s'ouvre, éclats qui s'écartent ── */
+.tbtn.like{position:relative}
+.tbtn.like.sav{color:var(--accent)}
+.icon.pop svg,.tbtn.like.pop svg{animation:coeur-rebond .42s cubic-bezier(.2,.9,.25,1.4)}
+@keyframes coeur-rebond{
+  0%{transform:scale(1)}
+  22%{transform:scale(.8)}
+  55%{transform:scale(1.3)}
+  100%{transform:scale(1)}
+}
+.burst{position:absolute;inset:0;pointer-events:none}
+.burst .ring{
+  position:absolute;inset:1px;border-radius:50%;border:2px solid var(--accent);
+  animation:like-anneau .5s ease-out forwards;
+}
+@keyframes like-anneau{
+  from{transform:scale(.4);opacity:.85}
+  to{transform:scale(1.85);opacity:0}
+}
+.burst .spark{
+  position:absolute;left:calc(50% - 1.5px);top:calc(50% - 1.5px);
+  width:3px;height:3px;border-radius:50%;background:var(--accent);
+  animation:like-eclat .55s cubic-bezier(.2,.7,.3,1) forwards;
+}
+@keyframes like-eclat{
+  0%{transform:rotate(var(--a)) translateY(-2px) scale(1);opacity:.95}
+  100%{transform:rotate(var(--a)) translateY(-15px) scale(.2);opacity:0}
+}
+.icon:hover{background:rgba(0,0,0,.06);color:var(--ink)}
+.icon.sav{color:var(--accent)}
+.dead{opacity:.45}
+.dead .title{text-decoration:line-through}
+
+.empty{padding:56px 24px;text-align:center}
+.empty h3{font-size:19px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+.empty p{font-size:13.5px;color:var(--dim)}
+
+@media(max-width:1240px){ .row .num.k-key{display:none} }
+/* Le nombre d'écoutes reste lisible bien plus longtemps : on sacrifie d'abord
+   sa barre, puis la durée, et lui en dernier. */
+@media(max-width:1100px){
+  .row .num.pop .bar{display:none}
+  .row .num.pop .k{display:block}
+  .row .num.pop{min-width:42px}
+}
+@media(max-width:1000px){ .row .nums .num:nth-of-type(3){display:none} }
+@media(max-width:860px){ .res-head h2{font-size:22px} }
+@media(max-width:780px){ .row .num.pop{display:none} }
+@media(max-width:640px){
+  .row .nums .num{display:none}
+  .row .refs{display:none}
+  .row{gap:11px;padding:7px 8px}
+  .row + .row::before{left:66px}
+  .play{width:46px;height:46px}
+  .hot{display:none}
+  .top-in{gap:12px;padding:10px 14px;flex-wrap:wrap}
+  .shell{padding:14px 14px 210px}
+}
+
+/* ─────────── pied de page ─────────── */
+.hint-file{
+  max-width:1320px;margin:14px auto 0;padding:12px 16px;border-radius:var(--r-md);
+  background:rgba(255,214,10,.16);border:1px solid rgba(180,140,0,.28);
+  font-size:12.5px;line-height:1.5;color:#6b5200;
+}
+.hint-file code{font-family:var(--mono);font-size:11.5px;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px}
+.hint-file b{color:#4a3800}
+@media(max-width:1000px){ .hint-file{margin:12px 14px 0} }
+
+.foot{
+  max-width:1320px;margin:0 auto;padding:6px 22px 40px;
+  font-size:11.5px;line-height:1.6;color:var(--dim);
+}
+.foot p{margin:0 0 6px;max-width:80ch}
+.foot b{color:var(--ink-2);font-weight:590}
+
+/* ─────────── le lecteur ─────────── */
+.bar{
+  position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;
+  border-radius:var(--r-lg);
+  background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);box-shadow:var(--sh-3);
+  transform:translateY(calc(100% + 28px));transition:transform .32s cubic-bezier(.32,.72,0,1);
+}
+.bar.up{transform:none}
+.prog{position:absolute;top:0;left:0;right:0;height:14px;cursor:pointer;z-index:2}
+/* Le remplissage et la pastille se mesurent sur la piste elle-même, pas sur la
+   barre entière : un pourcentage calculé sur une largeur plus grande que la
+   piste fait déborder l'indicateur et décale le clic de déplacement. */
+.prog .rail2{position:absolute;top:6px;left:14px;right:14px;height:4px;border-radius:2px;background:rgba(0,0,0,.09)}
+/* Le dégradé est dimensionné sur la piste entière, pas sur le remplissage :
+   la barre agit comme une fenêtre qui en découvre une part croissante. La
+   couleur se construit donc à mesure que la prod avance, au lieu d'être
+   comprimée dans les premières secondes. Les teintes dérivent toutes de --c,
+   la couleur du style : chaque genre garde la sienne. */
+.prog .rail2 i{
+  position:absolute;left:0;top:0;height:100%;width:0;border-radius:2px;
+  background-image:linear-gradient(90deg,
+    color-mix(in srgb, var(--c) 76%, #fff) 0%,
+    var(--c) 38%,
+    color-mix(in srgb, var(--c) 72%, #101014) 100%);
+  background-repeat:no-repeat;background-position:left center;
+  transition:width .18s linear;
+}
+.prog .rail2 .knob{
+  position:absolute;top:-3px;left:0;width:10px;height:10px;border-radius:50%;background:var(--c);
+  margin-left:-5px;opacity:0;transition:opacity .12s;box-shadow:0 1px 3px rgba(0,0,0,.25);
+}
+.prog:hover .knob,.prog:focus-visible .knob{opacity:1}
+
+.bar-in{
+  max-width:1320px;margin:0 auto;padding:12px 16px;height:var(--bar-h);
+  display:flex;align-items:center;gap:16px;
+}
+.vid{
+  width:96px;height:54px;border-radius:8px;overflow:hidden;background:#000;
+  flex:0 0 auto;position:relative;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.18);
+  transition:width .2s,height .2s;
+}
+.vid iframe{width:100%;height:100%;border:0;display:block}
+.vid.big{
+  position:absolute;bottom:calc(100% + 14px);left:16px;
+  width:min(340px, calc(100vw - 56px));height:auto;aspect-ratio:16/9;
+  border-radius:var(--r-md);box-shadow:var(--sh-3);
+}
+@media(max-width:820px){ .vid.big{left:8px} }
+/* en intégration simple, YouTube affiche ses propres commandes : les nôtres,
+   qui ne peuvent plus rien piloter, s'effacent */
+.bar.plain .prog,.bar.plain #toggle,.bar.plain .times{display:none}
+.vid.big iframe{width:100%;height:100%;margin:0}
+/* Couche transparente au-dessus de l'iframe : sans survol, YouTube n'affiche
+   ni son titre, ni ses boutons de partage. C'est notre barre qui pilote la
+   lecture, donc rien n'est perdu. En repli, au contraire, les commandes de
+   YouTube sont le seul moyen de jouer : la couche s'efface. */
+.vid .shield{position:absolute;inset:0;z-index:2;cursor:default}
+.bar.plain .vid .shield{display:none}
+/* L'iframe YouTube occupe toute la vignette et intercepte les clics : la
+   commande d'agrandissement doit donc être un bouton posé par-dessus, avec ses
+   propres événements. */
+.vid .zoom{
+  position:absolute;top:3px;right:3px;z-index:3;
+  width:21px;height:21px;border-radius:7px;display:grid;place-items:center;
+  background:rgba(0,0,0,.55);color:#fff;border:0;padding:0;cursor:pointer;
+  opacity:.9;transition:background .14s,opacity .14s,transform .14s;
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+}
+.vid .zoom:hover{opacity:1;background:rgba(0,0,0,.78);transform:scale(1.08)}
+.vid .zoom:focus-visible{outline:2px solid #fff;outline-offset:1px}
+.vid.big .zoom{top:8px;right:8px;width:28px;height:28px;border-radius:9px}
+
+.now{min-width:0;flex:1 1 200px}
+.now .t{
+  font-size:14.5px;font-weight:650;letter-spacing:-.018em;margin:0 0 1px;
+  color:color-mix(in srgb,var(--c) 58%,var(--ink));
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.now .d{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.now .d span + span{margin-left:10px}
+.now .d b{font-weight:590;color:var(--ink-2)}
+
+.transport{display:flex;align-items:center;gap:2px;flex:0 0 auto}
+.tbtn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--ink-2);transition:.14s}
+.tbtn:hover{background:rgba(0,0,0,.06)}
+.tbtn.on{color:var(--accent);background:var(--accent-soft)}
+.tbtn.big{
+  width:44px;height:44px;margin:0 4px;background:var(--ink);color:#fff;
+  box-shadow:var(--sh-1);
+}
+.tbtn.big:hover{background:#000}
+.times{
+  font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:10px;
+  white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+.times b{color:var(--ink-2);font-weight:500}
+
+.bar-acts{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.vol{display:flex;align-items:center;gap:7px;color:var(--dimmer)}
+.vol input{
+  -webkit-appearance:none;appearance:none;width:72px;height:4px;border-radius:2px;
+  background:rgba(0,0,0,.12);cursor:pointer;
+}
+.vol input::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;
+  border:.5px solid rgba(0,0,0,.08);box-shadow:0 1px 2px rgba(0,0,0,.25);
+}
+.vol input::-moz-range-thumb{
+  width:13px;height:13px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);
+}
+
+.btn{
+  display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:999px;
+  font-size:12.5px;font-weight:590;white-space:nowrap;
+  background:rgba(118,118,128,.12);color:var(--ink);transition:.15s;
+}
+.btn:hover{background:rgba(118,118,128,.2)}
+.btn.pri{background:var(--accent);color:#fff}
+.btn.pri:hover{background:#e51f35}
+
+@media(max-width:1180px){ .vol{display:none} }
+@media(max-width:1060px){ .bar-acts .btn.ghost{display:none} }
+@media(max-width:380px){
+  .bar-in{gap:8px}
+  .transport{gap:0}
+  .tbtn{width:32px;height:32px}
+  .tbtn.big{width:40px;height:40px;margin:0 2px}
+  .vid{width:46px;height:46px}
+  .now .t{font-size:13.5px}
+}
+@media(max-width:820px){
+  .bar{left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+  .bar-in{padding:10px 12px;gap:10px}
+  .vid{width:54px;height:54px;border-radius:9px}
+  .vid iframe{width:96px;height:54px;margin-left:-21px}
+  .times{display:none}
+  .bar-acts .btn{display:none}
+}
+
+/* ═══════════ vue accueil ═══════════
+   Portée depuis l'ancienne page d'accueil. Le lecteur, lui, est celui du
+   catalogue : il n'y en a plus qu'un dans le document. */
 /* ─────────── barre du haut ─────────── */
-.nav{
+.hnav{
   position:sticky;top:0;z-index:30;
   background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
   border-bottom:1px solid var(--line-soft);
   padding-top:env(safe-area-inset-top,0px);
 }
-.nav-in{
+.hnav-in{
   max-width:1220px;margin:0 auto;padding:11px 22px;
   display:flex;align-items:center;justify-content:space-between;gap:16px;
 }
-.nav .mark{font-size:17px;font-weight:800;letter-spacing:-.03em}
-.nav .links{display:flex;align-items:center;gap:6px}
-.nav .links a{
+.hnav .mark{font-size:17px;font-weight:800;letter-spacing:-.03em}
+.hnav .links{display:flex;align-items:center;gap:6px}
+.hnav .links a{
   padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--dim);transition:.15s;
 }
-.nav .links a:hover{color:var(--ink);background:rgba(0,0,0,.05)}
-.nav .links a.cta{background:var(--ink);color:#fff;font-weight:590}
-.nav .links a.cta:hover{background:#000}
+.hnav .links a:hover{color:var(--ink);background:rgba(0,0,0,.05)}
+.hnav .links a.cta{background:var(--ink);color:#fff;font-weight:590}
+.hnav .links a.cta:hover{background:#000}
 
 /* ─────────── héros ─────────── */
 .hero{
@@ -162,14 +676,14 @@ button{font:inherit;background:none;border:0;padding:0;cursor:pointer;color:inhe
 @media(max-width:520px){ .hs-hot{display:none} .hsearch{height:48px} }
 
 .cta-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
-.btn{
+.hbtn{
   display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 22px;border-radius:999px;
   font-size:15px;font-weight:590;transition:.16s;white-space:nowrap;
 }
-.btn.pri{background:var(--accent);color:#fff;box-shadow:0 6px 18px rgba(250,35,59,.28)}
-.btn.pri:hover{background:#e51f35;transform:translateY(-1px);box-shadow:0 10px 26px rgba(250,35,59,.32)}
-.btn.ghost{background:var(--glass-strong);backdrop-filter:var(--blur);border:1px solid var(--glass-edge);box-shadow:var(--sh-1)}
-.btn.ghost:hover{box-shadow:var(--sh-2);transform:translateY(-1px)}
+.hbtn.pri{background:var(--accent);color:#fff;box-shadow:0 6px 18px rgba(250,35,59,.28)}
+.hbtn.pri:hover{background:#e51f35;transform:translateY(-1px);box-shadow:0 10px 26px rgba(250,35,59,.32)}
+.hbtn.ghost{background:var(--glass-strong);backdrop-filter:var(--blur);border:1px solid var(--glass-edge);box-shadow:var(--sh-1)}
+.hbtn.ghost:hover{box-shadow:var(--sh-2);transform:translateY(-1px)}
 
 .stats{
   display:flex;flex-wrap:wrap;justify-content:center;gap:0;
@@ -186,7 +700,7 @@ button{font:inherit;background:none;border:0;padding:0;cursor:pointer;color:inhe
 .wrap{max-width:1220px;margin:0 auto;padding:0 22px}
 .sec{padding:56px 0}
 /* l'en-tête est collant : les ancres doivent s'arrêter en dessous, pas dessous */
-#likes,#dedans,#styles,#moods{scroll-margin-top:76px}
+#vueLikes,#vueDedans,#vueStyles,#vueMoods{scroll-margin-top:76px}
 .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
 .sec-head h2{font-size:clamp(21px,3vw,30px);font-weight:700;letter-spacing:-.028em}
 .sec-head p{font-size:13.5px;color:var(--dim);margin-top:3px}
@@ -340,150 +854,55 @@ button{font:inherit;background:none;border:0;padding:0;cursor:pointer;color:inhe
 }
 .more-btn:hover{box-shadow:var(--sh-2);transform:translateY(-1px)}
 
-/* ─────────── lecteur ─────────── */
-.tile.playing{box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 55%,#fff),var(--sh-2)}
-.tile.playing .go{opacity:1;transform:none;background:var(--c);color:#fff}
-body.playing{padding-bottom:104px}
+/* bascule entre les deux vues */
+[hidden]{display:none !important}
+.hlinks{display:none;align-items:center;gap:6px}
+body.vue-accueil .hlinks{display:flex}
+body.vue-accueil .top .search{display:none}
+.hlinks a{padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--dim);transition:.15s;text-decoration:none}
+.hlinks a:hover{color:var(--ink);background:rgba(0,0,0,.05)}
+.hlinks a.cta{background:var(--ink);color:#fff;font-weight:590}
+.hlinks a.cta:hover{background:#000}
+@media(max-width:640px){ .hlinks a:not(.cta){display:none} }
 
-.bar{
-  position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;
-  border-radius:var(--r-lg);
-  background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--glass-edge);box-shadow:var(--sh-3);
-  transform:translateY(calc(100% + 28px));transition:transform .32s cubic-bezier(.32,.72,0,1);
-}
-.bar.up{transform:none}
-.prog{position:absolute;top:0;left:0;right:0;height:14px;cursor:pointer;z-index:2}
-/* Le remplissage et la pastille se mesurent sur la piste elle-même, pas sur la
-   barre entière : un pourcentage calculé sur une largeur plus grande que la
-   piste fait déborder l'indicateur et décale le clic de déplacement. */
-.prog .rail2{position:absolute;top:6px;left:14px;right:14px;height:4px;border-radius:2px;background:rgba(0,0,0,.09)}
-/* Le dégradé est dimensionné sur la piste entière, pas sur le remplissage :
-   la barre agit comme une fenêtre qui en découvre une part croissante. La
-   couleur se construit donc à mesure que la prod avance, au lieu d'être
-   comprimée dans les premières secondes. Les teintes dérivent toutes de --c,
-   la couleur du style : chaque genre garde la sienne. */
-.prog .rail2 i{
-  position:absolute;left:0;top:0;height:100%;width:0;border-radius:2px;
-  background-image:linear-gradient(90deg,
-    color-mix(in srgb, var(--c) 76%, #fff) 0%,
-    var(--c) 38%,
-    color-mix(in srgb, var(--c) 72%, #101014) 100%);
-  background-repeat:no-repeat;background-position:left center;
-  transition:width .18s linear;
-}
-.prog .rail2 .knob{
-  position:absolute;top:-3px;left:0;width:10px;height:10px;border-radius:50%;background:var(--c);
-  margin-left:-5px;opacity:0;transition:opacity .12s;box-shadow:0 1px 3px rgba(0,0,0,.25);
-}
-.prog:hover .knob,.prog:focus-visible .knob{opacity:1}
-.bar-in{max-width:1220px;margin:0 auto;padding:12px 16px;height:var(--bar-h);display:flex;align-items:center;gap:16px}
-.vid{
-  width:96px;height:54px;border-radius:8px;overflow:hidden;background:#000;
-  flex:0 0 auto;position:relative;box-shadow:0 1px 4px rgba(0,0,0,.18);
-}
-.vid iframe{width:100%;height:100%;border:0;display:block}
-.vid.big{
-  position:absolute;bottom:calc(100% + 14px);left:16px;
-  width:min(340px, calc(100vw - 56px));height:auto;aspect-ratio:16/9;
-  border-radius:var(--r-md);box-shadow:var(--sh-3);
-}
-.vid.big iframe{width:100%;height:100%;margin:0}
-/* Couche transparente au-dessus de l'iframe : sans survol, YouTube n'affiche
-   ni son titre, ni ses boutons de partage. C'est notre barre qui pilote la
-   lecture, donc rien n'est perdu. En repli, au contraire, les commandes de
-   YouTube sont le seul moyen de jouer : la couche s'efface. */
-.vid .shield{position:absolute;inset:0;z-index:2;cursor:default}
-.bar.plain .vid .shield{display:none}
-/* L'iframe YouTube occupe toute la vignette et intercepte les clics : la
-   commande d'agrandissement doit donc être un bouton posé par-dessus, avec ses
-   propres événements. */
-.vid .zoom{
-  position:absolute;top:3px;right:3px;z-index:3;
-  width:21px;height:21px;border-radius:7px;display:grid;place-items:center;
-  background:rgba(0,0,0,.55);color:#fff;border:0;padding:0;cursor:pointer;
-  opacity:.9;transition:background .14s,opacity .14s,transform .14s;
-  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
-}
-.vid .zoom:hover{opacity:1;background:rgba(0,0,0,.78);transform:scale(1.08)}
-.vid .zoom:focus-visible{outline:2px solid #fff;outline-offset:1px}
-.vid.big .zoom{top:8px;right:8px;width:28px;height:28px;border-radius:9px}
-.bar.plain .prog,.bar.plain #toggle,.bar.plain .times{display:none}
-.now{min-width:0;flex:1 1 200px}
-.now .t{
-  font-size:14.5px;font-weight:650;letter-spacing:-.018em;margin:0 0 1px;
-  color:color-mix(in srgb,var(--c) 58%,var(--ink));
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.now .d{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.now .d b{font-weight:590;color:var(--ink-2)}
-.now .d span + span{margin-left:10px}
-.transport{display:flex;align-items:center;gap:2px;flex:0 0 auto}
-.tbtn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--ink-2);transition:.14s;border:0;background:none;cursor:pointer}
-.tbtn:hover{background:rgba(0,0,0,.06)}
-.tbtn.big{width:44px;height:44px;margin:0 4px;background:var(--ink);color:#fff;box-shadow:var(--sh-1)}
-.tbtn.big:hover{background:#000}
-.times{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:10px;white-space:nowrap;font-variant-numeric:tabular-nums}
-.times b{color:var(--ink-2);font-weight:500}
-.bar-btn{
-  display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:999px;
-  font-size:12.5px;font-weight:590;white-space:nowrap;flex:0 0 auto;
-  background:rgba(118,118,128,.12);color:var(--ink);transition:.15s;
-}
-.bar-btn:hover{background:rgba(118,118,128,.2)}
-@media(max-width:820px){
-  .bar{left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px))}
-  .bar-in{padding:10px 12px;gap:10px}
-  .vid{width:54px;height:54px;border-radius:9px}
-  .vid iframe{width:96px;height:54px;margin-left:-21px}
-  .vid.big{left:8px}
-  .vid.big iframe{margin:0}
-  .times,.bar-btn{display:none}
-}
-@media(max-width:380px){
-  .bar-in{gap:8px}
-  .transport{gap:0}
-  .tbtn{width:32px;height:32px}
-  .tbtn.big{width:40px;height:40px;margin:0 2px}
-  .vid{width:46px;height:46px}
-}
-
-.foot{
-  max-width:1220px;margin:0 auto;padding:30px 22px 48px;
-  font-size:12px;line-height:1.6;color:var(--dim);border-top:1px solid var(--line-soft);
-}
-.foot p{margin:0 0 6px;max-width:80ch}
-.foot b{color:var(--ink-2);font-weight:590}
-
-@media(max-width:470px){
-  .stats{display:grid;grid-template-columns:1fr 1fr;width:100%}
-  .stat + .stat::before{display:none}
-  .stat{padding:12px 8px}
-  .cta-row .btn{width:100%;justify-content:center}
-}
-@media(max-width:640px){
-  .hero{min-height:74vh;padding:34px 16px 28px}
-  .wrap,.nav-in,.foot{padding-left:16px;padding-right:16px}
-  .sec{padding:40px 0}
-  .stat{padding:9px 15px}
-  .nav .links a:not(.cta){display:none}
-}
 @media(prefers-reduced-motion:reduce){ *{animation-duration:.01ms !important;transition-duration:.01ms !important} }
 </style>
 </head>
 <body>
 
-<nav class="nav">
-  <div class="nav-in">
-    <a class="mark" href="index.html">FINDINGS</a>
-    <div class="links">
-      <a href="#styles">Styles</a>
-      <a href="#moods">Moods</a>
-      <a class="cta" href="app.html">Les prods</a>
-    </div>
-  </div>
-</nav>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="?vue=accueil" data-vue="accueil" title="Accueil">
+      <span class="logo">FINDINGS</span>
+    </a>
 
+    <div class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+      <input id="q" type="search" autocomplete="off" placeholder="Un artiste, un mood, un titre&nbsp;: &laquo;&nbsp;Werenoi&nbsp;&raquo;, &laquo;&nbsp;Clams Casino&nbsp;&raquo;, &laquo;&nbsp;sombre&nbsp;&raquo;&hellip;">
+      <div class="hot" id="hot"></div>
+    </div>
+
+    <nav class="hlinks">
+      <a href="#vueStyles">Styles</a>
+      <a href="#vueMoods">Moods</a>
+      <a class="cta" href="?vue=prods" data-vue="prods">Les prods</a>
+    </nav>
+
+    <button class="crate-btn" id="crateBtn" aria-pressed="false">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
+      Prods likés <span class="mono" id="crateN">0</span>
+    </button>
+  </div>
+</header>
+
+<div class="hint-file" id="hintFile" hidden>
+  <b>FINDINGS est ouvert depuis le disque.</b>
+  Le son passe quand même, mais le lecteur complet (enchaînement, file d'attente, barre de progression)
+  a besoin du serveur local&nbsp;: double-clique <code>FINDINGS.command</code>, puis ouvre
+  <code>http://127.0.0.1:4321</code>.
+</div>
+
+<div id="vueAccueil">
 <header class="hero">
   <div class="stage" aria-hidden="true">
     <canvas id="glnote"></canvas>
@@ -512,7 +931,7 @@ body.playing{padding-bottom:104px}
   <div class="hero-in">
     <p class="kicker">POWERED BY DOKA</p>
     <h1 class="wordmark">FINDINGS</h1>
-    <form class="hsearch" action="app.html" method="get" role="search">
+    <form class="hsearch" action="" data-recherche="1" role="search">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
       <input id="hq" name="q" type="search" autocomplete="off" aria-label="Rechercher une prod"
              placeholder="Un artiste, un mood, un titre&nbsp;: &laquo;&nbsp;Werenoi&nbsp;&raquo;, &laquo;&nbsp;sombre&nbsp;&raquo;&hellip;">
@@ -523,29 +942,29 @@ body.playing{padding-bottom:104px}
     <div class="hs-hot" id="hshot"></div>
 
     <div class="cta-row">
-      <a class="btn pri" href="app.html">
+      <a class="hbtn pri" href="?vue=prods" data-vue="prods">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
         Toutes les prods
       </a>
-      <a class="btn ghost" href="app.html?sort=recent">Les dernières sorties</a>
+      <a class="hbtn ghost" href="?sort=recent" data-vue="prods">Les dernières sorties</a>
     </div>
     <div class="stats" id="stats"></div>
   </div>
 </header>
 
 <main>
-  <section class="sec wrap" id="likes" hidden>
+  <section class="sec wrap" id="vueLikes" hidden>
     <div class="sec-head">
       <div>
         <h2>Tes prods likées</h2>
         <p id="likesSub"></p>
       </div>
-      <a href="app.html?likes=1">Tout voir →</a>
+      <a href="?likes=1" data-vue="prods">Tout voir →</a>
     </div>
     <div class="fresh" id="likewall"></div>
   </section>
 
-  <section class="sec wrap" id="dedans">
+  <section class="sec wrap" id="vueDedans">
     <div class="sec-head">
       <div>
         <h2>Trois règles, tenues à chaque passage</h2>
@@ -577,12 +996,12 @@ body.playing{padding-bottom:104px}
         <h2>Dernières sorties</h2>
         <p id="freshSub"></p>
       </div>
-      <a href="app.html?sort=recent">Tout voir →</a>
+      <a href="?sort=recent" data-vue="prods">Tout voir →</a>
     </div>
     <div class="fresh" id="fresh"></div>
   </section>
 
-  <section class="sec wrap" id="styles">
+  <section class="sec wrap" id="vueStyles">
     <div class="sec-head">
       <div>
         <h2>Par style</h2>
@@ -593,7 +1012,7 @@ body.playing{padding-bottom:104px}
     <div class="more-row"><button class="more-btn" id="moreStyles" hidden></button></div>
   </section>
 
-  <section class="sec wrap" id="moods">
+  <section class="sec wrap" id="vueMoods">
     <div class="sec-head">
       <div>
         <h2>Par mood</h2>
@@ -603,11 +1022,91 @@ body.playing{padding-bottom:104px}
     <div class="moodwall" id="moodwall"></div>
   </section>
 </main>
+</div>
+
+<main class="shell" hidden>
+
+  <button class="filters-toggle" id="ftog" aria-expanded="false" aria-controls="rail">
+    <span>Filtrer par style, tempo, mood</span>
+    <span class="n" id="ftogN">filtres</span>
+  </button>
+
+  <aside class="rail" id="rail">
+    <div class="fset">
+      <div class="fhead"><span class="eyebrow">Style</span><button id="clearStyle" hidden>tout effacer</button></div>
+      <div class="chips" id="styles"></div>
+    </div>
+
+    <div class="fset">
+      <div class="fhead"><span class="eyebrow">Tempo</span><button id="clearBpm" hidden>réinitialiser</button></div>
+      <div class="bpm-box">
+        <div class="hist" id="hist" aria-hidden="true"></div>
+        <div class="slider">
+          <div class="track"></div><div class="fill" id="fill"></div>
+          <input id="bpmMin" type="range" min="55" max="200" step="1" value="55" aria-label="BPM minimum">
+          <input id="bpmMax" type="range" min="55" max="200" step="1" value="200" aria-label="BPM maximum">
+        </div>
+        <div class="bpm-read"><span id="rMin">55 BPM</span><span id="rMax">200 BPM</span></div>
+      </div>
+    </div>
+
+    <div class="fset mood">
+      <div class="fhead"><span class="eyebrow">Mood</span><button id="clearMood" hidden>tout effacer</button></div>
+      <div class="chips" id="moods"></div>
+    </div>
+
+    <div class="fset">
+      <div class="fhead"><span class="eyebrow">Scène</span></div>
+      <label class="switch">
+        <input type="checkbox" id="frOnly">
+        <span class="box"></span>
+        <span class="lbl">Rap FR uniquement</span>
+      </label>
+    </div>
+
+    <div class="fset">
+      <div class="fhead"><span class="eyebrow">Tempo fiable</span></div>
+      <label class="switch">
+        <input type="checkbox" id="bpmSur">
+        <span class="box"></span>
+        <span class="lbl">Tempo vérifié uniquement</span>
+      </label>
+      <p class="mini" id="bpmSurN"></p>
+    </div>
+
+    <p class="note">
+      FINDINGS ne héberge aucun fichier&nbsp;: chaque prod est une vidéo YouTube publique, lue depuis YouTube,
+      et chaque clic renvoie du trafic au beatmaker.
+    </p>
+  </aside>
+
+  <section>
+    <div class="res-head">
+      <div>
+        <h2 id="resTitle">Toutes les prods</h2>
+        <div class="sub" id="resSub"></div>
+      </div>
+      <div class="head-acts">
+      <button class="playall" id="playall">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
+        <span id="playallN">Tout lire</span>
+      </button>
+      <div class="sorts" id="sorts">
+        <button data-sort="pertinence" aria-pressed="true">Pertinence</button>
+        <button data-sort="recent" aria-pressed="false" title="Les prods publiées le plus récemment par leur beatmaker">Nouveautés</button>
+        <button data-sort="bpm" aria-pressed="false">BPM</button>
+      </div>
+      </div>
+    </div>
+    <ul class="list" id="list"></ul>
+  </section>
+
+</main>
 
 <footer class="foot">
   <p id="footStats"></p>
-  <p><b>Prototype.</b> Les prods, leurs beatmakers, leurs durées et leurs compteurs d'écoutes sont réels et proviennent de YouTube. FINDINGS n'héberge aucun fichier&nbsp;: chaque écoute renvoie du trafic au beatmaker.</p>
-  <p>Le BPM et la tonalité sont lus dans le titre ou la description quand ils y figurent&nbsp;; sinon ce sont des estimations.</p>
+  <p><b>Prototype.</b> Les prods, leurs producteurs, leurs durées et leurs compteurs d'écoutes sont réels et proviennent de YouTube.</p>
+  <p>En revanche le <b>BPM, la tonalité et les moods sont des estimations de démonstration</b> saisies à la main&nbsp;: en production ils seraient extraits par analyse audio (essentia / librosa) ou lus dans le titre de la vidéo.</p>
 </footer>
 
 <div class="bar" id="bar">
@@ -620,32 +1119,759 @@ body.playing{padding-bottom:104px}
       <p class="t" id="nowT">—</p>
       <div class="d" id="nowD"></div>
     </div>
+
     <div class="transport">
-      <button class="tbtn" id="prev" aria-label="Prod précédente" title="Précédent (P)">
+      <button class="tbtn pv" id="prev" aria-label="Prod précédente" title="Précédent (P)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h2.2v14H7zM19 5v14l-9.4-7z"/></svg>
       </button>
       <button class="tbtn big" id="toggle" aria-label="Lecture ou pause" title="Lecture / pause (Espace)">
         <svg id="tgIcon" width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
       </button>
-      <button class="tbtn" id="next" aria-label="Prod suivante" title="Suivant (N)">
+      <button class="tbtn nx" id="next" aria-label="Prod suivante" title="Suivant (N)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M14.8 5H17v14h-2.2zM5 5l9.4 7L5 19z"/></svg>
+      </button>
+      <button class="tbtn sh" id="shuffle" aria-pressed="false" aria-label="Lecture aléatoire" title="Aléatoire">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
       </button>
       <span class="times"><b id="tCur">0:00</b> / <span id="tDur">0:00</span></span>
     </div>
-    <a class="bar-btn" id="openApp" href="app.html">Ouvrir dans les prods</a>
+
+    <div class="bar-acts">
+      <button class="tbtn like" id="likeBtn" aria-label="Liker cette prod" title="Liker cette prod">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
+      </button>
+      <span class="vol">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9z"/></svg>
+        <input id="vol" type="range" min="0" max="100" value="100" aria-label="Volume">
+      </span>
+      <button class="btn ghost" id="ytLink">Ouvrir sur YouTube</button>
+      <button class="btn pri" id="chanBtn" title="Voir la chaîne YouTube du beatmaker">Voir la chaîne</button>
+    </div>
   </div>
 </div>
 
 <script src="catalog.js"></script>
 <script>
 /* ============ données ============ */
+/* Le catalogue vit dans catalog.js, régénéré par ingest.mjs. */
 const CAT = window.FINDINGS_CATALOG || window.PRODYFIND_CATALOG || window.DIGGR_CATALOG
-         || { beats: [], styles: [], updatedAt: null };
-const BEATS = CAT.beats || [];
-const STYLE_META = CAT.styles || [];
+         || { beats: [], updatedAt: null, lastRun: null };
+
+/* Les styles, leurs noms et leurs couleurs viennent du catalogue : en ajouter un
+   dans ingest.mjs suffit, l'interface suit sans qu'on touche au CSS. */
+const STYLE_META = (CAT.styles && CAT.styles.length) ? CAT.styles : [
+  {key:"trap",label:"Trap",color:"#FF7A3D"},{key:"drill",label:"Drill",color:"#5B7CFF"},
+  {key:"boombap",label:"Boom bap",color:"#E3B13C"},{key:"afro",label:"Afro",color:"#2FBF71"},
+  {key:"rnb",label:"R&B",color:"#EC5FA6"},{key:"phonk",label:"Phonk",color:"#9B5BE0"},
+  {key:"jersey",label:"Jersey club",color:"#2FC6D8"},{key:"reggaeton",label:"Reggaeton",color:"#F1544B"},
+  {key:"cloud",label:"Cloud rap",color:"#9FB2FF"},{key:"amapiano",label:"Amapiano",color:"#B9D63F"}
+];
 STYLE_META.forEach(s => document.documentElement.style.setProperty(`--s-${s.key}`, s.color));
-const STYLE_NAME = Object.fromEntries(STYLE_META.map(s => [s.key, s.label]));
+const STYLES = STYLE_META.map(s => [s.key, s.label]);
+const STYLE_NAME = Object.fromEntries(STYLES);
+const MOODS = ["agressif","sombre","mélancolique","énergique","chill","solaire","sensuel","planant","nostalgique","cinématique","festif"];
+
+const DAY = 86400000;
+const since = d => d ? Math.max(0, (Date.now() - new Date(d + "T12:00:00Z")) / DAY) : 9999;
+
+const BEATS = CAT.beats.map(b => ({
+  ...b,
+  days: since(b.published),
+  isNew: since(b.addedAt) <= 3.5,
+  // « est » liste ce qui a été deviné : hors de cette liste, la valeur est écrite
+  // quelque part par le beatmaker, dans le titre ou la description
+  bpmSur: Array.isArray(b.est) && !b.est.includes("bpm"),
+  keySur: Array.isArray(b.est) && !b.est.includes("key")
+}));
+
+/* ============ état ============ */
+const S = {
+  q:"", styles:new Set(), moods:new Set(), bpm:[55,200], fr:false, bpmSur:false,
+  sort:"pertinence", crateOnly:false, playing:null, paused:false
+};
+let LAST = [];                 // resultats affiches = file d'attente potentielle
+const DEAD = new Set();        // videos dont l'integration est refusee par la chaine
+let CRATE = new Set();
+try{
+  const saved = localStorage.getItem("findings.crate") || localStorage.getItem("prodyfind.crate")
+             || localStorage.getItem("diggr.crate") || "[]";
+  CRATE = new Set(JSON.parse(saved));
+}catch(e){}
+const saveCrate = () => { try{ localStorage.setItem("findings.crate",JSON.stringify([...CRATE])); }catch(e){} };
+
+/* ============ utilitaires ============ */
+const cssVar = s => `var(--s-${s})`;
+const fmtDur = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+const fmtViews = v =>
+  v >= 1e6 ? (v/1e6).toFixed(v>=1e7?0:1).replace(".",",")+" M"
+  : v >= 1e3 ? Math.round(v/1e3)+" k" : String(v);
+function fmtAge(d){
+  if(d<1) return "aujourd'hui";
+  if(d<7) return `${Math.round(d)} j`;
+  if(d<31) return `${Math.round(d/7)} sem.`;
+  if(d<365) return `${Math.round(d/30)} mois`;
+  const y=Math.round(d/365); return `${y} an${y>1?"s":""}`;
+}
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function haystack(b){
+  return norm([b.title,b.prod,STYLE_NAME[b.style],b.key,b.moods.join(" "),b.refs.join(" "),b.fr?"francais fr france":""].join(" "));
+}
+BEATS.forEach(b => b._h = haystack(b));
+
+/* ============ filtrage ============ */
+function filtered(){
+  const q = norm(S.q.trim());
+  const terms = q ? q.split(/\s+/) : [];
+  let out = BEATS.filter(b => {
+    if(S.crateOnly && !CRATE.has(b.id)) return false;
+    if(S.styles.size && !S.styles.has(b.style)) return false;
+    if(S.fr && !b.fr) return false;
+    if(S.bpmSur && !b.bpmSur) return false;
+    if(b.bpm < S.bpm[0] || b.bpm > S.bpm[1]) return false;
+    if(S.moods.size && !b.moods.some(m => S.moods.has(m))) return false;
+    if(terms.length && !terms.every(t => b._h.includes(t))) return false;
+    return true;
+  });
+  const score = b => {
+    let s = Math.log10(Math.max(b.views,10));
+    if(terms.length){
+      if(terms.every(t => norm(b.title).includes(t))) s += 6;
+      if(terms.every(t => b.refs.some(r => norm(r).includes(t)))) s += 5;
+      if(terms.every(t => norm(b.prod).includes(t))) s += 4;
+    }
+    s += Math.max(0, 2.5 - b.days/120);
+    return s;
+  };
+  const by = {
+    pertinence:(a,b) => score(b)-score(a),
+    recent:(a,b) => a.days-b.days,
+    bpm:(a,b) => a.bpm-b.bpm
+  }[S.sort];
+  return out.sort(by);
+}
+
+/* ============ rendu : filtres ============ */
+const elStyles = document.getElementById("styles");
+const STYLE_N = Object.fromEntries(STYLES.map(([k]) => [k, BEATS.filter(b => b.style===k).length]));
+/* un style sans prod n'a rien à faire dans les filtres ; les autres sont triés
+   par volume, et au-delà de douze on replie pour ne pas noyer la colonne */
+const LIVE_STYLES = STYLES.filter(([k]) => STYLE_N[k] > 0).sort((a,b) => STYLE_N[b[0]] - STYLE_N[a[0]]);
+const FOLD = 12;
+let stylesOpen = false;
+function chipHTML([k,label]){
+  return `<button class="chip" role="button" data-style="${k}" aria-pressed="${S.styles.has(k)}" style="--c:${cssVar(k)}">
+    <span class="dot"></span>${esc(label)}<span class="n">${STYLE_N[k]}</span></button>`;
+}
+function renderStyleChips(){
+  const shown = stylesOpen ? LIVE_STYLES : LIVE_STYLES.slice(0, FOLD);
+  const rest = LIVE_STYLES.length - shown.length;
+  elStyles.innerHTML = shown.map(chipHTML).join("") +
+    (LIVE_STYLES.length > FOLD
+      ? `<button class="chip fold" data-fold="1">${stylesOpen ? "− replier" : `+ ${rest} styles`}</button>`
+      : "");
+}
+renderStyleChips();
+
+const elMoods = document.getElementById("moods");
+elMoods.innerHTML = MOODS.map(m => {
+  const n = BEATS.filter(b => b.moods.includes(m)).length;
+  return `<button class="chip" data-mood="${esc(m)}" aria-pressed="false" style="--c:#1D1D1F">${esc(m)}<span class="n">${n}</span></button>`;
+}).join("");
+
+/* Les suggestions de recherche sortent des références réellement citées par les
+   prods en catalogue : elles changent quand le catalogue change. */
+(function hotSearches(){
+  const tally = {};
+  BEATS.forEach(b => (b.refs || []).forEach(r => {
+    const k = r.trim(); if (k.length < 3) return;
+    tally[k] = (tally[k] || 0) + 1;
+  }));
+  const top = Object.entries(tally).sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]))
+    .filter(([,n]) => n > 1).slice(0, 6).map(([r]) => r);
+  const refs = top.length >= 4 ? top : ["Werenoi","Clams Casino","Morad","MF DOOM","Joey Bada$$","Rema"];
+  document.getElementById("hot").innerHTML =
+    refs.map(r => `<button data-hot="${esc(r)}">${esc(r)} type beat</button>`).join("");
+})();
+
+/* histogramme BPM */
+/* la plage couvre tout ce que le catalogue contient réellement — une prod à
+   57 ou à 199 BPM doit rester atteignable */
+const BUCKETS = 24, BMIN = 55, BMAX = 200, BW = (BMAX-BMIN)/BUCKETS;
+const counts = new Array(BUCKETS).fill(0);
+BEATS.forEach(b => { const i = Math.min(BUCKETS-1, Math.floor((b.bpm-BMIN)/BW)); counts[i]++; });
+const cmax = Math.max(...counts);
+document.getElementById("hist").innerHTML =
+  counts.map((c,i) => `<i data-i="${i}" style="height:${Math.max(6,(c/cmax)*100)}%"></i>`).join("");
+
+/* ============ rendu : liste ============ */
+const list = document.getElementById("list");
+
+function rowHTML(b){
+  const c = cssVar(b.style);
+  const pop = Math.max(6, Math.min(100, ((Math.log10(Math.max(b.views,10)) - 1.8) / 5.5) * 100));
+  const saved = CRATE.has(b.id);
+  return `<li class="row${S.playing===b.id?" playing":""}${DEAD.has(b.id)?" dead":""}" data-id="${b.id}" style="--c:${c}">
+    <button class="play" data-act="play" aria-label="Lire ${esc(b.title)}">
+      <img src="https://i.ytimg.com/vi/${b.id}/mqdefault.jpg" alt="" loading="lazy" width="62" height="40">
+      <span class="glyph">${(S.playing===b.id && !S.paused)
+        ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
+        : '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>'}</span>
+    </button>
+
+    <div class="meta">
+      <p class="title">${esc(b.title)}</p>
+      <div class="sub2">
+        <span class="pill">${esc(STYLE_NAME[b.style])}</span>
+        ${b.isNew?'<span class="new">nouveau</span>':""}
+        ${b.fr?'<span class="fr">FR</span>':""}
+        <span class="prod">par <b>${esc(b.prod)}</b></span>
+        ${b.refs.length?`<span class="refs">${b.refs.map(r=>`<button data-act="ref" data-ref="${esc(r)}">${esc(r)}</button>`).join("")}</span>`:""}
+      </div>
+    </div>
+
+    <div class="nums">
+      <div class="num"><span class="v${b.bpmSur?"":" flou"}"${b.bpmSur?"":' title="Tempo estimé d\'après le style : le beatmaker ne l\'a pas indiqué."'}>${b.bpmSur?"":"~"}${b.bpm}</span><span class="k">bpm</span></div>
+      <div class="num k-key"><span class="v${b.keySur?"":" flou"}"${b.keySur?"":' title="Tonalité estimée : non indiquée par le beatmaker."'}>${b.keySur?"":"~"}${esc(b.key)}</span><span class="k">clé</span></div>
+      <div class="num"><span class="v">${fmtDur(b.dur)}</span><span class="k">durée</span></div>
+      <div class="num pop"><span class="v">${fmtViews(b.views)}</span><div class="bar"><i style="width:${pop}%"></i></div><span class="k">vues</span></div>
+      <div class="num"><span class="v" style="color:var(--dim)">${fmtAge(b.days)}</span><span class="k">âge</span></div>
+      <div class="acts">
+        <button class="icon${saved?" sav":""}" data-act="save" aria-label="${saved?"Retirer des prods likées":"Liker cette prod"}" title="${saved?"Retirer des prods likées":"Liker cette prod"}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="${saved?"currentColor":"none"}" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
+        </button>
+        <button class="icon" data-act="chan" aria-label="Voir la chaîne YouTube de ${esc(b.prod)}" title="Voir la chaîne YouTube de ${esc(b.prod)}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+        </button>
+      </div>
+    </div>
+  </li>`;
+}
+
+function render(){
+  const res = filtered();
+  LAST = res;
+
+  const parts = [];
+  if(S.crateOnly) parts.push("prods likées");
+  if(S.styles.size) parts.push([...S.styles].map(s=>STYLE_NAME[s]).join(" + "));
+  if(S.moods.size) parts.push([...S.moods].join(" + "));
+  if(S.fr) parts.push("scène FR");
+  if(S.bpmSur) parts.push("tempo vérifié");
+  if(S.bpm[0]>BMIN || S.bpm[1]<BMAX) parts.push(`${S.bpm[0]}–${S.bpm[1]} BPM`);
+  if(S.q.trim()) parts.push(`« ${S.q.trim()} »`);
+
+  document.getElementById("resTitle").textContent = parts.length ? parts.join(" · ") : "Toutes les prods";
+  const prods = new Set(res.map(b=>b.prod)).size;
+  document.getElementById("resSub").textContent = res.length
+    ? `${res.length} prod${res.length>1?"s":""} · ${prods} beatmaker${prods>1?"s":""}`
+    : "";
+  const pa = document.getElementById("playall");
+  pa.hidden = !res.length;
+  document.getElementById("playallN").textContent = res.length > 1 ? `Lire les ${res.length}` : "Tout lire";
+
+  list.innerHTML = res.length ? res.map(rowHTML).join("") : `
+    <li class="empty">
+      <h3>Aucune prod ne correspond.</h3>
+      <p>Élargis le tempo ou enlève un filtre — le catalogue en compte ${BEATS.length}.</p>
+    </li>`;
+
+  // histogramme : surligner la plage active
+  document.querySelectorAll("#hist i").forEach(el => {
+    const i = +el.dataset.i, lo = BMIN + i*BW, hi = lo + BW;
+    el.classList.toggle("in", hi > S.bpm[0] && lo < S.bpm[1]);
+  });
+
+  document.getElementById("clearStyle").hidden = !S.styles.size;
+  document.getElementById("clearMood").hidden = !S.moods.size;
+  document.getElementById("clearBpm").hidden = !(S.bpm[0]>BMIN || S.bpm[1]<BMAX);
+  document.getElementById("crateN").textContent = CRATE.size;
+
+  const active = S.styles.size + S.moods.size + (S.fr?1:0) + (S.bpmSur?1:0) + ((S.bpm[0]>BMIN||S.bpm[1]<BMAX)?1:0);
+  document.getElementById("ftogN").textContent = active
+    ? `${active} filtre${active>1?"s":""} actif${active>1?"s":""}`
+    : `${LIVE_STYLES.length} styles · ${MOODS.length} moods`;
+}
+
+/* ============ lecteur ============ */
+/* On pilote le lecteur YouTube officiel via son IFrame API : lecture, pause,
+   recherche dans la piste, enchaînement. L'utilisateur ne quitte jamais FINDINGS. */
+
+const bar = document.getElementById("bar");
+const elNowT = document.getElementById("nowT"), elNowD = document.getElementById("nowD");
+const elCur = document.getElementById("tCur"), elDur = document.getElementById("tDur");
+const elFill = document.getElementById("progFill"), elKnob = document.getElementById("progKnob");
+const elProg = document.getElementById("prog"), tgIcon = document.getElementById("tgIcon");
+const elTrack = elProg.querySelector(".rail2");
+
+let player = null, apiReady = false, pendingId = null, tick = null;
+let repriseT = 0, repriseJoue = true;   // position à rejoindre après un changement de page
+/* Le lecteur pilotable exige une vraie origine : ouverte depuis le disque
+   (file://), la page ne peut pas dialoguer avec YouTube et rien ne sort. On
+   bascule alors sur une intégration simple, qui elle joue partout — on perd le
+   pilotage fin, pas le son. Même repli si le lecteur ne démarre pas. */
+const FILE_MODE = location.protocol === "file:";
+let PLAIN = FILE_MODE, started = false, watchdog = null;
+/* Un navigateur refuse souvent de lancer un son que personne n'a demandé. Ce
+   silence-là est normal : on ne le confond pas avec un lecteur en panne. */
+let gestured = false;
+addEventListener("pointerdown", () => gestured = true, { once:true, capture:true });
+addEventListener("keydown",     () => gestured = true, { once:true, capture:true });
+let QUEUE = [], QI = -1, SHUFFLE = false, VOL = 100;
+let current = null;
+
+const ICON_PLAY  = '<path d="M8 5.5v13l11-6.5z"/>';
+const ICON_PAUSE = '<rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/>';
+
+/* --- chargement de l'API --- */
+(function loadApi(){
+  if (PLAIN) return;
+  const tag = document.createElement("script");
+  tag.src = "https://www.youtube.com/iframe_api";
+  tag.onerror = () => goPlain("l'API YouTube n'a pas pu être chargée");
+  document.head.appendChild(tag);
+})();
+window.onYouTubeIframeAPIReady = () => {
+  apiReady = true;
+  if (pendingId) { const id = pendingId; pendingId = null; mount(id); }
+};
+
+function mount(id){
+  if (PLAIN) return mountPlain(id);
+  player = new YT.Player("ytplayer", {
+    width:"100%", height:"100%", videoId:id,
+    // controls:0 retire la barre du lecteur, disablekb:1 ses raccourcis clavier,
+    // fs:0 son bouton plein écran : il ne reste que l'image
+    playerVars:{ autoplay:1, rel:0, modestbranding:1, playsinline:1, iv_load_policy:3,
+                 controls:0, disablekb:1, fs:0 },
+    events:{
+      onReady: e => {
+        e.target.setVolume(VOL);
+        if (repriseT > 0) e.target.seekTo(repriseT, true);
+        // on ne relance pas ce qui était en pause au moment de quitter la page
+        if (repriseT > 0 && !repriseJoue) { e.target.pauseVideo(); S.paused = true; tgIcon.innerHTML = ICON_PLAY; }
+        else e.target.playVideo();
+        repriseT = 0;
+        startTick();
+      },
+      onStateChange: onState,
+      onError: onError
+    }
+  });
+  armWatchdog(id);
+}
+
+/* Intégration simple : c'est YouTube qui affiche ses propres commandes dans la
+   vignette. Suivant et précédent marchent encore — on recharge l'iframe. */
+function mountPlain(id){
+  const host = document.getElementById("ytplayer");
+  host.innerHTML =
+    `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&modestbranding=1"
+             allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen
+             referrerpolicy="origin-when-cross-origin"></iframe>`;
+  // sur un grand écran on agrandit pour montrer les commandes de YouTube ;
+  // sur un téléphone la vignette resterait plus large que la barre
+  if (innerWidth >= 620) document.getElementById("vidWrap").classList.add("big");
+  bar.classList.add("plain");
+}
+
+/* Bascule définitive vers l'intégration simple, en expliquant pourquoi. */
+function goPlain(raison){
+  if (PLAIN) return;
+  PLAIN = true;
+  clearInterval(tick); clearTimeout(watchdog);
+  try { player && player.destroy && player.destroy(); } catch(e){}
+  player = null;
+  const host = document.getElementById("ytplayer");
+  if (host) host.innerHTML = "";
+  if (current) mountPlain(current.id);
+  elNowD.innerHTML =
+    `<span>par <b>${esc(current ? current.prod : "")}</b></span>` +
+    `<span style="color:var(--accent)">Lecture dans la vignette — ${esc(raison)}.</span>`;
+}
+
+/* Si rien n'a démarré au bout de cinq secondes, c'est que le lecteur pilotable
+   ne peut pas fonctionner ici : on bascule au lieu de laisser un cadre muet. */
+function armWatchdog(id){
+  clearTimeout(watchdog);
+  started = false;
+  if (!gestured) return;
+  watchdog = setTimeout(() => {
+    if (PLAIN || started || S.playing !== id) return;
+    // L'API absente, c'est un blocage : le lecteur pilotable ne peut pas exister.
+    // L'API présente mais rien qui démarre, c'est la politique d'autoplay du
+    // navigateur — on ne dégrade pas le lecteur pour ça, l'utilisateur a un
+    // bouton lecture sous la main.
+    if (typeof YT === "undefined" || !player) goPlain("l'API YouTube n'est pas disponible ici");
+  }, 9000);
+}
+
+function onState(e){
+  if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING){ started = true; clearTimeout(watchdog); }
+  if (e.data === YT.PlayerState.ENDED) { next(); return; }
+  if (e.data === YT.PlayerState.PLAYING){ S.paused = false; tgIcon.innerHTML = ICON_PAUSE; startTick(); render(); peindreTuiles(); }
+  if (e.data === YT.PlayerState.PAUSED){ S.paused = true;  tgIcon.innerHTML = ICON_PLAY;  render(); peindreTuiles(); }
+  if (e.data === YT.PlayerState.CUED)  { try { player.playVideo(); } catch(err){} }
+}
+
+/* Certaines chaînes interdisent la lecture hors de YouTube : on marque la prod
+   et on passe à la suivante plutôt que de laisser un lecteur noir. */
+function onError(e){
+  const code = e && e.data;
+  clearTimeout(watchdog);
+  // 101 et 150 : la chaîne refuse l'intégration. 2, 5, 100 : autre chose cloche,
+  // et l'intégration simple s'en sort souvent — on tente avant d'abandonner.
+  if (code !== 101 && code !== 150 && !PLAIN) { goPlain("le lecteur pilotable a renvoyé une erreur"); return; }
+  if (current) DEAD.add(current.id);
+  elNowD.innerHTML = '<span style="color:var(--accent)">Cette chaîne bloque la lecture hors YouTube — prod suivante.</span>';
+  render();
+  setTimeout(next, 1200);
+}
+
+function startTick(){
+  clearInterval(tick);
+  tick = setInterval(() => {
+    if (!player || !player.getDuration) return;
+    const d = player.getDuration() || 0, t = player.getCurrentTime() || 0;
+    if (!d) return;
+    const pct = Math.min(100, (t/d)*100);
+    elFill.style.width = pct + "%";
+    elKnob.style.left = pct + "%";
+    // le dégradé garde la largeur de la piste quelle que soit l'avancée
+    elFill.style.backgroundSize = elTrack.getBoundingClientRect().width + "px 100%";
+    elCur.textContent = fmtDur(Math.floor(t));
+    elDur.textContent = fmtDur(Math.floor(d));
+    elProg.setAttribute("aria-valuenow", Math.round(pct));
+  }, 300);
+}
+
+/* --- file d'attente --- */
+function playFrom(listOfBeats, index){
+  QUEUE = listOfBeats.map(x => x.id);
+  QI = index;
+  load(QUEUE[QI]);
+}
+function load(id){
+  const b = BEATS.find(x => x.id === id);
+  if (!b) return;
+  current = b;
+  S.playing = id;
+  S.paused = false;
+
+  bar.style.setProperty("--c", cssVar(b.style));
+  elNowT.textContent = b.title;
+  elNowD.innerHTML =
+    `<span>par <b style="color:#aab3c6">${esc(b.prod)}</b></span>` +
+    `<span class="mono" style="font-size:11px">${esc(STYLE_NAME[b.style])} · ${b.bpmSur?"":"~"}${b.bpm} BPM</span>` +
+    (QUEUE.length > 1 ? `<span class="mono" style="font-size:11px;color:var(--dimmer)">file ${QI+1}/${QUEUE.length}</span>` : "");
+  elFill.style.width = "0%"; elKnob.style.left = "0%";
+  elCur.textContent = "0:00"; elDur.textContent = fmtDur(b.dur);
+  tgIcon.innerHTML = ICON_PAUSE;
+  syncCoeur();
+  peindreTuiles();
+  bar.classList.add("up");
+  document.body.classList.add("playing");
+
+  if (PLAIN) {
+    mountPlain(id);
+  } else if (!apiReady || !player) {
+    pendingId = id;
+    if (apiReady && !player) { pendingId = null; mount(id); }
+  } else {
+    player.loadVideoById(id);
+    player.setVolume(VOL);
+    armWatchdog(id);
+  }
+  render();
+}
+
+function next(){
+  if (!QUEUE.length) return;
+  QI = SHUFFLE ? Math.floor(Math.random()*QUEUE.length) : (QI + 1) % QUEUE.length;
+  load(QUEUE[QI]);
+}
+function prev(){
+  if (!QUEUE.length) return;
+  const t = player && player.getCurrentTime ? player.getCurrentTime() : 0;
+  if (t > 3){ player.seekTo(0, true); return; }
+  QI = (QI - 1 + QUEUE.length) % QUEUE.length;
+  load(QUEUE[QI]);
+}
+if (FILE_MODE) document.getElementById("hintFile").hidden = false;
+
+function togglePlay(){
+  if (PLAIN) { if (!current && LAST.length) playFrom(LAST, 0); return; }
+  if (!player) { if (LAST.length) playFrom(LAST, 0); return; }
+  const st = player.getPlayerState();
+  if (st === YT.PlayerState.PLAYING) player.pauseVideo(); else player.playVideo();
+}
+
+/* --- commandes --- */
+document.getElementById("toggle").addEventListener("click", togglePlay);
+document.getElementById("next").addEventListener("click", next);
+document.getElementById("prev").addEventListener("click", prev);
+document.getElementById("shuffle").addEventListener("click", e => {
+  SHUFFLE = !SHUFFLE;
+  const btn = e.currentTarget;
+  btn.setAttribute("aria-pressed", SHUFFLE);
+  btn.classList.toggle("on", SHUFFLE);
+});
+document.getElementById("vol").addEventListener("input", e => {
+  VOL = +e.target.value;
+  if (player && player.setVolume) player.setVolume(VOL);
+});
+
+function seekFromEvent(e){
+  if (!player || !player.getDuration) return;
+  const r = elTrack.getBoundingClientRect();
+  const pct = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+  player.seekTo(player.getDuration() * pct, true);
+}
+elProg.addEventListener("click", seekFromEvent);
+elProg.addEventListener("keydown", e => {
+  if (!player || !player.getCurrentTime) return;
+  if (e.key === "ArrowRight"){ player.seekTo(player.getCurrentTime()+5, true); e.preventDefault(); }
+  if (e.key === "ArrowLeft"){ player.seekTo(Math.max(0, player.getCurrentTime()-5), true); e.preventDefault(); }
+});
+
+/* agrandir la vidéo */
+/* agrandir / réduire la vignette */
+(function zoomVideo(){
+  const wrap = document.getElementById("vidWrap"), btn = document.getElementById("vidZoom");
+  const GRAND = '<path d="M9 3H5a2 2 0 0 0-2 2v4"/><path d="M15 3h4a2 2 0 0 1 2 2v4"/><path d="M9 21H5a2 2 0 0 1-2-2v-4"/><path d="M15 21h4a2 2 0 0 0 2-2v-4"/>';
+  const PETIT = '<path d="M3 9h4a2 2 0 0 0 2-2V3"/><path d="M21 9h-4a2 2 0 0 1-2-2V3"/><path d="M3 15h4a2 2 0 0 1 2 2v4"/><path d="M21 15h-4a2 2 0 0 0-2 2v4"/>';
+  function peindre(){
+    const on = wrap.classList.contains("big");
+    btn.querySelector("svg").innerHTML = on ? PETIT : GRAND;
+    btn.setAttribute("aria-pressed", on);
+    btn.title = btn.ariaLabel = on ? "Réduire la vidéo" : "Agrandir la vidéo";
+  }
+  btn.addEventListener("click", e => { e.stopPropagation(); wrap.classList.toggle("big"); peindre(); });
+  addEventListener("keydown", e => {
+    if (e.key === "Escape" && wrap.classList.contains("big")) { wrap.classList.remove("big"); peindre(); }
+  });
+  new MutationObserver(peindre).observe(wrap, { attributes:true, attributeFilter:["class"] });
+  peindre();
+})();
+
+document.getElementById("ytLink").addEventListener("click", () => {
+  if (current) window.open(`https://www.youtube.com/watch?v=${current.id}`, "_blank", "noopener");
+});
+
+/* raccourcis clavier */
+document.addEventListener("keydown", e => {
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || "");
+  if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === " "){ e.preventDefault(); togglePlay(); }
+  else if (e.key.toLowerCase() === "n") next();
+  else if (e.key.toLowerCase() === "p") prev();
+  else if (e.key === "ArrowRight" && player?.getCurrentTime){ player.seekTo(player.getCurrentTime()+5, true); }
+  else if (e.key === "ArrowLeft"  && player?.getCurrentTime){ player.seekTo(Math.max(0, player.getCurrentTime()-5), true); }
+});
+
+/* Bascule l'état d'un cœur et, à l'ajout seulement, lance l'éclat. L'élément
+   d'animation se retire tout seul une fois la séquence finie. */
+/* Le cœur de la barre reflète la prod en cours ; celui de la ligne reflète la
+   sienne. Les deux écrivent dans la même liste, il faut donc les tenir d'accord
+   sans rejouer l'animation sur celui qu'on n'a pas cliqué. */
+function syncCoeur(){
+  const btn = document.getElementById("likeBtn");
+  if (!btn) return;
+  btn.hidden = !current;
+  if (!current) return;
+  const like = CRATE.has(current.id);
+  btn.classList.toggle("sav", like);
+  const texte = like ? "Retirer des prods likées" : "Liker cette prod";
+  btn.setAttribute("aria-label", texte);
+  btn.title = texte;
+  btn.querySelector("svg")?.setAttribute("fill", like ? "currentColor" : "none");
+}
+
+function basculerLike(b, source){
+  const like = !CRATE.has(b.id);
+  like ? CRATE.add(b.id) : CRATE.delete(b.id);
+  saveCrate();
+  document.getElementById("crateN").textContent = CRATE.size;
+  if (source) peindreLike(source, like);
+  // l'autre représentation se met à jour sans fêter l'événement une deuxième fois
+  const ligne = list.querySelector(`.row[data-id="${CSS.escape(b.id)}"] [data-act="save"]`);
+  if (ligne && ligne !== source) peindreLike(ligne, like, false);
+  if (current && current.id === b.id) syncCoeur();
+  majLikes();
+  if (S.crateOnly) render();
+}
+
+function peindreLike(btn, like, anime = true){
+  if (!btn) return;
+  btn.classList.toggle("sav", like);
+  const texte = like ? "Retirer des prods likées" : "Liker cette prod";
+  btn.setAttribute("aria-label", texte);
+  btn.title = texte;
+  const svg = btn.querySelector("svg");
+  if (svg) svg.setAttribute("fill", like ? "currentColor" : "none");
+  if (!like || !anime) return;
+
+  btn.classList.remove("pop");
+  void btn.offsetWidth;            // force le navigateur à rejouer l'animation
+  btn.classList.add("pop");
+
+  btn.querySelector(".burst")?.remove();
+  const burst = document.createElement("span");
+  burst.className = "burst";
+  burst.setAttribute("aria-hidden", "true");
+  burst.innerHTML = '<i class="ring"></i>' +
+    Array.from({ length:6 }, (_, k) => `<i class="spark" style="--a:${k * 60}deg"></i>`).join("");
+  btn.appendChild(burst);
+  setTimeout(() => burst.remove(), 620);
+}
+
+/* ============ chaîne du beatmaker ============ */
+/* Le catalogue porte l'adresse exacte de la chaîne quand l'ingestion a pu la
+   lire ; sinon on retombe sur une recherche YouTube sur le nom du beatmaker. */
+function chanUrl(b){
+  return b.chan || `https://www.youtube.com/results?search_query=${encodeURIComponent(b.prod)}`;
+}
+function openChan(b){
+  if (b) window.open(chanUrl(b), "_blank", "noopener");
+}
+
+document.getElementById("chanBtn").addEventListener("click", () => openChan(current));
+document.getElementById("likeBtn").addEventListener("click", () => { if (current) basculerLike(current, document.getElementById("likeBtn")); });
+
+/* ============ interactions ============ */
+list.addEventListener("click", e => {
+  const row = e.target.closest(".row"); if(!row) return;
+  const b = BEATS.find(x => x.id === row.dataset.id);
+  const act = e.target.closest("[data-act]")?.dataset.act;
+  if(act === "ref"){
+    document.getElementById("q").value = e.target.closest("[data-ref]").dataset.ref;
+    S.q = e.target.closest("[data-ref]").dataset.ref; render(); window.scrollTo({top:0,behavior:"smooth"}); return;
+  }
+  if(act === "save"){
+    basculerLike(b, e.target.closest('[data-act="save"]'));
+    return;
+  }
+  if(act === "chan"){ openChan(b); return; }
+  if(S.playing === b.id){ togglePlay(); return; }   // reclic sur la prod en cours = pause/reprise
+  playFrom(LAST, LAST.findIndex(x => x.id === b.id));
+});
+
+elStyles.addEventListener("click", e => {
+  if (e.target.closest("[data-fold]")) { stylesOpen = !stylesOpen; renderStyleChips(); return; }
+  const btn = e.target.closest("[data-style]"); if(!btn) return;
+  const k = btn.dataset.style;
+  S.styles.has(k) ? S.styles.delete(k) : S.styles.add(k);
+  btn.setAttribute("aria-pressed", S.styles.has(k));
+  render();
+});
+elMoods.addEventListener("click", e => {
+  const btn = e.target.closest("[data-mood]"); if(!btn) return;
+  const k = btn.dataset.mood;
+  S.moods.has(k) ? S.moods.delete(k) : S.moods.add(k);
+  btn.setAttribute("aria-pressed", S.moods.has(k));
+  render();
+});
+document.getElementById("hot").addEventListener("click", e => {
+  const b = e.target.closest("[data-hot]"); if(!b) return;
+  const v = b.dataset.hot;
+  document.getElementById("q").value = v; S.q = v; render();
+});
+
+document.getElementById("clearStyle").addEventListener("click", () => {
+  S.styles.clear(); renderStyleChips(); render();
+});
+document.getElementById("clearMood").addEventListener("click", () => {
+  S.moods.clear(); elMoods.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed","false")); render();
+});
+
+const bMin = document.getElementById("bpmMin"), bMax = document.getElementById("bpmMax"), fill = document.getElementById("fill");
+function syncBpm(){
+  let lo = +bMin.value, hi = +bMax.value;
+  if(lo > hi - 5){ if(document.activeElement === bMin) lo = hi - 5; else hi = lo + 5; bMin.value = lo; bMax.value = hi; }
+  S.bpm = [lo,hi];
+  const span = BMAX - BMIN;
+  fill.style.left = ((lo-BMIN)/span*100)+"%";
+  fill.style.width = ((hi-lo)/span*100)+"%";
+  document.getElementById("rMin").textContent = lo+" BPM";
+  document.getElementById("rMax").textContent = hi+" BPM";
+  render();
+}
+bMin.addEventListener("input", syncBpm); bMax.addEventListener("input", syncBpm);
+document.getElementById("clearBpm").addEventListener("click", () => { bMin.value=BMIN; bMax.value=BMAX; syncBpm(); });
+
+let t;
+document.getElementById("q").addEventListener("input", e => {
+  clearTimeout(t); t = setTimeout(() => { S.q = e.target.value; render(); }, 120);
+});
+
+const crateBtn = document.getElementById("crateBtn");
+crateBtn.addEventListener("click", () => {
+  S.crateOnly = !S.crateOnly;
+  crateBtn.setAttribute("aria-pressed", S.crateOnly);
+  crateBtn.classList.toggle("on", S.crateOnly);
+  render();
+});
+
+document.getElementById("frOnly").addEventListener("change", e => { S.fr = e.target.checked; render(); });
+document.getElementById("bpmSur").addEventListener("change", e => { S.bpmSur = e.target.checked; render(); });
+(function noteTempo(){
+  const n = BEATS.filter(b => b.bpmSur).length;
+  document.getElementById("bpmSurN").textContent =
+    `${n} prods sur ${BEATS.length} annoncent leur tempo. Pour les autres, la valeur affichée est une estimation, signalée par un ~.`;
+})();
+
+document.getElementById("sorts").addEventListener("click", e => {
+  const b = e.target.closest("[data-sort]"); if(!b) return;
+  S.sort = b.dataset.sort;
+  document.querySelectorAll("#sorts button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+});
+
+document.getElementById("playall").addEventListener("click", () => {
+  if (LAST.length) playFrom(LAST, 0);
+});
+
+/* pied de page : état réel du catalogue */
+(function footStats(){
+  const d = CAT.updatedAt ? new Date(CAT.updatedAt) : null;
+  const when = d ? d.toLocaleDateString("fr-FR", { day:"numeric", month:"long", year:"numeric" }) : "—";
+  const add = CAT.lastRun ? ` · +${CAT.lastRun.added} à la dernière passe` : "";
+  const age = CAT.maxAgeMonths || 9;
+  const styles = new Set(BEATS.map(b => b.style)).size;
+  document.getElementById("footStats").innerHTML =
+    `<b>${BEATS.length} prods</b> · ${styles} styles · mis à jour le ${when}${add}` +
+    ` · ingestion automatique tous les 2 jours, rien de plus vieux que ${age} mois, tout se lit ici sans quitter la page.`;
+})();
+
+const ftog = document.getElementById("ftog"), rail = document.getElementById("rail");
+ftog.addEventListener("click", () => {
+  const open = rail.classList.toggle("open");
+  ftog.setAttribute("aria-expanded", open);
+});
+
+syncBpm();
+
+
+/* ============ reprise entre les pages ============
+   Changer de page détruit l'iframe : aucun lecteur ne survit à une navigation
+   entre deux documents. On enregistre donc la prod et la seconde exacte avant
+   de partir, et on reprend là au chargement suivant. L'interruption dure le
+   temps du chargement, pas le temps d'un morceau. */
+const REPRISE = "findings.reprise";
+function memoriser(){
+  if (!current) return;
+  let t = 0, joue = false;
+  try {
+    if (player && player.getCurrentTime) t = player.getCurrentTime() || 0;
+    if (player && player.getPlayerState) joue = player.getPlayerState() === 1;
+  } catch (e) {}
+  try { sessionStorage.setItem(REPRISE, JSON.stringify({ id: current.id, t, joue, ts: Date.now() })); } catch (e) {}
+}
+addEventListener("pagehide", memoriser);
+addEventListener("beforeunload", memoriser);
+
+/* ============ vue accueil : données d'affichage ============ */
 const nf = n => n.toLocaleString("fr-FR");
 
 /* ============ chiffres du héros ============ */
@@ -673,7 +1899,7 @@ const FRESH = BEATS.slice().sort((a,b) =>
 (function fresh(){
   const recent = FRESH;
   document.getElementById("fresh").innerHTML = recent.map(b => `
-    <a class="tile" data-id="${b.id}" href="app.html?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
+    <a class="tile" data-id="${b.id}" href="?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
       <div class="art">
         <img src="https://i.ytimg.com/vi/${b.id}/mqdefault.jpg" alt="" loading="lazy">
         <span class="go"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span>
@@ -717,7 +1943,7 @@ const FRESH = BEATS.slice().sort((a,b) =>
   if (choix.length < 3) choix = ["Werenoi", "amapiano", "sombre"];
 
   document.getElementById("hshot").innerHTML =
-    choix.map(r => `<a href="app.html?q=${encodeURIComponent(r)}">${esc(r)}</a>`).join("");
+    choix.map(r => `<a href="?q=${encodeURIComponent(r)}" data-vue="prods">${esc(r)}</a>`).join("");
 
   /* L'invite se construit sous contrainte de longueur : un tirage peut sortir
      « Ndombolo / Coupé-décalé », et trois exemples de cette taille dépassent la
@@ -740,7 +1966,7 @@ const FRESH = BEATS.slice().sort((a,b) =>
    Les likes vivent dans le stockage local du navigateur : chaque visiteur ne
    voit que les siens, et rien ne remonte nulle part. La section reste masquée
    tant qu'il n'y en a aucun — une étagère vide n'apprend rien à personne. */
-const LIKED = (function likes(){
+function calcLikes(){
   let ids = [];
   try {
     const brut = localStorage.getItem("findings.crate")
@@ -752,14 +1978,16 @@ const LIKED = (function likes(){
   const parId = Object.fromEntries(BEATS.map(b => [b.id, b]));
   // le plus récemment liké en premier
   return ids.slice().reverse().map(id => parId[id]).filter(Boolean).slice(0, 8);
-})();
+}
+let LIKED = calcLikes();
 
-(function murLikes(){
-  const section = document.getElementById("likes");
+function majLikes(){
+  LIKED = calcLikes();
+  const section = document.getElementById("vueLikes");
+  section.hidden = !LIKED.length;
   if (!LIKED.length) return;
-  section.hidden = false;
   document.getElementById("likewall").innerHTML = LIKED.map(b => `
-    <a class="tile" data-id="${b.id}" href="app.html?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
+    <a class="tile" data-id="${b.id}" href="?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
       <div class="art">
         <img src="https://i.ytimg.com/vi/${b.id}/mqdefault.jpg" alt="" loading="lazy">
         <span class="go"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span>
@@ -771,7 +1999,8 @@ const LIKED = (function likes(){
     </a>`).join("");
   document.getElementById("likesSub").textContent =
     LIKED.length === 1 ? "Une prod mise de côté." : `${LIKED.length} prods mises de côté.`;
-})();
+}
+majLikes();
 
 /* ============ nuage de styles ============ */
 (function cloud(){
@@ -786,7 +2015,7 @@ const LIKED = (function likes(){
     const lot = par[s.key];
     const covers = (lot.length >= 4 ? lot.slice(0, 4) : lot.slice(0, 1))
       .map(b => `<img src="https://i.ytimg.com/vi/${b.id}/mqdefault.jpg" alt="" loading="lazy">`).join("");
-    return `<a class="scard${s.label.length > 12 ? " long" : ""}" href="app.html?style=${encodeURIComponent(s.key)}" style="--c:${esc(s.color)}">
+    return `<a class="scard${s.label.length > 12 ? " long" : ""}" href="?style=${encodeURIComponent(s.key)}" data-vue="prods" style="--c:${esc(s.color)}">
       <div class="mosaic${lot.length >= 4 ? "" : " solo"}">${covers}</div>
       <div class="scard-in">
         <span class="nm">${esc(s.label)}</span>
@@ -829,7 +2058,7 @@ const LIKED = (function likes(){
 
   document.getElementById("moodwall").innerHTML = live.map(m => {
     const lot = par[m], cover = lot[0];
-    return `<a class="mcard" href="app.html?mood=${encodeURIComponent(m)}" style="--c:${TEINTES[m]}">
+    return `<a class="mcard" href="?mood=${encodeURIComponent(m)}" data-vue="prods" style="--c:${TEINTES[m]}">
       <img src="https://i.ytimg.com/vi/${cover.id}/mqdefault.jpg" alt="" loading="lazy">
       <div class="mcard-in">
         <span class="nm">${esc(m)}</span>
@@ -842,257 +2071,127 @@ const LIKED = (function likes(){
     `${live.length} ambiances, déduites du titre et de la description de chaque prod.`;
 })();
 
-/* ============ lecteur ============
-   Même moteur que sur la page des prods : le lecteur YouTube officiel piloté par son
-   IFrame API, avec repli sur une intégration simple si l'API ne peut pas se
-   charger. Ici, la file d'attente, ce sont les huit dernières arrivées. */
-const bar = document.getElementById("bar");
-const elNowT = document.getElementById("nowT"), elNowD = document.getElementById("nowD");
-const elCur = document.getElementById("tCur"), elDur = document.getElementById("tDur");
-const elFill = document.getElementById("progFill"), elKnob = document.getElementById("progKnob");
-const elProg = document.getElementById("prog"), tgIcon = document.getElementById("tgIcon");
-const elTrack = elProg.querySelector(".rail2");
-const openApp = document.getElementById("openApp");
+/* ============ les deux vues ============
+   Un seul document, donc un seul lecteur : passer de l'accueil au catalogue ne
+   recharge rien et n'interrompt pas le son. L'adresse suit quand même, pour que
+   les liens restent partageables et que le bouton « retour » fonctionne. */
+const vAccueil = document.getElementById("vueAccueil");
+const vProds = document.querySelector("main.shell");
 
-let player = null, apiReady = false, pendingId = null, tick = null;
-let QI = -1, current = null, paused = false;
-let QUEUE = [];   // la section d'où part la lecture devient la file d'attente
-let repriseT = 0, repriseJoue = true;   // position à rejoindre après un changement de page
-const FILE_MODE = location.protocol === "file:";
-let PLAIN = FILE_MODE, started = false, watchdog = null, gestured = false;
-addEventListener("pointerdown", () => gestured = true, { once:true, capture:true });
-addEventListener("keydown",     () => gestured = true, { once:true, capture:true });
+function montrerVue(nom, pousser = true, params = ""){
+  const accueil = nom !== "prods";
+  vAccueil.hidden = !accueil;
+  vProds.hidden = accueil;
+  document.body.classList.toggle("vue-accueil", accueil);
+  document.title = accueil ? "FINDINGS" : "FINDINGS — les prods";
+  if (pousser) {
+    const url = accueil ? location.pathname : location.pathname + (params || "?vue=prods");
+    history.pushState({ vue: nom }, "", url);
+  }
+  if (!accueil) window.scrollTo({ top: 0, behavior: "instant" });
+}
 
-const ICON_PLAY  = '<path d="M8 5.5v13l11-6.5z"/>';
-const ICON_PAUSE = '<rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/>';
-const fmtDur = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+/* Les liens internes ne rechargent pas la page : ils changent de vue. */
+document.addEventListener("click", e => {
+  const a = e.target.closest('a[data-vue]');
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  e.preventDefault();
+  const p = new URLSearchParams(a.getAttribute("href").replace(/^\?/, ""));
+  appliquerParams(p);
+  montrerVue(a.dataset.vue, true, a.getAttribute("href"));
+});
 
-(function loadApi(){
-  if (PLAIN) return;
-  const tag = document.createElement("script");
-  tag.src = "https://www.youtube.com/iframe_api";
-  tag.onerror = goPlain;
-  document.head.appendChild(tag);
-})();
-window.onYouTubeIframeAPIReady = () => {
-  apiReady = true;
-  if (pendingId) { const id = pendingId; pendingId = null; mount(id); }
-};
+/* La recherche du héros bascule sur le catalogue sans quitter la page. */
+document.querySelector('form[data-recherche]')?.addEventListener("submit", e => {
+  e.preventDefault();
+  const v = document.getElementById("hq").value.trim();
+  document.getElementById("q").value = v;
+  S.q = v;
+  render();
+  montrerVue("prods", true, v ? "?q=" + encodeURIComponent(v) : "?vue=prods");
+});
 
-function mount(id){
-  if (PLAIN) return mountPlain(id);
-  player = new YT.Player("ytplayer", {
-    width:"100%", height:"100%", videoId:id,
-    // controls:0 retire la barre du lecteur, disablekb:1 ses raccourcis clavier,
-    // fs:0 son bouton plein écran : il ne reste que l'image
-    playerVars:{ autoplay:1, rel:0, modestbranding:1, playsinline:1, iv_load_policy:3,
-                 controls:0, disablekb:1, fs:0 },
-    events:{
-      onReady: e => {
-        if (repriseT > 0) e.target.seekTo(repriseT, true);
-        if (repriseT > 0 && !repriseJoue) { e.target.pauseVideo(); paused = true; tgIcon.innerHTML = ICON_PLAY; }
-        else e.target.playVideo();
-        repriseT = 0;
-        startTick();
-      },
-      onStateChange: onState, onError: onError
-    }
+addEventListener("popstate", () => {
+  const p = new URLSearchParams(location.search);
+  appliquerParams(p);
+  montrerVue(p.toString() ? "prods" : "accueil", false);
+});
+
+/* Les tuiles de l'accueil alimentent la file d'attente du lecteur unique. */
+function brancherTuiles(id, liste){
+  document.getElementById(id)?.addEventListener("click", e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest(".tile"); if (!a) return;
+    e.preventDefault();
+    const l = liste();
+    const i = l.findIndex(b => b.id === a.dataset.id);
+    if (i < 0) return;
+    (current && current.id === l[i].id) ? togglePlay() : playFrom(l, i);
   });
-  armWatchdog(id);
 }
-function mountPlain(id){
-  document.getElementById("ytplayer").innerHTML =
-    `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&modestbranding=1"` +
-    ` allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
-  if (innerWidth >= 620) document.getElementById("vidWrap").classList.add("big");
-  bar.classList.add("plain");
-}
-function goPlain(){
-  if (PLAIN) return;
-  PLAIN = true;
-  clearInterval(tick); clearTimeout(watchdog);
-  try { player && player.destroy && player.destroy(); } catch(e){}
-  player = null;
-  document.getElementById("ytplayer").innerHTML = "";
-  if (current) mountPlain(current.id);
-}
-/* Rien qui démarre au bout de neuf secondes : soit l'API est bloquée — et le
-   lecteur pilotable ne peut pas exister ici —, soit le navigateur retient le
-   son, ce qui est normal et ne justifie pas de dégrader quoi que ce soit. */
-function armWatchdog(id){
-  clearTimeout(watchdog); started = false;
-  if (!gestured) return;
-  watchdog = setTimeout(() => {
-    if (PLAIN || started || !current || current.id !== id) return;
-    if (typeof YT === "undefined" || !player) goPlain();
-  }, 9000);
-}
-function onState(e){
-  if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING){ started = true; clearTimeout(watchdog); }
-  if (e.data === YT.PlayerState.ENDED){ next(); return; }
-  if (e.data === YT.PlayerState.PLAYING){ paused = false; tgIcon.innerHTML = ICON_PAUSE; startTick(); paint(); }
-  if (e.data === YT.PlayerState.PAUSED){ paused = true;  tgIcon.innerHTML = ICON_PLAY;  paint(); }
-  if (e.data === YT.PlayerState.CUED){ try { player.playVideo(); } catch(err){} }
-}
-function onError(e){
-  const code = e && e.data;
-  clearTimeout(watchdog);
-  if (code !== 101 && code !== 150 && !PLAIN){ goPlain(); return; }
-  next();   // la chaîne refuse l'intégration : on passe à la suivante
-}
-function startTick(){
-  clearInterval(tick);
-  tick = setInterval(() => {
-    if (!player || !player.getDuration) return;
-    const d = player.getDuration() || 0, t = player.getCurrentTime() || 0;
-    if (!d) return;
-    const pct = Math.min(100, (t/d)*100);
-    elFill.style.width = pct + "%";
-    elKnob.style.left = pct + "%";
-    // le dégradé garde la largeur de la piste quelle que soit l'avancée
-    elFill.style.backgroundSize = elTrack.getBoundingClientRect().width + "px 100%";
-    elCur.textContent = fmtDur(t);
-    elDur.textContent = fmtDur(d);
-    elProg.setAttribute("aria-valuenow", Math.round(pct));
-  }, 300);
-}
+brancherTuiles("fresh", () => FRESH);
+brancherTuiles("likewall", () => LIKED);
 
-function play(i, file){
-  if (file && file.length) QUEUE = file;
-  const n = QUEUE.length;
-  if (!n) return;
-  QI = ((i % n) + n) % n;
-  const b = QUEUE[QI];
-  if (!b) return;
-  current = b; paused = false;
-  bar.style.setProperty("--c", `var(--s-${b.style})`);
-  elNowT.textContent = b.title;
-  elNowD.innerHTML =
-    `<span>par <b>${esc(b.prod)}</b></span>` +
-    `<span>${esc(STYLE_NAME[b.style] || b.style)} · ${b.bpm} BPM</span>` +
-    `<span>${QI + 1}/${n}</span>`;
-  elFill.style.width = "0%"; elKnob.style.left = "0%";
-  elCur.textContent = "0:00"; elDur.textContent = fmtDur(b.dur || 0);
-  tgIcon.innerHTML = ICON_PAUSE;
-  openApp.href = `app.html?play=${encodeURIComponent(b.id)}`;
-  bar.classList.add("up");
-  document.body.classList.add("playing");
-
-  if (PLAIN) mountPlain(b.id);
-  else if (!apiReady || !player){ pendingId = b.id; if (apiReady && !player){ pendingId = null; mount(b.id); } }
-  else { player.loadVideoById(b.id); armWatchdog(b.id); }
-  paint();
-}
-const next = () => play(QI + 1);
-const prev = () => play(QI - 1);
-function toggle(){
-  if (PLAIN) return;
-  if (!player){ play(QI < 0 ? 0 : QI); return; }
-  player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo();
-}
-function paint(){
+/* L'état de lecture se lit aussi sur les tuiles, pas seulement dans la liste. */
+function peindreTuiles(){
   document.querySelectorAll(".tile").forEach(t => {
     const on = !!current && t.dataset.id === current.id;
     t.classList.toggle("playing", on);
     const g = t.querySelector(".go svg");
-    if (g) g.innerHTML = (on && !paused) ? ICON_PAUSE : ICON_PLAY;
+    if (g) g.innerHTML = (on && !S.paused)
+      ? '<rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/>'
+      : '<path d="M8 5.5v13l11-6.5z"/>';
   });
 }
 
-/* Un clic sur une vignette lit la prod ici même. Ctrl, cmd ou clic du milieu
-   laissent le lien faire son travail : ouvrir la prod dans le catalogue. */
-document.getElementById("fresh").addEventListener("click", e => {
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-  const a = e.target.closest(".tile"); if (!a) return;
-  e.preventDefault();
-  const i = FRESH.findIndex(b => b.id === a.dataset.id);
-  if (i < 0) return;
-  (current && current.id === FRESH[i].id) ? toggle() : play(i, FRESH);
-});
-
-document.getElementById("likewall").addEventListener("click", e => {
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-  const a = e.target.closest(".tile"); if (!a) return;
-  e.preventDefault();
-  const i = LIKED.findIndex(b => b.id === a.dataset.id);
-  if (i < 0) return;
-  (current && current.id === LIKED[i].id) ? toggle() : play(i, LIKED);
-});
-document.getElementById("prev").addEventListener("click", prev);
-document.getElementById("next").addEventListener("click", next);
-document.getElementById("toggle").addEventListener("click", toggle);
-elProg.addEventListener("click", e => {
-  if (!player || !player.getDuration) return;
-  const r = elTrack.getBoundingClientRect();
-  const pct = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-  player.seekTo((player.getDuration() || 0) * pct, true);
-});
-addEventListener("keydown", e => {
-  if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || "")) return;
-  if (e.key === " " && current){ e.preventDefault(); toggle(); }
-  else if (e.key.toLowerCase() === "n" && current) next();
-  else if (e.key.toLowerCase() === "p" && current) prev();
-});
-
-/* agrandir / réduire la vignette */
-(function zoomVideo(){
-  const wrap = document.getElementById("vidWrap"), btn = document.getElementById("vidZoom");
-  const GRAND = '<path d="M9 3H5a2 2 0 0 0-2 2v4"/><path d="M15 3h4a2 2 0 0 1 2 2v4"/><path d="M9 21H5a2 2 0 0 1-2-2v-4"/><path d="M15 21h4a2 2 0 0 0 2-2v-4"/>';
-  const PETIT = '<path d="M3 9h4a2 2 0 0 0 2-2V3"/><path d="M21 9h-4a2 2 0 0 1-2-2V3"/><path d="M3 15h4a2 2 0 0 1 2 2v4"/><path d="M21 15h-4a2 2 0 0 0-2 2v4"/>';
-  function peindre(){
-    const on = wrap.classList.contains("big");
-    btn.querySelector("svg").innerHTML = on ? PETIT : GRAND;
-    btn.setAttribute("aria-pressed", on);
-    btn.title = btn.ariaLabel = on ? "Réduire la vidéo" : "Agrandir la vidéo";
+/* ============ liens entrants ============
+   L'accueil envoie ici avec un style, un tri, une recherche ou une prod précise. */
+function appliquerParams(p){
+  const style = p.get("style"), sort = p.get("sort"), q = p.get("q"), play = p.get("play");
+  const mood = p.get("mood"), likes = p.get("likes");
+  if (style && STYLE_NAME[style]) { S.styles.add(style); stylesOpen = true; renderStyleChips(); }
+  if (sort && ["pertinence","recent","bpm"].includes(sort)) {
+    S.sort = sort;
+    document.querySelectorAll("#sorts button").forEach(x => x.setAttribute("aria-pressed", x.dataset.sort === sort));
   }
-  btn.addEventListener("click", e => { e.stopPropagation(); wrap.classList.toggle("big"); peindre(); });
-  addEventListener("keydown", e => {
-    if (e.key === "Escape" && wrap.classList.contains("big")) { wrap.classList.remove("big"); peindre(); }
-  });
-  new MutationObserver(peindre).observe(wrap, { attributes:true, attributeFilter:["class"] });
-  peindre();
-})();
+  if (q) { document.getElementById("q").value = q; S.q = q; }
+  if (mood && MOODS.includes(mood)) {
+    S.moods.add(mood);
+    elMoods.querySelector(`[data-mood="${CSS.escape(mood)}"]`)?.setAttribute("aria-pressed", "true");
+  }
+  S.crateOnly = likes === "1" && CRATE.size > 0;
+  crateBtn.setAttribute("aria-pressed", S.crateOnly);
+  crateBtn.classList.toggle("on", S.crateOnly);
+  render();
+  if (play) {
+    const i = LAST.findIndex(b => b.id === play);
+    if (i >= 0) playFrom(LAST, i);
+    else { const b = BEATS.find(x => x.id === play); if (b) playFrom([b], 0); }
+    return;
+  }
 
-
-/* ============ reprise entre les pages ============
-   Changer de page détruit l'iframe : aucun lecteur ne survit à une navigation
-   entre deux documents. On enregistre donc la prod et la seconde exacte avant
-   de partir, et on reprend là au chargement suivant. L'interruption dure le
-   temps du chargement, pas le temps d'un morceau. */
-const REPRISE = "findings.reprise";
-function memoriser(){
-  if (!current) return;
-  let t = 0, joue = false;
-  try {
-    if (player && player.getCurrentTime) t = player.getCurrentTime() || 0;
-    if (player && player.getPlayerState) joue = player.getPlayerState() === 1;
-  } catch (e) {}
-  try { sessionStorage.setItem(REPRISE, JSON.stringify({ id: current.id, t, joue, ts: Date.now() })); } catch (e) {}
-}
-addEventListener("pagehide", memoriser);
-addEventListener("beforeunload", memoriser);
-
-(function reprendre(){
+  // rien d'explicite dans l'adresse : on reprend ce qui jouait avant la navigation
   let d = null;
   try { d = JSON.parse(sessionStorage.getItem(REPRISE) || "null"); } catch (e) {}
   if (!d || !d.id || Date.now() - d.ts > 120000) return;
-  const file = [FRESH, LIKED].find(l => l.some(b => b.id === d.id)) || BEATS.filter(b => b.id === d.id);
-  const i = file.findIndex(b => b.id === d.id);
-  if (i < 0) return;
+  const b = BEATS.find(x => x.id === d.id);
+  if (!b) return;
   repriseT = d.t || 0; repriseJoue = !!d.joue;
-  play(i, file);
-})();
+  const i = LAST.findIndex(x => x.id === b.id);
+  i >= 0 ? playFrom(LAST, i) : playFrom([b], 0);
+}
 
-/* ============ pied de page ============ */
-(function foot(){
-  const d = CAT.updatedAt ? new Date(CAT.updatedAt) : null;
-  const when = d ? d.toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"}) : "—";
-  const age = CAT.maxAgeMonths || 9;
-  document.getElementById("footStats").innerHTML =
-    `<b>${nf(BEATS.length)} prods</b> · catalogue mis à jour le ${when} · ingestion automatique toutes les 48 h, rien de plus vieux que ${age} mois.`;
+/* ============ démarrage ============
+   L'adresse décide de la vue : nue, c'est l'accueil ; porteuse d'un filtre,
+   d'une recherche ou d'une prod, c'est le catalogue. */
+(function demarrer(){
+  const p = new URLSearchParams(location.search);
+  const versProds = p.get("vue") === "prods" || ["style","sort","q","mood","likes","play"].some(k => p.get(k));
+  appliquerParams(p);
+  montrerVue(versProds ? "prods" : "accueil", false);
+  history.replaceState({ vue: versProds ? "prods" : "accueil" }, "", location.pathname + location.search);
 })();
 </script>
-
 <script type="module">
 /* ============ la note, en volume ============
    Un vrai maillage extrudé, éclairé et tourné en continu. Si WebGL manque ou si
@@ -1209,5 +2308,8 @@ try {
   console.info("note 3D non disponible :", e && e.message);
 }
 </script>
+</body>
+</html>
+
 </body>
 </html>
