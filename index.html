@@ -225,8 +225,20 @@ button{font:inherit;background:none;border:0;padding:0;cursor:pointer;color:inhe
       rgba(0,0,0,.24) 42%,
       rgba(0,0,0,.72) 100%);
 }
+/* Voile de couleur du survol : une couche à part, en fondu, plutôt qu'un
+   changement de dégradé — les dégradés ne s'animent pas, ils sautent. */
+.scard::before,.mcard::before{
+  content:"";position:absolute;inset:0;z-index:2;opacity:0;
+  transition:opacity .22s ease;pointer-events:none;
+  background:linear-gradient(160deg,
+    color-mix(in srgb,var(--c) 88%,transparent) 0%,
+    color-mix(in srgb,var(--c) 62%,transparent) 55%,
+    color-mix(in srgb,var(--c) 30%,transparent) 100%);
+}
+.scard:hover::before,.mcard:hover::before{opacity:1}
+
 .scard-in{
-  position:absolute;inset:0;z-index:2;padding:10px;color:#fff;
+  position:absolute;inset:0;z-index:3;padding:10px;color:#fff;
   display:grid;place-content:center;justify-items:center;gap:5px;text-align:center;
 }
 .scard .nm{
@@ -243,15 +255,15 @@ button{font:inherit;background:none;border:0;padding:0;cursor:pointer;color:inhe
 /* même pastille que sur les vignettes de sorties : elle monte et apparaît au
    survol. Une flèche, pas un triangle de lecture — une carte de style ouvre le
    catalogue filtré, elle ne joue rien. */
-.scard .go{
-  position:absolute;right:10px;bottom:10px;z-index:3;
+.scard .go,.mcard .go{
+  position:absolute;right:10px;bottom:10px;z-index:4;
   width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
   background:rgba(255,255,255,.92);color:var(--ink);
   box-shadow:0 2px 8px rgba(0,0,0,.25);
   opacity:0;transform:translateY(4px);transition:.18s;
 }
-.scard:hover .go{opacity:1;transform:none}
-@media(hover:none){ .scard .go{opacity:1;transform:none} }
+.scard:hover .go,.mcard:hover .go{opacity:1;transform:none}
+@media(hover:none){ .scard .go,.mcard .go{opacity:1;transform:none} }
 
 .scard.repliee{display:none}
 /* Mur des moods : format paysage et couleur dominante. Un mood est une
@@ -279,7 +291,7 @@ button{font:inherit;background:none;border:0;padding:0;cursor:pointer;color:inhe
     color-mix(in srgb,var(--c) 42%,transparent) 48%,
     rgba(0,0,0,.72) 100%);
 }
-.mcard-in{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:13px 14px;color:#fff}
+.mcard-in{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:13px 14px;color:#fff}
 .mcard .nm{
   display:block;font-size:17px;font-weight:700;letter-spacing:-.02em;
   text-shadow:0 1px 5px rgba(0,0,0,.5);text-transform:capitalize;
@@ -730,6 +742,7 @@ const LIKED = (function likes(){
         <span class="nm">${esc(m)}</span>
         <span class="ct">${lot.length} prod${lot.length > 1 ? "s" : ""}</span>
       </div>
+      <span class="go"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg></span>
     </a>`;
   }).join("");
   document.getElementById("moodsSub").textContent =
