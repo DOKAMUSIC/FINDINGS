@@ -857,6 +857,7 @@ const openApp = document.getElementById("openApp");
 let player = null, apiReady = false, pendingId = null, tick = null;
 let QI = -1, current = null, paused = false;
 let QUEUE = [];   // la section d'où part la lecture devient la file d'attente
+let repriseT = 0, repriseJoue = true;   // position à rejoindre après un changement de page
 const FILE_MODE = location.protocol === "file:";
 let PLAIN = FILE_MODE, started = false, watchdog = null, gestured = false;
 addEventListener("pointerdown", () => gestured = true, { once:true, capture:true });
@@ -886,7 +887,16 @@ function mount(id){
     // fs:0 son bouton plein écran : il ne reste que l'image
     playerVars:{ autoplay:1, rel:0, modestbranding:1, playsinline:1, iv_load_policy:3,
                  controls:0, disablekb:1, fs:0 },
-    events:{ onReady: e => { e.target.playVideo(); startTick(); }, onStateChange: onState, onError: onError }
+    events:{
+      onReady: e => {
+        if (repriseT > 0) e.target.seekTo(repriseT, true);
+        if (repriseT > 0 && !repriseJoue) { e.target.pauseVideo(); paused = true; tgIcon.innerHTML = ICON_PLAY; }
+        else e.target.playVideo();
+        repriseT = 0;
+        startTick();
+      },
+      onStateChange: onState, onError: onError
+    }
   });
   armWatchdog(id);
 }
@@ -1041,6 +1051,36 @@ addEventListener("keydown", e => {
   });
   new MutationObserver(peindre).observe(wrap, { attributes:true, attributeFilter:["class"] });
   peindre();
+})();
+
+
+/* ============ reprise entre les pages ============
+   Changer de page détruit l'iframe : aucun lecteur ne survit à une navigation
+   entre deux documents. On enregistre donc la prod et la seconde exacte avant
+   de partir, et on reprend là au chargement suivant. L'interruption dure le
+   temps du chargement, pas le temps d'un morceau. */
+const REPRISE = "findings.reprise";
+function memoriser(){
+  if (!current) return;
+  let t = 0, joue = false;
+  try {
+    if (player && player.getCurrentTime) t = player.getCurrentTime() || 0;
+    if (player && player.getPlayerState) joue = player.getPlayerState() === 1;
+  } catch (e) {}
+  try { sessionStorage.setItem(REPRISE, JSON.stringify({ id: current.id, t, joue, ts: Date.now() })); } catch (e) {}
+}
+addEventListener("pagehide", memoriser);
+addEventListener("beforeunload", memoriser);
+
+(function reprendre(){
+  let d = null;
+  try { d = JSON.parse(sessionStorage.getItem(REPRISE) || "null"); } catch (e) {}
+  if (!d || !d.id || Date.now() - d.ts > 120000) return;
+  const file = [FRESH, LIKED].find(l => l.some(b => b.id === d.id)) || BEATS.filter(b => b.id === d.id);
+  const i = file.findIndex(b => b.id === d.id);
+  if (i < 0) return;
+  repriseT = d.t || 0; repriseJoue = !!d.joue;
+  play(i, file);
 })();
 
 /* ============ pied de page ============ */
