@@ -458,7 +458,7 @@ body.playing{padding-bottom:104px}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
         Toutes les prods
       </a>
-      <a class="btn ghost" href="app.html?sort=nouveautes">Les dernières arrivées</a>
+      <a class="btn ghost" href="app.html?sort=recent">Les dernières sorties</a>
     </div>
     <div class="stats" id="stats"></div>
   </div>
@@ -505,10 +505,10 @@ body.playing{padding-bottom:104px}
   <section class="sec wrap">
     <div class="sec-head">
       <div>
-        <h2>Dernières arrivées</h2>
+        <h2>Dernières sorties</h2>
         <p id="freshSub"></p>
       </div>
-      <a href="app.html?sort=nouveautes">Tout voir →</a>
+      <a href="app.html?sort=recent">Tout voir →</a>
     </div>
     <div class="fresh" id="fresh"></div>
   </section>
@@ -596,9 +596,9 @@ const nf = n => n.toLocaleString("fr-FR");
 })();
 
 /* ============ dernières arrivées ============ */
-/* les huit dernières arrivées : c'est aussi la file d'attente du lecteur */
+/* les huit sorties les plus récentes : c'est aussi la file d'attente du lecteur */
 const FRESH = BEATS.slice().sort((a,b) =>
-  (b.addedAt||"").localeCompare(a.addedAt||"") || (b.published||"").localeCompare(a.published||"")
+  (b.published||"").localeCompare(a.published||"") || (b.addedAt||"").localeCompare(a.addedAt||"")
 ).slice(0, 8);
 
 (function fresh(){
@@ -614,9 +614,9 @@ const FRESH = BEATS.slice().sort((a,b) =>
         <div class="s"><span class="pill">${esc(STYLE_NAME[b.style]||b.style)}</span><span>${esc(b.prod)}</span></div>
       </div>
     </a>`).join("");
-  const dates = recent.map(b => b.addedAt).filter(Boolean).sort();
+  const dates = recent.map(b => b.published).filter(Boolean).sort();
   document.getElementById("freshSub").textContent =
-    dates.length ? `Ajoutées le ${new Date(dates[dates.length-1]+"T12:00:00Z").toLocaleDateString("fr-FR",{day:"numeric",month:"long"})}.` : "";
+    dates.length ? `La plus récente est sortie le ${new Date(dates[dates.length-1]+"T12:00:00Z").toLocaleDateString("fr-FR",{day:"numeric",month:"long"})}.` : "";
 })();
 
 /* ============ prods likées ============

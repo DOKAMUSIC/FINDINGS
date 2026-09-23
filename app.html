@@ -348,6 +348,7 @@ ul{margin:0;padding:0;list-style:none}
 .num.pop{min-width:62px;align-items:flex-end}
 .num.pop .bar{width:56px;height:3px;border-radius:2px;background:rgba(0,0,0,.09);margin-top:4px;overflow:hidden}
 .num.pop .bar i{display:block;height:100%;border-radius:2px;background:var(--dimmer)}
+.num.pop .k{display:none}   /* la barre suffit tant qu'elle est visible */
 .acts{display:flex;gap:2px;margin-left:4px}
 .icon{
   width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--dimmer);
@@ -390,11 +391,16 @@ ul{margin:0;padding:0;list-style:none}
 .empty p{font-size:13.5px;color:var(--dim)}
 
 @media(max-width:1240px){ .row .num.k-key{display:none} }
-@media(max-width:1100px){ .row .num.pop{display:none} }
-@media(max-width:860px){
-  .row .nums .num:nth-of-type(3){display:none}
-  .res-head h2{font-size:22px}
+/* Le nombre d'écoutes reste lisible bien plus longtemps : on sacrifie d'abord
+   sa barre, puis la durée, et lui en dernier. */
+@media(max-width:1100px){
+  .row .num.pop .bar{display:none}
+  .row .num.pop .k{display:block}
+  .row .num.pop{min-width:42px}
 }
+@media(max-width:1000px){ .row .nums .num:nth-of-type(3){display:none} }
+@media(max-width:860px){ .res-head h2{font-size:22px} }
+@media(max-width:780px){ .row .num.pop{display:none} }
 @media(max-width:640px){
   .row .nums .num{display:none}
   .row .refs{display:none}
@@ -664,9 +670,7 @@ ul{margin:0;padding:0;list-style:none}
       </button>
       <div class="sorts" id="sorts">
         <button data-sort="pertinence" aria-pressed="true">Pertinence</button>
-        <button data-sort="vues" aria-pressed="false">Écoutes</button>
-        <button data-sort="nouveautes" aria-pressed="false" title="Les prods arrivées le plus récemment dans FINDINGS">Ajouts</button>
-        <button data-sort="recent" aria-pressed="false" title="Les prods publiées le plus récemment sur YouTube">Sorties</button>
+        <button data-sort="recent" aria-pressed="false" title="Les prods publiées le plus récemment par leur beatmaker">Récent</button>
         <button data-sort="bpm" aria-pressed="false">BPM</button>
       </div>
       </div>
@@ -816,10 +820,8 @@ function filtered(){
   };
   const by = {
     pertinence:(a,b) => score(b)-score(a),
-    vues:(a,b) => b.views-a.views,
     recent:(a,b) => a.days-b.days,
-    bpm:(a,b) => a.bpm-b.bpm,
-    nouveautes:(a,b) => (b.addedAt||"").localeCompare(a.addedAt||"") || b.views-a.views
+    bpm:(a,b) => a.bpm-b.bpm
   }[S.sort];
   return out.sort(by);
 }
@@ -907,7 +909,7 @@ function rowHTML(b){
       <div class="num"><span class="v${b.bpmSur?"":" flou"}"${b.bpmSur?"":' title="Tempo estimé d\'après le style : le beatmaker ne l\'a pas indiqué."'}>${b.bpmSur?"":"~"}${b.bpm}</span><span class="k">bpm</span></div>
       <div class="num k-key"><span class="v${b.keySur?"":" flou"}"${b.keySur?"":' title="Tonalité estimée : non indiquée par le beatmaker."'}>${b.keySur?"":"~"}${esc(b.key)}</span><span class="k">clé</span></div>
       <div class="num"><span class="v">${fmtDur(b.dur)}</span><span class="k">durée</span></div>
-      <div class="num pop"><span class="v">${fmtViews(b.views)}</span><div class="bar"><i style="width:${pop}%"></i></div></div>
+      <div class="num pop"><span class="v">${fmtViews(b.views)}</span><div class="bar"><i style="width:${pop}%"></i></div><span class="k">vues</span></div>
       <div class="num"><span class="v" style="color:var(--dim)">${fmtAge(b.days)}</span><span class="k">âge</span></div>
       <div class="acts">
         <button class="icon${saved?" sav":""}" data-act="save" aria-label="${saved?"Retirer des prods likées":"Liker cette prod"}" title="${saved?"Retirer des prods likées":"Liker cette prod"}">
@@ -1398,7 +1400,7 @@ syncBpm();
   const style = p.get("style"), sort = p.get("sort"), q = p.get("q"), play = p.get("play");
   const mood = p.get("mood"), likes = p.get("likes");
   if (style && STYLE_NAME[style]) { S.styles.add(style); stylesOpen = true; renderStyleChips(); }
-  if (sort && ["pertinence","vues","nouveautes","recent","bpm"].includes(sort)) {
+  if (sort && ["pertinence","recent","bpm"].includes(sort)) {
     S.sort = sort;
     document.querySelectorAll("#sorts button").forEach(x => x.setAttribute("aria-pressed", x.dataset.sort === sort));
   }
