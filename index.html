@@ -140,7 +140,8 @@ button{font:inherit;background:none;border:0;padding:0;cursor:pointer;color:inhe
 .hsearch:focus-within{box-shadow:var(--sh-3);border-color:rgba(0,0,0,.10)}
 .hsearch > svg{color:var(--dimmer);flex:0 0 auto}
 .hsearch input{
-  flex:1;min-width:0;height:100%;border:0;background:none;outline:none;
+  flex:1;min-width:0;height:100%;border:0;background:none;outline:none;padding-right:6px;
+  text-overflow:ellipsis;
   font-size:15px;letter-spacing:-.011em;color:var(--ink);
 }
 .hsearch input::placeholder{color:var(--dimmer)}
@@ -718,11 +719,21 @@ const FRESH = BEATS.slice().sort((a,b) =>
   document.getElementById("hshot").innerHTML =
     choix.map(r => `<a href="app.html?q=${encodeURIComponent(r)}">${esc(r)}</a>`).join("");
 
-  const ex = piocher(choix, 3);
-  if (ex.length === 3) {
-    document.getElementById("hq").placeholder =
-      `Un artiste, un style, un mood\u00a0: \u00ab\u00a0${ex[0]}\u00a0\u00bb, \u00ab\u00a0${ex[1]}\u00a0\u00bb, \u00ab\u00a0${ex[2]}\u00a0\u00bb\u2026`;
+  /* L'invite se construit sous contrainte de longueur : un tirage peut sortir
+     « Ndombolo / Coupé-décalé », et trois exemples de cette taille dépassent la
+     largeur du champ — la fin serait coupée. On ajoute donc du plus court au
+     plus long, tant que ça tient. */
+  const BUDGET = 56;
+  const parts = [];
+  for (const c of choix.slice().sort((a, b) => a.length - b.length)) {
+    const p = `\u00ab\u00a0${c}\u00a0\u00bb`;
+    if (`Cherche ${[...parts, p].join(", ")}\u2026`.length > BUDGET) break;
+    parts.push(p);
+    if (parts.length === 3) break;
   }
+  document.getElementById("hq").placeholder = parts.length
+    ? `Cherche ${parts.join(", ")}\u2026`
+    : "Cherche une prod, un artiste, un mood\u2026";
 })();
 
 /* ============ prods likées ============
