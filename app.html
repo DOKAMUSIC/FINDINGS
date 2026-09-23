@@ -743,7 +743,7 @@ const STYLE_META = (CAT.styles && CAT.styles.length) ? CAT.styles : [
 STYLE_META.forEach(s => document.documentElement.style.setProperty(`--s-${s.key}`, s.color));
 const STYLES = STYLE_META.map(s => [s.key, s.label]);
 const STYLE_NAME = Object.fromEntries(STYLES);
-const MOODS = ["agressif","sombre","mélancolique","énergique","chill","solaire","sensuel","planant"];
+const MOODS = ["agressif","sombre","mélancolique","énergique","chill","solaire","sensuel","planant","nostalgique","épique","festif"];
 
 const DAY = 86400000;
 const since = d => d ? Math.max(0, (Date.now() - new Date(d + "T12:00:00Z")) / DAY) : 9999;

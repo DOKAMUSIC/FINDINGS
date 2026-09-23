@@ -726,7 +726,8 @@ const LIKED = (function likes(){
      styles : le sombre tire vers l'encre, le solaire vers le jaune franc. */
   const TEINTES = {
     "agressif":"#E63946", "sombre":"#2F3A5C", "mélancolique":"#5B7A9E", "énergique":"#FF9F0A",
-    "chill":"#34C759", "solaire":"#FFC531", "sensuel":"#FF6FA5", "planant":"#A46BFF"
+    "chill":"#34C759", "solaire":"#FFC531", "sensuel":"#FF6FA5", "planant":"#A46BFF",
+    "nostalgique":"#B08968", "épique":"#C9A227", "festif":"#2FC6D8"
   };
   const par = {};
   BEATS.forEach(b => (b.moods || []).forEach(m => (par[m] = par[m] || []).push(b)));
@@ -746,7 +747,7 @@ const LIKED = (function likes(){
     </a>`;
   }).join("");
   document.getElementById("moodsSub").textContent =
-    `${live.length} ambiances, déduites du titre de chaque prod.`;
+    `${live.length} ambiances, déduites du titre et de la description de chaque prod.`;
 })();
 
 /* ============ lecteur ============
