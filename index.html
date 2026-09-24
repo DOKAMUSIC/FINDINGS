@@ -1443,6 +1443,11 @@ const elTrack = elProg.querySelector(".rail2");
 
 let player = null, apiReady = false, pendingId = null, tick = null;
 let glisse = false;   // curseur de temps en cours de deplacement
+/* Une recherche n'est pas instantanee : le lecteur continue d'annoncer l'ancienne
+   position pendant ~400 ms. On retient la position demandee et on garde l'affichage
+   dessus tant qu'elle n'est pas atteinte, sinon la barre repasse par l'endroit
+   qu'on vient de quitter et le curseur parait mal se poser. */
+let cibleSeek = null, cibleSeekTs = 0;
 let repriseT = 0, repriseJoue = true;   // position à rejoindre après un changement de page
 /* Le lecteur pilotable exige une vraie origine : ouverte depuis le disque
    (file://), la page ne peut pas dialoguer avec YouTube et rien ne sort. On
@@ -1575,6 +1580,12 @@ function startTick(){
     /* Pendant le glissement, la barre appartient au doigt : sans ca le curseur
        reviendrait a la position reelle toutes les 300 ms et le geste accrocherait. */
     if (glisse) return;
+    if (cibleSeek !== null) {
+      // 1,2 s de tolerance : le lecteur ne retombe jamais sur la seconde exacte.
+      // Le delai de garde evite de figer la barre si la recherche n'aboutit pas.
+      if (Math.abs(t - cibleSeek) < 1.2 || Date.now() - cibleSeekTs > 2500) cibleSeek = null;
+      else return;
+    }
     const pct = Math.min(100, (t/d)*100);
     elFill.style.width = pct + "%";
     elKnob.style.left = pct + "%";
@@ -1669,6 +1680,15 @@ function pctDepuis(e){
   const r = elTrack.getBoundingClientRect();
   return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
 }
+/* Seul chemin pour chercher : l'affichage se cale d'abord, le lecteur suit. */
+function chercher(t){
+  if (!player || !player.seekTo) return;
+  const d = player.getDuration() || 0;
+  const pos = Math.max(0, d ? Math.min(d, t) : t);
+  cibleSeek = pos; cibleSeekTs = Date.now();
+  if (d) apercu(pos / d);
+  player.seekTo(pos, true);
+}
 function apercu(pct){
   const p = pct * 100;
   elFill.style.width = p + "%";
@@ -1693,14 +1713,14 @@ function relacherCurseur(e){
   try { elProg.releasePointerCapture(e.pointerId); } catch (err) {}
   const pct = pctDepuis(e);
   apercu(pct);
-  if (player && player.getDuration) player.seekTo(player.getDuration() * pct, true);
+  if (player && player.getDuration) chercher(player.getDuration() * pct);
 }
 elProg.addEventListener("pointerup", relacherCurseur);
 elProg.addEventListener("pointercancel", relacherCurseur);
 elProg.addEventListener("keydown", e => {
   if (!player || !player.getCurrentTime) return;
-  if (e.key === "ArrowRight"){ player.seekTo(player.getCurrentTime()+5, true); e.preventDefault(); }
-  if (e.key === "ArrowLeft"){ player.seekTo(Math.max(0, player.getCurrentTime()-5), true); e.preventDefault(); }
+  if (e.key === "ArrowRight"){ chercher(player.getCurrentTime()+5); e.preventDefault(); }
+  if (e.key === "ArrowLeft"){ chercher(player.getCurrentTime()-5); e.preventDefault(); }
 });
 
 /* agrandir la vidéo */
@@ -1734,8 +1754,8 @@ document.addEventListener("keydown", e => {
   if (e.key === " "){ e.preventDefault(); togglePlay(); }
   else if (e.key.toLowerCase() === "n") next();
   else if (e.key.toLowerCase() === "p") prev();
-  else if (e.key === "ArrowRight" && player?.getCurrentTime){ player.seekTo(player.getCurrentTime()+5, true); }
-  else if (e.key === "ArrowLeft"  && player?.getCurrentTime){ player.seekTo(Math.max(0, player.getCurrentTime()-5), true); }
+  else if (e.key === "ArrowRight" && player?.getCurrentTime){ chercher(player.getCurrentTime()+5); }
+  else if (e.key === "ArrowLeft"  && player?.getCurrentTime){ chercher(player.getCurrentTime()-5); }
 });
 
 /* Bascule l'état d'un cœur et, à l'ajout seulement, lance l'éclat. L'élément
