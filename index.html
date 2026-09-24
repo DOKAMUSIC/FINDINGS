@@ -1213,6 +1213,14 @@ STYLE_META.forEach(s => document.documentElement.style.setProperty(`--s-${s.key}
 const STYLES = STYLE_META.map(s => [s.key, s.label]);
 const STYLE_NAME = Object.fromEntries(STYLES);
 const MOODS = ["agressif","sombre","mélancolique","énergique","chill","solaire","sensuel","planant","nostalgique","cinématique","festif"];
+/* Une teinte par mood, partagee entre les pastilles du panneau et les cartes de
+   l'accueil : le meme mot doit avoir la meme couleur partout. L'ordre des cles sert
+   aussi a ordonner le mur de l'accueil, ne pas le remanier a la legere. */
+const MOOD_TEINTE = {
+  "agressif":"#E63946", "sombre":"#2F3A5C", "mélancolique":"#5B7A9E", "énergique":"#FF9F0A",
+  "chill":"#34C759", "solaire":"#FFC531", "sensuel":"#FF6FA5", "planant":"#A46BFF",
+  "nostalgique":"#B08968", "cinématique":"#C9A227", "festif":"#2FC6D8"
+};
 
 const DAY = 86400000;
 const since = d => d ? Math.max(0, (Date.now() - new Date(d + "T12:00:00Z")) / DAY) : 9999;
@@ -1320,7 +1328,7 @@ renderStyleChips();
 const elMoods = document.getElementById("moods");
 elMoods.innerHTML = MOODS.map(m => {
   const n = BEATS.filter(b => b.moods.includes(m)).length;
-  return `<button class="chip" data-mood="${esc(m)}" aria-pressed="false" style="--c:#1D1D1F">${esc(m)}<span class="n">${n}</span></button>`;
+  return `<button class="chip" data-mood="${esc(m)}" aria-pressed="false" style="--c:${MOOD_TEINTE[m] || "#1D1D1F"}"><span class="dot"></span>${esc(m)}<span class="n">${n}</span></button>`;
 }).join("");
 
 /* Les suggestions de recherche sortent des références réellement citées par les
@@ -2196,11 +2204,7 @@ majLikes();
 (function moods(){
   /* Une couleur par ambiance — choisie pour ce qu'elle évoque, pas reprise des
      styles : le sombre tire vers l'encre, le solaire vers le jaune franc. */
-  const TEINTES = {
-    "agressif":"#E63946", "sombre":"#2F3A5C", "mélancolique":"#5B7A9E", "énergique":"#FF9F0A",
-    "chill":"#34C759", "solaire":"#FFC531", "sensuel":"#FF6FA5", "planant":"#A46BFF",
-    "nostalgique":"#B08968", "cinématique":"#C9A227", "festif":"#2FC6D8"
-  };
+  const TEINTES = MOOD_TEINTE;   // source unique : voir la declaration pres de MOODS
   const par = {};
   BEATS.forEach(b => (b.moods || []).forEach(m => (par[m] = par[m] || []).push(b)));
   const live = Object.keys(TEINTES).filter(m => par[m]);
