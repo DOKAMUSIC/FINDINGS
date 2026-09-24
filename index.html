@@ -61,7 +61,12 @@ body{
   font-family:var(--sans);font-size:14px;line-height:1.45;
   letter-spacing:-.011em;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  /* L'interface se manipule, elle ne se copie pas : un double-clic sur un titre
+     ou un glisse rate surlignait du texte, ce qui trahit la page web sous l'appli. */
+  -webkit-user-select:none;user-select:none;
 }
+/* Les champs de saisie gardent la selection, sans quoi on ne peut plus editer. */
+input,textarea{-webkit-user-select:text;user-select:text}
 /* lavis de couleur très dilués : ce qui donne au blanc sa profondeur */
 body::before{
   content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
@@ -440,7 +445,9 @@ ul{margin:0;padding:0;list-style:none}
   transform:translateY(calc(100% + 28px));transition:transform .32s cubic-bezier(.32,.72,0,1);
 }
 .bar.up{transform:none}
-.prog{position:absolute;top:0;left:0;right:0;height:14px;cursor:pointer;z-index:2}
+.prog{position:absolute;top:0;left:0;right:0;height:14px;cursor:pointer;z-index:2;
+  /* sans ca, glisser sur la barre en tactile fait defiler la page au lieu de chercher */
+  touch-action:none}
 /* Le remplissage et la pastille se mesurent sur la piste elle-même, pas sur la
    barre entière : un pourcentage calculé sur une largeur plus grande que la
    piste fait déborder l'indicateur et décale le clic de déplacement. */
@@ -463,7 +470,8 @@ ul{margin:0;padding:0;list-style:none}
   position:absolute;top:-3px;left:0;width:10px;height:10px;border-radius:50%;background:var(--c);
   margin-left:-5px;opacity:0;transition:opacity .12s;box-shadow:0 1px 3px rgba(0,0,0,.25);
 }
-.prog:hover .knob,.prog:focus-visible .knob{opacity:1}
+.prog:hover .knob,.prog:focus-visible .knob,.prog.glisse .knob{opacity:1}
+.prog.glisse{cursor:grabbing}
 
 .bar-in{
   max-width:1320px;margin:0 auto;padding:12px 16px;height:var(--bar-h);
@@ -862,8 +870,19 @@ ul{margin:0;padding:0;list-style:none}
 body.vue-accueil .hlinks{display:flex;margin-left:auto}
 body.vue-accueil .top .search{display:none}
 /* vue prods : la recherche plafonne a 640px et cesse de pousser des que l'ecran
-   est large. Sans cet auto, le bouton retombe au milieu de la bande. */
-body:not(.vue-accueil) .crate-btn{margin-left:auto}
+   est large. Sans cet auto, les boutons retombent au milieu de la bande. */
+.actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+body:not(.vue-accueil) .actions{margin-left:auto}
+/* N'apparait que sous filtre likes : une sortie visible, plutot qu'un second clic
+   sur le bouton qui a amene ici — rien ne disait qu'il servait aussi a revenir. */
+.sortie-filtre{
+  display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;
+  height:38px;padding:0 13px;border-radius:999px;
+  background:transparent;border:1px solid var(--line);
+  font-size:13px;font-weight:530;color:var(--dim);transition:.15s;
+}
+.sortie-filtre:hover{color:var(--ink);background:var(--surface);box-shadow:var(--sh-1)}
+@media(max-width:640px){ .sortie-filtre span,.sortie-filtre{font-size:12.5px;padding:0 10px} }
 .hlinks a{padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--dim);transition:.15s;text-decoration:none}
 .hlinks a:hover{color:var(--ink);background:rgba(0,0,0,.05)}
 .hlinks a.cta{background:var(--ink);color:#fff;font-weight:590}
@@ -893,10 +912,16 @@ body:not(.vue-accueil) .crate-btn{margin-left:auto}
       <a class="cta" href="?vue=prods" data-vue="prods">Les prods</a>
     </nav>
 
-    <button class="crate-btn" id="crateBtn" aria-pressed="false">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
-      Prods likés <span class="mono" id="crateN">0</span>
-    </button>
+    <div class="actions">
+      <button class="sortie-filtre" id="toutesBtn" hidden>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+        Toutes les prods
+      </button>
+      <button class="crate-btn" id="crateBtn" aria-pressed="false">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
+        Prods likés <span class="mono" id="crateN">0</span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -1417,6 +1442,7 @@ const elProg = document.getElementById("prog"), tgIcon = document.getElementById
 const elTrack = elProg.querySelector(".rail2");
 
 let player = null, apiReady = false, pendingId = null, tick = null;
+let glisse = false;   // curseur de temps en cours de deplacement
 let repriseT = 0, repriseJoue = true;   // position à rejoindre après un changement de page
 /* Le lecteur pilotable exige une vraie origine : ouverte depuis le disque
    (file://), la page ne peut pas dialoguer avec YouTube et rien ne sort. On
@@ -1546,6 +1572,9 @@ function startTick(){
     if (!player || !player.getDuration) return;
     const d = player.getDuration() || 0, t = player.getCurrentTime() || 0;
     if (!d) return;
+    /* Pendant le glissement, la barre appartient au doigt : sans ca le curseur
+       reviendrait a la position reelle toutes les 300 ms et le geste accrocherait. */
+    if (glisse) return;
     const pct = Math.min(100, (t/d)*100);
     elFill.style.width = pct + "%";
     elKnob.style.left = pct + "%";
@@ -1633,13 +1662,41 @@ document.getElementById("vol").addEventListener("input", e => {
   if (player && player.setVolume) player.setVolume(VOL);
 });
 
-function seekFromEvent(e){
-  if (!player || !player.getDuration) return;
+/* Le curseur se prend et se deplace, pas seulement se pointe. On suit le pointeur
+   jusqu'au relachement et on n'appelle seekTo qu'une fois, a la fin : chercher a
+   chaque pixel parcouru saccaderait la lecture pour rien. */
+function pctDepuis(e){
   const r = elTrack.getBoundingClientRect();
-  const pct = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-  player.seekTo(player.getDuration() * pct, true);
+  return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
 }
-elProg.addEventListener("click", seekFromEvent);
+function apercu(pct){
+  const p = pct * 100;
+  elFill.style.width = p + "%";
+  elKnob.style.left = p + "%";
+  elProg.setAttribute("aria-valuenow", Math.round(p));
+  const d = player && player.getDuration ? (player.getDuration() || 0) : 0;
+  if (d) elCur.textContent = fmtDur(Math.floor(d * pct));
+}
+elProg.addEventListener("pointerdown", e => {
+  if (!player || !player.getDuration || !player.getDuration()) return;
+  glisse = true;
+  elProg.classList.add("glisse");
+  try { elProg.setPointerCapture(e.pointerId); } catch (err) {}
+  apercu(pctDepuis(e));
+  e.preventDefault();
+});
+elProg.addEventListener("pointermove", e => { if (glisse) apercu(pctDepuis(e)); });
+function relacherCurseur(e){
+  if (!glisse) return;
+  glisse = false;
+  elProg.classList.remove("glisse");
+  try { elProg.releasePointerCapture(e.pointerId); } catch (err) {}
+  const pct = pctDepuis(e);
+  apercu(pct);
+  if (player && player.getDuration) player.seekTo(player.getDuration() * pct, true);
+}
+elProg.addEventListener("pointerup", relacherCurseur);
+elProg.addEventListener("pointercancel", relacherCurseur);
 elProg.addEventListener("keydown", e => {
   if (!player || !player.getCurrentTime) return;
   if (e.key === "ArrowRight"){ player.seekTo(player.getCurrentTime()+5, true); e.preventDefault(); }
@@ -1784,6 +1841,7 @@ function refletFiltres(){
     c.setAttribute("aria-pressed", String(S.moods.has(c.dataset.mood))));
   crateBtn.setAttribute("aria-pressed", S.crateOnly);
   crateBtn.classList.toggle("on", S.crateOnly);
+  toutesBtn.hidden = !S.crateOnly;
 }
 /* L'adresse suit l'etat reel : un lien copie rouvre ce qu'on a sous les yeux. */
 function majAdresse(){
@@ -1852,6 +1910,13 @@ document.getElementById("q").addEventListener("input", e => {
 });
 
 const crateBtn = document.getElementById("crateBtn");
+const toutesBtn = document.getElementById("toutesBtn");
+toutesBtn.addEventListener("click", () => {
+  viderFiltres();
+  refletFiltres();
+  render();
+  majAdresse();
+});
 crateBtn.addEventListener("click", () => {
   const etaitActif = S.crateOnly;
   viderFiltres();
