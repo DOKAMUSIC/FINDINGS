@@ -857,8 +857,13 @@ ul{margin:0;padding:0;list-style:none}
 /* bascule entre les deux vues */
 [hidden]{display:none !important}
 .hlinks{display:none;align-items:center;gap:6px}
-body.vue-accueil .hlinks{display:flex}
+/* la recherche est masquee sur l'accueil : sans elle, plus rien ne pousse le groupe
+   vers la droite. margin-left:auto absorbe l'espace libre a la place. */
+body.vue-accueil .hlinks{display:flex;margin-left:auto}
 body.vue-accueil .top .search{display:none}
+/* vue prods : la recherche plafonne a 640px et cesse de pousser des que l'ecran
+   est large. Sans cet auto, le bouton retombe au milieu de la bande. */
+body:not(.vue-accueil) .crate-btn{margin-left:auto}
 .hlinks a{padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--dim);transition:.15s;text-decoration:none}
 .hlinks a:hover{color:var(--ink);background:rgba(0,0,0,.05)}
 .hlinks a.cta{background:var(--ink);color:#fff;font-weight:590}
