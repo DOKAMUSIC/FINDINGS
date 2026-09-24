@@ -1931,7 +1931,18 @@ document.getElementById("clearMood").addEventListener("click", () => {
 });
 
 const bMin = document.getElementById("bpmMin"), bMax = document.getElementById("bpmMax"), fill = document.getElementById("fill");
-function syncBpm(){
+/* render() coute ~30 ms et un glissement du tempo produit ~66 evenements : recalculer
+   la liste a chaque pixel bloquait le fil principal bien au-dela d'une image, d'ou la
+   saccade. On separe donc les deux : la poignee, la plage remplie et les reperes BPM
+   suivent le doigt sans delai, la liste se recalcule au plus huit fois par seconde. */
+let bpmDernierRendu = 0, bpmAttente = null;
+function planifierRendu(){
+  clearTimeout(bpmAttente);
+  const maintenant = Date.now();
+  if (maintenant - bpmDernierRendu > 120){ bpmDernierRendu = maintenant; render(); }
+  else bpmAttente = setTimeout(() => { bpmDernierRendu = Date.now(); render(); }, 120);
+}
+function syncBpm(immediat){
   let lo = +bMin.value, hi = +bMax.value;
   if(lo > hi - 5){ if(document.activeElement === bMin) lo = hi - 5; else hi = lo + 5; bMin.value = lo; bMax.value = hi; }
   S.bpm = [lo,hi];
@@ -1940,10 +1951,13 @@ function syncBpm(){
   fill.style.width = ((hi-lo)/span*100)+"%";
   document.getElementById("rMin").textContent = lo+" BPM";
   document.getElementById("rMax").textContent = hi+" BPM";
-  render();
+  if (immediat){ clearTimeout(bpmAttente); bpmDernierRendu = Date.now(); render(); }
+  else planifierRendu();
 }
-bMin.addEventListener("input", syncBpm); bMax.addEventListener("input", syncBpm);
-document.getElementById("clearBpm").addEventListener("click", () => { bMin.value=BMIN; bMax.value=BMAX; syncBpm(); });
+bMin.addEventListener("input", () => syncBpm()); bMax.addEventListener("input", () => syncBpm());
+/* au relachement, on garantit un dernier rendu exact sans attendre la temporisation */
+bMin.addEventListener("change", () => syncBpm(true)); bMax.addEventListener("change", () => syncBpm(true));
+document.getElementById("clearBpm").addEventListener("click", () => { bMin.value=BMIN; bMax.value=BMAX; syncBpm(true); });
 
 let t;
 document.getElementById("q").addEventListener("input", e => {
@@ -2009,7 +2023,7 @@ ftog.addEventListener("click", () => {
   ftog.setAttribute("aria-expanded", open);
 });
 
-syncBpm();
+syncBpm(true);
 
 
 /* ============ reprise entre les pages ============
