@@ -1400,10 +1400,9 @@ function rowHTML(b){
   </li>`;
 }
 
-function render(){
-  const res = filtered();
-  LAST = res;
-
+/* Partie legere de render() : titre, compteurs, bouton de lecture. Elle ne touche
+   pas a la liste, donc elle coute une fraction de milliseconde. */
+function majEntete(res){
   const parts = [];
   if(S.crateOnly) parts.push("prods likées");
   if(S.styles.size) parts.push([...S.styles].map(s=>STYLE_NAME[s]).join(" + "));
@@ -1421,6 +1420,12 @@ function render(){
   const pa = document.getElementById("playall");
   pa.hidden = !res.length;
   document.getElementById("playallN").textContent = res.length > 1 ? `Lire les ${res.length}` : "Tout lire";
+}
+
+function render(){
+  const res = filtered();
+  LAST = res;
+  majEntete(res);
 
   /* Etagere vide et « rien ne correspond » ont la meme apparence mais pas la meme
      cause : le dire evite de chercher un filtre fautif qui n'existe pas. */
@@ -1931,17 +1936,11 @@ document.getElementById("clearMood").addEventListener("click", () => {
 });
 
 const bMin = document.getElementById("bpmMin"), bMax = document.getElementById("bpmMax"), fill = document.getElementById("fill");
-/* render() coute ~30 ms et un glissement du tempo produit ~66 evenements : recalculer
-   la liste a chaque pixel bloquait le fil principal bien au-dela d'une image, d'ou la
-   saccade. On separe donc les deux : la poignee, la plage remplie et les reperes BPM
-   suivent le doigt sans delai, la liste se recalcule au plus huit fois par seconde. */
-let bpmDernierRendu = 0, bpmAttente = null;
-function planifierRendu(){
-  clearTimeout(bpmAttente);
-  const maintenant = Date.now();
-  if (maintenant - bpmDernierRendu > 120){ bpmDernierRendu = maintenant; render(); }
-  else bpmAttente = setTimeout(() => { bpmDernierRendu = Date.now(); render(); }, 120);
-}
+/* Reconstruire la liste coute une image entiere : mesure faite, 35 images sautees
+   sur 82 pendant un glissement, contre 0 sans rendu. Limiter le nombre d'appels ne
+   suffisait pas — il faut n'en declencher aucun tant que la poignee bouge. Les
+   reperes et les compteurs suivent quand meme, eux ne touchent pas a la liste. */
+let bpmAttente = null;
 function syncBpm(immediat){
   let lo = +bMin.value, hi = +bMax.value;
   if(lo > hi - 5){ if(document.activeElement === bMin) lo = hi - 5; else hi = lo + 5; bMin.value = lo; bMax.value = hi; }
@@ -1951,8 +1950,12 @@ function syncBpm(immediat){
   fill.style.width = ((hi-lo)/span*100)+"%";
   document.getElementById("rMin").textContent = lo+" BPM";
   document.getElementById("rMax").textContent = hi+" BPM";
-  if (immediat){ clearTimeout(bpmAttente); bpmDernierRendu = Date.now(); render(); }
-  else planifierRendu();
+  clearTimeout(bpmAttente);
+  if (immediat){ render(); return; }
+  majEntete(filtered());
+  /* Filet : si « change » n'arrive pas (relachement hors de la poignee), on rend
+     quand meme des que la poignee s'immobilise. */
+  bpmAttente = setTimeout(render, 200);
 }
 bMin.addEventListener("input", () => syncBpm()); bMax.addEventListener("input", () => syncBpm());
 /* au relachement, on garantit un dernier rendu exact sans attendre la temporisation */
