@@ -1768,20 +1768,55 @@ list.addEventListener("click", e => {
   playFrom(LAST, LAST.findIndex(x => x.id === b.id));
 });
 
+/* Un seul filtre a la fois. Avant, style, mood et likes se cumulaient : demander
+   « sombre » en ayant « Trap » actif renvoyait l'intersection des deux, souvent vide,
+   sans que rien n'indique lequel des deux etait en cause. Choisir remplace desormais. */
+function viderFiltres(){
+  S.styles.clear();
+  S.moods.clear();
+  S.crateOnly = false;
+}
+/* Remet les trois jeux de boutons en accord avec l'etat, y compris ceux qu'on vient
+   d'eteindre sans les avoir touches. */
+function refletFiltres(){
+  renderStyleChips();
+  elMoods.querySelectorAll("[data-mood]").forEach(c =>
+    c.setAttribute("aria-pressed", String(S.moods.has(c.dataset.mood))));
+  crateBtn.setAttribute("aria-pressed", S.crateOnly);
+  crateBtn.classList.toggle("on", S.crateOnly);
+}
+/* L'adresse suit l'etat reel : un lien copie rouvre ce qu'on a sous les yeux. */
+function majAdresse(){
+  if (document.body.classList.contains("vue-accueil")) return;
+  const p = new URLSearchParams();
+  if (S.styles.size) p.set("style", [...S.styles][0]);
+  if (S.moods.size)  p.set("mood",  [...S.moods][0]);
+  if (S.crateOnly)   p.set("likes", "1");
+  if (S.q)           p.set("q", S.q);
+  if (S.sort !== "pertinence") p.set("sort", S.sort);
+  const qs = p.toString();
+  history.replaceState({ vue: "prods" }, "", location.pathname + (qs ? "?" + qs : "?vue=prods"));
+}
+
+/* Un second clic sur le filtre actif le retire : c'est la seule facon de tout enlever. */
+function choisirFiltre(appliquer, etaitActif){
+  viderFiltres();
+  if (!etaitActif) appliquer();
+  refletFiltres();
+  render();
+  majAdresse();
+}
+
 elStyles.addEventListener("click", e => {
   if (e.target.closest("[data-fold]")) { stylesOpen = !stylesOpen; renderStyleChips(); return; }
   const btn = e.target.closest("[data-style]"); if(!btn) return;
   const k = btn.dataset.style;
-  S.styles.has(k) ? S.styles.delete(k) : S.styles.add(k);
-  btn.setAttribute("aria-pressed", S.styles.has(k));
-  render();
+  choisirFiltre(() => S.styles.add(k), S.styles.has(k));
 });
 elMoods.addEventListener("click", e => {
   const btn = e.target.closest("[data-mood]"); if(!btn) return;
   const k = btn.dataset.mood;
-  S.moods.has(k) ? S.moods.delete(k) : S.moods.add(k);
-  btn.setAttribute("aria-pressed", S.moods.has(k));
-  render();
+  choisirFiltre(() => S.moods.add(k), S.moods.has(k));
 });
 document.getElementById("hot").addEventListener("click", e => {
   const b = e.target.closest("[data-hot]"); if(!b) return;
@@ -1790,10 +1825,10 @@ document.getElementById("hot").addEventListener("click", e => {
 });
 
 document.getElementById("clearStyle").addEventListener("click", () => {
-  S.styles.clear(); renderStyleChips(); render();
+  S.styles.clear(); renderStyleChips(); render(); majAdresse();
 });
 document.getElementById("clearMood").addEventListener("click", () => {
-  S.moods.clear(); elMoods.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed","false")); render();
+  S.moods.clear(); elMoods.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed","false")); render(); majAdresse();
 });
 
 const bMin = document.getElementById("bpmMin"), bMax = document.getElementById("bpmMax"), fill = document.getElementById("fill");
@@ -1818,14 +1853,16 @@ document.getElementById("q").addEventListener("input", e => {
 
 const crateBtn = document.getElementById("crateBtn");
 crateBtn.addEventListener("click", () => {
-  S.crateOnly = !S.crateOnly;
-  crateBtn.setAttribute("aria-pressed", S.crateOnly);
-  crateBtn.classList.toggle("on", S.crateOnly);
+  const etaitActif = S.crateOnly;
+  viderFiltres();
+  S.crateOnly = !etaitActif;
+  refletFiltres();
   render();
   /* Sur l'accueil le catalogue est masque : filtrer sans y basculer n'affiche rien.
      On y emmene, avec la meme adresse que le lien « Tout voir » de la section likes. */
   if (document.body.classList.contains("vue-accueil"))
     montrerVue("prods", true, S.crateOnly ? "?likes=1" : "?vue=prods");
+  else majAdresse();
 });
 
 document.getElementById("frOnly").addEventListener("change", e => { S.fr = e.target.checked; render(); });
@@ -1841,6 +1878,7 @@ document.getElementById("sorts").addEventListener("click", e => {
   S.sort = b.dataset.sort;
   document.querySelectorAll("#sorts button").forEach(x => x.setAttribute("aria-pressed", x === b));
   render();
+  majAdresse();
 });
 
 document.getElementById("playall").addEventListener("click", () => {
@@ -2161,22 +2199,22 @@ function peindreTuiles(){
 
 /* ============ liens entrants ============
    L'accueil envoie ici avec un style, un tri, une recherche ou une prod précise. */
-function appliquerParams(p){
+function appliquerParams(p, reprendreLecture = false){
   const style = p.get("style"), sort = p.get("sort"), q = p.get("q"), play = p.get("play");
   const mood = p.get("mood"), likes = p.get("likes");
-  if (style && STYLE_NAME[style]) { S.styles.add(style); stylesOpen = true; renderStyleChips(); }
+  /* Changer de vue repart de l'adresse et de rien d'autre : sans ce nettoyage, le style
+     choisi avant restait actif et venait se cumuler au filtre de la vue d'arrivee. */
+  viderFiltres();
+  document.getElementById("q").value = q || "";
+  S.q = q || "";
+  if (style && STYLE_NAME[style]) { S.styles.add(style); stylesOpen = true; }
   if (sort && ["pertinence","recent","bpm"].includes(sort)) {
     S.sort = sort;
     document.querySelectorAll("#sorts button").forEach(x => x.setAttribute("aria-pressed", x.dataset.sort === sort));
   }
-  if (q) { document.getElementById("q").value = q; S.q = q; }
-  if (mood && MOODS.includes(mood)) {
-    S.moods.add(mood);
-    elMoods.querySelector(`[data-mood="${CSS.escape(mood)}"]`)?.setAttribute("aria-pressed", "true");
-  }
+  if (mood && MOODS.includes(mood)) S.moods.add(mood);
   S.crateOnly = likes === "1" && CRATE.size > 0;
-  crateBtn.setAttribute("aria-pressed", S.crateOnly);
-  crateBtn.classList.toggle("on", S.crateOnly);
+  refletFiltres();
   render();
   if (play) {
     const i = LAST.findIndex(b => b.id === play);
@@ -2185,7 +2223,10 @@ function appliquerParams(p){
     return;
   }
 
-  // rien d'explicite dans l'adresse : on reprend ce qui jouait avant la navigation
+  /* Reprise : uniquement au chargement du document. Depuis la fusion des deux pages,
+     changer de vue ne detruit plus l'iframe — la relancer ici repartait de la position
+     enregistree au dernier vrai depart de la page, donc en arriere. */
+  if (!reprendreLecture) return;
   let d = null;
   try { d = JSON.parse(sessionStorage.getItem(REPRISE) || "null"); } catch (e) {}
   if (!d || !d.id || Date.now() - d.ts > 120000) return;
@@ -2202,7 +2243,7 @@ function appliquerParams(p){
 (function demarrer(){
   const p = new URLSearchParams(location.search);
   const versProds = p.get("vue") === "prods" || ["style","sort","q","mood","likes","play"].some(k => p.get(k));
-  appliquerParams(p);
+  appliquerParams(p, true);
   montrerVue(versProds ? "prods" : "accueil", false);
   history.replaceState({ vue: versProds ? "prods" : "accueil" }, "", location.pathname + location.search);
 })();
