@@ -1376,11 +1376,17 @@ function render(){
   pa.hidden = !res.length;
   document.getElementById("playallN").textContent = res.length > 1 ? `Lire les ${res.length}` : "Tout lire";
 
-  list.innerHTML = res.length ? res.map(rowHTML).join("") : `
+  /* Etagere vide et « rien ne correspond » ont la meme apparence mais pas la meme
+     cause : le dire evite de chercher un filtre fautif qui n'existe pas. */
+  list.innerHTML = res.length ? res.map(rowHTML).join("") : (S.crateOnly && !CRATE.size ? `
+    <li class="empty">
+      <h3>Aucune prod likée pour l'instant.</h3>
+      <p>Touche le cœur à côté d'une prod — elle se rangera ici.</p>
+    </li>` : `
     <li class="empty">
       <h3>Aucune prod ne correspond.</h3>
       <p>Élargis le tempo ou enlève un filtre — le catalogue en compte ${BEATS.length}.</p>
-    </li>`;
+    </li>`);
 
   // histogramme : surligner la plage active
   document.querySelectorAll("#hist i").forEach(el => {
@@ -1816,6 +1822,10 @@ crateBtn.addEventListener("click", () => {
   crateBtn.setAttribute("aria-pressed", S.crateOnly);
   crateBtn.classList.toggle("on", S.crateOnly);
   render();
+  /* Sur l'accueil le catalogue est masque : filtrer sans y basculer n'affiche rien.
+     On y emmene, avec la meme adresse que le lien « Tout voir » de la section likes. */
+  if (document.body.classList.contains("vue-accueil"))
+    montrerVue("prods", true, S.crateOnly ? "?likes=1" : "?vue=prods");
 });
 
 document.getElementById("frOnly").addEventListener("change", e => { S.fr = e.target.checked; render(); });
