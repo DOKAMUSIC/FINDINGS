@@ -895,31 +895,6 @@ body:not(.vue-accueil) .actions{margin-left:auto}
   font-size:13px;font-weight:530;color:var(--dim);transition:.15s;
 }
 .sortie-filtre:hover{color:var(--ink);background:var(--surface);box-shadow:var(--sh-1)}
-/* Partager n'a de sens que devant une liste : l'accueil n'en affiche pas. */
-body.vue-accueil #partagerBtn{display:none}
-.actions{position:relative}
-.partage{
-  position:absolute;top:calc(100% + 10px);right:0;z-index:60;
-  width:min(340px,calc(100vw - 28px));
-  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);
-  box-shadow:var(--sh-2);padding:14px;display:grid;gap:7px;text-align:left;
-}
-.partage label{font-size:10.5px;font-weight:650;color:var(--dimmer);letter-spacing:.06em;text-transform:uppercase}
-.partage input{
-  width:100%;height:36px;border:1px solid var(--line);border-radius:9px;
-  background:var(--bg);padding:0 11px;font-size:13px;color:var(--ink);
-}
-.partage input:focus{outline:none;border-color:var(--accent)}
-.partage input[readonly]{color:var(--dim);font-family:var(--mono);font-size:11px}
-.partage-bas{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:3px}
-.partage-note{font-size:11.5px;color:var(--dim);line-height:1.3}
-.partage-bas button{
-  flex:0 0 auto;height:34px;padding:0 14px;border-radius:999px;
-  background:var(--ink);color:#fff;font-size:12.5px;font-weight:590;transition:.15s;
-}
-.partage-bas button:hover{background:#000}
-.playall.garder{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--sh-1)}
-.playall.garder:hover{box-shadow:var(--sh-2)}
 @media(max-width:640px){ .sortie-filtre span,.sortie-filtre{font-size:12.5px;padding:0 10px} }
 .hlinks a{padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--dim);transition:.15s;text-decoration:none}
 .hlinks a:hover{color:var(--ink);background:rgba(0,0,0,.05)}
@@ -955,25 +930,10 @@ body.vue-accueil #partagerBtn{display:none}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
         Toutes les prods
       </button>
-      <button class="sortie-filtre" id="partagerBtn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4"/><path d="m15.4 6.5-6.8 4"/></svg>
-        Partager
-      </button>
       <button class="crate-btn" id="crateBtn" aria-pressed="false">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
         Prods likés <span class="mono" id="crateN">0</span>
       </button>
-
-      <div class="partage" id="partage" hidden>
-        <label for="selNom">Nom de la sélection</label>
-        <input id="selNom" type="text" maxlength="60" placeholder="Pour Werenoi, Sombre 2026&hellip;" autocomplete="off">
-        <label for="selLien">Lien à envoyer</label>
-        <input id="selLien" type="text" readonly>
-        <div class="partage-bas">
-          <span class="partage-note" id="partageNote"></span>
-          <button id="copierLien">Copier le lien</button>
-        </div>
-      </div>
     </div>
   </div>
 </header>
@@ -1170,10 +1130,6 @@ body.vue-accueil #partagerBtn{display:none}
         <div class="sub" id="resSub"></div>
       </div>
       <div class="head-acts">
-      <button class="playall garder" id="garderSel" hidden>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
-        <span id="garderSelN">Tout ajouter à mes likes</span>
-      </button>
       <button class="playall" id="playall">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
         <span id="playallN">Tout lire</span>
@@ -1282,10 +1238,7 @@ const BEATS = CAT.beats.map(b => ({
 /* ============ état ============ */
 const S = {
   q:"", styles:new Set(), moods:new Set(), bpm:[55,200], fr:false, bpmSur:false,
-  sort:"pertinence", crateOnly:false, playing:null, paused:false,
-  /* sel : prods inscrites explicitement dans un lien partage. titre : le nom que
-     l'expediteur a donne a sa selection. */
-  sel:null, titre:""
+  sort:"pertinence", crateOnly:false, playing:null, paused:false
 };
 let LAST = [];                 // resultats affiches = file d'attente potentielle
 const DEAD = new Set();        // videos dont l'integration est refusee par la chaine
@@ -1323,7 +1276,6 @@ function filtered(){
   const q = norm(S.q.trim());
   const terms = q ? q.split(/\s+/) : [];
   let out = BEATS.filter(b => {
-    if(S.sel && !S.sel.has(b.id)) return false;
     if(S.crateOnly && !CRATE.has(b.id)) return false;
     if(S.styles.size && !S.styles.has(b.style)) return false;
     if(S.fr && !b.fr) return false;
@@ -1460,15 +1412,11 @@ function majEntete(res){
   if(S.bpm[0]>BMIN || S.bpm[1]<BMAX) parts.push(`${S.bpm[0]}–${S.bpm[1]} BPM`);
   if(S.q.trim()) parts.push(`« ${S.q.trim()} »`);
 
-  if (S.sel && !S.titre) parts.unshift("sélection partagée");
-  document.getElementById("resTitle").textContent =
-    S.titre || (parts.length ? parts.join(" · ") : "Toutes les prods");
+  document.getElementById("resTitle").textContent = parts.length ? parts.join(" · ") : "Toutes les prods";
   const prods = new Set(res.map(b=>b.prod)).size;
   document.getElementById("resSub").textContent = res.length
     ? `${res.length} prod${res.length>1?"s":""} · ${prods} beatmaker${prods>1?"s":""}`
     : "";
-  document.getElementById("toutesBtn").hidden = !filtreActif();
-  document.getElementById("garderSel").hidden = !S.sel;
   const pa = document.getElementById("playall");
   pa.hidden = !res.length;
   document.getElementById("playallN").textContent = res.length > 1 ? `Lire les ${res.length}` : "Tout lire";
@@ -1930,24 +1878,6 @@ function viderFiltres(){
   S.styles.clear();
   S.moods.clear();
   S.crateOnly = false;
-  S.sel = null;
-  S.titre = "";
-}
-/* Un filtre quelconque est-il pose ? Sert a montrer la sortie « Toutes les prods ».
-   Le tempo, la scene FR et le tempo verifie comptent : ils reduisent aussi la liste. */
-function filtreActif(){
-  return !!(S.crateOnly || S.sel || S.styles.size || S.moods.size || S.q.trim()
-         || S.fr || S.bpmSur || S.bpm[0] > BMIN || S.bpm[1] < BMAX);
-}
-/* Sortie complete, y compris les affinages que viderFiltres laisse en place. */
-function toutRemettre(){
-  viderFiltres();
-  S.fr = false; S.bpmSur = false; S.sort = "pertinence";
-  S.q = ""; document.getElementById("q").value = "";
-  document.getElementById("frOnly").checked = false;
-  document.getElementById("bpmSur").checked = false;
-  document.querySelectorAll("#sorts button").forEach(x => x.setAttribute("aria-pressed", x.dataset.sort === "pertinence"));
-  bMin.value = BMIN; bMax.value = BMAX; S.bpm = [BMIN, BMAX]; majVisuelBpm();
 }
 /* Remet les trois jeux de boutons en accord avec l'etat, y compris ceux qu'on vient
    d'eteindre sans les avoir touches. */
@@ -1957,6 +1887,7 @@ function refletFiltres(){
     c.setAttribute("aria-pressed", String(S.moods.has(c.dataset.mood))));
   crateBtn.setAttribute("aria-pressed", S.crateOnly);
   crateBtn.classList.toggle("on", S.crateOnly);
+  toutesBtn.hidden = !S.crateOnly;
 }
 /* L'adresse suit l'etat reel : un lien copie rouvre ce qu'on a sous les yeux. */
 function majAdresse(){
@@ -2010,18 +1941,15 @@ const bMin = document.getElementById("bpmMin"), bMax = document.getElementById("
    suffisait pas — il faut n'en declencher aucun tant que la poignee bouge. Les
    reperes et les compteurs suivent quand meme, eux ne touchent pas a la liste. */
 let bpmAttente = null;
-function majVisuelBpm(){
-  const [lo, hi] = S.bpm, span = BMAX - BMIN;
-  fill.style.left = ((lo-BMIN)/span*100)+"%";
-  fill.style.width = ((hi-lo)/span*100)+"%";
-  document.getElementById("rMin").textContent = lo+" BPM";
-  document.getElementById("rMax").textContent = hi+" BPM";
-}
 function syncBpm(immediat){
   let lo = +bMin.value, hi = +bMax.value;
   if(lo > hi - 5){ if(document.activeElement === bMin) lo = hi - 5; else hi = lo + 5; bMin.value = lo; bMax.value = hi; }
   S.bpm = [lo,hi];
-  majVisuelBpm();
+  const span = BMAX - BMIN;
+  fill.style.left = ((lo-BMIN)/span*100)+"%";
+  fill.style.width = ((hi-lo)/span*100)+"%";
+  document.getElementById("rMin").textContent = lo+" BPM";
+  document.getElementById("rMax").textContent = hi+" BPM";
   clearTimeout(bpmAttente);
   if (immediat){ render(); return; }
   majEntete(filtered());
@@ -2041,82 +1969,11 @@ document.getElementById("q").addEventListener("input", e => {
 
 const crateBtn = document.getElementById("crateBtn");
 const toutesBtn = document.getElementById("toutesBtn");
-const partagerBtn = document.getElementById("partagerBtn");
 toutesBtn.addEventListener("click", () => {
-  toutRemettre();
+  viderFiltres();
   refletFiltres();
   render();
   majAdresse();
-});
-
-/* ============ partage d'une selection ============
-   Un filtre voyage comme filtre et reste vivant chez le destinataire. Des likes,
-   eux, n'existent que dans le navigateur de l'expediteur : ils voyagent donc en
-   clair, prod par prod, inscrits dans le lien. */
-const partagePanneau = document.getElementById("partage");
-const selNom = document.getElementById("selNom");
-const selLien = document.getElementById("selLien");
-const partageNote = document.getElementById("partageNote");
-const PLAFOND_SEL = 160;   // au-dela, l'adresse devient trop longue pour certains messageries
-
-function lienDeSelection(){
-  const p = new URLSearchParams();
-  const nom = selNom.value.trim();
-  if (nom) p.set("titre", nom);
-  let note = "";
-  if (S.crateOnly || S.sel) {
-    const ids = LAST.map(b => b.id).slice(0, PLAFOND_SEL);
-    if (ids.length) p.set("sel", ids.join("."));
-    note = LAST.length > PLAFOND_SEL
-      ? `Les ${PLAFOND_SEL} premières sur ${LAST.length} : au-delà le lien devient trop long.`
-      : `${ids.length} prod${ids.length > 1 ? "s" : ""} dans le lien.`;
-  } else {
-    if (S.styles.size) p.set("style", [...S.styles][0]);
-    if (S.moods.size)  p.set("mood",  [...S.moods][0]);
-    if (S.q.trim())    p.set("q", S.q.trim());
-    if (S.sort !== "pertinence") p.set("sort", S.sort);
-    if (S.bpm[0] > BMIN || S.bpm[1] < BMAX) p.set("bpm", S.bpm[0] + "-" + S.bpm[1]);
-    if (S.fr) p.set("fr", "1");
-    if (S.bpmSur) p.set("sur", "1");
-    note = filtreActif()
-      ? "Le filtre voyage : la liste restera à jour chez la personne."
-      : "Le catalogue entier.";
-  }
-  const qs = p.toString();
-  partageNote.textContent = note;
-  return location.origin + location.pathname + (qs ? "?" + qs : "");
-}
-function rafraichirLien(){ selLien.value = lienDeSelection(); }
-
-partagerBtn.addEventListener("click", e => {
-  e.stopPropagation();
-  partagePanneau.hidden = !partagePanneau.hidden;
-  if (!partagePanneau.hidden) { rafraichirLien(); selNom.focus(); }
-});
-selNom.addEventListener("input", rafraichirLien);
-document.getElementById("copierLien").addEventListener("click", async () => {
-  const b = document.getElementById("copierLien");
-  try { await navigator.clipboard.writeText(selLien.value); b.textContent = "Lien copié"; }
-  catch (err) { selLien.select(); b.textContent = "Copie manuelle"; }
-  setTimeout(() => { b.textContent = "Copier le lien"; }, 1800);
-});
-document.addEventListener("click", e => {
-  if (!partagePanneau.hidden && !partagePanneau.contains(e.target) && e.target !== partagerBtn)
-    partagePanneau.hidden = true;
-});
-addEventListener("keydown", e => { if (e.key === "Escape") partagePanneau.hidden = true; });
-
-/* Le destinataire garde la selection chez lui : sans ca, fermer l'onglet la perd. */
-document.getElementById("garderSel").addEventListener("click", () => {
-  if (!S.sel) return;
-  const avant = CRATE.size;
-  S.sel.forEach(id => CRATE.add(id));
-  saveCrate();
-  document.getElementById("crateN").textContent = CRATE.size;
-  const ajout = CRATE.size - avant;
-  document.getElementById("garderSelN").textContent =
-    ajout ? `${ajout} prod${ajout > 1 ? "s" : ""} ajoutée${ajout > 1 ? "s" : ""}` : "Déjà dans tes likes";
-  setTimeout(() => { document.getElementById("garderSelN").textContent = "Tout ajouter à mes likes"; }, 2200);
 });
 crateBtn.addEventListener("click", () => {
   const etaitActif = S.crateOnly;
@@ -2464,8 +2321,6 @@ function peindreTuiles(){
 function appliquerParams(p, reprendreLecture = false){
   const style = p.get("style"), sort = p.get("sort"), q = p.get("q"), play = p.get("play");
   const mood = p.get("mood"), likes = p.get("likes");
-  const sel = p.get("sel"), titre = p.get("titre");
-  const bpm = p.get("bpm"), fr = p.get("fr"), sur = p.get("sur");
   /* Changer de vue repart de l'adresse et de rien d'autre : sans ce nettoyage, le style
      choisi avant restait actif et venait se cumuler au filtre de la vue d'arrivee. */
   viderFiltres();
@@ -2478,22 +2333,6 @@ function appliquerParams(p, reprendreLecture = false){
   }
   if (mood && MOODS.includes(mood)) S.moods.add(mood);
   S.crateOnly = likes === "1" && CRATE.size > 0;
-
-  /* Un lien partage porte ses prods et ses affinages : l'adresse doit pouvoir tout
-     restituer, sinon le destinataire ne voit pas la meme liste que l'expediteur. */
-  if (sel) {
-    const ids = sel.split(".").filter(x => /^[\w-]{11}$/.test(x));
-    if (ids.length) S.sel = new Set(ids);
-  }
-  if (titre) S.titre = titre.slice(0, 60);
-  S.fr = fr === "1"; document.getElementById("frOnly").checked = S.fr;
-  S.bpmSur = sur === "1"; document.getElementById("bpmSur").checked = S.bpmSur;
-  const bornes = /^(\d{2,3})-(\d{2,3})$/.exec(bpm || "");
-  const lo = bornes ? Math.max(BMIN, +bornes[1]) : BMIN;
-  const hi = bornes ? Math.min(BMAX, +bornes[2]) : BMAX;
-  S.bpm = lo < hi ? [lo, hi] : [BMIN, BMAX];
-  bMin.value = S.bpm[0]; bMax.value = S.bpm[1]; majVisuelBpm();
-
   refletFiltres();
   render();
   if (play) {
