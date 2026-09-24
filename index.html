@@ -210,7 +210,20 @@ ul{margin:0;padding:0;list-style:none}
   font-weight:590;
 }
 .chip[aria-pressed="true"] .n{color:inherit;opacity:.65}
-.chip.fold{color:var(--dim);font-size:11.5px}
+/* Ce bouton commande la liste, il n'en fait pas partie. Tant qu'il gardait la pilule
+   des styles, il se lisait comme un 52e style : on lui retire fond, bordure et rayon,
+   et le chevron dit dans quel sens il agit. */
+.chip.fold{
+  background:none;border-color:transparent;box-shadow:none;
+  padding:5px 2px;margin-left:6px;gap:5px;
+  color:var(--accent);font-size:12px;font-weight:600;
+}
+.chip.fold:hover{
+  background:none;border-color:transparent;box-shadow:none;color:var(--ink);
+  text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px;
+}
+.chip.fold svg{transition:transform .18s}
+.chip.fold[aria-expanded="true"] svg{transform:rotate(180deg)}
 
 .bpm-box{display:grid;gap:8px}
 .hist{display:flex;align-items:flex-end;gap:2px;height:38px}
@@ -1299,7 +1312,7 @@ function renderStyleChips(){
   const rest = LIVE_STYLES.length - shown.length;
   elStyles.innerHTML = shown.map(chipHTML).join("") +
     (LIVE_STYLES.length > FOLD
-      ? `<button class="chip fold" data-fold="1">${stylesOpen ? "− replier" : `+ ${rest} styles`}</button>`
+      ? `<button class="chip fold" data-fold="1" aria-expanded="${stylesOpen}">${stylesOpen ? "Replier" : `${rest} styles de plus`}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>`
       : "");
 }
 renderStyleChips();
