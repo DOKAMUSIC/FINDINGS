@@ -145,7 +145,16 @@ ul{margin:0;padding:0;list-style:none}
 /* ── barre de filtres : une ligne, chaque famille s'ouvre en menu ──
    Remplace la colonne de 250 px qui empilait cinq blocs (1279 px de haut, donc
    defilante) : Style et Mood a eux seuls en prenaient 760. */
-.fbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;position:relative}
+/* Collee sous l'en-tete : les filtres restent a portee pendant qu'on parcourt 1 500
+   prods. --hh est la hauteur reelle de l'en-tete, mesuree en JS, parce qu'elle change
+   avec la largeur (suggestions de recherche, passage sur deux lignes en mobile). */
+.fbar{
+  display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+  position:sticky;top:var(--hh,96px);z-index:30;
+  margin-bottom:6px;padding:8px 0;
+  background:color-mix(in srgb,var(--bg) 80%,transparent);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+}
 .fitem{position:relative}
 .ftrig{
   display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;border-radius:999px;
@@ -157,15 +166,13 @@ ul{margin:0;padding:0;list-style:none}
 .ftrig svg{opacity:.5;transition:transform .18s}
 .ftrig[aria-expanded="true"] svg{transform:rotate(180deg)}
 .ftrig .fdot{display:none;width:7px;height:7px;border-radius:50%;background:var(--c,var(--accent));flex:0 0 auto}
-.ftrig.on,.tog:has(input:checked){
+.ftrig.on{
   background:color-mix(in srgb,var(--c,var(--accent)) 12%,#fff);
   border-color:color-mix(in srgb,var(--c,var(--accent)) 40%,#fff);
   color:color-mix(in srgb,var(--c,var(--accent)) 58%,var(--ink));
   font-weight:590;
 }
 .ftrig.on .fdot{display:block}
-.tog input{position:absolute;opacity:0;width:0;height:0}
-.tog:has(input:focus-visible){outline:2px solid var(--focus);outline-offset:2px}
 .fclear{
   display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 10px;
   font-size:12.5px;font-weight:560;color:var(--accent);border-radius:999px;transition:.15s;
@@ -173,7 +180,7 @@ ul{margin:0;padding:0;list-style:none}
 .fclear:hover{background:rgba(250,35,59,.08)}
 .fmenu{
   position:absolute;top:calc(100% + 8px);left:0;z-index:35;
-  width:min(440px,calc(100vw - 28px));max-height:min(420px,calc(100vh - 230px));overflow-y:auto;
+  width:min(440px,calc(100vw - 28px));max-height:min(420px,max(200px,calc(100vh - var(--hh,96px) - 170px)));overflow-y:auto;
   overscroll-behavior:contain;scrollbar-width:thin;
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
   box-shadow:var(--sh-2);padding:14px;display:grid;gap:10px;align-content:start;
@@ -1077,8 +1084,6 @@ body:not(.vue-accueil) .actions{margin-left:auto}
         </div>
       </div>
 
-      <label class="ftrig tog"><input type="checkbox" id="frOnly"><span>Rap FR</span></label>
-
       <button class="fclear" id="clearAll" hidden>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
         Effacer
@@ -1093,8 +1098,7 @@ body:not(.vue-accueil) .actions{margin-left:auto}
 <footer class="foot">
   <p id="footStats"></p>
   <p>FINDINGS ne héberge aucun fichier&nbsp;: chaque prod est une vidéo YouTube publique, lue depuis YouTube, et chaque clic renvoie du trafic au beatmaker.</p>
-  <p><b>Prototype.</b> Les prods, leurs producteurs, leurs durées et leurs compteurs d'écoutes sont réels et proviennent de YouTube.</p>
-  <p>En revanche le <b>BPM, la tonalité et les moods sont des estimations de démonstration</b> saisies à la main&nbsp;: en production ils seraient extraits par analyse audio (essentia / librosa) ou lus dans le titre de la vidéo.</p>
+  <p id="footData"></p>
 </footer>
 
 <div class="bar" id="bar">
@@ -1182,7 +1186,7 @@ const BEATS = CAT.beats.map(b => ({
 
 /* ============ état ============ */
 const S = {
-  q:"", styles:new Set(), moods:new Set(), bpm:[55,200], fr:false, bpmSur:false,
+  q:"", styles:new Set(), moods:new Set(), bpm:[55,200], bpmSur:false,
   sort:"pertinence", crateOnly:false, playing:null, paused:false
 };
 let LAST = [];                 // resultats affiches = file d'attente potentielle
@@ -1223,7 +1227,6 @@ function filtered(){
   let out = BEATS.filter(b => {
     if(S.crateOnly && !CRATE.has(b.id)) return false;
     if(S.styles.size && !S.styles.has(b.style)) return false;
-    if(S.fr && !b.fr) return false;
     if(S.bpmSur && !b.bpmSur) return false;
     if(b.bpm < S.bpm[0] || b.bpm > S.bpm[1]) return false;
     if(S.moods.size && !b.moods.some(m => S.moods.has(m))) return false;
@@ -1347,7 +1350,6 @@ function majEntete(res){
   if(S.crateOnly) parts.push("prods likées");
   if(S.styles.size) parts.push([...S.styles].map(s=>STYLE_NAME[s]).join(" + "));
   if(S.moods.size) parts.push([...S.moods].join(" + "));
-  if(S.fr) parts.push("scène FR");
   if(S.bpmSur) parts.push("tempo vérifié");
   if(S.bpm[0]>BMIN || S.bpm[1]<BMAX) parts.push(`${S.bpm[0]}–${S.bpm[1]} BPM`);
   if(S.q.trim()) parts.push(`« ${S.q.trim()} »`);
@@ -1923,7 +1925,6 @@ crateBtn.addEventListener("click", () => {
   else majAdresse();
 });
 
-document.getElementById("frOnly").addEventListener("change", e => { S.fr = e.target.checked; render(); });
 document.getElementById("bpmSur").addEventListener("change", e => { S.bpmSur = e.target.checked; render(); });
 (function noteTempo(){
   const n = BEATS.filter(b => b.bpmSur).length;
@@ -1953,6 +1954,15 @@ document.getElementById("playall").addEventListener("click", () => {
   document.getElementById("footStats").innerHTML =
     `<b>${BEATS.length} prods</b> · ${styles} styles · mis à jour le ${when}${add}` +
     ` · ingestion automatique tous les 2 jours, rien de plus vieux que ${age} mois, tout se lit ici sans quitter la page.`;
+
+  /* Les parts sont calculees sur le catalogue affiche : figees dans le texte, elles
+     seraient fausses des la prochaine ingestion. */
+  const part = k => Math.round(BEATS.filter(b => b[k]).length / BEATS.length * 100);
+  document.getElementById("footData").innerHTML =
+    `Titres, beatmakers, durées et écoutes viennent de YouTube, relevés lors des passages automatiques. ` +
+    `Le <b>tempo</b> (${part("bpmSur")}&nbsp;% des prods) et la <b>tonalité</b> (${part("keySur")}&nbsp;%) sont lus dans le titre ou la description ` +
+    `quand le beatmaker les indique&nbsp;; sinon ils sont estimés d'après le style et s'affichent en gris, précédés d'un «&nbsp;~&nbsp;». ` +
+    `Les <b>moods</b> sont déduits du texte de la vidéo, à défaut du style&nbsp;: des repères, pas une mesure.`;
 })();
 
 /* ============ barre de filtres ============
@@ -1973,8 +1983,16 @@ function majBarre(){
             : S.bpmSur ? "Tempo vérifié" : "Tempo";
   poserTrig("trigTempo", lib, null, bornes || S.bpmSur);
   document.getElementById("clearAll").hidden =
-    !(st || mo || bornes || S.bpmSur || S.fr);
+    !(st || mo || bornes || S.bpmSur);
 }
+
+/* Hauteur reelle de l'en-tete, pour que la barre se colle juste dessous. */
+(function suivreEntete(){
+  const top = document.querySelector(".top");
+  const poser = () => document.documentElement.style.setProperty("--hh", Math.round(top.getBoundingClientRect().height) + "px");
+  poser();
+  if (window.ResizeObserver) new ResizeObserver(poser).observe(top);
+})();
 
 const MENUS = [...document.querySelectorAll(".fitem[data-pop]")];
 function fermerMenus(sauf){
@@ -2002,8 +2020,7 @@ addEventListener("keydown", e => { if (e.key === "Escape") fermerMenus(); });
 
 document.getElementById("clearAll").addEventListener("click", () => {
   S.styles.clear(); S.moods.clear();
-  S.fr = false; S.bpmSur = false;
-  document.getElementById("frOnly").checked = false;
+  S.bpmSur = false;
   document.getElementById("bpmSur").checked = false;
   bMin.value = BMIN; bMax.value = BMAX;
   refletFiltres();
