@@ -138,54 +138,51 @@ ul{margin:0;padding:0;list-style:none}
 .crate-btn.on span.mono{color:rgba(255,255,255,.85)}
 
 /* ─────────── ossature ─────────── */
-.shell{
-  max-width:1320px;margin:0 auto;padding:26px 22px 200px;
-  display:grid;grid-template-columns:250px minmax(0,1fr);gap:26px;align-items:start;
-}
+.shell{max-width:1320px;margin:0 auto;padding:26px 22px 200px}
 .shell > *{min-width:0}
-@media(max-width:1000px){ .shell{grid-template-columns:1fr;padding-top:16px} }
+@media(max-width:1000px){ .shell{padding-top:16px} }
 
-.filters-toggle{display:none}
-@media(max-width:1000px){
-  .filters-toggle{
-    display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
-    padding:12px 16px;border-radius:var(--r-md);margin-bottom:14px;
-    background:var(--glass-strong);backdrop-filter:var(--blur);
-    border:1px solid var(--line-soft);box-shadow:var(--sh-1);
-    font-size:13.5px;font-weight:590;
-  }
-  .filters-toggle .n{font-size:11.5px;font-weight:400;color:var(--dim)}
+/* ── barre de filtres : une ligne, chaque famille s'ouvre en menu ──
+   Remplace la colonne de 250 px qui empilait cinq blocs (1279 px de haut, donc
+   defilante) : Style et Mood a eux seuls en prenaient 760. */
+.fbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;position:relative}
+.fitem{position:relative}
+.ftrig{
+  display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);
+  font-size:13px;font-weight:530;color:var(--ink-2);box-shadow:var(--sh-1);
+  cursor:pointer;transition:.15s;white-space:nowrap;
 }
-
-.rail{
-  display:grid;gap:20px;align-content:start;
-  padding:18px;border-radius:var(--r-lg);
-  background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--glass-edge);box-shadow:var(--sh-2);
+.ftrig:hover{box-shadow:var(--sh-2)}
+.ftrig svg{opacity:.5;transition:transform .18s}
+.ftrig[aria-expanded="true"] svg{transform:rotate(180deg)}
+.ftrig .fdot{display:none;width:7px;height:7px;border-radius:50%;background:var(--c,var(--accent));flex:0 0 auto}
+.ftrig.on,.tog:has(input:checked){
+  background:color-mix(in srgb,var(--c,var(--accent)) 12%,#fff);
+  border-color:color-mix(in srgb,var(--c,var(--accent)) 40%,#fff);
+  color:color-mix(in srgb,var(--c,var(--accent)) 58%,var(--ink));
+  font-weight:590;
 }
-@media(min-width:1001px){
-  /* Collé sous l'en-tête, le panneau peut devenir plus haut que l'écran — et
-     tout ce qui dépasse serait alors hors d'atteinte. Il défile donc pour son
-     propre compte, et s'arrête au-dessus du lecteur quand celui-ci est monté. */
-  .rail{
-    position:sticky;top:calc(env(safe-area-inset-top,0px) + 112px);
-    max-height:calc(100vh - 136px);overflow-y:auto;overscroll-behavior:contain;
-    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.2) transparent;
-  }
-  body.playing .rail{max-height:calc(100vh - 232px)}
-  .rail::-webkit-scrollbar{width:9px}
-  .rail::-webkit-scrollbar-track{background:transparent}
-  .rail::-webkit-scrollbar-thumb{
-    background:rgba(0,0,0,.18);border-radius:5px;
-    border:3px solid transparent;background-clip:content-box;
-  }
-  .rail:hover::-webkit-scrollbar-thumb{background:rgba(0,0,0,.28);background-clip:content-box}
+.ftrig.on .fdot{display:block}
+.tog input{position:absolute;opacity:0;width:0;height:0}
+.tog:has(input:focus-visible){outline:2px solid var(--focus);outline-offset:2px}
+.fclear{
+  display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 10px;
+  font-size:12.5px;font-weight:560;color:var(--accent);border-radius:999px;transition:.15s;
 }
-/* sur petit écran le panneau ne s'ouvre qu'à la demande — règle placée après la
-   règle de base, sinon c'est la dernière déclarée qui l'emporte */
-@media(max-width:1000px){
-  .rail{display:none}
-  .rail.open{display:grid}
+.fclear:hover{background:rgba(250,35,59,.08)}
+.fmenu{
+  position:absolute;top:calc(100% + 8px);left:0;z-index:35;
+  width:min(440px,calc(100vw - 28px));max-height:min(420px,calc(100vh - 230px));overflow-y:auto;
+  overscroll-behavior:contain;scrollbar-width:thin;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:var(--sh-2);padding:14px;display:grid;gap:10px;align-content:start;
+}
+.fmenu-tempo{width:min(300px,calc(100vw - 28px))}
+/* sur petit ecran les menus prennent la largeur de la barre, sinon ils debordent */
+@media(max-width:640px){
+  .fitem{position:static}
+  .fmenu,.fmenu-tempo{left:0;right:0;width:auto}
 }
 .fset{display:grid;gap:10px}
 .fhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
@@ -210,21 +207,6 @@ ul{margin:0;padding:0;list-style:none}
   font-weight:590;
 }
 .chip[aria-pressed="true"] .n{color:inherit;opacity:.65}
-/* Ce bouton commande la liste, il n'en fait pas partie. Tant qu'il gardait la pilule
-   des styles, il se lisait comme un 52e style : on lui retire fond, bordure et rayon,
-   et le chevron dit dans quel sens il agit. */
-.chip.fold{
-  background:none;border-color:transparent;box-shadow:none;
-  padding:5px 2px;margin-left:6px;gap:5px;
-  color:var(--accent);font-size:12px;font-weight:600;
-}
-.chip.fold:hover{
-  background:none;border-color:transparent;box-shadow:none;color:var(--ink);
-  text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px;
-}
-.chip.fold svg{transition:transform .18s}
-.chip.fold[aria-expanded="true"] svg{transform:rotate(180deg)}
-
 .bpm-box{display:grid;gap:8px}
 .hist{display:flex;align-items:flex-end;gap:2px;height:38px}
 .hist i{flex:1;background:rgba(0,0,0,.10);border-radius:2px 2px 0 0;transition:background .14s}
@@ -1029,60 +1011,6 @@ body:not(.vue-accueil) .actions{margin-left:auto}
 
 <main class="shell" hidden>
 
-  <button class="filters-toggle" id="ftog" aria-expanded="false" aria-controls="rail">
-    <span>Filtrer par style, tempo, mood</span>
-    <span class="n" id="ftogN">filtres</span>
-  </button>
-
-  <aside class="rail" id="rail">
-    <div class="fset">
-      <div class="fhead"><span class="eyebrow">Style</span><button id="clearStyle" hidden>tout effacer</button></div>
-      <div class="chips" id="styles"></div>
-    </div>
-
-    <div class="fset">
-      <div class="fhead"><span class="eyebrow">Tempo</span><button id="clearBpm" hidden>réinitialiser</button></div>
-      <div class="bpm-box">
-        <div class="hist" id="hist" aria-hidden="true"></div>
-        <div class="slider">
-          <div class="track"></div><div class="fill" id="fill"></div>
-          <input id="bpmMin" type="range" min="55" max="200" step="1" value="55" aria-label="BPM minimum">
-          <input id="bpmMax" type="range" min="55" max="200" step="1" value="200" aria-label="BPM maximum">
-        </div>
-        <div class="bpm-read"><span id="rMin">55 BPM</span><span id="rMax">200 BPM</span></div>
-      </div>
-    </div>
-
-    <div class="fset mood">
-      <div class="fhead"><span class="eyebrow">Mood</span><button id="clearMood" hidden>tout effacer</button></div>
-      <div class="chips" id="moods"></div>
-    </div>
-
-    <div class="fset">
-      <div class="fhead"><span class="eyebrow">Scène</span></div>
-      <label class="switch">
-        <input type="checkbox" id="frOnly">
-        <span class="box"></span>
-        <span class="lbl">Rap FR uniquement</span>
-      </label>
-    </div>
-
-    <div class="fset">
-      <div class="fhead"><span class="eyebrow">Tempo fiable</span></div>
-      <label class="switch">
-        <input type="checkbox" id="bpmSur">
-        <span class="box"></span>
-        <span class="lbl">Tempo vérifié uniquement</span>
-      </label>
-      <p class="mini" id="bpmSurN"></p>
-    </div>
-
-    <p class="note">
-      FINDINGS ne héberge aucun fichier&nbsp;: chaque prod est une vidéo YouTube publique, lue depuis YouTube,
-      et chaque clic renvoie du trafic au beatmaker.
-    </p>
-  </aside>
-
   <section>
     <div class="res-head">
       <div>
@@ -1101,6 +1029,62 @@ body:not(.vue-accueil) .actions{margin-left:auto}
       </div>
       </div>
     </div>
+    <div class="fbar" id="fbar">
+      <div class="fitem" data-pop>
+        <button class="ftrig" id="trigStyle" aria-haspopup="true" aria-expanded="false">
+          <span class="fdot"></span><span class="flbl">Style</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="fmenu" hidden>
+          <div class="fhead"><span class="eyebrow">Style</span><button id="clearStyle" hidden>effacer</button></div>
+          <div class="chips" id="styles"></div>
+        </div>
+      </div>
+
+      <div class="fitem" data-pop>
+        <button class="ftrig" id="trigMood" aria-haspopup="true" aria-expanded="false">
+          <span class="fdot"></span><span class="flbl">Mood</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="fmenu" hidden>
+          <div class="fhead"><span class="eyebrow">Mood</span><button id="clearMood" hidden>effacer</button></div>
+          <div class="chips" id="moods"></div>
+        </div>
+      </div>
+
+      <div class="fitem" data-pop>
+        <button class="ftrig" id="trigTempo" aria-haspopup="true" aria-expanded="false">
+          <span class="fdot"></span><span class="flbl">Tempo</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="fmenu fmenu-tempo" hidden>
+          <div class="fhead"><span class="eyebrow">Tempo</span><button id="clearBpm" hidden>réinitialiser</button></div>
+          <div class="bpm-box">
+            <div class="hist" id="hist" aria-hidden="true"></div>
+            <div class="slider">
+              <div class="track"></div><div class="fill" id="fill"></div>
+              <input id="bpmMin" type="range" min="55" max="200" step="1" value="55" aria-label="BPM minimum">
+              <input id="bpmMax" type="range" min="55" max="200" step="1" value="200" aria-label="BPM maximum">
+            </div>
+            <div class="bpm-read"><span id="rMin">55 BPM</span><span id="rMax">200 BPM</span></div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="bpmSur">
+            <span class="box"></span>
+            <span class="lbl">Tempo vérifié uniquement</span>
+          </label>
+          <p class="mini" id="bpmSurN"></p>
+        </div>
+      </div>
+
+      <label class="ftrig tog"><input type="checkbox" id="frOnly"><span>Rap FR</span></label>
+
+      <button class="fclear" id="clearAll" hidden>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        Effacer
+      </button>
+    </div>
+
     <ul class="list" id="list"></ul>
   </section>
 
@@ -1108,6 +1092,7 @@ body:not(.vue-accueil) .actions{margin-left:auto}
 
 <footer class="foot">
   <p id="footStats"></p>
+  <p>FINDINGS ne héberge aucun fichier&nbsp;: chaque prod est une vidéo YouTube publique, lue depuis YouTube, et chaque clic renvoie du trafic au beatmaker.</p>
   <p><b>Prototype.</b> Les prods, leurs producteurs, leurs durées et leurs compteurs d'écoutes sont réels et proviennent de YouTube.</p>
   <p>En revanche le <b>BPM, la tonalité et les moods sont des estimations de démonstration</b> saisies à la main&nbsp;: en production ils seraient extraits par analyse audio (essentia / librosa) ou lus dans le titre de la vidéo.</p>
 </footer>
@@ -1267,21 +1252,15 @@ function filtered(){
 const elStyles = document.getElementById("styles");
 const STYLE_N = Object.fromEntries(STYLES.map(([k]) => [k, BEATS.filter(b => b.style===k).length]));
 /* un style sans prod n'a rien à faire dans les filtres ; les autres sont triés
-   par volume, et au-delà de douze on replie pour ne pas noyer la colonne */
+   par volume */
 const LIVE_STYLES = STYLES.filter(([k]) => STYLE_N[k] > 0).sort((a,b) => STYLE_N[b[0]] - STYLE_N[a[0]]);
-const FOLD = 12;
-let stylesOpen = false;
 function chipHTML([k,label]){
   return `<button class="chip" role="button" data-style="${k}" aria-pressed="${S.styles.has(k)}" style="--c:${cssVar(k)}">
     <span class="dot"></span>${esc(label)}<span class="n">${STYLE_N[k]}</span></button>`;
 }
 function renderStyleChips(){
-  const shown = stylesOpen ? LIVE_STYLES : LIVE_STYLES.slice(0, FOLD);
-  const rest = LIVE_STYLES.length - shown.length;
-  elStyles.innerHTML = shown.map(chipHTML).join("") +
-    (LIVE_STYLES.length > FOLD
-      ? `<button class="chip fold" data-fold="1" aria-expanded="${stylesOpen}">${stylesOpen ? "− replier" : `+ ${rest} styles`}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>`
-      : "");
+  // le menu defile de lui-meme : plus besoin de replier une liste pour la garder courte
+  elStyles.innerHTML = LIVE_STYLES.map(chipHTML).join("");
 }
 renderStyleChips();
 
@@ -1363,6 +1342,7 @@ function rowHTML(b){
 /* Partie legere de render() : titre, compteurs, bouton de lecture. Elle ne touche
    pas a la liste, donc elle coute une fraction de milliseconde. */
 function majEntete(res){
+  majBarre();
   const parts = [];
   if(S.crateOnly) parts.push("prods likées");
   if(S.styles.size) parts.push([...S.styles].map(s=>STYLE_NAME[s]).join(" + "));
@@ -1409,11 +1389,6 @@ function render(){
   document.getElementById("clearMood").hidden = !S.moods.size;
   document.getElementById("clearBpm").hidden = !(S.bpm[0]>BMIN || S.bpm[1]<BMAX);
   document.getElementById("crateN").textContent = CRATE.size;
-
-  const active = S.styles.size + S.moods.size + (S.fr?1:0) + (S.bpmSur?1:0) + ((S.bpm[0]>BMIN||S.bpm[1]<BMAX)?1:0);
-  document.getElementById("ftogN").textContent = active
-    ? `${active} filtre${active>1?"s":""} actif${active>1?"s":""}`
-    : `${LIVE_STYLES.length} styles · ${MOODS.length} moods`;
 }
 
 /* ============ lecteur ============ */
@@ -1869,10 +1844,10 @@ function choisirFiltre(appliquer, etaitActif){
   refletFiltres();
   render();
   majAdresse();
+  fermerMenus();
 }
 
 elStyles.addEventListener("click", e => {
-  if (e.target.closest("[data-fold]")) { stylesOpen = !stylesOpen; renderStyleChips(); return; }
   const btn = e.target.closest("[data-style]"); if(!btn) return;
   const k = btn.dataset.style;
   choisirFiltre(() => S.styles.add(k), S.styles.has(k));
@@ -1980,10 +1955,61 @@ document.getElementById("playall").addEventListener("click", () => {
     ` · ingestion automatique tous les 2 jours, rien de plus vieux que ${age} mois, tout se lit ici sans quitter la page.`;
 })();
 
-const ftog = document.getElementById("ftog"), rail = document.getElementById("rail");
-ftog.addEventListener("click", () => {
-  const open = rail.classList.toggle("open");
-  ftog.setAttribute("aria-expanded", open);
+/* ============ barre de filtres ============
+   Chaque famille est un bouton qui ouvre un menu. Le bouton porte la valeur active :
+   on voit d'un coup d'oeil ce qui filtre, sans rien ouvrir. */
+function poserTrig(id, libelle, couleur, actif){
+  const b = document.getElementById(id);
+  b.querySelector(".flbl").textContent = libelle;
+  b.classList.toggle("on", !!actif);
+  if (couleur) b.style.setProperty("--c", couleur); else b.style.removeProperty("--c");
+}
+function majBarre(){
+  const st = [...S.styles][0], mo = [...S.moods][0];
+  poserTrig("trigStyle", st ? STYLE_NAME[st] : "Style", st ? cssVar(st) : null, st);
+  poserTrig("trigMood",  mo || "Mood", mo ? MOOD_TEINTE[mo] : null, mo);
+  const bornes = S.bpm[0] > BMIN || S.bpm[1] < BMAX;
+  const lib = bornes ? `${S.bpm[0]}–${S.bpm[1]} BPM${S.bpmSur ? " · vérifié" : ""}`
+            : S.bpmSur ? "Tempo vérifié" : "Tempo";
+  poserTrig("trigTempo", lib, null, bornes || S.bpmSur);
+  document.getElementById("clearAll").hidden =
+    !(st || mo || bornes || S.bpmSur || S.fr);
+}
+
+const MENUS = [...document.querySelectorAll(".fitem[data-pop]")];
+function fermerMenus(sauf){
+  MENUS.forEach(m => {
+    if (m === sauf) return;
+    m.querySelector(".fmenu").hidden = true;
+    m.querySelector(".ftrig").setAttribute("aria-expanded", "false");
+  });
+}
+MENUS.forEach(m => {
+  const trig = m.querySelector(".ftrig"), pop = m.querySelector(".fmenu");
+  trig.addEventListener("click", () => {
+    const ouvrir = pop.hidden;
+    fermerMenus(m);
+    pop.hidden = !ouvrir;
+    trig.setAttribute("aria-expanded", ouvrir);
+  });
+});
+/* Clic ailleurs ou Echap : on referme. Un clic dans un menu ne le referme pas, sauf
+   quand il valide un choix — choisirFiltre s'en charge. */
+document.addEventListener("click", e => {
+  if (!e.target.closest(".fitem") && e.target.isConnected) fermerMenus();
+});
+addEventListener("keydown", e => { if (e.key === "Escape") fermerMenus(); });
+
+document.getElementById("clearAll").addEventListener("click", () => {
+  S.styles.clear(); S.moods.clear();
+  S.fr = false; S.bpmSur = false;
+  document.getElementById("frOnly").checked = false;
+  document.getElementById("bpmSur").checked = false;
+  bMin.value = BMIN; bMax.value = BMAX;
+  refletFiltres();
+  syncBpm(true);
+  majAdresse();
+  fermerMenus();
 });
 
 syncBpm(true);
@@ -2286,7 +2312,7 @@ function appliquerParams(p, reprendreLecture = false){
   viderFiltres();
   document.getElementById("q").value = q || "";
   S.q = q || "";
-  if (style && STYLE_NAME[style]) { S.styles.add(style); stylesOpen = true; }
+  if (style && STYLE_NAME[style]) S.styles.add(style);
   if (sort && ["pertinence","recent","bpm"].includes(sort)) {
     S.sort = sort;
     document.querySelectorAll("#sorts button").forEach(x => x.setAttribute("aria-pressed", x.dataset.sort === sort));
