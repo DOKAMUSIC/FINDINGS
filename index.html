@@ -152,9 +152,20 @@ ul{margin:0;padding:0;list-style:none}
   display:flex;align-items:center;flex-wrap:wrap;gap:8px;
   position:sticky;top:var(--hh,96px);z-index:30;
   margin-bottom:6px;padding:8px 0;
-  background:color-mix(in srgb,var(--bg) 80%,transparent);
-  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
 }
+/* Le fond flou vit sur un pseudo-element qui deborde des marges de la page : la barre
+   est contrainte a la largeur du contenu, le flou doit couvrir tout l'ecran comme celui
+   de l'en-tete. --cw est la largeur de la zone visible, barre de defilement exclue :
+   100vw l'inclurait et ferait deborder la page sous Windows. Il n'apparait que colle,
+   sinon une bande floue traverserait la page au milieu du contenu. */
+.fbar::before{
+  content:"";position:absolute;z-index:-1;top:0;bottom:0;left:50%;
+  width:var(--cw,100vw);transform:translateX(-50%);pointer-events:none;
+  background:var(--glass);border-bottom:1px solid var(--line-soft);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  opacity:0;transition:opacity .18s;
+}
+.fbar.collee::before{opacity:1}
 .fitem{position:relative}
 .ftrig{
   display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;border-radius:999px;
@@ -1984,10 +1995,27 @@ function majBarre(){
 /* Hauteur reelle de l'en-tete, pour que la barre se colle juste dessous. */
 (function suivreEntete(){
   const top = document.querySelector(".top");
-  const poser = () => document.documentElement.style.setProperty("--hh", Math.round(top.getBoundingClientRect().height) + "px");
+  const racine = document.documentElement.style;
+  const poser = () => {
+    const r = top.getBoundingClientRect();
+    racine.setProperty("--hh", Math.round(r.height) + "px");
+    racine.setProperty("--cw", Math.round(r.width) + "px");   // l'en-tete occupe toute la zone visible
+    testerCollage();
+  };
   poser();
   if (window.ResizeObserver) new ResizeObserver(poser).observe(top);
+  let cadre = 0;
+  addEventListener("scroll", () => { if (!cadre) cadre = requestAnimationFrame(() => { cadre = 0; testerCollage(); }); }, { passive: true });
 })();
+
+/* La bande floue ne se montre que lorsque la barre est vraiment collee sous l'en-tete.
+   Sur l'accueil la barre n'a pas de boite (vue masquee) : elle ne peut pas etre collee. */
+function testerCollage(){
+  const bar = document.getElementById("fbar"), top = document.querySelector(".top");
+  const visible = bar.getClientRects().length > 0;
+  bar.classList.toggle("collee",
+    visible && scrollY > 0 && bar.getBoundingClientRect().top <= top.getBoundingClientRect().bottom + 0.5);
+}
 
 const MENUS = [...document.querySelectorAll(".fitem[data-pop]")];
 function fermerMenus(sauf){
@@ -2259,6 +2287,7 @@ function montrerVue(nom, pousser = true, params = ""){
     history.pushState({ vue: nom }, "", url);
   }
   if (!accueil) window.scrollTo({ top: 0, behavior: "instant" });
+  testerCollage();   // un changement de vue ne declenche pas toujours un evenement de defilement
 }
 
 /* Les liens internes ne rechargent pas la page : ils changent de vue. */
