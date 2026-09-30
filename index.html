@@ -422,6 +422,7 @@ ul{margin:0;padding:0;list-style:none}
 .dead .title{text-decoration:line-through}
 
 .empty{padding:56px 24px;text-align:center}
+.list > .suite{height:1px;list-style:none}
 .empty h3{font-size:19px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
 .empty p{font-size:13.5px;color:var(--dim)}
 
@@ -1365,6 +1366,34 @@ document.getElementById("hist").innerHTML =
 
 /* ============ rendu : liste ============ */
 const list = document.getElementById("list");
+const PAQUET = 60;
+let lignesAffichees = 0;
+function ajouterLignes(){
+  const suite = LAST.slice(lignesAffichees, lignesAffichees + PAQUET);
+  list.querySelector(".suite")?.remove();
+  if (!suite.length) return;
+  list.insertAdjacentHTML("beforeend", suite.map(rowHTML).join(""));
+  lignesAffichees += suite.length;
+  if (lignesAffichees < LAST.length) {
+    list.insertAdjacentHTML("beforeend", '<li class="suite" aria-hidden="true"></li>');
+    obsSuite.observe(list.lastElementChild);
+  }
+}
+// on charge bien avant d'atteindre le bas : le paquet suivant est pret quand on y arrive
+const obsSuite = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) ajouterLignes(); }, { rootMargin: "1500px 0px" });
+
+/* Lecture, pause, prod bloquee : seules les lignes concernees changent. Reconstruire la
+   liste ici la ramenait au premier paquet et faisait sauter la page sous le doigt. */
+function repeindreLecture(){
+  const ids = new Set([S.playing, ...[...list.querySelectorAll(".row.playing, .row.dead")].map(r => r.dataset.id)]);
+  DEAD.forEach(id => ids.add(id));
+  ids.forEach(id => {
+    if (!id) return;
+    const r = list.querySelector(`.row[data-id="${CSS.escape(id)}"]`);
+    const b = r && BEATS.find(x => x.id === id);
+    if (b) r.outerHTML = rowHTML(b);
+  });
+}
 
 function rowHTML(b){
   const c = cssVar(b.style);
@@ -1436,7 +1465,18 @@ function render(){
 
   /* Etagere vide et « rien ne correspond » ont la meme apparence mais pas la meme
      cause : le dire evite de chercher un filtre fautif qui n'existe pas. */
-  list.innerHTML = res.length ? res.map(rowHTML).join("") : (S.crateOnly && !CRATE.size ? `
+  /* Les lignes arrivent par paquets : reconstruire 2 000+ lignes a chaque clic coutait
+     plus de 80 ms, alors que l'oeil n'en voit qu'une dizaine. Le reste suit au defilement. */
+  obsSuite.disconnect();
+  lignesAffichees = 0;
+  if (res.length) {
+    list.innerHTML = "";
+    ajouterLignes();
+    // un filtre change en bas de page : on repart du haut de la nouvelle liste
+    const haut = list.getBoundingClientRect().top;
+    const reserve = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hh")) || 96) + 60;
+    if (haut < reserve) window.scrollTo({ top: Math.max(0, scrollY + haut - reserve), behavior: "instant" });
+  } else list.innerHTML = (S.crateOnly && !CRATE.size ? `
     <li class="empty">
       <h3>Aucune prod likée pour l'instant.</h3>
       <p>Touche le cœur à côté d'une prod — elle se rangera ici.</p>
@@ -1580,8 +1620,8 @@ function armWatchdog(id){
 function onState(e){
   if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING){ started = true; clearTimeout(watchdog); }
   if (e.data === YT.PlayerState.ENDED) { next(); return; }
-  if (e.data === YT.PlayerState.PLAYING){ S.paused = false; tgIcon.innerHTML = ICON_PAUSE; startTick(); render(); peindreTuiles(); }
-  if (e.data === YT.PlayerState.PAUSED){ S.paused = true;  tgIcon.innerHTML = ICON_PLAY;  render(); peindreTuiles(); }
+  if (e.data === YT.PlayerState.PLAYING){ S.paused = false; tgIcon.innerHTML = ICON_PAUSE; startTick(); repeindreLecture(); peindreTuiles(); }
+  if (e.data === YT.PlayerState.PAUSED){ S.paused = true;  tgIcon.innerHTML = ICON_PLAY;  repeindreLecture(); peindreTuiles(); }
   if (e.data === YT.PlayerState.CUED)  { try { player.playVideo(); } catch(err){} }
 }
 
@@ -1595,7 +1635,7 @@ function onError(e){
   if (code !== 101 && code !== 150 && !PLAIN) { goPlain("le lecteur pilotable a renvoyé une erreur"); return; }
   if (current) DEAD.add(current.id);
   elNowD.innerHTML = '<span style="color:var(--accent)">Cette chaîne bloque la lecture hors YouTube — prod suivante.</span>';
-  render();
+  repeindreLecture();
   setTimeout(next, 1200);
 }
 
@@ -1662,7 +1702,7 @@ function load(id){
     player.setVolume(VOL);
     armWatchdog(id);
   }
-  render();
+  repeindreLecture();
 }
 
 function next(){
