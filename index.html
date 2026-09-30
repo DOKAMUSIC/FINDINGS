@@ -331,10 +331,6 @@ ul{margin:0;padding:0;list-style:none}
   font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
   color:#fff;background:var(--accent);border-radius:5px;padding:1px 6px;
 }
-.fr{
-  font-size:10px;font-weight:700;letter-spacing:.03em;
-  color:#0A84FF;background:rgba(10,132,255,.12);border-radius:5px;padding:1px 6px;
-}
 .prod{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:100%}
 .prod b{font-weight:590;color:var(--ink-2)}
 .refs{display:flex;gap:5px;flex-wrap:wrap}
@@ -1318,7 +1314,6 @@ function rowHTML(b){
       <div class="sub2">
         <span class="pill">${esc(STYLE_NAME[b.style])}</span>
         ${b.isNew?'<span class="new">nouveau</span>':""}
-        ${b.fr?'<span class="fr">FR</span>':""}
         <span class="prod">par <b>${esc(b.prod)}</b></span>
         ${b.refs.length?`<span class="refs">${b.refs.map(r=>`<button data-act="ref" data-ref="${esc(r)}">${esc(r)}</button>`).join("")}</span>`:""}
       </div>
