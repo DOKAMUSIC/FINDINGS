@@ -136,6 +136,8 @@ ul{margin:0;padding:0;list-style:none}
 .crate-btn span.mono{font-size:11.5px;color:var(--dim)}
 .crate-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .crate-btn.on span.mono{color:rgba(255,255,255,.85)}
+/* sur petit ecran l'historique se reduit a son icone : l'en-tete n'a pas la place de trois libelles */
+@media(max-width:640px){ .hist-btn{padding:0 11px} .hist-t{display:none} }
 
 /* ─────────── ossature ─────────── */
 .shell{max-width:1320px;margin:0 auto;padding:26px 22px 200px}
@@ -933,6 +935,10 @@ body:not(.vue-accueil) .actions{margin-left:auto}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
         Toutes les prods
       </button>
+      <button class="crate-btn hist-btn" id="histBtn" aria-pressed="false" aria-label="Historique d'écoute">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
+        <span class="hist-t">Historique</span>
+      </button>
       <button class="crate-btn" id="crateBtn" aria-pressed="false">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
         Prods likés <span class="mono" id="crateN">0</span>
@@ -1064,6 +1070,7 @@ body:not(.vue-accueil) .actions{margin-left:auto}
         <div class="sub" id="resSub"></div>
       </div>
       <div class="head-acts">
+      <button class="sortie-filtre" id="effHist" hidden>Effacer l'historique</button>
       <button class="playall" id="playall">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
         <span id="playallN">Tout lire</span>
@@ -1242,7 +1249,7 @@ const BEATS = CAT.beats.map(b => ({
 /* ============ état ============ */
 const S = {
   q:"", styles:new Set(), moods:new Set(), artists:new Set(), bpm:[55,200], bpmSur:false,
-  sort:"pertinence", crateOnly:false, playing:null, paused:false
+  sort:"pertinence", crateOnly:false, historyOnly:false, playing:null, paused:false
 };
 let LAST = [];                 // resultats affiches = file d'attente potentielle
 const DEAD = new Set();        // videos dont l'integration est refusee par la chaine
@@ -1252,6 +1259,19 @@ try{
              || localStorage.getItem("diggr.crate") || "[]";
   CRATE = new Set(JSON.parse(saved));
 }catch(e){}
+/* Historique d'ecoute : comme les likes, il vit dans le navigateur du visiteur. Le plus
+   recent en tete, sans doublon (reecouter remonte la prod), 200 au plus. */
+const HIST_KEY = "findings.historique", HIST_MAX = 200;
+let HIST = [];
+try { HIST = JSON.parse(localStorage.getItem(HIST_KEY) || "[]").filter(x => x && x.id); } catch (e) {}
+let HIST_POS = new Map();
+const majHistPos = () => { HIST_POS = new Map(HIST.map((x, i) => [x.id, i])); };
+majHistPos();
+function noterEcoute(id){
+  HIST = [{ id, t: Date.now() }, ...HIST.filter(x => x.id !== id)].slice(0, HIST_MAX);
+  majHistPos();
+  try { localStorage.setItem(HIST_KEY, JSON.stringify(HIST)); } catch (e) {}
+}
 const saveCrate = () => { try{ localStorage.setItem("findings.crate",JSON.stringify([...CRATE])); }catch(e){} };
 
 /* ============ utilitaires ============ */
@@ -1294,6 +1314,7 @@ function filtered(){
   const terms = q ? q.split(/\s+/) : [];
   let out = BEATS.filter(b => {
     if(S.crateOnly && !CRATE.has(b.id)) return false;
+    if(S.historyOnly && !HIST_POS.has(b.id)) return false;
     if(S.artists.size && !b.artists.some(a => S.artists.has(a))) return false;
     if(S.styles.size && !S.styles.has(b.style)) return false;
     if(S.bpmSur && !b.bpmSur) return false;
@@ -1317,6 +1338,8 @@ function filtered(){
     recent:(a,b) => a.days-b.days,
     bpm:(a,b) => a.bpm-b.bpm
   }[S.sort];
+  // l'historique se lit dans l'ordre d'ecoute, le plus recent en tete, quel que soit le tri
+  if (S.historyOnly) return out.sort((a, b) => HIST_POS.get(a.id) - HIST_POS.get(b.id));
   return out.sort(by);
 }
 
@@ -1450,6 +1473,7 @@ function majEntete(res){
   majBarre();
   const parts = [];
   if(S.crateOnly) parts.push("prods likées");
+  if(S.historyOnly) parts.push("écoutées récemment");
   if(S.styles.size) parts.push([...S.styles].map(s=>STYLE_NAME[s]).join(" + "));
   if(S.artists.size) parts.push([...S.artists].map(id => ARTIST_NAME[id] || id).join(" + "));
   if(S.moods.size) parts.push([...S.moods].join(" + "));
@@ -1462,6 +1486,8 @@ function majEntete(res){
   document.getElementById("resSub").textContent = res.length
     ? `${res.length} prod${res.length>1?"s":""} · ${prods} beatmaker${prods>1?"s":""}`
     : "";
+  document.getElementById("sorts").hidden = S.historyOnly;   // sans effet ici : l'ordre est celui de l'ecoute
+  document.getElementById("effHist").hidden = !(S.historyOnly && HIST.length);
   const pa = document.getElementById("playall");
   pa.hidden = !res.length;
   document.getElementById("playallN").textContent = res.length > 1 ? `Lire les ${res.length}` : "Tout lire";
@@ -1485,7 +1511,11 @@ function render(){
     const haut = list.getBoundingClientRect().top;
     const reserve = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hh")) || 96) + 60;
     if (haut < reserve) window.scrollTo({ top: Math.max(0, scrollY + haut - reserve), behavior: "instant" });
-  } else list.innerHTML = (S.crateOnly && !CRATE.size ? `
+  } else list.innerHTML = (S.historyOnly && !HIST.length ? `
+    <li class="empty">
+      <h3>Rien d'écouté pour l'instant.</h3>
+      <p>Lance une prod — elle viendra se ranger ici, la plus récente en tête.</p>
+    </li>` : S.crateOnly && !CRATE.size ? `
     <li class="empty">
       <h3>Aucune prod likée pour l'instant.</h3>
       <p>Touche le cœur à côté d'une prod — elle se rangera ici.</p>
@@ -1683,6 +1713,7 @@ function playFrom(listOfBeats, index){
 function load(id){
   const b = BEATS.find(x => x.id === id);
   if (!b) return;
+  noterEcoute(id);
   current = b;
   S.playing = id;
   S.paused = false;
@@ -1926,6 +1957,7 @@ list.addEventListener("click", e => {
    « sombre » en ayant « Trap » actif renvoyait l'intersection des deux, souvent vide,
    sans que rien n'indique lequel des deux etait en cause. Choisir remplace desormais. */
 function viderFiltres(){
+  S.historyOnly = false;
   S.styles.clear();
   S.moods.clear();
   S.artists.clear();
@@ -1939,7 +1971,9 @@ function refletFiltres(){
     c.setAttribute("aria-pressed", String(S.moods.has(c.dataset.mood))));
   crateBtn.setAttribute("aria-pressed", S.crateOnly);
   crateBtn.classList.toggle("on", S.crateOnly);
-  toutesBtn.hidden = !S.crateOnly;
+  toutesBtn.hidden = !(S.crateOnly || S.historyOnly);
+  histBtn.setAttribute("aria-pressed", S.historyOnly);
+  histBtn.classList.toggle("on", S.historyOnly);
   document.querySelectorAll("#artistes [data-artist]").forEach(c =>
     c.setAttribute("aria-pressed", String(S.artists.has(c.dataset.artist))));
 }
@@ -1951,6 +1985,7 @@ function majAdresse(){
   if (S.styles.size) p.set("style", [...S.styles][0]);
   if (S.moods.size)  p.set("mood",  [...S.moods][0]);
   if (S.crateOnly)   p.set("likes", "1");
+  if (S.historyOnly) p.set("historique", "1");
   if (S.q)           p.set("q", S.q);
   if (S.sort !== "pertinence") p.set("sort", S.sort);
   const qs = p.toString();
@@ -2032,6 +2067,33 @@ toutesBtn.addEventListener("click", () => {
   render();
   majAdresse();
 });
+const histBtn = document.getElementById("histBtn");
+histBtn.addEventListener("click", () => {
+  const etaitActif = S.historyOnly;
+  viderFiltres();
+  S.historyOnly = !etaitActif;
+  refletFiltres();
+  render();
+  if (document.body.classList.contains("vue-accueil"))
+    montrerVue("prods", true, S.historyOnly ? "?historique=1" : "?vue=prods");
+  else majAdresse();
+});
+/* Effacer en deux temps : le premier clic demande confirmation, sans fenetre surgissante. */
+const effHist = document.getElementById("effHist");
+let effArme = null;
+effHist.addEventListener("click", () => {
+  if (!effArme) {
+    effHist.textContent = "Confirmer l'effacement";
+    effArme = setTimeout(() => { effArme = null; effHist.textContent = "Effacer l'historique"; }, 3000);
+    return;
+  }
+  clearTimeout(effArme); effArme = null;
+  HIST = []; majHistPos();
+  try { localStorage.removeItem(HIST_KEY); } catch (e) {}
+  effHist.textContent = "Effacer l'historique";
+  render();
+});
+
 crateBtn.addEventListener("click", () => {
   const etaitActif = S.crateOnly;
   viderFiltres();
@@ -2542,6 +2604,7 @@ function appliquerParams(p, reprendreLecture = false){
   if (mood && MOODS.includes(mood)) S.moods.add(mood);
   if (artist && ARTIST_NAME[artist]) S.artists.add(artist);
   S.crateOnly = likes === "1" && CRATE.size > 0;
+  S.historyOnly = p.get("historique") === "1" && !S.crateOnly;
   refletFiltres();
   render();
   if (play) {
@@ -2570,7 +2633,7 @@ function appliquerParams(p, reprendreLecture = false){
    d'une recherche ou d'une prod, c'est le catalogue. */
 (function demarrer(){
   const p = new URLSearchParams(location.search);
-  const versProds = p.get("vue") === "prods" || ["style","sort","q","mood","likes","play","artist"].some(k => p.get(k));
+  const versProds = p.get("vue") === "prods" || ["style","sort","q","mood","likes","play","artist","historique"].some(k => p.get(k));
   appliquerParams(p, true);
   montrerVue(versProds ? "prods" : "accueil", false);
   history.replaceState({ vue: versProds ? "prods" : "accueil" }, "", location.pathname + location.search);
