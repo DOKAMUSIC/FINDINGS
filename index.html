@@ -137,7 +137,11 @@ ul{margin:0;padding:0;list-style:none}
 .crate-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .crate-btn.on span.mono{color:rgba(255,255,255,.85)}
 /* sur petit ecran l'historique se reduit a son icone : l'en-tete n'a pas la place de trois libelles */
-@media(max-width:640px){ .hist-btn{padding:0 11px} .hist-t{display:none} }
+@media(max-width:640px){
+  .hist-btn{padding:0 11px} .hist-t{display:none}
+  /* quatre boutons ne tiennent pas sur une ligne a 375 px : le retour se reduit a sa fleche */
+  #toutesBtn .sf-t{display:none} #toutesBtn{padding:0 11px}
+}
 
 /* ─────────── ossature ─────────── */
 .shell{max-width:1320px;margin:0 auto;padding:26px 22px 200px}
@@ -931,9 +935,13 @@ body:not(.vue-accueil) .actions{margin-left:auto}
     </nav>
 
     <div class="actions">
-      <button class="sortie-filtre" id="toutesBtn" hidden>
+      <button class="sortie-filtre" id="toutesBtn" hidden aria-label="Toutes les prods" title="Toutes les prods">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-        Toutes les prods
+        <span class="sf-t">Toutes les prods</span>
+      </button>
+      <button class="crate-btn hist-btn" id="ptBtn" aria-pressed="false" aria-label="Pour toi : prods choisies d'après tes goûts" title="Pour toi">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z"/><path d="M19 16l.7 1.8L21.5 18.5l-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/></svg>
+        <span class="hist-t">Pour toi</span>
       </button>
       <button class="crate-btn hist-btn" id="histBtn" aria-pressed="false" aria-label="Historique d'écoute">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
@@ -1249,7 +1257,7 @@ const BEATS = CAT.beats.map(b => ({
 /* ============ état ============ */
 const S = {
   q:"", styles:new Set(), moods:new Set(), artists:new Set(), bpm:[55,200], bpmSur:false,
-  sort:"pertinence", crateOnly:false, historyOnly:false, playing:null, paused:false
+  sort:"pertinence", crateOnly:false, historyOnly:false, forYou:false, playing:null, paused:false
 };
 let LAST = [];                 // resultats affiches = file d'attente potentielle
 const DEAD = new Set();        // videos dont l'integration est refusee par la chaine
@@ -1267,12 +1275,14 @@ try { HIST = JSON.parse(localStorage.getItem(HIST_KEY) || "[]").filter(x => x &&
 let HIST_POS = new Map();
 const majHistPos = () => { HIST_POS = new Map(HIST.map((x, i) => [x.id, i])); };
 majHistPos();
+let versionGout = 0;   // incremente a chaque like ou ecoute : invalide le profil mis en cache
 function noterEcoute(id){
+  versionGout++;
   HIST = [{ id, t: Date.now() }, ...HIST.filter(x => x.id !== id)].slice(0, HIST_MAX);
   majHistPos();
   try { localStorage.setItem(HIST_KEY, JSON.stringify(HIST)); } catch (e) {}
 }
-const saveCrate = () => { try{ localStorage.setItem("findings.crate",JSON.stringify([...CRATE])); }catch(e){} };
+const saveCrate = () => { versionGout++; try{ localStorage.setItem("findings.crate",JSON.stringify([...CRATE])); }catch(e){} };
 
 /* ============ utilitaires ============ */
 const cssVar = s => `var(--s-${s})`;
@@ -1308,6 +1318,115 @@ const LIVE_ARTISTS = ARTIST_META.filter(a => ARTIST_N[a.id]).sort((a, b) => ARTI
 
 BEATS.forEach(b => b._h = haystack(b));
 
+/* ============ « Pour toi » ============
+   Un profil de gouts tire de ce que le visiteur a like (poids 3) et ecoute (poids 1,
+   qui s'estompe avec l'anciennete), puis un classement des prods qu'il n'a pas encore
+   entendues. Tout se calcule ici, dans le navigateur : rien ne part vers un serveur, et
+   c'est aussi pourquoi le profil ne suit pas d'un appareil a l'autre. */
+const BY_ID = new Map(BEATS.map(b => [b.id, b]));
+let profilCache = null, profilVersion = -1;
+function profilGout(){
+  if (profilCache && profilVersion === versionGout) return profilCache;
+  const P = { style:new Map(), artist:new Map(), mood:new Map(), prod:new Map(), pts:[], poids:0, likes:0, ecoutes:0 };
+  const ajoute = (b, w) => {
+    P.poids += w;
+    P.style.set(b.style, (P.style.get(b.style) || 0) + w);
+    b.artists.forEach(a => P.artist.set(a, (P.artist.get(a) || 0) + w));
+    const ms = b.moods || [];
+    ms.forEach(m => P.mood.set(m, (P.mood.get(m) || 0) + w / ms.length));
+    P.prod.set(b.prod, (P.prod.get(b.prod) || 0) + w);
+    // un tempo estime d'apres le style n'apprend presque rien sur les gouts
+    P.pts.push([b.bpm, w * (b.bpmSur ? 1 : 0.4)]);
+  };
+  CRATE.forEach(id => { const b = BY_ID.get(id); if (b) { ajoute(b, 3); P.likes++; } });
+  HIST.forEach((x, r) => { const b = BY_ID.get(x.id); if (b) { ajoute(b, 1 / (1 + r / 60)); P.ecoutes++; } });
+  // le plus present vaut 1 ; l'exposant evite qu'un seul favori ecrase tout le reste
+  // densite de gout par BPM, calculee une fois : le classement la lit ensuite en O(1) par prod
+  // au lieu de reparcourir toutes les ecoutes pour chacune des 4 000 candidates
+  P.tempo = new Float32Array(260);
+  for (const [bpm, w] of P.pts) {
+    const c = Math.round(bpm);
+    for (let x = Math.max(0, c - 36); x <= Math.min(259, c + 36); x++) { const d = (x - bpm) / 12; P.tempo[x] += w * Math.exp(-d * d); }
+  }
+  if (P.poids) for (let x = 0; x < 260; x++) P.tempo[x] /= P.poids;
+  [P.style, P.artist, P.mood, P.prod].forEach(m => {
+    const mx = Math.max(0, ...m.values());
+    if (mx) m.forEach((v, k) => m.set(k, Math.pow(v / mx, 0.7)));
+  });
+  profilCache = P; profilVersion = versionGout;
+  return P;
+}
+function scoreGout(b, P){
+  const sty = P.style.get(b.style) || 0;
+  let art = 0; for (const a of b.artists) art = Math.max(art, P.artist.get(a) || 0);
+  let mo = 0; const ms = b.moods || [];
+  if (ms.length) { for (const m of ms) mo += P.mood.get(m) || 0; mo /= ms.length; }
+  const pr = P.prod.get(b.prod) || 0;
+  // part du gout qui tombe pres de ce tempo : gere un gout a deux pics (drill 140, boom bap 90)
+  const tp = P.tempo[Math.min(259, Math.max(0, Math.round(b.bpm)))] || 0;
+  const frais = Math.max(0, 1 - b.days / 274);
+  const pop = Math.min(1, Math.log10(Math.max(b.views, 10)) / 6);
+  /* Confiance : une seule ecoute ne dit pas grand-chose. Sans cette modulation, un
+     premier clic sur du jazz rap remplissait toute la page de jazz rap. Elle atteint 1
+     vers trois likes, ou une dizaine d'ecoutes ; avant, le gout pese moins que la fraicheur. */
+  const conf = Math.min(1, 0.3 + P.poids / 9);
+  return conf * (3*sty + 2.2*art + 1.4*mo + 1.3*pr + 0.8*tp) + 0.5*frais + 0.3*pop;
+}
+/* Classement diversifie : sans correctif, le haut de la liste serait vingt prods du meme
+   style ou du meme beatmaker. Chaque prod deja retenue du meme style ou de la meme chaine
+   retire des points a la suivante. Seul le haut est trie ainsi ; le reste suit par score. */
+function classerPourToi(cands){
+  const P = profilGout();
+  const sc = new Map(cands.map(b => [b, scoreGout(b, P)]));
+  const tri = [...cands].sort((a, b) => sc.get(b) - sc.get(a));
+  const tete = tri.slice(0, 300), reste = tri.slice(300), out = [], nS = {}, nP = {};
+  while (out.length < 120 && tete.length) {
+    let mi = 0, mv = -Infinity;
+    for (let i = 0; i < tete.length; i++) {
+      const b = tete[i];
+      const v = sc.get(b) - 0.3 * Math.min(nS[b.style] || 0, 10) - 0.5 * (nP[b.prod] || 0);
+      if (v > mv) { mv = v; mi = i; }
+    }
+    const [b] = tete.splice(mi, 1);
+    out.push(b); nS[b.style] = (nS[b.style] || 0) + 1; nP[b.prod] = (nP[b.prod] || 0) + 1;
+  }
+  if (!P.poids) return [...out, ...tete, ...reste];
+  /* Une prod sur cinq sort du territoire connu. Un profil nourri par dix ecoutes de
+     reggaeton ne voyait que du reggaeton : il se refermait sur lui-meme. Les
+     decouvertes viennent de styles que le visiteur n'a (presque) pas touches, choisies
+     sur le mood et le tempo qu'il aime, au plus une par style pour rester variees. */
+  const hors = cands.filter(b => (P.style.get(b.style) || 0) < 0.15);
+  const dec = [], vus = new Set();
+  hors.map(b => {
+    let mo = 0; const ms = b.moods || [];
+    if (ms.length) { for (const m of ms) mo += P.mood.get(m) || 0; mo /= ms.length; }
+    const tp = P.tempo[Math.min(259, Math.max(0, Math.round(b.bpm)))] || 0;
+    return [b, 1.4 * mo + 0.8 * tp + 0.5 * Math.max(0, 1 - b.days / 274) + 0.3 * Math.min(1, Math.log10(Math.max(b.views, 10)) / 6)];
+  }).sort((a, b) => b[1] - a[1]).forEach(([b]) => { if (dec.length < 30 && !vus.has(b.style)) { vus.add(b.style); dec.push(b); } });
+  const prises = new Set(dec.map(b => b.id)), principal = [...out, ...tete, ...reste].filter(b => !prises.has(b.id));
+  const res = []; let i = 0, d = 0;
+  while (i < principal.length || d < dec.length) {
+    if (res.length % 5 === 4 && d < dec.length) res.push(dec[d++]);
+    else if (i < principal.length) res.push(principal[i++]);
+    else res.push(dec[d++]);
+  }
+  return res;
+}
+/* Ce que le profil a retenu, en clair : sans ca la liste serait une boite noire. */
+function resumeGout(){
+  const P = profilGout();
+  if (!P.poids) return "Écoute ou like quelques prods : cette page s'adaptera à tes goûts.";
+  const top = (m, n, nom) => [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, n).map(([k]) => nom(k));
+  const noms = [
+    ...top(P.style, 2, k => STYLE_NAME[k] || k),
+    ...top(P.artist, 1, k => ARTIST_NAME[k] || k),
+    ...top(P.mood, 1, k => k)
+  ];
+  const l = P.likes, e = P.ecoutes;
+  const base = [l && `${l} like${l > 1 ? "s" : ""}`, e && `${e} écoute${e > 1 ? "s" : ""}`].filter(Boolean).join(" et ");
+  return `D'après ${l && e ? "tes " : ""}${base} : ${[...new Set(noms)].join(", ")}.`;
+}
+
 /* ============ filtrage ============ */
 function filtered(){
   const q = norm(S.q.trim());
@@ -1315,6 +1434,8 @@ function filtered(){
   let out = BEATS.filter(b => {
     if(S.crateOnly && !CRATE.has(b.id)) return false;
     if(S.historyOnly && !HIST_POS.has(b.id)) return false;
+    // « Pour toi » ne propose que du neuf : ce qu'on a deja ecoute ou mis de cote est exclu
+    if(S.forYou && (HIST_POS.has(b.id) || CRATE.has(b.id))) return false;
     if(S.artists.size && !b.artists.some(a => S.artists.has(a))) return false;
     if(S.styles.size && !S.styles.has(b.style)) return false;
     if(S.bpmSur && !b.bpmSur) return false;
@@ -1340,6 +1461,7 @@ function filtered(){
   }[S.sort];
   // l'historique se lit dans l'ordre d'ecoute, le plus recent en tete, quel que soit le tri
   if (S.historyOnly) return out.sort((a, b) => HIST_POS.get(a.id) - HIST_POS.get(b.id));
+  if (S.forYou) return classerPourToi(out);
   return out.sort(by);
 }
 
@@ -1474,6 +1596,7 @@ function majEntete(res){
   const parts = [];
   if(S.crateOnly) parts.push("prods likées");
   if(S.historyOnly) parts.push("écoutées récemment");
+  if(S.forYou) parts.push("Pour toi");
   if(S.styles.size) parts.push([...S.styles].map(s=>STYLE_NAME[s]).join(" + "));
   if(S.artists.size) parts.push([...S.artists].map(id => ARTIST_NAME[id] || id).join(" + "));
   if(S.moods.size) parts.push([...S.moods].join(" + "));
@@ -1486,8 +1609,9 @@ function majEntete(res){
   document.getElementById("resSub").textContent = res.length
     ? `${res.length} prod${res.length>1?"s":""} · ${prods} beatmaker${prods>1?"s":""}`
     : "";
-  document.getElementById("sorts").hidden = S.historyOnly;   // sans effet ici : l'ordre est celui de l'ecoute
+  document.getElementById("sorts").hidden = S.historyOnly || S.forYou;   // l'ordre est celui de l'ecoute, ou du gout
   document.getElementById("effHist").hidden = !(S.historyOnly && HIST.length);
+  if (S.forYou) document.getElementById("resSub").textContent += (res.length ? " · " : "") + resumeGout();
   const pa = document.getElementById("playall");
   pa.hidden = !res.length;
   document.getElementById("playallN").textContent = res.length > 1 ? `Lire les ${res.length}` : "Tout lire";
@@ -1974,6 +2098,7 @@ list.addEventListener("click", e => {
    sans que rien n'indique lequel des deux etait en cause. Choisir remplace desormais. */
 function viderFiltres(){
   S.historyOnly = false;
+  S.forYou = false;
   S.styles.clear();
   S.moods.clear();
   S.artists.clear();
@@ -1987,9 +2112,12 @@ function refletFiltres(){
     c.setAttribute("aria-pressed", String(S.moods.has(c.dataset.mood))));
   crateBtn.setAttribute("aria-pressed", S.crateOnly);
   crateBtn.classList.toggle("on", S.crateOnly);
-  toutesBtn.hidden = !(S.crateOnly || S.historyOnly);
+  toutesBtn.hidden = !(S.crateOnly || S.historyOnly || S.forYou);
   histBtn.setAttribute("aria-pressed", S.historyOnly);
   histBtn.classList.toggle("on", S.historyOnly);
+  const ptBtn = document.getElementById("ptBtn");
+  ptBtn.setAttribute("aria-pressed", S.forYou);
+  ptBtn.classList.toggle("on", S.forYou);
   document.querySelectorAll("#artistes [data-artist]").forEach(c =>
     c.setAttribute("aria-pressed", String(S.artists.has(c.dataset.artist))));
 }
@@ -2002,6 +2130,7 @@ function majAdresse(){
   if (S.moods.size)  p.set("mood",  [...S.moods][0]);
   if (S.crateOnly)   p.set("likes", "1");
   if (S.historyOnly) p.set("historique", "1");
+  if (S.forYou)      p.set("pourtoi", "1");
   if (S.q)           p.set("q", S.q);
   if (S.sort !== "pertinence") p.set("sort", S.sort);
   const qs = p.toString();
@@ -2082,6 +2211,17 @@ toutesBtn.addEventListener("click", () => {
   refletFiltres();
   render();
   majAdresse();
+});
+const ptBtn = document.getElementById("ptBtn");
+ptBtn.addEventListener("click", () => {
+  const etaitActif = S.forYou;
+  viderFiltres();
+  S.forYou = !etaitActif;
+  refletFiltres();
+  render();
+  if (document.body.classList.contains("vue-accueil"))
+    montrerVue("prods", true, S.forYou ? "?pourtoi=1" : "?vue=prods");
+  else majAdresse();
 });
 const histBtn = document.getElementById("histBtn");
 histBtn.addEventListener("click", () => {
@@ -2621,6 +2761,7 @@ function appliquerParams(p, reprendreLecture = false){
   if (artist && ARTIST_NAME[artist]) S.artists.add(artist);
   S.crateOnly = likes === "1" && CRATE.size > 0;
   S.historyOnly = p.get("historique") === "1" && !S.crateOnly;
+  S.forYou = p.get("pourtoi") === "1" && !S.crateOnly && !S.historyOnly;
   refletFiltres();
   render();
   if (play) {
@@ -2649,7 +2790,7 @@ function appliquerParams(p, reprendreLecture = false){
    d'une recherche ou d'une prod, c'est le catalogue. */
 (function demarrer(){
   const p = new URLSearchParams(location.search);
-  const versProds = p.get("vue") === "prods" || ["style","sort","q","mood","likes","play","artist","historique"].some(k => p.get(k));
+  const versProds = p.get("vue") === "prods" || ["style","sort","q","mood","likes","play","artist","historique","pourtoi"].some(k => p.get(k));
   appliquerParams(p, true);
   montrerVue(versProds ? "prods" : "accueil", false);
   history.replaceState({ vue: versProds ? "prods" : "accueil" }, "", location.pathname + location.search);
