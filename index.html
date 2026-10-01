@@ -1549,6 +1549,10 @@ const elProg = document.getElementById("prog"), tgIcon = document.getElementById
 const elTrack = elProg.querySelector(".rail2");
 
 let player = null, apiReady = false, pendingId = null, tick = null;
+/* L'objet lecteur existe des sa creation, mais ses commandes (loadVideoById,
+   getPlayerState…) n'arrivent qu'avec onReady, environ une seconde plus tard. Lancer
+   une autre prod entre-temps levait une erreur : le titre changeait, pas la video. */
+let playerReady = false;
 let glisse = false;   // curseur de temps en cours de deplacement
 /* Une recherche n'est pas instantanee : le lecteur continue d'annoncer l'ancienne
    position pendant ~400 ms. On retient la position demandee et on garde l'affichage
@@ -1588,6 +1592,7 @@ window.onYouTubeIframeAPIReady = () => {
 
 function mount(id){
   if (PLAIN) return mountPlain(id);
+  playerReady = false;
   player = new YT.Player("ytplayer", {
     width:"100%", height:"100%", videoId:id,
     // controls:0 retire la barre du lecteur, disablekb:1 ses raccourcis clavier,
@@ -1596,7 +1601,15 @@ function mount(id){
                  controls:0, disablekb:1, fs:0 },
     events:{
       onReady: e => {
+        playerReady = true;
         e.target.setVolume(VOL);
+        // une autre prod a ete demandee pendant l'initialisation : c'est elle qui compte
+        if (pendingId) {
+          const id = pendingId; pendingId = null; repriseT = 0;
+          e.target.loadVideoById(id);
+          armWatchdog(id); startTick();
+          return;
+        }
         if (repriseT > 0) e.target.seekTo(repriseT, true);
         // on ne relance pas ce qui était en pause au moment de quitter la page
         if (repriseT > 0 && !repriseJoue) { e.target.pauseVideo(); S.paused = true; tgIcon.innerHTML = ICON_PLAY; }
@@ -1737,6 +1750,8 @@ function load(id){
   } else if (!apiReady || !player) {
     pendingId = id;
     if (apiReady && !player) { pendingId = null; mount(id); }
+  } else if (!playerReady) {
+    pendingId = id;            // onReady chargera la derniere prod demandee
   } else {
     player.loadVideoById(id);
     player.setVolume(VOL);
@@ -1762,6 +1777,7 @@ if (FILE_MODE) document.getElementById("hintFile").hidden = false;
 function togglePlay(){
   if (PLAIN) { if (!current && LAST.length) playFrom(LAST, 0); return; }
   if (!player) { if (LAST.length) playFrom(LAST, 0); return; }
+  if (!playerReady) return;    // il s'initialise : la lecture demarre toute seule
   const st = player.getPlayerState();
   if (st === YT.PlayerState.PLAYING) player.pauseVideo(); else player.playVideo();
 }
