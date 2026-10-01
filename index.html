@@ -1096,7 +1096,9 @@ body:not(.vue-accueil) .actions{margin-left:auto}
         </button>
         <div class="fmenu" hidden>
           <div class="fhead"><span class="eyebrow">Style</span><button id="clearStyle" hidden>effacer</button></div>
+          <input class="fsearch" id="styleQ" type="search" placeholder="Drill, afro, kompa&hellip;" autocomplete="off" aria-label="Chercher un style">
           <div class="chips" id="styles"></div>
+          <p class="mini" id="styleVide" hidden>Aucun style ne correspond.</p>
         </div>
       </div>
 
@@ -1262,7 +1264,8 @@ function fmtAge(d){
   if(d<1) return "aujourd'hui";
   if(d<7) return `${Math.round(d)} j`;
   if(d<31) return `${Math.round(d/7)} sem.`;
-  if(d<365) return `${Math.round(d/30)} mois`;
+  // en mois jusqu'a deux ans : « 2 ans » pour une prod de 18 mois serait faux
+  if(d<730) return `${Math.round(d/30)} mois`;
   const y=Math.round(d/365); return `${y} an${y>1?"s":""}`;
 }
 const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
@@ -1328,8 +1331,14 @@ function chipHTML([k,label]){
     <span class="dot"></span>${esc(label)}<span class="n">${STYLE_N[k]}</span></button>`;
 }
 function renderStyleChips(){
-  // le menu defile de lui-meme : plus besoin de replier une liste pour la garder courte
-  elStyles.innerHTML = LIVE_STYLES.map(chipHTML).join("");
+  // 51 styles : on cherche plutot qu'on ne defile. Le nom et la cle comptent, pour que
+  // « rnb » trouve « R&B » et « coupe » trouve « Ndombolo / Coupé-décalé ».
+  const champ = document.getElementById("styleQ");
+  const q = champ ? norm(champ.value.trim()) : "";
+  const liste = q ? LIVE_STYLES.filter(([k, label]) => norm(label + " " + k).includes(q)) : LIVE_STYLES;
+  elStyles.innerHTML = liste.map(chipHTML).join("");
+  const vide = document.getElementById("styleVide");
+  if (vide) vide.hidden = !!liste.length;
 }
 renderStyleChips();
 
@@ -1958,9 +1967,11 @@ function choisirFiltre(appliquer, etaitActif){
   fermerMenus();
 }
 
+document.getElementById("styleQ").addEventListener("input", renderStyleChips);
 elStyles.addEventListener("click", e => {
   const btn = e.target.closest("[data-style]"); if(!btn) return;
   const k = btn.dataset.style;
+  document.getElementById("styleQ").value = "";   // le menu rouvre sur la liste complete
   choisirFiltre(() => S.styles.add(k), S.styles.has(k));
 });
 elMoods.addEventListener("click", e => {
@@ -2062,7 +2073,9 @@ document.getElementById("playall").addEventListener("click", () => {
   const styles = new Set(BEATS.map(b => b.style)).size;
   document.getElementById("footStats").innerHTML =
     `<b>${BEATS.length} prods</b> · ${styles} styles · mis à jour le ${when}${add}` +
-    ` · ingestion automatique tous les 2 jours, rien de plus vieux que ${age} mois, tout se lit ici sans quitter la page.`;
+    ` · ingestion automatique tous les 2 jours, rien de plus vieux que ${age} mois` +
+    (CAT.artistMaxAgeMonths ? ` (jusqu'à ${CAT.artistMaxAgeMonths} mois pour compléter un artiste à ${CAT.artistMin || 20} type beats)` : "") +
+    `, tout se lit ici sans quitter la page.`;
 
   /* Les parts sont calculees sur le catalogue affiche : figees dans le texte, elles
      seraient fausses des la prochaine ingestion. */
