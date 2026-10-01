@@ -1053,6 +1053,17 @@ body.vue-accueil .hcta{display:inline-flex}
     <div class="fresh" id="likewall"></div>
   </section>
 
+  <section class="sec wrap" id="vuePourToi">
+    <div class="sec-head">
+      <div>
+        <h2>Pour toi</h2>
+        <p id="pourtoiSub"></p>
+      </div>
+      <a href="?pourtoi=1" data-vue="prods">Tout voir →</a>
+    </div>
+    <div class="fresh" id="pourtoiwall"></div>
+  </section>
+
   <section class="sec wrap">
     <div class="sec-head">
       <div>
@@ -1444,7 +1455,7 @@ function classerPourToi(cands){
 /* Ce que le profil a retenu, en clair : sans ca la liste serait une boite noire. */
 function resumeGout(){
   const P = profilGout();
-  if (!P.poids) return "Écoute ou like quelques prods : cette page s'adaptera à tes goûts.";
+  if (!P.poids) return "Écoute ou like quelques prods : cette sélection s'adaptera à tes goûts.";
   const top = (m, n, nom) => [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, n).map(([k]) => nom(k));
   const noms = [
     ...top(P.style, 2, k => STYLE_NAME[k] || k),
@@ -2064,6 +2075,7 @@ function basculerLike(b, source){
   if (ligne && ligne !== source) peindreLike(ligne, like, false);
   if (current && current.id === b.id) syncCoeur();
   majLikes();
+  majPourToi();
   if (S.crateOnly) render();
 }
 
@@ -2593,6 +2605,40 @@ function majLikes(){
 }
 majLikes();
 
+/* ============ « Pour toi » sur l'accueil ============
+   Huit vignettes, mais la file du lecteur en compte quarante : ecoutees a la suite, elles
+   restent sur des recommandations au lieu de s'arreter apres la huitieme. La selection ne
+   bouge qu'a un like ou au retour sur l'accueil : pas de remaniement sous les yeux. */
+let POURTOI = [];
+function majPourToi(){
+  const mur = document.getElementById("pourtoiwall");
+  if (!mur) return;
+  const candidats = BEATS.filter(b => !HIST_POS.has(b.id) && !CRATE.has(b.id));
+  /* Quatre vignettes par style au plus : sur la page « Pour toi » le goût dominant peut
+     occuper tout le haut de la liste, mais une vitrine de huit en a quelques-unes —
+     un second goût n'y aurait jamais sa place. Les vignettes ouvrent la file, le reste suit. */
+  const classees = classerPourToi(candidats).slice(0, 90), nb = {}, vitrine = [], suite = [];
+  for (const b of classees) {
+    if (vitrine.length < 8 && (nb[b.style] || 0) < 4) { vitrine.push(b); nb[b.style] = (nb[b.style] || 0) + 1; }
+    else suite.push(b);
+  }
+  POURTOI = [...vitrine, ...suite].slice(0, 40);
+  mur.innerHTML = vitrine.map(b => `
+    <a class="tile" data-id="${b.id}" href="?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
+      <div class="art">
+        <img src="https://i.ytimg.com/vi/${b.id}/mqdefault.jpg" alt="" loading="lazy">
+        <span class="go"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+      </div>
+      <div class="body">
+        <p class="t">${esc(b.title)}</p>
+        <div class="s"><span class="pill">${esc(STYLE_NAME[b.style]||b.style)}</span><span>${esc(b.prod)}</span></div>
+      </div>
+    </a>`).join("");
+  document.getElementById("pourtoiSub").textContent = resumeGout();
+  peindreTuiles();
+}
+majPourToi();
+
 /* ============ mur des artistes ============
    Memes cartes que les styles : mosaique des pochettes les plus ecoutees, teinte du
    style de l'artiste. Seuls les plus fournis sont visibles, le reste se deplie. */
@@ -2715,6 +2761,7 @@ function montrerVue(nom, pousser = true, params = ""){
     history.pushState({ vue: nom }, "", url);
   }
   if (!accueil) window.scrollTo({ top: 0, behavior: "instant" });
+  else if (typeof majPourToi === "function") majPourToi();   // ce qu'on vient d'ecouter change la selection
   testerCollage();   // un changement de vue ne declenche pas toujours un evenement de defilement
 }
 
@@ -2758,6 +2805,7 @@ function brancherTuiles(id, liste){
 }
 brancherTuiles("fresh", () => FRESH);
 brancherTuiles("likewall", () => LIKED);
+brancherTuiles("pourtoiwall", () => POURTOI);
 
 /* L'état de lecture se lit aussi sur les tuiles, pas seulement dans la liste. */
 function peindreTuiles(){
