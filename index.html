@@ -126,20 +126,33 @@ ul{margin:0;padding:0;list-style:none}
 }
 .hot button:hover{color:var(--ink);border-color:var(--line);box-shadow:var(--sh-1)}
 
-.crate-btn{
-  display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;
-  height:38px;padding:0 14px;border-radius:999px;
-  background:var(--surface);border:1px solid var(--line);
-  font-size:13px;font-weight:590;box-shadow:var(--sh-1);transition:.15s;
+/* Les trois raccourcis personnels (Pour toi, Historique, Prods likes) forment UNE capsule :
+   trois pastilles separees se lisaient comme six boutons quand on y ajoutait la navigation.
+   Groupes, ils se lisent comme un seul objet, avec des segments. */
+.seg{
+  display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;
+  height:38px;padding:3px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-1);
 }
-.crate-btn:hover{box-shadow:var(--sh-2)}
-.crate-btn span.mono{font-size:11.5px;color:var(--dim)}
-.crate-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.crate-btn.on span.mono{color:rgba(255,255,255,.85)}
-/* sur petit ecran l'historique se reduit a son icone : l'en-tete n'a pas la place de trois libelles */
+.seg-b{
+  display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 13px;border-radius:999px;
+  font-size:13px;font-weight:560;color:var(--ink-2);transition:background .15s,color .15s;
+}
+/* filet entre deux segments : disparait autour d'un segment actif, qui a son propre fond */
+.seg-b + .seg-b{position:relative}
+.seg-b + .seg-b::before{
+  content:"";position:absolute;left:-2px;top:8px;bottom:8px;width:1px;background:var(--line-soft);
+}
+.seg-b:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.seg-b span.mono{font-size:11.5px;color:var(--dim)}
+.seg-b.on{background:var(--accent);color:#fff}
+.seg-b.on span.mono{color:rgba(255,255,255,.85)}
+.seg-b.on::before,.seg-b.on + .seg-b::before{opacity:0}
+.seg-b:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
 @media(max-width:640px){
-  .hist-btn{padding:0 11px} .hist-t{display:none}
-  /* quatre boutons ne tiennent pas sur une ligne a 375 px : le retour se reduit a sa fleche */
+  /* a petite largeur seuls les compteurs gardent un libelle : les icones se suffisent */
+  .seg-b{padding:0 11px} .hist-t{display:none}
+  /* le retour se reduit a sa fleche, sinon la rangee deborde */
   #toutesBtn .sf-t{display:none} #toutesBtn{padding:0 11px}
 }
 
@@ -888,12 +901,11 @@ ul{margin:0;padding:0;list-style:none}
 .hlinks{display:none;align-items:center;gap:6px}
 /* la recherche est masquee sur l'accueil : sans elle, plus rien ne pousse le groupe
    vers la droite. margin-left:auto absorbe l'espace libre a la place. */
-body.vue-accueil .hlinks{display:flex;margin-left:auto}
+body.vue-accueil .hlinks{display:flex;margin-left:6px}
 body.vue-accueil .top .search{display:none}
 /* vue prods : la recherche plafonne a 640px et cesse de pousser des que l'ecran
    est large. Sans cet auto, les boutons retombent au milieu de la bande. */
-.actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
-body:not(.vue-accueil) .actions{margin-left:auto}
+.actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:auto}
 /* N'apparait que sous filtre likes : une sortie visible, plutot qu'un second clic
    sur le bouton qui a amene ici — rien ne disait qu'il servait aussi a revenir. */
 .sortie-filtre{
@@ -906,9 +918,21 @@ body:not(.vue-accueil) .actions{margin-left:auto}
 @media(max-width:640px){ .sortie-filtre span,.sortie-filtre{font-size:12.5px;padding:0 10px} }
 .hlinks a{padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--dim);transition:.15s;text-decoration:none}
 .hlinks a:hover{color:var(--ink);background:rgba(0,0,0,.05)}
-.hlinks a.cta{background:var(--ink);color:#fff;font-weight:590}
-.hlinks a.cta:hover{background:#000}
-@media(max-width:640px){ .hlinks a:not(.cta){display:none} }
+/* Le bouton noir est l'action principale de l'accueil : il ferme la rangee, a droite,
+   a part. Au milieu des liens, il se lisait comme un nom de plus dans la liste. */
+.hcta{
+  display:none;align-items:center;gap:7px;flex:0 0 auto;margin-left:4px;
+  height:38px;padding:0 18px 0 20px;border-radius:999px;
+  background:var(--ink);color:#fff;font-size:13.5px;font-weight:600;text-decoration:none;
+  box-shadow:0 1px 2px rgba(0,0,0,.18),0 4px 14px rgba(0,0,0,.14);
+  transition:background .15s,transform .15s,box-shadow .15s;
+}
+.hcta svg{transition:transform .18s}
+.hcta:hover{background:#000;transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,.2),0 8px 20px rgba(0,0,0,.18)}
+.hcta:hover svg{transform:translateX(3px)}
+body.vue-accueil .hcta{display:inline-flex}
+/* petit ecran : le heros porte deja « Toutes les prods », l'en-tete n'a pas la place de le redire */
+@media(max-width:640px){ .hlinks a{display:none} body.vue-accueil .hcta{display:none} }
 
 @media(prefers-reduced-motion:reduce){ *{animation-duration:.01ms !important;transition-duration:.01ms !important} }
 </style>
@@ -931,7 +955,6 @@ body:not(.vue-accueil) .actions{margin-left:auto}
       <a href="#vueArtistes" id="navArtistes" hidden>Artistes</a>
       <a href="#vueStyles">Styles</a>
       <a href="#vueMoods">Moods</a>
-      <a class="cta" href="?vue=prods" data-vue="prods">Les prods</a>
     </nav>
 
     <div class="actions">
@@ -939,19 +962,25 @@ body:not(.vue-accueil) .actions{margin-left:auto}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
         <span class="sf-t">Toutes les prods</span>
       </button>
-      <button class="crate-btn hist-btn" id="ptBtn" aria-pressed="false" aria-label="Pour toi : prods choisies d'après tes goûts" title="Pour toi">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z"/><path d="M19 16l.7 1.8L21.5 18.5l-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/></svg>
-        <span class="hist-t">Pour toi</span>
-      </button>
-      <button class="crate-btn hist-btn" id="histBtn" aria-pressed="false" aria-label="Historique d'écoute">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
-        <span class="hist-t">Historique</span>
-      </button>
-      <button class="crate-btn" id="crateBtn" aria-pressed="false">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
-        Prods likés <span class="mono" id="crateN">0</span>
-      </button>
+      <div class="seg" role="group" aria-label="Mes prods">
+        <button class="seg-b" id="ptBtn" aria-pressed="false" aria-label="Pour toi : prods choisies d'après tes goûts" title="Pour toi">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z"/><path d="M19 16l.7 1.8L21.5 18.5l-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/></svg>
+          <span class="hist-t">Pour toi</span>
+        </button>
+        <button class="seg-b" id="histBtn" aria-pressed="false" aria-label="Historique d'écoute">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
+          <span class="hist-t">Historique</span>
+        </button>
+        <button class="seg-b" id="crateBtn" aria-pressed="false">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
+          Prods likés <span class="mono" id="crateN">0</span>
+        </button>
+      </div>
     </div>
+
+    <a class="hcta" href="?vue=prods" data-vue="prods">Les prods
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+    </a>
   </div>
 </header>
 
