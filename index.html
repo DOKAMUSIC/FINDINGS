@@ -1502,6 +1502,9 @@ function filtered(){
   // l'historique se lit dans l'ordre d'ecoute, le plus recent en tete, quel que soit le tri
   if (S.historyOnly) return out.sort((a, b) => HIST_POS.get(a.id) - HIST_POS.get(b.id));
   if (S.forYou) return classerPourToi(out);
+  /* Le score est calcule une fois par prod, pas a chaque comparaison : trier 5 500 prods
+     appelle le comparateur ~70 000 fois, soit 140 000 calculs de score (14 ms) au lieu de 5 500. */
+  if (S.sort === "pertinence") return out.map(b => [score(b), b]).sort((x, y) => y[0] - x[0]).map(x => x[1]);
   return out.sort(by);
 }
 
@@ -1671,10 +1674,13 @@ function render(){
   if (res.length) {
     list.innerHTML = "";
     ajouterLignes();
-    // un filtre change en bas de page : on repart du haut de la nouvelle liste
-    const haut = list.getBoundingClientRect().top;
-    const reserve = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hh")) || 96) + 60;
-    if (haut < reserve) window.scrollTo({ top: Math.max(0, scrollY + haut - reserve), behavior: "instant" });
+    // un filtre change en bas de page : on repart du haut de la nouvelle liste. En haut de
+    // page il n'y a rien a corriger, et la mesure force une mise en page complete (~23 ms).
+    if (scrollY > 80) {
+      const haut = list.getBoundingClientRect().top;
+      const reserve = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hh")) || 96) + 60;
+      if (haut < reserve) window.scrollTo({ top: Math.max(0, scrollY + haut - reserve), behavior: "instant" });
+    }
   } else list.innerHTML = (S.historyOnly && !HIST.length ? `
     <li class="empty">
       <h3>Rien d'écouté pour l'instant.</h3>
