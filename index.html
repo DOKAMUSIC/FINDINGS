@@ -323,6 +323,15 @@ ul{margin:0;padding:0;list-style:none}
   transition:.15s;
 }
 .playall:hover{background:#e51f35;box-shadow:var(--sh-2)}
+.surprise{
+  display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink-2);
+  font-size:13px;font-weight:560;box-shadow:var(--sh-1);transition:.15s;
+}
+.surprise:hover{box-shadow:var(--sh-2)}
+.surprise svg{transition:transform .35s cubic-bezier(.2,.9,.25,1.4)}
+.surprise:active svg,.hbtn:active svg{transform:rotate(90deg)}
+@media(max-width:640px){ .surprise span{display:none} .surprise{padding:0 10px} }
 
 .head-acts{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0;max-width:100%}
 .sorts{
@@ -1041,6 +1050,10 @@ body.vue-accueil .hcta{display:inline-flex}
         Toutes les prods
       </a>
       <a class="hbtn ghost" href="?sort=recent" data-vue="prods">Les dernières sorties</a>
+      <button class="hbtn ghost" id="surpriseAcc" title="Lance une prod au hasard parmi celles que tu n'as jamais écoutées">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
+        Surprends-moi
+      </button>
     </div>
     <div class="stats" id="stats"></div>
   </div>
@@ -1127,6 +1140,10 @@ body.vue-accueil .hcta{display:inline-flex}
       <button class="playall" id="playall">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
         <span id="playallN">Tout lire</span>
+      </button>
+      <button class="surprise" id="surprise" title="Une prod au hasard dans cette liste, parmi celles que tu n'as jamais écoutées">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
+        <span>Surprends-moi</span>
       </button>
       <div class="sorts" id="sorts">
         <button data-sort="pertinence" aria-pressed="true">Pertinence</button>
@@ -1747,6 +1764,7 @@ function majEntete(res){
     `${res.length - 1} prods proches · style, tempo, tonalité et artistes en commun`;
   const pa = document.getElementById("playall");
   pa.hidden = !res.length;
+  document.getElementById("surprise").hidden = res.length < 3;   // un tirage parmi deux prods n'a rien d'une surprise
   document.getElementById("playallN").textContent = res.length > 1 ? `Lire les ${res.length}` : "Tout lire";
 }
 
@@ -2479,6 +2497,23 @@ document.getElementById("sorts").addEventListener("click", e => {
 document.getElementById("playall").addEventListener("click", () => {
   if (LAST.length) playFrom(LAST, 0);
 });
+/* « Surprends-moi » : une prod tiree au hasard, de preference jamais ecoutee, puis une
+   file de 40 autres tirees pareil — « suivant » continue la surprise. Dans le catalogue
+   il respecte les filtres affiches ; depuis l'accueil il puise dans tout le catalogue. */
+function surprendre(source){
+  const pool = source.filter(b => !DEAD.has(b.id) && b.id !== current?.id);
+  const neufs = pool.filter(b => !VU.has(b.id));
+  const base = neufs.length ? neufs : pool;
+  if (!base.length) return;
+  const tirage = base.slice();
+  for (let i = tirage.length - 1; i > 0 && i >= tirage.length - 41; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [tirage[i], tirage[j]] = [tirage[j], tirage[i]];
+  }
+  playFrom(tirage.slice(-41).reverse(), 0);
+}
+document.getElementById("surprise").addEventListener("click", () => surprendre(LAST));
+document.getElementById("surpriseAcc").addEventListener("click", () => surprendre(BEATS));
 
 /* pied de page : état réel du catalogue */
 (function footStats(){
