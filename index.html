@@ -363,6 +363,10 @@ ul{margin:0;padding:0;list-style:none}
 }
 .profil-acts .pbtn:hover{border-color:#fff;background:rgba(255,255,255,.14)}
 .profil-acts .pbtn.on{background:#fff;color:#111;border-color:#fff}
+/* liens d'ecoute : une pastille a la couleur de la plateforme */
+.profil{--pc-spotify:#1ED760;--pc-apple:#FA2D48;--pc-deezer:#A238FF}
+.profil-acts .plat i{width:9px;height:9px;border-radius:50%;background:var(--pc);box-shadow:0 0 0 3px color-mix(in srgb,var(--pc) 30%,transparent)}
+.profil-acts .plat:hover{border-color:var(--pc)}
 .profil .cibles{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
 .profil .cibles a{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff}
 .profil .cibles a:hover{background:rgba(255,255,255,.24)}
@@ -2654,7 +2658,14 @@ function majProfil(res){
           ban: c.img ? `background-image:url('${esc(c.img)}');filter:blur(28px) saturate(1.3);transform:scale(1.25)` : "",
           chiffre: c.fans ? `<span><b>${fmtViews(c.fans)}</b> fans Deezer</span>` : "",
           compte: `<b>${toutes.length}</b> type beat${toutes.length > 1 ? "s" : ""} · <b>${nbProds}</b> beatmaker${nbProds > 1 ? "s" : ""}`,
-          lien: c.dz ? "Deezer ↗" : "", dz: c.dz, couleur: ARTIST_STYLE[art] || styles[0] || "trap",
+          lien: "", couleur: ARTIST_STYLE[art] || styles[0] || "trap",
+          /* Ecouter l'artiste : Spotify (fiche exacte, sinon sa recherche), Apple Music si on
+             a sa fiche, Deezer. */
+          ecouter: [
+            ["spotify", "Spotify", c.sp || `https://open.spotify.com/search/${encodeURIComponent(ARTIST_NAME[art] || art)}/artists`],
+            c.am && ["apple", "Apple Music", c.am],
+            c.dz && ["deezer", "Deezer", c.dz]
+          ].filter(Boolean),
           // les beatmakers qui font le plus de type beats « a la Hamza » — pas ses producteurs reels
           liste: compte(b => b.prod).slice(0, 6).map(p => `<a href="?prod=${encodeURIComponent(p)}" data-vue="prods">${avatarDe(p) ? `<img src="${esc(avatarDe(p))}" alt="" referrerpolicy="no-referrer">` : ""}${esc(p)}</a>`) };
   }
@@ -2676,7 +2687,9 @@ function majProfil(res){
         <div class="profil-acts">
           <button class="lire" id="profLire" aria-label="Tout lire" title="Tout lire"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></button>
           <button class="pbtn${suivi ? " on" : ""}" id="profSuivre" aria-pressed="${suivi}">${suivi ? "✓ Suivi" : "+ Suivre"}</button>
-          ${v.lien ? `<button class="pbtn" id="profLien" ${v.dz ? `data-href="${esc(v.dz)}"` : ""}>${v.lien}</button>` : ""}
+          ${v.lien ? `<button class="pbtn" id="profLien">${v.lien}</button>` : ""}
+          ${(v.ecouter || []).map(([k, nom, url]) =>
+            `<a class="pbtn plat" href="${esc(url)}" target="_blank" rel="noopener" style="--pc:var(--pc-${k})"><i></i>${nom}</a>`).join("")}
         </div>
         ${v.liste.length ? `<div class="cibles">${S.prod ? "" : `<span class="cibles-t">Type beats ${esc(v.nom)} par</span>`}${v.liste.join("")}</div>` : ""}
       </div>
@@ -2725,8 +2738,7 @@ elProfil.addEventListener("click", e => {
   if (e.target.closest("#profLire")) { if (LAST.length) playFrom(LAST, 0); return; }
   const lien = e.target.closest("#profLien");
   if (lien) {
-    if (lien.dataset.href) window.open(lien.dataset.href, "_blank", "noopener");
-    else openChan(BEATS.find(x => x.prod === S.prod));
+    openChan(BEATS.find(x => x.prod === S.prod));
     return;
   }
   if (e.target.closest("#profSuivre")) {
