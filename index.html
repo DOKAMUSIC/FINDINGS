@@ -322,6 +322,40 @@ ul{margin:0;padding:0;list-style:none}
   font-size:12.5px;font-weight:600;color:var(--ink-2);box-shadow:var(--sh-1);transition:.15s;
 }
 .suivre:hover{box-shadow:var(--sh-2)}
+/* dossiers de likes : une rangee de pastilles au-dessus des filtres */
+.dossiers{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 10px}
+.dossiers[hidden]{display:none}
+.dos{
+  display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);font-size:13px;font-weight:560;color:var(--ink-2);
+  box-shadow:var(--sh-1);transition:.15s;cursor:pointer;
+}
+.dos:hover{box-shadow:var(--sh-2)}
+.dos span{font-family:var(--mono,ui-monospace,monospace);font-size:11px;color:var(--dimmer)}
+.dos[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.dos[aria-pressed="true"] span{color:rgba(255,255,255,.6)}
+.dos.suivi{padding:0 4px 0 12px;gap:4px}
+.dos.suivi a{display:inline-flex;align-items:center;gap:7px}
+.dos.suivi i{width:7px;height:7px;border-radius:50%;background:var(--dimmer)}
+.dos.suivi button{width:22px;height:22px;border-radius:50%;font-size:15px;line-height:1;color:var(--dimmer)}
+.dos.suivi button:hover{background:rgba(0,0,0,.06);color:var(--ink)}
+.dos.ajout{background:transparent;border-style:dashed;box-shadow:none;color:var(--dim)}
+.dos-input{height:32px;border:1px solid var(--accent);border-radius:999px;padding:0 13px;font-size:13px;width:170px;background:var(--surface);color:var(--ink);outline:none}
+.dos-act{height:32px;padding:0 9px;font-size:12.5px;font-weight:560;color:var(--dim);border-radius:999px}
+.dos-act:hover{color:var(--ink);background:rgba(0,0,0,.05)}
+.dos-act.danger{color:var(--accent)}
+/* menu « ranger dans » ouvert depuis une prod */
+.dosmenu{
+  position:fixed;z-index:60;width:240px;max-height:320px;overflow-y:auto;padding:8px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg,14px);box-shadow:var(--sh-2);
+}
+.dosmenu[hidden]{display:none}
+.dosmenu .eyebrow{display:block;padding:4px 8px 6px}
+.dosmenu label{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;font-size:13px;cursor:pointer}
+.dosmenu label:hover{background:rgba(0,0,0,.04)}
+.dosmenu input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px}
+.dosmenu .dos-input{width:100%;margin-top:6px;border-radius:9px}
+.icon.dans{color:var(--accent)}
 .suivre.on{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
 .suivre[hidden]{display:none}
 .res-head .sub{display:block}
@@ -1009,6 +1043,10 @@ body.vue-accueil .hcta{display:inline-flex}
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z"/><path d="M19 16l.7 1.8L21.5 18.5l-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/></svg>
           <span class="hist-t">Pour toi</span>
         </button>
+        <button class="seg-b" id="suivisBtn" aria-pressed="false" aria-label="Mes abonnements : artistes et beatmakers suivis" title="Mes abonnements">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M19 8v6M16 11h6"/></svg>
+          <span class="hist-t">Suivis</span>
+        </button>
         <button class="seg-b" id="histBtn" aria-pressed="false" aria-label="Historique d'écoute">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
           <span class="hist-t">Historique</span>
@@ -1204,6 +1242,7 @@ body.vue-accueil .hcta{display:inline-flex}
       </div>
       </div>
     </div>
+    <div class="dossiers" id="dossiers" hidden></div>
     <div class="fbar" id="fbar">
       <div class="fitem" data-pop id="fitemArtiste" hidden>
         <button class="ftrig" id="trigArtiste" aria-haspopup="true" aria-expanded="false">
@@ -1334,6 +1373,7 @@ body.vue-accueil .hcta{display:inline-flex}
   </div>
 </div>
 
+<div class="dosmenu" id="dosMenu" hidden role="menu"></div>
 <script src="catalog.js"></script>
 <script>
 /* ============ données ============ */
@@ -1384,6 +1424,7 @@ const S = {
   proche:null,      // id de la prod dont on cherche les voisines
   depuis:false,     // seulement les prods arrivees depuis la derniere visite
   prod:null,        // un beatmaker
+  dossier:null,     // un dossier de likes (avec crateOnly)
   suivis:false,     // les prods des artistes et beatmakers suivis
   neuf:false        // « Jamais écoutées » : un reglage, pas un filtre — il survit aux changements de vue
 };
@@ -1420,6 +1461,15 @@ function noterEcoute(id){
   if (VU.size > 20000) VU = new Set([...VU].slice(-20000));
   try { localStorage.setItem(VU_KEY, JSON.stringify([...VU])); } catch (e) {}
 }
+/* Dossiers de likes : « Projet été », « À acheter »… Une prod likee peut etre rangee dans
+   plusieurs dossiers ; retirer le like la retire de tous. Dans le navigateur, comme les likes. */
+const DOS_KEY = "findings.dossiers";
+let DOSSIERS = [];
+try { DOSSIERS = JSON.parse(localStorage.getItem(DOS_KEY) || "[]").filter(d => d && d.id && d.nom).map(d => ({ id: d.id, nom: d.nom, ids: new Set(d.ids || []) })); } catch (e) {}
+const saveDossiers = () => {
+  try { localStorage.setItem(DOS_KEY, JSON.stringify(DOSSIERS.map(d => ({ id: d.id, nom: d.nom, ids: [...d.ids] })))); } catch (e) {}
+};
+const dossier = id => DOSSIERS.find(d => d.id === id);
 const saveCrate = () => { versionGout++; try{ localStorage.setItem("findings.crate",JSON.stringify([...CRATE])); }catch(e){} };
 
 /* ============ utilitaires ============ */
@@ -1677,6 +1727,7 @@ function filtered(){
   const terms = q ? q.split(/\s+/) : [];
   let out = BEATS.filter(b => {
     if(S.crateOnly && !CRATE.has(b.id)) return false;
+    if(S.crateOnly && S.dossier && !dossier(S.dossier)?.ids.has(b.id)) return false;
     if(S.historyOnly && !HIST_POS.has(b.id)) return false;
     // « Pour toi » ne propose que du neuf : ce qu'on a deja ecoute ou mis de cote est exclu
     if(S.forYou && (HIST_POS.has(b.id) || CRATE.has(b.id))) return false;
@@ -1837,6 +1888,9 @@ function rowHTML(b){
         <button class="icon${saved?" sav":""}" data-act="save" aria-label="${saved?"Retirer des prods likées":"Liker cette prod"}" title="${saved?"Retirer des prods likées":"Liker cette prod"}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="${saved?"currentColor":"none"}" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
         </button>
+        ${S.crateOnly && saved ? (dans => `<button class="icon${dans?" dans":""}" data-act="dossier" aria-label="Ranger dans un dossier" title="Ranger dans un dossier">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="${dans?"currentColor":"none"}" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        </button>`)(DOSSIERS.some(d => d.ids.has(b.id))) : ""}
         <button class="icon" data-act="proche" aria-label="Prods similaires à ${esc(b.title)}" title="Prods similaires">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="5"/><circle cx="15" cy="15" r="5"/></svg>
         </button>
@@ -1853,7 +1907,7 @@ function rowHTML(b){
 function majEntete(res){
   majBarre();
   const parts = [];
-  if(S.crateOnly) parts.push("prods likées");
+  if(S.crateOnly) parts.push(S.dossier && dossier(S.dossier) ? dossier(S.dossier).nom : "prods likées");
   if(S.historyOnly) parts.push("écoutées récemment");
   if(S.forYou) parts.push("Pour toi");
   if(S.depuis) parts.push("Nouveau depuis ta visite");
@@ -1877,6 +1931,7 @@ function majEntete(res){
   document.getElementById("effHist").hidden = !(S.historyOnly && HIST.length);
   if (S.forYou) document.getElementById("resSub").textContent += (res.length ? " · " : "") + resumeGout();
   majSuivre();
+  majDossiers();
   if (S.depuis && VISITE_PREC) document.getElementById("resSub").textContent += ` · ta dernière visite : ${ilYa(VISITE_PREC)}`;
   if (S.proche && res.length > 1) document.getElementById("resSub").textContent =
     `${res.length - 1} prods proches · style, tempo, tonalité et artistes en commun`;
@@ -1923,6 +1978,14 @@ function render(){
     <li class="empty">
       <h3>Tu as déjà tout écouté ici.</h3>
       <p>Tu as déjà lancé ces ${dejaEcoutees()} prods — désactive « Jamais écoutées » pour les revoir.</p>
+    </li>` : S.suivis && !nbSuivis() ? `
+    <li class="empty">
+      <h3>Tu ne suis personne pour l'instant.</h3>
+      <p>Ouvre un artiste (menu Artiste) ou clique sur le nom d'un beatmaker, puis touche « + Suivre » à côté du titre.</p>
+    </li>` : S.crateOnly && S.dossier && dossier(S.dossier) && !dossier(S.dossier).ids.size ? `
+    <li class="empty">
+      <h3>Ce dossier est vide.</h3>
+      <p>Dans « Tous », touche l'icône dossier à côté d'une prod pour la ranger ici.</p>
     </li>` : S.crateOnly && !CRATE.size ? `
     <li class="empty">
       <h3>Aucune prod likée pour l'instant.</h3>
@@ -2343,6 +2406,7 @@ function basculerLike(b, source){
   const like = !CRATE.has(b.id);
   like ? CRATE.add(b.id) : CRATE.delete(b.id);
   saveCrate();
+  if (!like && DOSSIERS.some(d => d.ids.delete(b.id))) saveDossiers();
   document.getElementById("crateN").textContent = CRATE.size;
   if (source) peindreLike(source, like);
   // l'autre représentation se met à jour sans fêter l'événement une deuxième fois
@@ -2406,6 +2470,7 @@ list.addEventListener("click", e => {
   }
   if(act === "chan"){ openChan(b); return; }
   if(act === "proche"){ voirProches(b.id); return; }
+  if(act === "dossier"){ ouvrirDosMenu(b, e.target.closest('[data-act="dossier"]')); return; }
   if(act === "prod"){
     viderFiltres(); S.prod = b.prod; refletFiltres(); render();
     history.pushState({ vue: "prods" }, "", location.pathname + "?prod=" + encodeURIComponent(b.prod));
@@ -2449,11 +2514,128 @@ document.getElementById("suivreBtn").addEventListener("click", () => {
   majSuivre();
 });
 
+/* ---- dossiers : la rangee de pastilles ---- */
+const elDos = document.getElementById("dossiers");
+let dosSaisie = null;   // null, "new" ou l'id du dossier qu'on renomme
+let dosSuppr = null;    // suppression armee (deux clics)
+function majDossiers(){
+  elDos.hidden = !(S.crateOnly || (S.suivis && nbSuivis()));
+  if (S.suivis) {
+    // ceux qu'on suit, chacun ouvre sa page ; la croix arrete de suivre
+    elDos.innerHTML = [...SUIVIS.artists].map(id =>
+        `<span class="dos suivi"><a href="?artist=${encodeURIComponent(id)}" data-vue="prods"><i style="background:var(--s-${ARTIST_STYLE[id]})"></i>${esc(ARTIST_NAME[id] || id)}</a><button data-unf="artists" data-id="${esc(id)}" aria-label="Ne plus suivre ${esc(ARTIST_NAME[id] || id)}" title="Ne plus suivre">×</button></span>`)
+      .concat([...SUIVIS.prods].map(p =>
+        `<span class="dos suivi"><a href="?prod=${encodeURIComponent(p)}" data-vue="prods"><i></i>${esc(p)}</a><button data-unf="prods" data-id="${esc(p)}" aria-label="Ne plus suivre ${esc(p)}" title="Ne plus suivre">×</button></span>`)).join("");
+    return;
+  }
+  if (!S.crateOnly) return;
+  const n = d => [...d.ids].filter(id => CRATE.has(id)).length;
+  const saisie = (val = "") => `<input class="dos-input" id="dosInput" maxlength="40" placeholder="Nom du dossier" value="${esc(val)}" aria-label="Nom du dossier">`;
+  elDos.innerHTML =
+    `<button class="dos" data-dos="" aria-pressed="${!S.dossier}">Tous <span>${CRATE.size}</span></button>` +
+    DOSSIERS.map(d => dosSaisie === d.id ? saisie(d.nom)
+      : `<button class="dos" data-dos="${esc(d.id)}" aria-pressed="${S.dossier === d.id}">${esc(d.nom)} <span>${n(d)}</span></button>`).join("") +
+    (dosSaisie === "new" ? saisie() : `<button class="dos ajout" id="dosNew">+ Nouveau dossier</button>`) +
+    (S.dossier && dossier(S.dossier) && dosSaisie !== S.dossier
+      ? `<button class="dos-act" data-dosact="ren">Renommer</button><button class="dos-act danger" data-dosact="del">${dosSuppr === S.dossier ? "Confirmer la suppression" : "Supprimer"}</button>` : "");
+  const inp = document.getElementById("dosInput");
+  if (inp) { inp.focus(); inp.select(); }
+}
+function creerDossier(nom){
+  const d = { id: "d" + Date.now().toString(36), nom: nom.slice(0, 40), ids: new Set() };
+  DOSSIERS.push(d);
+  saveDossiers();
+  return d;
+}
+function validerSaisie(){
+  const inp = document.getElementById("dosInput");
+  const nom = inp ? inp.value.trim() : "";
+  const mode = dosSaisie;
+  dosSaisie = null;
+  if (nom && mode === "new") { const d = creerDossier(nom); S.dossier = d.id; }
+  else if (nom && dossier(mode)) { dossier(mode).nom = nom.slice(0, 40); saveDossiers(); }
+  render(); majAdresse();
+}
+elDos.addEventListener("click", e => {
+  const unf = e.target.closest("[data-unf]");
+  if (unf) { SUIVIS[unf.dataset.unf].delete(unf.dataset.id); saveSuivis(); versionGout++; render(); return; }
+  const chip = e.target.closest("[data-dos]");
+  if (chip) { S.dossier = chip.dataset.dos || null; dosSuppr = null; render(); majAdresse(); return; }
+  if (e.target.closest("#dosNew")) { dosSaisie = "new"; majDossiers(); return; }
+  const act = e.target.closest("[data-dosact]")?.dataset.dosact;
+  if (act === "ren") { dosSaisie = S.dossier; majDossiers(); return; }
+  if (act === "del") {
+    if (dosSuppr !== S.dossier) {
+      dosSuppr = S.dossier; majDossiers();
+      setTimeout(() => { if (dosSuppr) { dosSuppr = null; majDossiers(); } }, 3000);
+      return;
+    }
+    DOSSIERS = DOSSIERS.filter(d => d.id !== S.dossier);   // les prods restent likees
+    saveDossiers(); dosSuppr = null; S.dossier = null; render(); majAdresse();
+  }
+});
+elDos.addEventListener("keydown", e => {
+  if (e.target.id !== "dosInput") return;
+  if (e.key === "Enter") { e.preventDefault(); validerSaisie(); }
+  if (e.key === "Escape") { dosSaisie = null; majDossiers(); }
+});
+// cliquer ailleurs valide ce qui a ete tape, comme Entree
+elDos.addEventListener("focusout", e => {
+  if (e.target.id === "dosInput") setTimeout(() => { if (dosSaisie !== null) validerSaisie(); }, 0);
+});
+
+/* ---- dossiers : le menu « ranger dans » d'une prod ---- */
+const dosMenu = document.getElementById("dosMenu");
+let dosProd = null;
+function peindreDosMenu(){
+  const b = dosProd;
+  dosMenu.innerHTML = `<span class="eyebrow">Ranger dans</span>` +
+    DOSSIERS.map(d => `<label><input type="checkbox" data-mdos="${esc(d.id)}"${d.ids.has(b.id) ? " checked" : ""}>${esc(d.nom)}</label>`).join("") +
+    `<input class="dos-input" id="dosMenuNew" maxlength="40" placeholder="+ Nouveau dossier" aria-label="Nouveau dossier">`;
+}
+function ouvrirDosMenu(b, btn){
+  if (!dosMenu.hidden && dosProd === b) return fermerDosMenu();
+  dosProd = b;
+  peindreDosMenu();
+  dosMenu.hidden = false;
+  const r = btn.getBoundingClientRect(), h = dosMenu.offsetHeight;
+  dosMenu.style.left = Math.max(8, Math.min(innerWidth - 248, r.right - 240)) + "px";
+  dosMenu.style.top = (r.bottom + 6 + h > innerHeight - 90 ? Math.max(8, r.top - 6 - h) : r.bottom + 6) + "px";
+  if (!DOSSIERS.length) document.getElementById("dosMenuNew").focus();
+}
+function fermerDosMenu(){
+  if (dosMenu.hidden) return;
+  dosMenu.hidden = true;
+  dosProd = null;
+  render();   // compteurs des pastilles, icone de la ligne, contenu du dossier affiche
+}
+dosMenu.addEventListener("change", e => {
+  const d = dossier(e.target.dataset.mdos); if (!d || !dosProd) return;
+  e.target.checked ? d.ids.add(dosProd.id) : d.ids.delete(dosProd.id);
+  saveDossiers();
+});
+dosMenu.addEventListener("keydown", e => {
+  if (e.target.id !== "dosMenuNew") return;
+  if (e.key === "Escape") return fermerDosMenu();
+  if (e.key !== "Enter" || !e.target.value.trim()) return;
+  const d = creerDossier(e.target.value.trim());
+  d.ids.add(dosProd.id);
+  saveDossiers();
+  peindreDosMenu();
+  document.getElementById("dosMenuNew").focus();
+});
+document.addEventListener("click", e => {
+  if (!dosMenu.hidden && !e.target.closest("#dosMenu") && !e.target.closest('[data-act="dossier"]')) fermerDosMenu();
+});
+addEventListener("keydown", e => { if (e.key === "Escape") fermerDosMenu(); });
+addEventListener("scroll", () => { if (!dosMenu.hidden) fermerDosMenu(); }, { passive: true });
+
 function viderFiltres(){
   S.proche = null;
   S.depuis = false;
   S.prod = null;
   S.suivis = false;
+  S.dossier = null;
   S.historyOnly = false;
   S.forYou = false;
   S.styles.clear();
@@ -2471,6 +2653,9 @@ function refletFiltres(){
   crateBtn.classList.toggle("on", S.crateOnly);
   toutesBtn.hidden = !(S.crateOnly || S.historyOnly || S.forYou || S.proche || S.depuis || S.prod || S.suivis);
   histBtn.setAttribute("aria-pressed", S.historyOnly);
+  const suBtn = document.getElementById("suivisBtn");
+  suBtn.setAttribute("aria-pressed", S.suivis);
+  suBtn.classList.toggle("on", S.suivis);
   histBtn.classList.toggle("on", S.historyOnly);
   const ptBtn = document.getElementById("ptBtn");
   ptBtn.setAttribute("aria-pressed", S.forYou);
@@ -2486,6 +2671,7 @@ function majAdresse(){
   if (S.styles.size) p.set("style", [...S.styles][0]);
   if (S.moods.size)  p.set("mood",  [...S.moods][0]);
   if (S.crateOnly)   p.set("likes", "1");
+  if (S.crateOnly && S.dossier) p.set("dossier", S.dossier);
   if (S.historyOnly) p.set("historique", "1");
   if (S.forYou)      p.set("pourtoi", "1");
   if (S.proche)      p.set("proche", S.proche);
@@ -2598,6 +2784,16 @@ function voirProches(id){
     if (scrollY > haut) window.scrollTo({ top: Math.max(0, haut), behavior: "smooth" });
   }
 }
+document.getElementById("suivisBtn").addEventListener("click", () => {
+  const etaitActif = S.suivis;
+  viderFiltres();
+  S.suivis = !etaitActif;
+  refletFiltres();
+  render();
+  if (document.body.classList.contains("vue-accueil"))
+    montrerVue("prods", true, S.suivis ? "?suivis=1" : "?vue=prods");
+  else majAdresse();
+});
 const histBtn = document.getElementById("histBtn");
 histBtn.addEventListener("click", () => {
   const etaitActif = S.historyOnly;
@@ -3268,6 +3464,7 @@ function appliquerParams(p, reprendreLecture = false){
   if (artist && ARTIST_NAME[artist]) S.artists.add(artist);
   S.crateOnly = likes === "1" && CRATE.size > 0;
   S.historyOnly = p.get("historique") === "1" && !S.crateOnly;
+  if (S.crateOnly && dossier(p.get("dossier"))) S.dossier = p.get("dossier");
   S.forYou = p.get("pourtoi") === "1" && !S.crateOnly && !S.historyOnly;
   if (BY_ID.has(p.get("proche")) && !S.crateOnly && !S.historyOnly && !S.forYou) S.proche = p.get("proche");
   S.depuis = p.get("nouveau") === "1" && !S.crateOnly && !S.historyOnly && !S.forYou && !S.proche;
