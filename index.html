@@ -3098,9 +3098,17 @@ const canvas = document.getElementById("glnote");
 const svg = document.getElementById("svgnote");
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/* Le CDN peut rater un chargement (reseau mobile, coupure breve) : un second essai
+   avant de se contenter du SVG. */
+async function chargerThree(){
+  const url = "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+  try { return await import(url); }
+  catch (e) { await new Promise(r => setTimeout(r, 2500)); return import(url + "?r=2"); }
+}
+
 try {
   if (!window.WebGLRenderingContext) throw new Error("WebGL indisponible");
-  const THREE = await import("https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js");
+  const THREE = await chargerThree();
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
   renderer.setClearAlpha(0);
@@ -3161,18 +3169,25 @@ try {
   group.scale.setScalar(.98);
   scene.add(group);
 
+  /* Taille : on la relit a chaque image. Ouvert sur la liste des prods, l'accueil est
+     cache — le canevas mesure 0 et le rendu se faisait en 2 x 2 pixels, etire ensuite
+     en une tache rose quand on revenait a l'accueil. Desormais : pas de rendu tant que
+     la scene n'a pas de taille, et la 3D ne remplace le SVG qu'apres une vraie image. */
+  let lw = 0, lh = 0;
   function size(){
-    const r = canvas.getBoundingClientRect();
-    const w = Math.max(1, r.width), h = Math.max(1, r.height);
-    renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    // la note garde sa place quel que soit le format de la fenêtre
-    camera.position.z = w < 620 ? 8.4 : 7.1;
-    camera.updateProjectionMatrix();
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return false;
+    if (w !== lw || h !== lh) {
+      lw = w; lh = h;
+      renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      // la note garde sa place quel que soit le format de la fenetre
+      camera.position.z = w < 620 ? 8.4 : 7.1;
+      camera.updateProjectionMatrix();
+    }
+    return true;
   }
-  size();
-  addEventListener("resize", size, { passive:true });
 
   let mx = 0, my = 0, tx = 0, ty = 0;
   addEventListener("pointermove", e => {
@@ -3180,8 +3195,27 @@ try {
     ty = (e.clientY / innerHeight - .5) * 2;
   }, { passive:true });
 
+  /* Contexte perdu (GPU sollicite, onglet en arriere-plan longtemps, veille du telephone) :
+     le canevas devient vide. On remontre le SVG le temps que le navigateur le rende. */
+  let perdu = false;
+  canvas.addEventListener("webglcontextlost", e => {
+    e.preventDefault();
+    perdu = true;
+    canvas.classList.remove("on");
+    svg.classList.remove("off");
+  });
+  canvas.addEventListener("webglcontextrestored", () => { perdu = false; lw = lh = 0; relancer(); });
+
+  /* On n'anime que ce qu'on voit : accueil affiche, haut de page a l'ecran, onglet actif. */
+  let visible = true, boucle = 0;
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; relancer(); }).observe(canvas);
+  new ResizeObserver(() => relancer()).observe(canvas);
+  document.addEventListener("visibilitychange", relancer);
+
   const t0 = performance.now();
   function frame(now){
+    boucle = 0;
+    if (perdu || document.hidden || !visible || !size()) return;   // relance par les observateurs
     const t = (now - t0) / 1000;
     mx += (tx - mx) * .06;
     my += (ty - my) * .06;
@@ -3194,19 +3228,20 @@ try {
       group.position.y = -.1 + Math.sin(t * .85) * .10;
     }
     renderer.render(scene, camera);
-    if (!REDUCED) requestAnimationFrame(frame);
+    if (!canvas.classList.contains("on")) {
+      canvas.classList.add("on");
+      svg.classList.add("off");
+    }
+    if (!REDUCED) boucle = requestAnimationFrame(frame);
   }
-  requestAnimationFrame(frame);
-
-  canvas.classList.add("on");
-  svg.classList.add("off");
+  function relancer(){
+    if (!boucle) boucle = requestAnimationFrame(frame);
+  }
+  relancer();
 } catch (e) {
   // le SVG reste affiché : on ne dit rien, il n'y a rien de cassé pour le visiteur
   console.info("note 3D non disponible :", e && e.message);
 }
 </script>
-</body>
-</html>
-
 </body>
 </html>
