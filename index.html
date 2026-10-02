@@ -1255,6 +1255,7 @@ body.vue-accueil .hcta{display:inline-flex}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9z"/></svg>
         <input id="vol" type="range" min="0" max="100" value="100" aria-label="Volume">
       </span>
+      <button class="btn ghost" id="procheBtn" title="Prods dans le même esprit que celle-ci">Similaires</button>
       <button class="btn ghost" id="ytLink">Ouvrir sur YouTube</button>
       <button class="btn pri" id="chanBtn" title="Voir la chaîne YouTube du beatmaker">Voir la chaîne</button>
     </div>
@@ -1308,6 +1309,7 @@ const BEATS = CAT.beats.map(b => ({
 const S = {
   q:"", styles:new Set(), moods:new Set(), artists:new Set(), bpm:[55,200], bpmSur:false,
   sort:"pertinence", crateOnly:false, historyOnly:false, forYou:false, playing:null, paused:false,
+  proche:null,      // id de la prod dont on cherche les voisines
   neuf:false        // « Jamais écoutées » : un reglage, pas un filtre — il survit aux changements de vue
 };
 try { S.neuf = localStorage.getItem("findings.neuf") === "1"; } catch (e) {}
@@ -1386,6 +1388,60 @@ BEATS.forEach(b => b._h = haystack(b));
    c'est aussi pourquoi le profil ne suit pas d'un appareil a l'autre. */
 const BY_ID = new Map(BEATS.map(b => [b.id, b]));
 let profilCache = null, profilVersion = -1;
+/* ============ prods similaires ============
+   « Montre-m'en d'autres comme celle-la » : meme style, artistes vises en commun, tempo
+   voisin (le double ou la moitie comptent, 70 et 140 se jouent pareil), tonalite egale ou
+   relative, moods partages. Une tonalite devinee pese moins qu'une tonalite annoncee. */
+const NOTE = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+const HAUTEURS = new Map();
+function hauteur(k){
+  if (!HAUTEURS.has(k)) HAUTEURS.set(k, lireHauteur(k));
+  return HAUTEURS.get(k);
+}
+function lireHauteur(k){
+  const m = /^([A-G])([#b]*)(m?)$/.exec(k || "");
+  if (!m) return null;
+  let pc = NOTE[m[1]];
+  for (const a of m[2]) pc += a === "#" ? 1 : -1;
+  // une tonalite mineure est rapportee a sa relative majeure : Am et C sonnent ensemble
+  return { pc: ((pc % 12) + 12) % 12, mineur: !!m[3], rel: (((pc + (m[3] ? 3 : 0)) % 12) + 12) % 12 };
+}
+function scoreProche(a, b){
+  let s = 0;
+  if (a.style === b.style) s += 3;
+  const art = b.artists.filter(x => a.artists.includes(x)).length;
+  s += 2.6 * Math.min(art, 2);
+  const d = Math.min(Math.abs(a.bpm - b.bpm), Math.abs(a.bpm * 2 - b.bpm), Math.abs(a.bpm - b.bpm * 2));
+  s += 2.2 * Math.max(0, 1 - d / 14);
+  const ka = hauteur(a.key), kb = hauteur(b.key);
+  if (ka && kb) {
+    const sur = a.keySur && b.keySur ? 1 : 0.4;
+    if (ka.pc === kb.pc && ka.mineur === kb.mineur) s += 1.6 * sur;
+    else if (ka.rel === kb.rel) s += 1.1 * sur;                      // relative
+    else if ((ka.rel - kb.rel + 12) % 12 === 7 || (kb.rel - ka.rel + 12) % 12 === 7) s += 0.5 * sur;   // quinte
+  }
+  s += 0.8 * Math.min(2, b.moods.filter(m => a.moods.includes(m)).length);
+  if (a.prod === b.prod) s += 0.7;
+  s += 0.15 * Math.log10(Math.max(b.views, 10)) + Math.max(0, 0.4 - b.days / 600);
+  return s;
+}
+/* La prod de depart en tete, puis 60 voisines au plus, 3 par beatmaker au plus :
+   sinon un beatmaker prolifique dans le meme style remplit toute la page. */
+function classerProches(cands){
+  const ref = BY_ID.get(S.proche);
+  if (!ref) return cands;
+  const notes = cands.filter(b => b.id !== ref.id).map(b => [scoreProche(ref, b), b]).sort((x, y) => y[0] - x[0]);
+  const parProd = new Map(), out = [ref];
+  for (const [, b] of notes) {
+    const n = parProd.get(b.prod) || 0;
+    if (n >= 3) continue;
+    parProd.set(b.prod, n + 1);
+    out.push(b);
+    if (out.length > 60) break;
+  }
+  return out;
+}
+
 function profilGout(){
   if (profilCache && profilVersion === versionGout) return profilCache;
   const P = { style:new Map(), artist:new Map(), mood:new Map(), prod:new Map(), pts:[], poids:0, likes:0, ecoutes:0 };
@@ -1525,6 +1581,7 @@ function filtered(){
   // l'historique se lit dans l'ordre d'ecoute, le plus recent en tete, quel que soit le tri
   if (S.historyOnly) return out.sort((a, b) => HIST_POS.get(a.id) - HIST_POS.get(b.id));
   if (S.forYou) return classerPourToi(out);
+  if (S.proche) return classerProches(out);
   /* Le score est calcule une fois par prod, pas a chaque comparaison : trier 5 500 prods
      appelle le comparateur ~70 000 fois, soit 140 000 calculs de score (14 ms) au lieu de 5 500. */
   if (S.sort === "pertinence") return out.map(b => [score(b), b]).sort((x, y) => y[0] - x[0]).map(x => x[1]);
@@ -1647,6 +1704,9 @@ function rowHTML(b){
         <button class="icon${saved?" sav":""}" data-act="save" aria-label="${saved?"Retirer des prods likées":"Liker cette prod"}" title="${saved?"Retirer des prods likées":"Liker cette prod"}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="${saved?"currentColor":"none"}" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
         </button>
+        <button class="icon" data-act="proche" aria-label="Prods similaires à ${esc(b.title)}" title="Prods similaires">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="5"/><circle cx="15" cy="15" r="5"/></svg>
+        </button>
         <button class="icon" data-act="chan" aria-label="Voir la chaîne YouTube de ${esc(b.prod)}" title="Voir la chaîne YouTube de ${esc(b.prod)}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
         </button>
@@ -1663,6 +1723,7 @@ function majEntete(res){
   if(S.crateOnly) parts.push("prods likées");
   if(S.historyOnly) parts.push("écoutées récemment");
   if(S.forYou) parts.push("Pour toi");
+  if(S.proche && BY_ID.has(S.proche)) parts.push(`Dans l'esprit de « ${BY_ID.get(S.proche).title} »`);
   if(S.styles.size) parts.push([...S.styles].map(s=>STYLE_NAME[s]).join(" + "));
   if(S.artists.size) parts.push([...S.artists].map(id => ARTIST_NAME[id] || id).join(" + "));
   if(S.moods.size) parts.push([...S.moods].join(" + "));
@@ -1676,9 +1737,11 @@ function majEntete(res){
   document.getElementById("resSub").textContent = res.length
     ? `${res.length} prod${res.length>1?"s":""} · ${prods} beatmaker${prods>1?"s":""}`
     : "";
-  document.getElementById("sorts").hidden = S.historyOnly || S.forYou;   // l'ordre est celui de l'ecoute, ou du gout
+  document.getElementById("sorts").hidden = S.historyOnly || S.forYou || !!S.proche;   // l'ordre est celui de l'ecoute, ou du gout
   document.getElementById("effHist").hidden = !(S.historyOnly && HIST.length);
   if (S.forYou) document.getElementById("resSub").textContent += (res.length ? " · " : "") + resumeGout();
+  if (S.proche && res.length > 1) document.getElementById("resSub").textContent =
+    `${res.length - 1} prods proches · style, tempo, tonalité et artistes en commun`;
   const pa = document.getElementById("playall");
   pa.hidden = !res.length;
   document.getElementById("playallN").textContent = res.length > 1 ? `Lire les ${res.length}` : "Tout lire";
@@ -2073,6 +2136,9 @@ elProg.addEventListener("keydown", e => {
   peindre();
 })();
 
+document.getElementById("procheBtn").addEventListener("click", () => {
+  if (current) voirProches(current.id);
+});
 document.getElementById("ytLink").addEventListener("click", () => {
   if (current) window.open(`https://www.youtube.com/watch?v=${current.id}`, "_blank", "noopener");
 });
@@ -2172,6 +2238,7 @@ list.addEventListener("click", e => {
     return;
   }
   if(act === "chan"){ openChan(b); return; }
+  if(act === "proche"){ voirProches(b.id); return; }
   if(S.playing === b.id){ togglePlay(); return; }   // reclic sur la prod en cours = pause/reprise
   playFrom(LAST, LAST.findIndex(x => x.id === b.id));
 });
@@ -2180,6 +2247,7 @@ list.addEventListener("click", e => {
    « sombre » en ayant « Trap » actif renvoyait l'intersection des deux, souvent vide,
    sans que rien n'indique lequel des deux etait en cause. Choisir remplace desormais. */
 function viderFiltres(){
+  S.proche = null;
   S.historyOnly = false;
   S.forYou = false;
   S.styles.clear();
@@ -2195,7 +2263,7 @@ function refletFiltres(){
     c.setAttribute("aria-pressed", String(S.moods.has(c.dataset.mood))));
   crateBtn.setAttribute("aria-pressed", S.crateOnly);
   crateBtn.classList.toggle("on", S.crateOnly);
-  toutesBtn.hidden = !(S.crateOnly || S.historyOnly || S.forYou);
+  toutesBtn.hidden = !(S.crateOnly || S.historyOnly || S.forYou || S.proche);
   histBtn.setAttribute("aria-pressed", S.historyOnly);
   histBtn.classList.toggle("on", S.historyOnly);
   const ptBtn = document.getElementById("ptBtn");
@@ -2214,6 +2282,7 @@ function majAdresse(){
   if (S.crateOnly)   p.set("likes", "1");
   if (S.historyOnly) p.set("historique", "1");
   if (S.forYou)      p.set("pourtoi", "1");
+  if (S.proche)      p.set("proche", S.proche);
   if (S.q)           p.set("q", S.q);
   if (S.sort !== "pertinence") p.set("sort", S.sort);
   const qs = p.toString();
@@ -2306,6 +2375,20 @@ ptBtn.addEventListener("click", () => {
     montrerVue("prods", true, S.forYou ? "?pourtoi=1" : "?vue=prods");
   else majAdresse();
 });
+/* Depuis une ligne ou depuis le lecteur, y compris sur l'accueil. La lecture continue :
+   on change la liste, pas la prod en cours. */
+function voirProches(id){
+  viderFiltres();
+  S.proche = id;
+  refletFiltres();
+  render();
+  if (document.body.classList.contains("vue-accueil")) montrerVue("prods", true, "?proche=" + encodeURIComponent(id));
+  else {
+    history.pushState({ vue: "prods" }, "", location.pathname + "?proche=" + encodeURIComponent(id));
+    const haut = list.getBoundingClientRect().top + scrollY - 160;
+    if (scrollY > haut) window.scrollTo({ top: Math.max(0, haut), behavior: "smooth" });
+  }
+}
 const histBtn = document.getElementById("histBtn");
 histBtn.addEventListener("click", () => {
   const etaitActif = S.historyOnly;
@@ -2897,6 +2980,7 @@ function appliquerParams(p, reprendreLecture = false){
   S.crateOnly = likes === "1" && CRATE.size > 0;
   S.historyOnly = p.get("historique") === "1" && !S.crateOnly;
   S.forYou = p.get("pourtoi") === "1" && !S.crateOnly && !S.historyOnly;
+  if (BY_ID.has(p.get("proche")) && !S.crateOnly && !S.historyOnly && !S.forYou) S.proche = p.get("proche");
   refletFiltres();
   render();
   if (play) {
@@ -2925,7 +3009,7 @@ function appliquerParams(p, reprendreLecture = false){
    d'une recherche ou d'une prod, c'est le catalogue. */
 (function demarrer(){
   const p = new URLSearchParams(location.search);
-  const versProds = p.get("vue") === "prods" || ["style","sort","q","mood","likes","play","artist","historique","pourtoi"].some(k => p.get(k));
+  const versProds = p.get("vue") === "prods" || ["style","sort","q","mood","likes","play","artist","historique","pourtoi","proche"].some(k => p.get(k));
   appliquerParams(p, true);
   montrerVue(versProds ? "prods" : "accueil", false);
   history.replaceState({ vue: versProds ? "prods" : "accueil" }, "", location.pathname + location.search);
