@@ -746,6 +746,14 @@ ul{margin:0;padding:0;list-style:none}
 @media(max-width:520px){ .hs-hot{display:none} .hsearch{height:48px} }
 
 .cta-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
+/* le bouton rouge au centre ; sur telephone les trois ne tiennent pas sur une ligne :
+   il passe seul au-dessus, les deux autres cote a cote en dessous */
+@media(max-width:640px){
+  .cta-row{display:grid;grid-template-columns:auto auto;justify-content:center}
+  .cta-row .hbtn.pri{grid-column:1 / -1;justify-self:center;order:-1}
+  .cta-row .hbtn{padding:0 15px;justify-content:center;font-size:14px;height:44px}
+  .cta-row .hbtn.pri{padding:0 22px;font-size:15px;height:46px}
+}
 .hbtn{
   display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 22px;border-radius:999px;
   font-size:15px;font-weight:590;transition:.16s;white-space:nowrap;
@@ -1045,11 +1053,11 @@ body.vue-accueil .hcta{display:inline-flex}
     <div class="hs-hot" id="hshot"></div>
 
     <div class="cta-row">
+      <a class="hbtn ghost" href="?sort=recent" data-vue="prods">Les dernières sorties</a>
       <a class="hbtn pri" href="?vue=prods" data-vue="prods">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
         Toutes les prods
       </a>
-      <a class="hbtn ghost" href="?sort=recent" data-vue="prods">Les dernières sorties</a>
       <button class="hbtn ghost" id="surpriseAcc" title="Lance une prod au hasard parmi celles que tu n'as jamais écoutées">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
         Surprends-moi
