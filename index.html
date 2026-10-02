@@ -1244,6 +1244,9 @@ body.vue-accueil .hcta{display:inline-flex}
       <button class="tbtn sh" id="shuffle" aria-pressed="false" aria-label="Lecture aléatoire" title="Aléatoire">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
       </button>
+      <button class="tbtn rp" id="rapide" aria-pressed="false" aria-label="Écoute rapide : démarrer chaque prod après l'intro" title="Écoute rapide : saute l'intro (R)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+      </button>
       <span class="times"><b id="tCur">0:00</b> / <span id="tDur">0:00</span></span>
     </div>
 
@@ -1841,6 +1844,17 @@ let gestured = false;
 addEventListener("pointerdown", () => gestured = true, { once:true, capture:true });
 addEventListener("keydown",     () => gestured = true, { once:true, capture:true });
 let QUEUE = [], QI = -1, SHUFFLE = false, VOL = 100;
+/* Écoute rapide : chaque prod demarre apres l'intro (tag du beatmaker, 8 a 16 mesures
+   d'installation), la ou le beat est complet. Pas de reperage du drop dans le son —
+   l'iframe ne donne pas acces a l'audio —, donc une estimation : 15 % de la duree,
+   entre 15 et 35 s. C'est un choix de l'auditeur, retenu d'une visite a l'autre. */
+let RAPIDE = false;
+try { RAPIDE = localStorage.getItem("findings.rapide") === "1"; } catch (e) {}
+const debut = id => {
+  if (!RAPIDE) return 0;
+  const b = BY_ID.get(id);
+  return b && b.dur > 60 ? Math.round(Math.min(35, Math.max(15, b.dur * 0.15))) : 0;
+};
 let current = null;
 
 const ICON_PLAY  = '<path d="M8 5.5v13l11-6.5z"/>';
@@ -1867,7 +1881,7 @@ function mount(id){
     // controls:0 retire la barre du lecteur, disablekb:1 ses raccourcis clavier,
     // fs:0 son bouton plein écran : il ne reste que l'image
     playerVars:{ autoplay:1, rel:0, modestbranding:1, playsinline:1, iv_load_policy:3,
-                 controls:0, disablekb:1, fs:0 },
+                 controls:0, disablekb:1, fs:0, start: debut(id) },
     events:{
       onReady: e => {
         playerReady = true;
@@ -1875,7 +1889,7 @@ function mount(id){
         // une autre prod a ete demandee pendant l'initialisation : c'est elle qui compte
         if (pendingId) {
           const id = pendingId; pendingId = null; repriseT = 0;
-          e.target.loadVideoById(id);
+          e.target.loadVideoById({ videoId: id, startSeconds: debut(id) });
           armWatchdog(id); startTick();
           return;
         }
@@ -1898,7 +1912,7 @@ function mount(id){
 function mountPlain(id){
   const host = document.getElementById("ytplayer");
   host.innerHTML =
-    `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&modestbranding=1"
+    `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&modestbranding=1&start=${debut(id)}"
              allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen
              referrerpolicy="origin-when-cross-origin"></iframe>`;
   // sur un grand écran on agrandit pour montrer les commandes de YouTube ;
@@ -2022,7 +2036,7 @@ function load(id){
   } else if (!playerReady) {
     pendingId = id;            // onReady chargera la derniere prod demandee
   } else {
-    player.loadVideoById(id);
+    player.loadVideoById({ videoId: id, startSeconds: debut(id) });
     player.setVolume(VOL);
     armWatchdog(id);
   }
@@ -2037,7 +2051,8 @@ function next(){
 function prev(){
   if (!QUEUE.length) return;
   const t = player && player.getCurrentTime ? player.getCurrentTime() : 0;
-  if (t > 3){ player.seekTo(0, true); return; }
+  const d = current ? debut(current.id) : 0;   // en écoute rapide, « recommencer » repart apres l'intro
+  if (t > d + 3){ player.seekTo(d, true); return; }
   QI = (QI - 1 + QUEUE.length) % QUEUE.length;
   load(QUEUE[QI]);
 }
@@ -2055,6 +2070,21 @@ function togglePlay(){
 document.getElementById("toggle").addEventListener("click", togglePlay);
 document.getElementById("next").addEventListener("click", next);
 document.getElementById("prev").addEventListener("click", prev);
+const rapideBtn = document.getElementById("rapide");
+function poserRapide(v){
+  RAPIDE = v;
+  rapideBtn.setAttribute("aria-pressed", String(v));
+  rapideBtn.classList.toggle("on", v);
+  try { localStorage.setItem("findings.rapide", v ? "1" : "0"); } catch (e) {}
+}
+poserRapide(RAPIDE);
+/* Activer en cours d'ecoute ne fait pas sauter la prod en cours, sauf si elle en est
+   encore a son intro : on y gagne tout de suite sans couper ce qu'on ecoutait. */
+rapideBtn.addEventListener("click", () => {
+  poserRapide(!RAPIDE);
+  if (RAPIDE && current && playerReady && player.getCurrentTime && player.getCurrentTime() < debut(current.id) - 3)
+    chercher(debut(current.id));
+});
 document.getElementById("shuffle").addEventListener("click", e => {
   SHUFFLE = !SHUFFLE;
   const btn = e.currentTarget;
@@ -2150,6 +2180,7 @@ document.addEventListener("keydown", e => {
   if (e.key === " "){ e.preventDefault(); togglePlay(); }
   else if (e.key.toLowerCase() === "n") next();
   else if (e.key.toLowerCase() === "p") prev();
+  else if (e.key.toLowerCase() === "r") rapideBtn.click();
   else if (e.key === "ArrowRight" && player?.getCurrentTime){ chercher(player.getCurrentTime()+5); }
   else if (e.key === "ArrowLeft"  && player?.getCurrentTime){ chercher(player.getCurrentTime()-5); }
 });
