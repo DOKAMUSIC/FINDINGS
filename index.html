@@ -322,6 +322,53 @@ ul{margin:0;padding:0;list-style:none}
   font-size:12.5px;font-weight:600;color:var(--ink-2);box-shadow:var(--sh-1);transition:.15s;
 }
 .suivre:hover{box-shadow:var(--sh-2)}
+/* ── page beatmaker, a la maniere d'une page d'artiste ── */
+.profil{
+  position:relative;overflow:hidden;border-radius:var(--r-lg,18px);margin:0 0 18px;
+  min-height:250px;display:flex;align-items:flex-end;padding:26px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--c,var(--accent)) 70%,#000),color-mix(in srgb,var(--c,var(--accent)) 30%,#111));
+  color:#fff;box-shadow:var(--sh-2);
+}
+.profil[hidden]{display:none}
+.profil .ban{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.55;filter:saturate(1.1)}
+.profil::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 45%,rgba(0,0,0,.72) 100%)}
+.profil-in{position:relative;z-index:1;display:flex;align-items:flex-end;gap:24px;width:100%}
+.profil .ava{
+  width:148px;height:148px;border-radius:50%;flex:0 0 auto;object-fit:cover;background:#222;
+  box-shadow:0 14px 40px rgba(0,0,0,.45);border:3px solid rgba(255,255,255,.14);
+  display:grid;place-items:center;font-size:52px;font-weight:700;color:rgba(255,255,255,.85);
+}
+.profil-txt{min-width:0;flex:1 1 280px}
+.profil .eyebrow{color:rgba(255,255,255,.75);display:flex;align-items:center;gap:6px}
+.profil h2{font-size:clamp(34px,6vw,64px);font-weight:800;letter-spacing:-.04em;line-height:1;margin:6px 0 10px;overflow-wrap:anywhere}
+.profil .meta{font-size:13.5px;color:rgba(255,255,255,.82);display:flex;flex-wrap:wrap;gap:4px 14px}
+.profil .meta b{color:#fff;font-weight:650}
+.profil-acts{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.profil-acts .lire{
+  width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;
+  box-shadow:0 8px 22px rgba(250,35,59,.45);transition:.15s;
+}
+.profil-acts .lire:hover{transform:scale(1.05)}
+.profil-acts .pbtn{
+  height:34px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.5);color:#fff;
+  font-size:13px;font-weight:650;display:inline-flex;align-items:center;gap:6px;transition:.15s;background:rgba(255,255,255,.06);
+}
+.profil-acts .pbtn:hover{border-color:#fff;background:rgba(255,255,255,.14)}
+.profil-acts .pbtn.on{background:#fff;color:#111;border-color:#fff}
+.profil .cibles{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+.profil .cibles a{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff}
+.profil .cibles a:hover{background:rgba(255,255,255,.24)}
+body.vue-profil #resTitle,body.vue-profil #resSub,body.vue-profil #suivreBtn,body.vue-profil #playall{display:none}
+@media(max-width:640px){
+  .profil{padding:20px 18px;min-height:0;padding-top:28px}
+  .profil-in{flex-direction:column;align-items:flex-start;gap:14px;flex-wrap:nowrap}
+  .profil-txt{flex:0 0 auto;width:100%}
+  .profil .ava{width:104px;height:104px;font-size:38px}
+  .profil h2{margin:4px 0 8px}
+}
+/* petite photo devant un beatmaker suivi */
+.dos.suivi img{width:20px;height:20px;border-radius:50%;object-fit:cover;margin-left:-6px}
+.suivis-chips img{width:20px;height:20px;border-radius:50%;object-fit:cover;margin-left:-5px}
 /* dossiers de likes : une rangee de pastilles au-dessus des filtres */
 .dossiers{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 10px}
 .dossiers[hidden]{display:none}
@@ -1219,6 +1266,7 @@ body.vue-accueil .hcta{display:inline-flex}
 <main class="shell" hidden>
 
   <section>
+    <div class="profil" id="profil" hidden></div>
     <div class="res-head">
       <div>
         <h2 id="resTitle">Toutes les prods</h2>
@@ -1556,6 +1604,12 @@ const nbSuivis = () => SUIVIS.artists.size + SUIVIS.prods.size;
    derniere visite. Pour un premier passage, faute de point de comparaison, elle garde son
    ancien sens : ajoutee au catalogue ces trois derniers jours. */
 const estNouvelle = b => VISITE_PREC ? NOUVEAUX.has(b.id) : b.isNew;
+/* Profils des chaines (photo, nom, abonnes, banniere), recoltes par ingest.mjs. */
+const CHANS = CAT.chans || {};
+const CHAN_DE = new Map();   // beatmaker -> url de sa chaine (celle de sa prod la plus recente)
+BEATS.forEach(b => { if (b.chan && !CHAN_DE.has(b.prod)) CHAN_DE.set(b.prod, b.chan); });
+const profilDe = prod => CHANS[CHAN_DE.get(prod)] || null;
+const avatarDe = prod => { const c = profilDe(prod); return c && c.a ? c.a : ""; };
 const ilYa = t => {
   const h = (Date.now() - t) / 36e5;
   if (h < 1) return "il y a moins d'une heure";
@@ -1932,6 +1986,7 @@ function majEntete(res){
   if (S.forYou) document.getElementById("resSub").textContent += (res.length ? " · " : "") + resumeGout();
   majSuivre();
   majDossiers();
+  majProfil(res);
   if (S.depuis && VISITE_PREC) document.getElementById("resSub").textContent += ` · ta dernière visite : ${ilYa(VISITE_PREC)}`;
   if (S.proche && res.length > 1) document.getElementById("resSub").textContent =
     `${res.length - 1} prods proches · style, tempo, tonalité et artistes en commun`;
@@ -2484,6 +2539,64 @@ list.addEventListener("click", e => {
 /* Un seul filtre a la fois. Avant, style, mood et likes se cumulaient : demander
    « sombre » en ayant « Trap » actif renvoyait l'intersection des deux, souvent vide,
    sans que rien n'indique lequel des deux etait en cause. Choisir remplace desormais. */
+/* Page beatmaker : banniere, photo, nom, chiffres, Lire / Suivre / Chaine YouTube,
+   et les artistes qu'il vise le plus. La liste de ses prods suit, avec les filtres. */
+const elProfil = document.getElementById("profil");
+let profilPeint = null;
+function majProfil(res){
+  document.body.classList.toggle("vue-profil", !!S.prod);
+  elProfil.hidden = !S.prod;
+  if (!S.prod) { profilPeint = null; return; }
+  const cle = S.prod + "|" + SUIVIS.prods.has(S.prod) + "|" + res.length;
+  if (profilPeint === cle) return;
+  profilPeint = cle;
+  const toutes = BEATS.filter(b => b.prod === S.prod);
+  const c = profilDe(S.prod) || {};
+  const parStyle = {}, parArt = {};
+  toutes.forEach(b => {
+    parStyle[b.style] = (parStyle[b.style] || 0) + 1;
+    b.artists.forEach(a => parArt[a] = (parArt[a] || 0) + 1);
+  });
+  const styles = Object.keys(parStyle).sort((a, b) => parStyle[b] - parStyle[a]);
+  const cibles = Object.keys(parArt).sort((a, b) => parArt[b] - parArt[a]).slice(0, 6);
+  const vues = toutes.reduce((n, b) => n + b.views, 0);
+  const suivi = SUIVIS.prods.has(S.prod);
+  elProfil.style.setProperty("--c", cssVar(styles[0] || "trap"));
+  elProfil.innerHTML = `
+    ${c.b ? `<div class="ban" style="background-image:url('${esc(c.b)}')"></div>` : ""}
+    <div class="profil-in">
+      ${c.a ? `<img class="ava" src="${esc(c.a)}" alt="" referrerpolicy="no-referrer">`
+            : `<div class="ava">${esc((S.prod.replace(/^prod\.?\s*/i, "")[0] || "?").toUpperCase())}</div>`}
+      <div class="profil-txt">
+        <span class="eyebrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 9.5 4.5H6v3.5L3.5 10.5 6 13v3.5h3.5L12 19l2.5-2.5H18V13l2.5-2.5L18 8V4.5h-3.5z" opacity=".9"/></svg>Beatmaker</span>
+        <h2>${esc(c.n || S.prod)}</h2>
+        <div class="meta">
+          ${c.s ? `<span><b>${esc(c.s)}</b> abonnés YouTube</span>` : ""}
+          <span><b>${toutes.length}</b> prod${toutes.length > 1 ? "s" : ""} sur FINDINGS</span>
+          <span><b>${fmtViews(vues)}</b> vues</span>
+          <span>${styles.slice(0, 3).map(st => esc(STYLE_NAME[st] || st)).join(" · ")}</span>
+        </div>
+        <div class="profil-acts">
+          <button class="lire" id="profLire" aria-label="Lire les prods de ${esc(S.prod)}" title="Tout lire"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></button>
+          <button class="pbtn${suivi ? " on" : ""}" id="profSuivre" aria-pressed="${suivi}">${suivi ? "✓ Suivi" : "+ Suivre"}</button>
+          <button class="pbtn" id="profChaine">Chaîne YouTube ↗</button>
+        </div>
+        ${cibles.length ? `<div class="cibles">${cibles.map(a => `<a href="?artist=${encodeURIComponent(a)}" data-vue="prods">${esc(ARTIST_NAME[a] || a)} type beat</a>`).join("")}</div>` : ""}
+      </div>
+    </div>`;
+  const img = elProfil.querySelector("img.ava");
+  if (img) img.onerror = () => { img.replaceWith(Object.assign(document.createElement("div"), { className: "ava", textContent: (S.prod[0] || "?").toUpperCase() })); };
+}
+elProfil.addEventListener("click", e => {
+  if (e.target.closest("#profLire")) { if (LAST.length) playFrom(LAST, 0); return; }
+  if (e.target.closest("#profChaine")) { const b = BEATS.find(x => x.prod === S.prod); openChan(b); return; }
+  if (e.target.closest("#profSuivre")) {
+    SUIVIS.prods.has(S.prod) ? SUIVIS.prods.delete(S.prod) : SUIVIS.prods.add(S.prod);
+    saveSuivis(); versionGout++;
+    majEntete(LAST);
+  }
+});
+
 /* Le bouton suit la liste affichee : un artiste seul ou un beatmaker. */
 function cibleSuivi(){
   if (S.prod) return { type: "prods", id: S.prod, nom: S.prod };
@@ -2525,7 +2638,7 @@ function majDossiers(){
     elDos.innerHTML = [...SUIVIS.artists].map(id =>
         `<span class="dos suivi"><a href="?artist=${encodeURIComponent(id)}" data-vue="prods"><i style="background:var(--s-${ARTIST_STYLE[id]})"></i>${esc(ARTIST_NAME[id] || id)}</a><button data-unf="artists" data-id="${esc(id)}" aria-label="Ne plus suivre ${esc(ARTIST_NAME[id] || id)}" title="Ne plus suivre">×</button></span>`)
       .concat([...SUIVIS.prods].map(p =>
-        `<span class="dos suivi"><a href="?prod=${encodeURIComponent(p)}" data-vue="prods"><i></i>${esc(p)}</a><button data-unf="prods" data-id="${esc(p)}" aria-label="Ne plus suivre ${esc(p)}" title="Ne plus suivre">×</button></span>`)).join("");
+        `<span class="dos suivi"><a href="?prod=${encodeURIComponent(p)}" data-vue="prods">${avatarDe(p) ? `<img src="${esc(avatarDe(p))}" alt="" referrerpolicy="no-referrer">` : "<i></i>"}${esc(p)}</a><button data-unf="prods" data-id="${esc(p)}" aria-label="Ne plus suivre ${esc(p)}" title="Ne plus suivre">×</button></span>`)).join("");
     return;
   }
   if (!S.crateOnly) return;
@@ -3246,7 +3359,7 @@ function majSuivis(){
     : neufs ? `${neufs} nouvelle${neufs > 1 ? "s" : ""} depuis ta visite · ${liste.length} prods en tout`
     : `${pasEcoutees} prod${pasEcoutees > 1 ? "s" : ""} pas encore écoutée${pasEcoutees > 1 ? "s" : ""} · ${liste.length} en tout`;
   const chips = [...SUIVIS.artists].map(id => `<a href="?artist=${encodeURIComponent(id)}" data-vue="prods" style="--c:var(--s-${ARTIST_STYLE[id]})"><i></i>${esc(ARTIST_NAME[id] || id)}</a>`)
-    .concat([...SUIVIS.prods].map(p => `<a href="?prod=${encodeURIComponent(p)}" data-vue="prods"><i></i>${esc(p)}</a>`));
+    .concat([...SUIVIS.prods].map(p => `<a href="?prod=${encodeURIComponent(p)}" data-vue="prods">${avatarDe(p) ? `<img src="${esc(avatarDe(p))}" alt="" referrerpolicy="no-referrer">` : "<i></i>"}${esc(p)}</a>`));
   document.getElementById("suivisChips").innerHTML = chips.join("");
   document.getElementById("suiviswall").innerHTML = SUIVIES.slice(0, 8).map(b => `
     <a class="tile" data-id="${b.id}" href="?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
