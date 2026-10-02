@@ -372,7 +372,6 @@ body.vue-profil #resTitle,body.vue-profil #resSub,body.vue-profil #suivreBtn,bod
   .profil h2{margin:4px 0 8px}
 }
 /* petite photo devant un beatmaker suivi */
-.dos.suivi img{width:20px;height:20px;border-radius:50%;object-fit:cover;margin-left:-6px}
 .suivis-chips img{width:20px;height:20px;border-radius:50%;object-fit:cover;margin-left:-5px}
 /* dossiers de likes : une rangee de pastilles au-dessus des filtres */
 .dossiers{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 10px}
@@ -386,11 +385,15 @@ body.vue-profil #resTitle,body.vue-profil #resSub,body.vue-profil #suivreBtn,bod
 .dos span{font-family:var(--mono,ui-monospace,monospace);font-size:11px;color:var(--dimmer)}
 .dos[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
 .dos[aria-pressed="true"] span{color:rgba(255,255,255,.6)}
-.dos.suivi{padding:0 4px 0 12px;gap:4px}
-.dos.suivi a{display:inline-flex;align-items:center;gap:7px}
-.dos.suivi i{width:7px;height:7px;border-radius:50%;background:var(--dimmer)}
-.dos.suivi button{width:22px;height:22px;border-radius:50%;font-size:15px;line-height:1;color:var(--dimmer)}
-.dos.suivi button:hover{background:rgba(0,0,0,.06);color:var(--ink)}
+.dos.suivi{padding:0 13px 0 6px;gap:7px}
+.dos.suivi img{width:22px;height:22px;margin:0;border-radius:50%;object-fit:cover}
+.dos.suivi i{width:22px;height:22px;border-radius:50%;background:var(--line)}
+a.dos-act{display:inline-flex;align-items:center}
+/* abonnements : les filtres du catalogue n'ont pas de sens ici (ils faisaient quitter la
+   page) — il ne reste que les onglets par personne et « Jamais écoutées » */
+body.vue-suivis #fbar{display:none}
+.dos-neuf{display:inline-flex;align-items:center;gap:6px}
+.dos-neuf[aria-pressed="true"]{color:var(--accent);background:var(--accent-soft)}
 .dos.ajout{background:transparent;border-style:dashed;box-shadow:none;color:var(--dim)}
 .dos-input{height:32px;border:1px solid var(--accent);border-radius:999px;padding:0 13px;font-size:13px;width:170px;background:var(--surface);color:var(--ink);outline:none}
 .dos-act{height:32px;padding:0 9px;font-size:12.5px;font-weight:560;color:var(--dim);border-radius:999px}
@@ -412,7 +415,10 @@ body.vue-profil #resTitle,body.vue-profil #resSub,body.vue-profil #suivreBtn,bod
 .suivre[hidden]{display:none}
 .res-head .sub{display:block}
 /* le nom du beatmaker ouvre sa page */
-.prod button{font:inherit;color:inherit;padding:0;cursor:pointer}
+.prod button{font:inherit;color:inherit;padding:0;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+/* un bouton ne se tronque pas dans le texte qui l'entoure : « par … » cachait le nom entier.
+   En ligne souple, c'est le nom qui se raccourcit, « par » reste. */
+.prod{display:inline-flex;gap:.3em;align-items:baseline}
 .prod button:hover b{text-decoration:underline}
 .res-head .sub{font-size:12.5px;color:var(--dim);margin-top:3px}
 
@@ -1499,6 +1505,7 @@ const S = {
   prod:null,        // un beatmaker
   dossier:null,     // un dossier de likes (avec crateOnly)
   suivis:false,     // les prods des artistes et beatmakers suivis
+  qui:null,         // dans les abonnements : « a:hamza » ou « p:Gamma Prod », sinon tous
   neuf:false        // « Jamais écoutées » : un reglage, pas un filtre — il survit aux changements de vue
 };
 try { S.neuf = localStorage.getItem("findings.neuf") === "1"; } catch (e) {}
@@ -1815,12 +1822,13 @@ function filtered(){
     if(S.depuis && !NOUVEAUX.has(b.id)) return false;
     if(S.prod && b.prod !== S.prod) return false;
     if(S.suivis && !estSuivie(b)) return false;
+    if(S.suivis && S.qui && !(S.qui[0] === "a" ? b.artists.includes(S.qui.slice(2)) : b.prod === S.qui.slice(2))) return false;
     // sans effet dans l'historique, qui n'est fait que de prods deja ecoutees
     if(S.neuf && !S.historyOnly && VU.has(b.id)) return false;
     if(S.artists.size && !b.artists.some(a => S.artists.has(a))) return false;
     if(S.styles.size && !S.styles.has(b.style)) return false;
-    if(S.bpmSur && !b.bpmSur) return false;
-    if(b.bpm < S.bpm[0] || b.bpm > S.bpm[1]) return false;
+    if(S.bpmSur && !S.suivis && !b.bpmSur) return false;
+    if(!S.suivis && (b.bpm < S.bpm[0] || b.bpm > S.bpm[1])) return false;
     if(S.moods.size && !b.moods.some(m => S.moods.has(m))) return false;
     if(terms.length && !terms.every(t => b._h.includes(t))) return false;
     return true;
@@ -2008,7 +2016,8 @@ function majEntete(res){
   document.getElementById("resSub").textContent = res.length
     ? `${res.length} prod${res.length>1?"s":""} · ${prods} beatmaker${prods>1?"s":""}`
     : "";
-  document.getElementById("sorts").hidden = S.historyOnly || S.forYou || !!S.proche;   // l'ordre est celui de l'ecoute, ou du gout
+  document.getElementById("sorts").hidden = S.historyOnly || S.forYou || !!S.proche || S.suivis;
+  document.body.classList.toggle("vue-suivis", S.suivis);   // l'ordre est celui de l'ecoute, ou du gout
   document.getElementById("effHist").hidden = !(S.historyOnly && HIST.length);
   if (S.forYou) document.getElementById("resSub").textContent += (res.length ? " · " : "") + resumeGout();
   majSuivre();
@@ -2731,11 +2740,24 @@ let dosSuppr = null;    // suppression armee (deux clics)
 function majDossiers(){
   elDos.hidden = !(S.crateOnly || (S.suivis && nbSuivis()));
   if (S.suivis) {
-    // ceux qu'on suit, chacun ouvre sa page ; la croix arrete de suivre
-    elDos.innerHTML = [...SUIVIS.artists].map(id =>
-        `<span class="dos suivi"><a href="?artist=${encodeURIComponent(id)}" data-vue="prods">${photoArtiste(id) ? `<img src="${esc(photoArtiste(id))}" alt="">` : `<i style="background:var(--s-${ARTIST_STYLE[id]})"></i>`}${esc(ARTIST_NAME[id] || id)}</a><button data-unf="artists" data-id="${esc(id)}" aria-label="Ne plus suivre ${esc(ARTIST_NAME[id] || id)}" title="Ne plus suivre">×</button></span>`)
-      .concat([...SUIVIS.prods].map(p =>
-        `<span class="dos suivi"><a href="?prod=${encodeURIComponent(p)}" data-vue="prods">${avatarDe(p) ? `<img src="${esc(avatarDe(p))}" alt="" referrerpolicy="no-referrer">` : "<i></i>"}${esc(p)}</a><button data-unf="prods" data-id="${esc(p)}" aria-label="Ne plus suivre ${esc(p)}" title="Ne plus suivre">×</button></span>`)).join("");
+    /* Une pastille par personne suivie, qui filtre la page sans la quitter. Celle qui est
+       choisie propose sa page et « Ne plus suivre ». */
+    const qui = [...SUIVIS.artists].map(id => ({ k: "a:" + id, nom: ARTIST_NAME[id] || id, img: photoArtiste(id),
+                  n: BEATS.filter(b => b.artists.includes(id)).length, href: "?artist=" + encodeURIComponent(id) }))
+      .concat([...SUIVIS.prods].map(p => ({ k: "p:" + p, nom: p, img: avatarDe(p),
+                  n: BEATS.filter(b => b.prod === p).length, href: "?prod=" + encodeURIComponent(p) })));
+    if (S.qui && !qui.some(x => x.k === S.qui)) S.qui = null;
+    const total = BEATS.filter(estSuivie).length, choisi = qui.find(x => x.k === S.qui);
+    elDos.innerHTML =
+      `<button class="dos" data-qui="" aria-pressed="${!S.qui}">Tout <span>${total}</span></button>` +
+      qui.map(x => `<button class="dos suivi" data-qui="${esc(x.k)}" aria-pressed="${S.qui === x.k}">` +
+        (x.img ? `<img src="${esc(x.img)}" alt="" referrerpolicy="no-referrer">` : "<i></i>") +
+        `${esc(x.nom)} <span>${x.n}</span></button>`).join("") +
+      (choisi ? `<a class="dos-act" href="${choisi.href}" data-vue="prods">Voir la page →</a>` +
+        `<button class="dos-act danger" data-unf="${choisi.k[0] === "a" ? "artists" : "prods"}" data-id="${esc(choisi.k.slice(2))}">Ne plus suivre</button>` : "") +
+      // le seul reglage utile ici : la barre de filtres est masquee
+      `<button class="dos-act dos-neuf" data-neuf aria-pressed="${S.neuf}" title="N'afficher que les prods jamais écoutées">` +
+        `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c6.5 0 10 8 10 8a17.6 17.6 0 0 1-2.2 3.2M6.6 6.6C3.9 8.4 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2M2 2l20 20"/></svg>Jamais écoutées</button>`;
     return;
   }
   if (!S.crateOnly) return;
@@ -2768,7 +2790,10 @@ function validerSaisie(){
 }
 elDos.addEventListener("click", e => {
   const unf = e.target.closest("[data-unf]");
-  if (unf) { SUIVIS[unf.dataset.unf].delete(unf.dataset.id); saveSuivis(); versionGout++; render(); return; }
+  if (unf) { SUIVIS[unf.dataset.unf].delete(unf.dataset.id); saveSuivis(); versionGout++; S.qui = null; render(); majAdresse(); return; }
+  if (e.target.closest("[data-neuf]")) { poserNeuf(!S.neuf); render(); return; }
+  const q = e.target.closest("[data-qui]");
+  if (q) { S.qui = q.dataset.qui || null; render(); majAdresse(); return; }
   const chip = e.target.closest("[data-dos]");
   if (chip) { S.dossier = chip.dataset.dos || null; dosSuppr = null; render(); majAdresse(); return; }
   if (e.target.closest("#dosNew")) { dosSaisie = "new"; majDossiers(); return; }
@@ -2845,6 +2870,7 @@ function viderFiltres(){
   S.depuis = false;
   S.prod = null;
   S.suivis = false;
+  S.qui = null;
   S.dossier = null;
   S.historyOnly = false;
   S.forYou = false;
@@ -2888,6 +2914,7 @@ function majAdresse(){
   if (S.depuis)      p.set("nouveau", "1");
   if (S.prod)        p.set("prod", S.prod);
   if (S.suivis)      p.set("suivis", "1");
+  if (S.suivis && S.qui) p.set("qui", S.qui);
   if (S.q)           p.set("q", S.q);
   if (S.sort !== "pertinence") p.set("sort", S.sort);
   const qs = p.toString();
@@ -3683,6 +3710,7 @@ function appliquerParams(p, reprendreLecture = false){
   S.depuis = p.get("nouveau") === "1" && !S.crateOnly && !S.historyOnly && !S.forYou && !S.proche;
   if (p.get("prod") && BEATS.some(b => b.prod === p.get("prod"))) S.prod = p.get("prod");
   S.suivis = p.get("suivis") === "1" && !S.crateOnly && !S.historyOnly && !S.forYou && !S.proche && !S.depuis;
+  if (S.suivis && /^[ap]:/.test(p.get("qui") || "")) S.qui = p.get("qui");
   refletFiltres();
   render();
   if (play) {
