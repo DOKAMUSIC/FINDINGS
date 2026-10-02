@@ -260,6 +260,12 @@ ul{margin:0;padding:0;list-style:none}
 }
 .chip:hover{border-color:var(--line);box-shadow:var(--sh-1)}
 .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--c);flex:0 0 auto}
+/* artistes : leur photo a la place de la pastille de couleur */
+.chip.avec-ph{padding-left:4px}
+.chip .ph{width:22px;height:22px;border-radius:50%;object-fit:cover;flex:0 0 auto;background:var(--line)}
+.ftrig .fph{width:22px;height:22px;border-radius:50%;object-fit:cover;margin-left:-8px;flex:0 0 auto}
+.ftrig .fph[hidden]{display:none}
+.ftrig.a-photo .fdot{display:none}
 .chip .n{font-family:var(--mono);font-size:10.5px;color:var(--dimmer);font-variant-numeric:tabular-nums}
 .chip[aria-pressed="true"]{
   background:color-mix(in srgb,var(--c) 13%,#fff);
@@ -1325,7 +1331,7 @@ body.vue-accueil .hcta{display:inline-flex}
     <div class="fbar" id="fbar">
       <div class="fitem" data-pop id="fitemArtiste" hidden>
         <button class="ftrig" id="trigArtiste" aria-haspopup="true" aria-expanded="false">
-          <span class="fdot"></span><span class="flbl">Artiste</span>
+          <img class="fph" alt="" hidden><span class="fdot"></span><span class="flbl">Artiste</span>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="fmenu" hidden>
@@ -1824,7 +1830,7 @@ function filtered(){
     if(S.suivis && !estSuivie(b)) return false;
     if(S.suivis && S.qui && !(S.qui[0] === "a" ? b.artists.includes(S.qui.slice(2)) : b.prod === S.qui.slice(2))) return false;
     // sans effet dans l'historique, qui n'est fait que de prods deja ecoutees
-    if(S.neuf && !S.historyOnly && VU.has(b.id)) return false;
+    if(S.neuf && !S.historyOnly && !S.crateOnly && VU.has(b.id)) return false;
     if(S.artists.size && !b.artists.some(a => S.artists.has(a))) return false;
     if(S.styles.size && !S.styles.has(b.style)) return false;
     if(S.bpmSur && !S.suivis && !b.bpmSur) return false;
@@ -2007,7 +2013,7 @@ function majEntete(res){
   if(S.artists.size) parts.push([...S.artists].map(id => ARTIST_NAME[id] || id).join(" + "));
   if(S.moods.size) parts.push([...S.moods].join(" + "));
   if(S.bpmSur) parts.push("tempo vérifié");
-  if(S.neuf && !S.historyOnly && !S.forYou) parts.push("jamais écoutées");
+  if(S.neuf && !S.historyOnly && !S.forYou && !S.crateOnly) parts.push("jamais écoutées");
   if(S.bpm[0]>BMIN || S.bpm[1]<BMAX) parts.push(`${S.bpm[0]}–${S.bpm[1]} BPM`);
   if(S.q.trim()) parts.push(`« ${S.q.trim()} »`);
 
@@ -2034,7 +2040,7 @@ function majEntete(res){
 
 /* Liste vide a cause de « Jamais écoutées » seul : combien de prods il cache. */
 function dejaEcoutees(){
-  if (!S.neuf || S.historyOnly || S.forYou) return 0;
+  if (!S.neuf || S.historyOnly || S.forYou || S.crateOnly) return 0;
   S.neuf = false;
   const n = filtered().length;
   S.neuf = true;
@@ -2580,7 +2586,7 @@ list.addEventListener("click", e => {
 const elProfil = document.getElementById("profil");
 let profilPeint = null;
 /* L'artiste dont la liste est affichee seul (sans style ni mood en plus), sinon null. */
-const artisteSeul = () => !S.prod && S.artists.size === 1 && !S.styles.size && !S.moods.size ? [...S.artists][0] : null;
+const artisteSeul = () => !S.prod && !S.crateOnly && S.artists.size === 1 && !S.styles.size && !S.moods.size ? [...S.artists][0] : null;
 function majProfil(res){
   const art = artisteSeul();
   const actif = !!(S.prod || art);
@@ -2923,7 +2929,11 @@ function majAdresse(){
 
 /* Un second clic sur le filtre actif le retire : c'est la seule facon de tout enlever. */
 function choisirFiltre(appliquer, etaitActif){
+  /* Dans les likes, un filtre trie tes likes au lieu de t'en faire sortir : on garde la
+     vue et le dossier ouvert, seul le style, le mood ou l'artiste change. */
+  const likes = S.crateOnly, dos = S.dossier;
   viderFiltres();
+  if (likes) { S.crateOnly = true; S.dossier = dos; }
   if (!etaitActif) appliquer();
   refletFiltres();
   render();
@@ -3143,6 +3153,11 @@ function poserTrig(id, libelle, couleur, actif){
 function majBarre(){
   const st = [...S.styles][0], mo = [...S.moods][0], ar = [...S.artists][0];
   poserTrig("trigArtiste", ar ? ARTIST_NAME[ar] : "Artiste", ar ? cssVar(ARTIST_STYLE[ar]) : null, ar);
+  // l'artiste choisi montre sa photo dans le bouton, a la place du point de couleur
+  const tA = document.getElementById("trigArtiste"), ph = tA.querySelector(".fph"), url = ar ? photoArtiste(ar) : "";
+  ph.hidden = !url;
+  tA.classList.toggle("a-photo", !!url);
+  if (url) { const petit = url.replace("1000x1000", "56x56"); if (ph.getAttribute("src") !== petit) ph.src = petit; }
   poserTrig("trigStyle", st ? STYLE_NAME[st] : "Style", st ? cssVar(st) : null, st);
   poserTrig("trigMood",  mo || "Mood", mo ? MOOD_TEINTE[mo] : null, mo);
   const bornes = S.bpm[0] > BMIN || S.bpm[1] < BMAX;
@@ -3153,7 +3168,7 @@ function majBarre(){
   neuf.classList.toggle("on", S.neuf);
   neuf.setAttribute("aria-pressed", String(S.neuf));
   // dans l'historique il n'a pas de sens, et « Pour toi » ecarte deja tout ce qu'on a ecoute
-  neuf.hidden = S.historyOnly || S.forYou;
+  neuf.hidden = S.historyOnly || S.forYou || S.crateOnly;   // une prod likee a forcement ete ecoutee
   document.getElementById("clearAll").hidden =
     !(ar || st || mo || bornes || S.bpmSur || (S.neuf && !neuf.hidden));
 }
@@ -3188,7 +3203,8 @@ function renderArtistChips(){
   const q = norm(artQ.value.trim());
   const liste = q ? LIVE_ARTISTS.filter(a => norm(a.name).includes(q)) : LIVE_ARTISTS;
   elArtistes.innerHTML = liste.map(a =>
-    `<button class="chip" data-artist="${esc(a.id)}" aria-pressed="${S.artists.has(a.id)}" style="--c:${cssVar(a.style)}"><span class="dot"></span>${esc(a.name)}<span class="n">${ARTIST_N[a.id]}</span></button>`).join("");
+    `<button class="chip${photoArtiste(a.id) ? " avec-ph" : ""}" data-artist="${esc(a.id)}" aria-pressed="${S.artists.has(a.id)}" style="--c:${cssVar(a.style)}">${photoArtiste(a.id)
+      ? `<img class="ph" src="${esc(photoArtiste(a.id).replace("1000x1000", "56x56"))}" alt="" loading="lazy">` : '<span class="dot"></span>'}${esc(a.name)}<span class="n">${ARTIST_N[a.id]}</span></button>`).join("");
   document.getElementById("artVide").hidden = !!liste.length;
 }
 if (LIVE_ARTISTS.length) {
