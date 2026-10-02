@@ -203,6 +203,8 @@ ul{margin:0;padding:0;list-style:none}
   font-weight:590;
 }
 .ftrig.on .fdot{display:block}
+.ftog svg{opacity:.7}
+.ftog.on svg{opacity:1}
 .fclear{
   display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 10px;
   font-size:12.5px;font-weight:560;color:var(--accent);border-radius:999px;transition:.15s;
@@ -235,6 +237,9 @@ ul{margin:0;padding:0;list-style:none}
   /* les quatre boutons remplissaient deja la largeur au repos : les chevrons (16 px
      chacun) sont la seule marge a reprendre. Au doigt, une pilule se lit comme un bouton. */
   .ftrig svg{display:none}
+  /* « Jamais écoutées » se reduit a son icone : un cinquieme libelle ferait passer la barre sur deux lignes */
+  .ftog svg{display:block}
+  .ftog .flbl{display:none}
   .fclear{padding:0 9px}
   .fclear-t{display:none}
   .fitem{position:static}
@@ -1193,6 +1198,11 @@ body.vue-accueil .hcta{display:inline-flex}
         </div>
       </div>
 
+      <button class="ftrig ftog" id="trigNeuf" aria-pressed="false" title="N'afficher que les prods jamais écoutées">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c6.5 0 10 8 10 8a17.6 17.6 0 0 1-2.2 3.2M6.6 6.6C3.9 8.4 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2M2 2l20 20"/></svg>
+        <span class="flbl">Jamais écoutées</span>
+      </button>
+
       <button class="fclear" id="clearAll" hidden aria-label="Effacer les filtres">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
         <span class="fclear-t">Effacer</span>
@@ -1297,8 +1307,10 @@ const BEATS = CAT.beats.map(b => ({
 /* ============ état ============ */
 const S = {
   q:"", styles:new Set(), moods:new Set(), artists:new Set(), bpm:[55,200], bpmSur:false,
-  sort:"pertinence", crateOnly:false, historyOnly:false, forYou:false, playing:null, paused:false
+  sort:"pertinence", crateOnly:false, historyOnly:false, forYou:false, playing:null, paused:false,
+  neuf:false        // « Jamais écoutées » : un reglage, pas un filtre — il survit aux changements de vue
 };
+try { S.neuf = localStorage.getItem("findings.neuf") === "1"; } catch (e) {}
 let LAST = [];                 // resultats affiches = file d'attente potentielle
 const DEAD = new Set();        // videos dont l'integration est refusee par la chaine
 let CRATE = new Set();
@@ -1315,12 +1327,21 @@ try { HIST = JSON.parse(localStorage.getItem(HIST_KEY) || "[]").filter(x => x &&
 let HIST_POS = new Map();
 const majHistPos = () => { HIST_POS = new Map(HIST.map((x, i) => [x.id, i])); };
 majHistPos();
+/* Toutes les prods deja lancees, sans limite utile : l'historique n'en garde que 200,
+   « Jamais écoutées » doit se souvenir de tout. 11 caracteres par prod, le catalogue
+   entier tient en 70 Ko. */
+const VU_KEY = "findings.ecoutees";
+let VU = new Set(HIST.map(x => x.id));
+try { JSON.parse(localStorage.getItem(VU_KEY) || "[]").forEach(id => VU.add(id)); } catch (e) {}
 let versionGout = 0;   // incremente a chaque like ou ecoute : invalide le profil mis en cache
 function noterEcoute(id){
   versionGout++;
   HIST = [{ id, t: Date.now() }, ...HIST.filter(x => x.id !== id)].slice(0, HIST_MAX);
   majHistPos();
   try { localStorage.setItem(HIST_KEY, JSON.stringify(HIST)); } catch (e) {}
+  VU.delete(id); VU.add(id);
+  if (VU.size > 20000) VU = new Set([...VU].slice(-20000));
+  try { localStorage.setItem(VU_KEY, JSON.stringify([...VU])); } catch (e) {}
 }
 const saveCrate = () => { versionGout++; try{ localStorage.setItem("findings.crate",JSON.stringify([...CRATE])); }catch(e){} };
 
@@ -1476,6 +1497,8 @@ function filtered(){
     if(S.historyOnly && !HIST_POS.has(b.id)) return false;
     // « Pour toi » ne propose que du neuf : ce qu'on a deja ecoute ou mis de cote est exclu
     if(S.forYou && (HIST_POS.has(b.id) || CRATE.has(b.id))) return false;
+    // sans effet dans l'historique, qui n'est fait que de prods deja ecoutees
+    if(S.neuf && !S.historyOnly && VU.has(b.id)) return false;
     if(S.artists.size && !b.artists.some(a => S.artists.has(a))) return false;
     if(S.styles.size && !S.styles.has(b.style)) return false;
     if(S.bpmSur && !b.bpmSur) return false;
@@ -1644,6 +1667,7 @@ function majEntete(res){
   if(S.artists.size) parts.push([...S.artists].map(id => ARTIST_NAME[id] || id).join(" + "));
   if(S.moods.size) parts.push([...S.moods].join(" + "));
   if(S.bpmSur) parts.push("tempo vérifié");
+  if(S.neuf && !S.historyOnly && !S.forYou) parts.push("jamais écoutées");
   if(S.bpm[0]>BMIN || S.bpm[1]<BMAX) parts.push(`${S.bpm[0]}–${S.bpm[1]} BPM`);
   if(S.q.trim()) parts.push(`« ${S.q.trim()} »`);
 
@@ -1660,6 +1684,14 @@ function majEntete(res){
   document.getElementById("playallN").textContent = res.length > 1 ? `Lire les ${res.length}` : "Tout lire";
 }
 
+/* Liste vide a cause de « Jamais écoutées » seul : combien de prods il cache. */
+function dejaEcoutees(){
+  if (!S.neuf || S.historyOnly || S.forYou) return 0;
+  S.neuf = false;
+  const n = filtered().length;
+  S.neuf = true;
+  return n;
+}
 function render(){
   const res = filtered();
   LAST = res;
@@ -1685,6 +1717,10 @@ function render(){
     <li class="empty">
       <h3>Rien d'écouté pour l'instant.</h3>
       <p>Lance une prod — elle viendra se ranger ici, la plus récente en tête.</p>
+    </li>` : dejaEcoutees() ? `
+    <li class="empty">
+      <h3>Tu as déjà tout écouté ici.</h3>
+      <p>Tu as déjà lancé ces ${dejaEcoutees()} prods — désactive « Jamais écoutées » pour les revoir.</p>
     </li>` : S.crateOnly && !CRATE.size ? `
     <li class="empty">
       <h3>Aucune prod likée pour l'instant.</h3>
@@ -2292,7 +2328,8 @@ effHist.addEventListener("click", () => {
   }
   clearTimeout(effArme); effArme = null;
   HIST = []; majHistPos();
-  try { localStorage.removeItem(HIST_KEY); } catch (e) {}
+  VU = new Set();   // effacer l'historique remet aussi « Jamais écoutées » a zero
+  try { localStorage.removeItem(HIST_KEY); localStorage.removeItem(VU_KEY); } catch (e) {}
   effHist.textContent = "Effacer l'historique";
   render();
 });
@@ -2370,8 +2407,13 @@ function majBarre(){
   const lib = bornes ? `${S.bpm[0]}–${S.bpm[1]} BPM${S.bpmSur ? " · vérifié" : ""}`
             : S.bpmSur ? "Tempo vérifié" : "Tempo";
   poserTrig("trigTempo", lib, null, bornes || S.bpmSur);
+  const neuf = document.getElementById("trigNeuf");
+  neuf.classList.toggle("on", S.neuf);
+  neuf.setAttribute("aria-pressed", String(S.neuf));
+  // dans l'historique il n'a pas de sens, et « Pour toi » ecarte deja tout ce qu'on a ecoute
+  neuf.hidden = S.historyOnly || S.forYou;
   document.getElementById("clearAll").hidden =
-    !(ar || st || mo || bornes || S.bpmSur);
+    !(ar || st || mo || bornes || S.bpmSur || (S.neuf && !neuf.hidden));
 }
 
 /* Hauteur reelle de l'en-tete, pour que la barre se colle juste dessous. */
@@ -2448,9 +2490,19 @@ document.addEventListener("click", e => {
 });
 addEventListener("keydown", e => { if (e.key === "Escape") fermerMenus(); });
 
+function poserNeuf(v){
+  S.neuf = v;
+  try { localStorage.setItem("findings.neuf", v ? "1" : "0"); } catch (e) {}
+}
+document.getElementById("trigNeuf").addEventListener("click", () => {
+  poserNeuf(!S.neuf);
+  fermerMenus();
+  render();
+});
 document.getElementById("clearAll").addEventListener("click", () => {
   S.styles.clear(); S.moods.clear(); S.artists.clear();
   S.bpmSur = false;
+  poserNeuf(false);
   document.getElementById("bpmSur").checked = false;
   bMin.value = BMIN; bMax.value = BMAX;
   refletFiltres();
