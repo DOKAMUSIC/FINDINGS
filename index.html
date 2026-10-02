@@ -1873,16 +1873,48 @@ const STYLE_N = Object.fromEntries(STYLES.map(([k]) => [k, BEATS.filter(b => b.s
 /* un style sans prod n'a rien à faire dans les filtres ; les autres sont triés
    par volume */
 const LIVE_STYLES = STYLES.filter(([k]) => STYLE_N[k] > 0).sort((a,b) => STYLE_N[b[0]] - STYLE_N[a[0]]);
+/* Portee des menus : dans les likes, les menus ne proposent que ce qui s'y trouve, avec les
+   comptes des likes (et du dossier ouvert). Ailleurs, le catalogue entier. */
+let PORTEE = null, porteeCle = "";
+function calculerPortee(){
+  const cle = S.crateOnly ? `${[...CRATE].join(",")}|${S.dossier || ""}|${S.dossier && dossier(S.dossier) ? dossier(S.dossier).ids.size : ""}` : "";
+  if (cle === porteeCle) return false;
+  porteeCle = cle;
+  if (!S.crateOnly) { PORTEE = null; return true; }
+  const d = S.dossier && dossier(S.dossier);
+  const base = BEATS.filter(b => CRATE.has(b.id) && (!d || d.ids.has(b.id)));
+  PORTEE = { style: {}, artist: {}, mood: {} };
+  base.forEach(b => {
+    PORTEE.style[b.style] = (PORTEE.style[b.style] || 0) + 1;
+    b.artists.forEach(a => PORTEE.artist[a] = (PORTEE.artist[a] || 0) + 1);
+    b.moods.forEach(m => PORTEE.mood[m] = (PORTEE.mood[m] || 0) + 1);
+  });
+  return true;
+}
+const nStyle = k => PORTEE ? (PORTEE.style[k] || 0) : STYLE_N[k];
+const nArtiste = id => PORTEE ? (PORTEE.artist[id] || 0) : ARTIST_N[id];
+const nMood = m => PORTEE ? (PORTEE.mood[m] || 0) : MOOD_N[m];
+// garde ce qui a des prods dans la portee, et ce qui est choisi (pour pouvoir le retirer)
+const dansPortee = (n, choisi) => n > 0 || choisi;
+const parPortee = (liste, n) => PORTEE ? [...liste].sort((a, b) => n(b) - n(a)) : liste;
+/* Appele a chaque rendu : ne repeint les menus que si la portee a change. */
+function majPortee(){
+  if (!calculerPortee()) return;
+  renderStyleChips(); renderMoodChips();
+  if (typeof renderArtistChips === "function" && LIVE_ARTISTS.length) renderArtistChips();
+}
+
 function chipHTML([k,label]){
   return `<button class="chip" role="button" data-style="${k}" aria-pressed="${S.styles.has(k)}" style="--c:${cssVar(k)}">
-    <span class="dot"></span>${esc(label)}<span class="n">${STYLE_N[k]}</span></button>`;
+    <span class="dot"></span>${esc(label)}<span class="n">${nStyle(k)}</span></button>`;
 }
 function renderStyleChips(){
   // 51 styles : on cherche plutot qu'on ne defile. Le nom et la cle comptent, pour que
   // « rnb » trouve « R&B » et « coupe » trouve « Ndombolo / Coupé-décalé ».
   const champ = document.getElementById("styleQ");
   const q = champ ? norm(champ.value.trim()) : "";
-  const liste = q ? LIVE_STYLES.filter(([k, label]) => norm(label + " " + k).includes(q)) : LIVE_STYLES;
+  const liste = parPortee(LIVE_STYLES, ([k]) => nStyle(k))
+    .filter(([k, label]) => dansPortee(nStyle(k), S.styles.has(k)) && (!q || norm(label + " " + k).includes(q)));
   elStyles.innerHTML = liste.map(chipHTML).join("");
   const vide = document.getElementById("styleVide");
   if (vide) vide.hidden = !!liste.length;
@@ -1890,10 +1922,13 @@ function renderStyleChips(){
 renderStyleChips();
 
 const elMoods = document.getElementById("moods");
-elMoods.innerHTML = MOODS.map(m => {
-  const n = BEATS.filter(b => b.moods.includes(m)).length;
-  return `<button class="chip" data-mood="${esc(m)}" aria-pressed="false" style="--c:${MOOD_TEINTE[m] || "#1D1D1F"}"><span class="dot"></span>${esc(m)}<span class="n">${n}</span></button>`;
-}).join("");
+const MOOD_N = Object.fromEntries(MOODS.map(m => [m, BEATS.filter(b => b.moods.includes(m)).length]));
+function renderMoodChips(){
+  elMoods.innerHTML = MOODS.filter(m => dansPortee(nMood(m), S.moods.has(m))).map(m =>
+    `<button class="chip" data-mood="${esc(m)}" aria-pressed="${S.moods.has(m)}" style="--c:${MOOD_TEINTE[m] || "#1D1D1F"}"><span class="dot"></span>${esc(m)}<span class="n">${nMood(m)}</span></button>`
+  ).join("");
+}
+renderMoodChips();
 
 /* Les suggestions de recherche sortent des références réellement citées par les
    prods en catalogue : elles changent quand le catalogue change. */
@@ -2026,6 +2061,7 @@ function majEntete(res){
   document.body.classList.toggle("vue-suivis", S.suivis);   // l'ordre est celui de l'ecoute, ou du gout
   document.getElementById("effHist").hidden = !(S.historyOnly && HIST.length);
   if (S.forYou) document.getElementById("resSub").textContent += (res.length ? " · " : "") + resumeGout();
+  majPortee();
   majSuivre();
   majDossiers();
   majProfil(res);
@@ -3201,10 +3237,13 @@ function testerCollage(){
 const elArtistes = document.getElementById("artistes"), artQ = document.getElementById("artQ");
 function renderArtistChips(){
   const q = norm(artQ.value.trim());
-  const liste = q ? LIVE_ARTISTS.filter(a => norm(a.name).includes(q)) : LIVE_ARTISTS;
+  const liste = parPortee(LIVE_ARTISTS, a => nArtiste(a.id))
+    .filter(a => dansPortee(nArtiste(a.id), S.artists.has(a.id)) && (!q || norm(a.name).includes(q)));
+  document.getElementById("artN").textContent = PORTEE
+    ? `${Object.keys(PORTEE.artist).filter(id => ARTIST_NAME[id]).length} dans tes likes` : `${LIVE_ARTISTS.length} artistes`;
   elArtistes.innerHTML = liste.map(a =>
     `<button class="chip${photoArtiste(a.id) ? " avec-ph" : ""}" data-artist="${esc(a.id)}" aria-pressed="${S.artists.has(a.id)}" style="--c:${cssVar(a.style)}">${photoArtiste(a.id)
-      ? `<img class="ph" src="${esc(photoArtiste(a.id).replace("1000x1000", "56x56"))}" alt="" loading="lazy">` : '<span class="dot"></span>'}${esc(a.name)}<span class="n">${ARTIST_N[a.id]}</span></button>`).join("");
+      ? `<img class="ph" src="${esc(photoArtiste(a.id).replace("1000x1000", "56x56"))}" alt="" loading="lazy">` : '<span class="dot"></span>'}${esc(a.name)}<span class="n">${nArtiste(a.id)}</span></button>`).join("");
   document.getElementById("artVide").hidden = !!liste.length;
 }
 if (LIVE_ARTISTS.length) {
