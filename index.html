@@ -1139,18 +1139,25 @@ body.studio-rec #prev,body.studio-rec #next,body.studio-rec #shuffle{opacity:.4;
 .rail.avatars + .rail-nav,.rail.avatars ~ .rail-nav{top:30px}
 .rail.cercles ~ .rail-nav{top:62px}
 
-/* Sections en bandes : une sur deux sur un fond pleine largeur un peu plus soutenu, avec
-   une touche d'accent dans le coin. Sans ca, en clair, tout etait du meme blanc. */
+/* Une section sur deux dans un panneau arrondi qui flotte dans la page, sans couleur ni
+   liseré, comme les cartes de l'App Store. Le fond de page gris clair fait ressortir le
+   panneau blanc ; en sombre, le panneau est d'un cran plus clair que le fond. Les bandes
+   pleine largeur teintées faisaient lourd. */
 #vueAccueil main > .sec{position:relative;isolation:isolate}
+#vueAccueil main > .sec.bande{padding-left:50px;padding-right:50px}
 #vueAccueil main > .sec.bande::before{
-  content:"";position:absolute;z-index:-1;top:0;bottom:0;left:50%;width:var(--cw,100vw);transform:translateX(-50%);
-  background:
-    radial-gradient(700px 260px at 12% 0%, color-mix(in srgb,var(--accent) 6%,transparent), transparent 70%),
-    var(--bande);
-  border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);
+  content:"";position:absolute;z-index:-1;inset:18px 12px;border-radius:32px;
+  background:var(--panneau);box-shadow:var(--panneau-ombre);
 }
-:root{--bande:#EBEBEF}
-:root[data-theme="dark"]{--bande:#141417}
+/* volontairement discret : un voile, pas un bloc */
+:root{--panneau:rgba(255,255,255,.5);--panneau-ombre:inset 0 0 0 1px rgba(0,0,0,.035)}
+:root[data-theme="dark"]{--panneau:rgba(255,255,255,.022);--panneau-ombre:inset 0 0 0 1px rgba(255,255,255,.04)}
+/* dans un panneau, les petites cartes prennent le fond de la page : blanc sur blanc, elles disparaissaient */
+#vueAccueil .sec.bande .tile:not(.rcard):not(.lrow):not(.vcard){background:var(--surface);border-color:var(--line-soft);box-shadow:none;backdrop-filter:none}
+@media(max-width:620px){
+  #vueAccueil main > .sec.bande{padding-left:26px;padding-right:26px}
+  #vueAccueil main > .sec.bande::before{inset:14px 6px;border-radius:24px}
+}
 
 
 /* carte de rangee : pochette carree, texte libre dessous */
