@@ -95,6 +95,15 @@
   --on-ink:#111113;
   --thumb:#2C2C2E;
 }
+/* En sombre, les lavis deviennent des lueurs : le violet, fixe en bas au centre de
+   l'ecran, faisait un rond clair au milieu de la page pendant tout le defilement. On ne
+   garde que les deux coins du haut, plus discrets. */
+:root[data-theme="dark"] body::before{
+  background:
+    radial-gradient(900px 560px at 6% -14%, rgba(250,35,59,.09), transparent 62%),
+    radial-gradient(820px 540px at 96% -10%, rgba(10,132,255,.07), transparent 60%),
+    var(--bg);
+}
 /* le passage d'un theme a l'autre se fait en fondu, pas d'un coup */
 html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
   transition:background-color .35s ease,border-color .35s ease,color .35s ease !important;
@@ -1130,6 +1139,20 @@ body.studio-rec #prev,body.studio-rec #next,body.studio-rec #shuffle{opacity:.4;
 .rail.avatars + .rail-nav,.rail.avatars ~ .rail-nav{top:30px}
 .rail.cercles ~ .rail-nav{top:62px}
 
+/* Sections en bandes : une sur deux sur un fond pleine largeur un peu plus soutenu, avec
+   une touche d'accent dans le coin. Sans ca, en clair, tout etait du meme blanc. */
+#vueAccueil main > .sec{position:relative;isolation:isolate}
+#vueAccueil main > .sec.bande::before{
+  content:"";position:absolute;z-index:-1;top:0;bottom:0;left:50%;width:var(--cw,100vw);transform:translateX(-50%);
+  background:
+    radial-gradient(700px 260px at 12% 0%, color-mix(in srgb,var(--accent) 6%,transparent), transparent 70%),
+    var(--bande);
+  border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);
+}
+:root{--bande:#EBEBEF}
+:root[data-theme="dark"]{--bande:#141417}
+
+
 /* carte de rangee : pochette carree, texte libre dessous */
 .tile.rcard{background:none;border:0;box-shadow:none;backdrop-filter:none;border-radius:0;overflow:visible}
 .tile.rcard:hover{transform:none;box-shadow:none}
@@ -1153,8 +1176,8 @@ body.studio-rec #prev,body.studio-rec #next,body.studio-rec #shuffle{opacity:.4;
 .avatar .nm{font-size:12px;font-weight:600;max-width:84px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* liste compacte (abonnements) et classement (sorties) : une ligne = une prod */
-.liste{display:grid;grid-template-columns:1fr 1fr;gap:4px 28px}
-.classement{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(5,auto);grid-auto-flow:column;gap:4px 28px}
+.liste{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 28px}
+.classement{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:repeat(5,auto);grid-auto-flow:column;gap:4px 28px}
 .tile.lrow{
   display:flex;align-items:center;gap:13px;padding:8px 10px;border-radius:14px;
   background:none;border:0;box-shadow:none;backdrop-filter:none;overflow:visible;
@@ -1170,7 +1193,7 @@ body.studio-rec #prev,body.studio-rec #next,body.studio-rec #shuffle{opacity:.4;
 .lrow .s b{font-weight:560;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis}
 .lrow .fin{flex:0 0 auto;font-size:12px;color:var(--dimmer);font-variant-numeric:tabular-nums}
 .lrow.playing .t,.lrow.playing .rang{color:var(--accent)}
-.classement li{display:block;border-bottom:1px solid var(--line-soft)}
+.classement li{display:block;min-width:0;border-bottom:1px solid var(--line-soft)}
 .liste .lrow{border-bottom:1px solid var(--line-soft);border-radius:14px 14px 0 0}
 
 /* Pour toi : une prod mise en avant, quatre a cote */
@@ -1212,16 +1235,33 @@ body.studio-rec #prev,body.studio-rec #next,body.studio-rec #shuffle{opacity:.4;
 .cercle .nm{font-size:14px;font-weight:650;letter-spacing:-.015em;max-width:128px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cercle .ct{font-size:12px;color:var(--dim)}
 
+/* Une rangee montre toujours un nombre exact de cartes entieres : 6 pochettes ou 7 cercles
+   sur ordinateur, 2 ou 3 sur telephone. Rien n'est coupe au bord ; les fleches (ordinateur)
+   ou le doigt font defiler page par page. */
+@media(min-width:0px){
+  .rail,.rail.cercles,.rail.avatars{--n:6;--g:16px;gap:var(--g);margin:0;padding:8px 0 16px;scroll-padding:0;
+    grid-auto-columns:calc((100% - (var(--n) - 1) * var(--g)) / var(--n))}
+  .rail.cercles{--n:7;--g:18px}
+  .rail.avatars{--n:10;--g:14px;padding-bottom:6px}
+  .rail-nav.g{left:-19px} .rail-nav.d{right:-19px}
+}
+@media(max-width:1100px){
+  .rail{--n:4} .rail.cercles{--n:5} .rail.avatars{--n:7}
+}
+@media(max-width:620px){
+  .rail,.rail.cercles,.rail.avatars{--g:12px}
+  .rail{--n:2} .rail.cercles{--n:3} .rail.avatars{--n:4}
+  .rail{scroll-snap-type:x mandatory}
+}
+.cercle .rond{width:min(128px,100%);height:auto;aspect-ratio:1}
+.avatar .rond{width:min(72px,100%);height:auto;aspect-ratio:1}
 @media(max-width:860px){
   .vedette{grid-template-columns:1fr}
   .tile.vcard{min-height:300px}
-  .liste,.classement{grid-template-columns:1fr;grid-auto-flow:row;grid-template-rows:none}
+  .liste,.classement{grid-template-columns:minmax(0,1fr);grid-auto-flow:row;grid-template-rows:none}
 }
 @media(max-width:520px){
-  .rail{grid-auto-columns:142px;gap:12px;margin:0 -16px;padding-left:16px;padding-right:16px;scroll-padding:0 16px}
-  .rail.cercles{grid-auto-columns:104px;gap:14px}
-  .cercle .rond{width:104px;height:104px}
-  .cercle .nm{max-width:104px}
+  .cercle .nm{max-width:100%}
   .tile.vcard{min-height:260px}
   .vcard .v-in{padding:18px}
 }
@@ -4129,6 +4169,17 @@ const carteMini = b => `
     <div class="art"><img src="${vignette(b.id)}" alt="" loading="lazy"><span class="go">${ICO_LIRE}</span></div>
     <div class="body"><p class="t">${esc(b.title)}</p><div class="s"><span class="pill">${esc(STYLE_NAME[b.style] || b.style)}</span><span>${esc(b.prod)}</span></div></div>
   </a>`;
+/* Bandes : une section visible sur deux, recalcule quand une section apparait ou
+   disparait (likes, abonnements, toplines n'existent pas pour tout le monde). */
+function alternerBandes(){
+  [...document.querySelectorAll("#vueAccueil main > section.sec")].filter(x => !x.hidden)
+    .forEach((x, i) => x.classList.toggle("bande", i % 2 === 0));
+}
+(() => {
+  const mo = new MutationObserver(alternerBandes);
+  document.querySelectorAll("#vueAccueil main > section.sec").forEach(x => mo.observe(x, { attributes: true, attributeFilter: ["hidden"] }));
+  alternerBandes();
+})();
 /* Fleches des rangees (ordinateur) : une page a la fois ; elles s'eteignent aux bouts. */
 function brancherRangees(){
   document.querySelectorAll(".rail-wrap").forEach(w => {
@@ -4136,8 +4187,10 @@ function brancherRangees(){
     w.dataset.branche = "1";
     const r = w.querySelector(".rail"), g = w.querySelector(".rail-nav.g"), d = w.querySelector(".rail-nav.d");
     const maj = () => { g.disabled = r.scrollLeft < 8; d.disabled = r.scrollLeft + r.clientWidth > r.scrollWidth - 8; };
-    g.addEventListener("click", () => r.scrollBy({ left: -r.clientWidth * .85, behavior: "smooth" }));
-    d.addEventListener("click", () => r.scrollBy({ left: r.clientWidth * .85, behavior: "smooth" }));
+    // une page exacte (largeur + un ecart) : la rangee retombe sur des cartes entieres
+    const page = () => r.clientWidth + (parseFloat(getComputedStyle(r).columnGap) || 0);
+    g.addEventListener("click", () => r.scrollBy({ left: -page(), behavior: "smooth" }));
+    d.addEventListener("click", () => r.scrollBy({ left: page(), behavior: "smooth" }));
     r.addEventListener("scroll", maj, { passive: true });
     new ResizeObserver(maj).observe(r);
     maj();
