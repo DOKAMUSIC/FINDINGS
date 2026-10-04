@@ -421,6 +421,9 @@ body.vue-suivis #fbar{display:none}
 .dosmenu input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px}
 .dosmenu .dos-input{width:100%;margin-top:6px;border-radius:9px}
 .icon.dans{color:var(--accent)}
+/* sur telephone, dans les likes, l'icone chaine cede sa place au dossier : avec quatre
+   icones le titre n'avait plus que six lettres */
+@media(max-width:640px){ .row .acts:has([data-act="dossier"]) [data-act="chan"]{display:none} }
 .suivre.on{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
 .suivre[hidden]{display:none}
 .res-head .sub{display:block}
@@ -559,6 +562,16 @@ body.vue-suivis #fbar{display:none}
 }
 .suivi-toast.on{transform:translate(-50%,0);opacity:1}
 .suivi-toast img,.suivi-toast .ini{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:0 0 auto;background:#333;display:grid;place-items:center;font-weight:700}
+.suivi-toast .toast-act{
+  margin-left:4px;height:30px;padding:0 13px;border-radius:999px;background:#fff;color:#111;
+  font-size:12.5px;font-weight:650;flex:0 0 auto;
+}
+.suivi-toast .toast-act:hover{background:#f0f0f2}
+.like-toast img{border-radius:8px;width:44px;object-fit:cover}
+.like-toast small{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbtn.dosb.dans{color:var(--accent)}
+/* la barre d'un telephone est pleine : on y range par le message « Ranger » ou les likes */
+@media(max-width:520px){ #dosBtn{display:none} }
 .suivi-toast small{display:block;font-size:11.5px;font-weight:450;color:rgba(255,255,255,.65)}
 @keyframes coeur-rebond{
   0%{transform:scale(1)}
@@ -1451,6 +1464,7 @@ body.vue-accueil .hcta{display:inline-flex}
       <button class="tbtn like" id="likeBtn" aria-label="Liker cette prod" title="Liker cette prod">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
       </button>
+      <button class="tbtn dosb" id="dosBtn" hidden data-act="dossier" aria-label="Ranger dans un dossier" title="Ranger dans un dossier"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>
       <span class="vol">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9z"/></svg>
         <input id="vol" type="range" min="0" max="100" value="100" aria-label="Volume">
@@ -2537,6 +2551,14 @@ function syncCoeur(){
   btn.setAttribute("aria-label", texte);
   btn.title = texte;
   btn.querySelector("svg")?.setAttribute("fill", like ? "currentColor" : "none");
+  // ranger la prod en cours : seulement si elle est likee
+  const dos = document.getElementById("dosBtn");
+  if (dos) {
+    dos.hidden = !like;
+    const dans = like && DOSSIERS.some(d => d.ids.has(current.id));
+    dos.classList.toggle("dans", dans);
+    dos.querySelector("svg")?.setAttribute("fill", dans ? "currentColor" : "none");
+  }
 }
 
 function basculerLike(b, source){
@@ -2544,6 +2566,7 @@ function basculerLike(b, source){
   like ? CRATE.add(b.id) : CRATE.delete(b.id);
   saveCrate();
   if (!like && DOSSIERS.some(d => d.ids.delete(b.id))) saveDossiers();
+  if (like) proposerDossier(b);
   document.getElementById("crateN").textContent = CRATE.size;
   if (source) peindreLike(source, like);
   // l'autre représentation se met à jour sans fêter l'événement une deuxième fois
@@ -2892,11 +2915,35 @@ function ouvrirDosMenu(b, btn){
   dosMenu.style.top = (r.bottom + 6 + h > innerHeight - 90 ? Math.max(8, r.top - 6 - h) : r.bottom + 6) + "px";
   if (!DOSSIERS.length) document.getElementById("dosMenuNew").focus();
 }
+/* Apres un like, ou qu'on soit : un message avec « Ranger », pour classer la prod sans
+   passer par la page des likes. */
+let likeToastMinuteur = 0;
+function proposerDossier(b){
+  document.querySelector(".like-toast")?.remove();
+  const t = document.createElement("div");
+  t.className = "suivi-toast like-toast";
+  t.setAttribute("role", "status");
+  t.innerHTML = `<img src="https://i.ytimg.com/vi/${b.id}/mqdefault.jpg" alt="">` +
+    `<span>Ajoutée à tes likes<small>${esc(b.title)}</small></span>` +
+    `<button class="toast-act" data-act="dossier">Ranger</button>`;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add("on"));
+  t.querySelector(".toast-act").addEventListener("click", e => {
+    clearTimeout(likeToastMinuteur);
+    ouvrirDosMenu(b, e.currentTarget);
+    likeToastMinuteur = setTimeout(() => { t.classList.remove("on"); setTimeout(() => t.remove(), 400); }, 400);
+  });
+  clearTimeout(likeToastMinuteur);
+  likeToastMinuteur = setTimeout(() => { t.classList.remove("on"); setTimeout(() => t.remove(), 400); }, 4000);
+}
+document.getElementById("dosBtn").addEventListener("click", e => { if (current) ouvrirDosMenu(current, e.currentTarget); });
+
 function fermerDosMenu(){
   if (dosMenu.hidden) return;
   dosMenu.hidden = true;
   dosProd = null;
   render();   // compteurs des pastilles, icone de la ligne, contenu du dossier affiche
+  syncCoeur();
 }
 dosMenu.addEventListener("change", e => {
   const d = dossier(e.target.dataset.mdos); if (!d || !dosProd) return;
