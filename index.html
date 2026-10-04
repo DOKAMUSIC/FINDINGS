@@ -1118,8 +1118,11 @@ body.vue-suivis #fbar{display:none}
 /* nos affiches : pleine opacite, un simple degrade en bas pour lire le nom */
 .mcard .affiche{position:absolute;inset:0;width:100%;height:100%;display:block;transition:transform .45s cubic-bezier(.2,.7,.3,1)}
 .mcard:hover .affiche{transform:scale(1.06)}
-.mcard.a-affiche::after{background:linear-gradient(180deg,transparent 42%,rgba(0,0,0,.18) 62%,rgba(0,0,0,.62) 100%)}
-.mcard.a-affiche .nm{font-size:19px}
+.mcard.a-affiche::after{background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.28) 100%)}
+/* titre a la maniere d'Apple Music : grand, gras, sans ombre portee lourde */
+.mcard.a-affiche .mcard-in{padding:14px 16px}
+.mcard.a-affiche .nm{font-size:23px;font-weight:800;letter-spacing:-.035em;line-height:1.05;text-shadow:none}
+.mcard.a-affiche .ct{font-size:12px;opacity:.72;text-shadow:none;margin-top:2px}
 .mcard::after{
   content:"";position:absolute;inset:0;z-index:1;
   background:linear-gradient(145deg,
@@ -3789,161 +3792,44 @@ majSuivis();
 })();
 
 /* ============ affiches des moods ============
-   Nos propres visuels, dessines en SVG : une composition par ambiance, dans sa couleur.
-   Avant, chaque carte montrait la miniature YouTube de la prod la plus vue du mood —
-   l'image d'un autre, qui changeait au gre du catalogue. Le hasard des motifs (pluie,
-   etoiles, confettis) est tire d'une graine fixe : l'affiche est la meme a chaque visite. */
+   Sobres, a la maniere des categories d'Apple Music et des lavis de l'accueil : un fond
+   profond, deux ou trois taches de lumiere tres floutees dans les teintes du mood, un seul
+   symbole au trait fin. Le nom, en grand, est pose par la carte (HTML), pas par l'image. */
 const AFFICHES = (() => {
-  const graine = s => () => (s = (s * 16807) % 2147483647, (s - 1) / 2147483646);
-  const grain = u => `<filter id="${u}n" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0"/></filter>`;
-  const voile = u => `<rect width="300" height="200" filter="url(#${u}n)" opacity=".14" style="mix-blend-mode:overlay"/>`;
-  const svg = (u, defs, corps) =>
-    `<svg class="affiche" viewBox="0 0 300 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>${grain(u)}${defs}</defs>${corps}${voile(u)}</svg>`;
-
-  return {
-    agressif: u => svg(u,
-      `<linearGradient id="${u}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF4040"/><stop offset=".55" stop-color="#9B0F1E"/><stop offset="1" stop-color="#160306"/></linearGradient>`,
-      `<rect width="300" height="200" fill="url(#${u}a)"/>
-       <polygon points="40,-10 120,-10 20,210 -60,210" fill="#000" opacity=".32"/>
-       <polygon points="172,-10 214,-10 118,210 76,210" fill="#FF6B6B" opacity=".45"/>
-       <polygon points="252,-10 330,-10 232,210 152,210" fill="#000" opacity=".3"/>
-       <polygon points="198,34 292,14 246,98" fill="#fff" opacity=".92"/>
-       <polygon points="230,104 268,92 250,130" fill="#fff" opacity=".55"/>
-       <polygon points="58,118 134,150 70,192" fill="#fff" opacity=".16"/>
-       <path d="M-10 166 L310 66" stroke="#fff" stroke-width="1.4" opacity=".65"/>
-       <path d="M-10 178 L310 78" stroke="#fff" stroke-width=".6" opacity=".4"/>`),
-
-    sombre: u => {
-      const r = graine(7);
-      const etoiles = Array.from({ length: 34 }, () =>
-        `<circle cx="${(r() * 300).toFixed(1)}" cy="${(r() * 120).toFixed(1)}" r="${(r() * .9 + .2).toFixed(2)}" fill="#fff" opacity="${(r() * .6 + .2).toFixed(2)}"/>`).join("");
-      return svg(u,
-        `<linearGradient id="${u}a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2C3863"/><stop offset="1" stop-color="#07090F"/></linearGradient>
-         <filter id="${u}f"><feGaussianBlur stdDeviation="9"/></filter>`,
-        `<rect width="300" height="200" fill="url(#${u}a)"/>${etoiles}
-         <circle cx="206" cy="70" r="36" fill="#E9EDF7"/>
-         <circle cx="222" cy="60" r="34" fill="#1B2340"/>
-         <g filter="url(#${u}f)"><ellipse cx="90" cy="150" rx="190" ry="26" fill="#9AABD6" opacity=".18"/><ellipse cx="240" cy="172" rx="150" ry="20" fill="#9AABD6" opacity=".14"/></g>
-         <path d="M0 200 V168 L40 150 L78 164 L120 140 L170 162 L214 146 L262 166 L300 152 V200 Z" fill="#05070C"/>`);
-    },
-
-    "mélancolique": u => {
-      const r = graine(19);
-      const pluie = Array.from({ length: 46 }, () => {
-        const x = r() * 340 - 20, y = r() * 200, l = 10 + r() * 18;
-        return `<line x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${(x - l * .35).toFixed(1)}" y2="${(y + l).toFixed(1)}" stroke="#DCE7F5" stroke-width="${(r() * .8 + .4).toFixed(2)}" opacity="${(r() * .4 + .25).toFixed(2)}" stroke-linecap="round"/>`;
-      }).join("");
-      return svg(u,
-        `<linearGradient id="${u}a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7393BA"/><stop offset="1" stop-color="#1E2B3D"/></linearGradient>`,
-        `<rect width="300" height="200" fill="url(#${u}a)"/>${pluie}
-         <g fill="none" stroke="#DCE7F5"><ellipse cx="96" cy="170" rx="10" ry="3" opacity=".7"/><ellipse cx="96" cy="170" rx="24" ry="7" opacity=".4"/><ellipse cx="96" cy="170" rx="42" ry="12" opacity=".2"/>
-         <ellipse cx="226" cy="182" rx="7" ry="2" opacity=".6"/><ellipse cx="226" cy="182" rx="18" ry="5" opacity=".3"/></g>`);
-    },
-
-    "énergique": u => {
-      const rayons = Array.from({ length: 24 }, (_, i) => {
-        const a1 = (i / 24) * Math.PI * 2, a2 = a1 + Math.PI / 30, R = 360, cx = 205, cy = 104;
-        return `<polygon points="${cx},${cy} ${(cx + Math.cos(a1) * R).toFixed(0)},${(cy + Math.sin(a1) * R).toFixed(0)} ${(cx + Math.cos(a2) * R).toFixed(0)},${(cy + Math.sin(a2) * R).toFixed(0)}" fill="#fff" opacity="${i % 2 ? .1 : .2}"/>`;
-      }).join("");
-      return svg(u,
-        `<radialGradient id="${u}a" cx=".68" cy=".52" r=".8"><stop offset="0" stop-color="#FFE14D"/><stop offset=".45" stop-color="#FF8A00"/><stop offset="1" stop-color="#B83A0A"/></radialGradient>`,
-        `<rect width="300" height="200" fill="url(#${u}a)"/>${rayons}
-         <circle cx="205" cy="104" r="44" fill="none" stroke="#fff" stroke-width="5" opacity=".5"/>
-         <circle cx="205" cy="104" r="24" fill="#fff" opacity=".95"/>
-         <polygon points="70,22 34,108 64,108 46,178 108,82 76,82 98,22" fill="#fff" opacity=".9"/>`);
-    },
-
-    chill: u => svg(u,
-      `<linearGradient id="${u}a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5BE3A4"/><stop offset=".5" stop-color="#119077"/><stop offset="1" stop-color="#0A3442"/></linearGradient>`,
-      `<rect width="300" height="200" fill="url(#${u}a)"/>
-       <circle cx="226" cy="52" r="22" fill="#F4FFE9" opacity=".9"/>
-       <circle cx="226" cy="52" r="34" fill="#F4FFE9" opacity=".14"/>
-       <path d="M0 104 C50 88 100 120 150 104 S250 88 300 104 V200 H0Z" fill="#fff" opacity=".1"/>
-       <path d="M0 126 C60 110 110 142 170 126 S260 112 300 124 V200 H0Z" fill="#fff" opacity=".1"/>
-       <path d="M0 148 C40 136 100 162 150 148 S250 134 300 148 V200 H0Z" fill="#06303A" opacity=".45"/>
-       <path d="M0 172 C60 160 120 184 180 170 S270 160 300 170 V200 H0Z" fill="#041F28" opacity=".6"/>`),
-
-    solaire: u => {
-      const reflets = [0, 1, 2, 3, 4, 5].map(i =>
-        `<rect x="${150 - (34 - i * 5)}" y="${146 + i * 9}" width="${(34 - i * 5) * 2}" height="3" rx="1.5" fill="#FFF3C4" opacity="${(.8 - i * .11).toFixed(2)}"/>`).join("");
-      return svg(u,
-        `<linearGradient id="${u}a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE477"/><stop offset=".5" stop-color="#FF9A3C"/><stop offset="1" stop-color="#FF5C7A"/></linearGradient>
-         <linearGradient id="${u}m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF7B47"/><stop offset="1" stop-color="#C2366B"/></linearGradient>`,
-        `<rect width="300" height="200" fill="url(#${u}a)"/>
-         <circle cx="150" cy="138" r="86" fill="#FFF1B8" opacity=".25"/>
-         <circle cx="150" cy="138" r="58" fill="#FFF6D2"/>
-         <rect y="140" width="300" height="60" fill="url(#${u}m)"/>${reflets}`);
-    },
-
-    sensuel: u => svg(u,
-      `<linearGradient id="${u}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF97C8"/><stop offset=".5" stop-color="#C2185B"/><stop offset="1" stop-color="#34061F"/></linearGradient>
-       <linearGradient id="${u}r" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#FFE3F0" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-       <filter id="${u}f"><feGaussianBlur stdDeviation="6"/></filter>`,
-      `<rect width="300" height="200" fill="url(#${u}a)"/>
-       <path d="M-20 150 C60 60 140 210 220 110 S300 40 330 70" fill="none" stroke="url(#${u}r)" stroke-width="30" opacity=".35" filter="url(#${u}f)"/>
-       <path d="M-20 150 C60 60 140 210 220 110 S300 40 330 70" fill="none" stroke="url(#${u}r)" stroke-width="12" opacity=".8"/>
-       <path d="M-20 175 C70 110 150 220 230 140 S300 100 330 116" fill="none" stroke="url(#${u}r)" stroke-width="6" opacity=".55"/>
-       <path d="M-20 120 C50 50 130 160 210 80 S290 20 330 40" fill="none" stroke="url(#${u}r)" stroke-width="3" opacity=".5"/>`),
-
-    planant: u => {
-      const r = graine(41);
-      const etoiles = Array.from({ length: 42 }, () =>
-        `<circle cx="${(r() * 300).toFixed(1)}" cy="${(r() * 200).toFixed(1)}" r="${(r() * 1 + .2).toFixed(2)}" fill="#fff" opacity="${(r() * .7 + .15).toFixed(2)}"/>`).join("");
-      return svg(u,
-        `<radialGradient id="${u}a" cx=".3" cy=".3" r="1"><stop offset="0" stop-color="#9C6BFF"/><stop offset=".5" stop-color="#3A1B7C"/><stop offset="1" stop-color="#0E0622"/></radialGradient>
-         <radialGradient id="${u}p" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#F3E8FF"/><stop offset=".6" stop-color="#B98CFF"/><stop offset="1" stop-color="#5B2DB8"/></radialGradient>`,
-        `<rect width="300" height="200" fill="url(#${u}a)"/>${etoiles}
-         <ellipse cx="190" cy="104" rx="70" ry="13" fill="none" stroke="#E4D2FF" stroke-width="2.5" opacity=".55" transform="rotate(-16 190 104)"/>
-         <circle cx="190" cy="104" r="36" fill="url(#${u}p)"/>
-         <path d="M122.7 123.3 A70 13 -16 0 0 257.3 84.7" fill="none" stroke="#E4D2FF" stroke-width="2.5" opacity=".85"/>
-         <circle cx="62" cy="58" r="9" fill="#D9C2FF" opacity=".7"/><circle cx="96" cy="160" r="5" fill="#D9C2FF" opacity=".5"/>`);
-    },
-
-    nostalgique: u => svg(u,
-      `<linearGradient id="${u}a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DDB78E"/><stop offset=".55" stop-color="#8E6239"/><stop offset="1" stop-color="#3B2818"/></linearGradient>
-       <pattern id="${u}l" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="1.2" fill="#000" opacity=".12"/></pattern>`,
-      `<rect width="300" height="200" fill="url(#${u}a)"/>
-       <g transform="rotate(-6 150 100)">
-         <rect x="72" y="46" width="156" height="102" rx="10" fill="#F2E2C4"/>
-         <rect x="84" y="56" width="132" height="58" rx="5" fill="#E8603C"/>
-         <rect x="84" y="70" width="132" height="8" fill="#F5A623"/>
-         <rect x="104" y="84" width="92" height="24" rx="12" fill="#2A1D12"/>
-         <circle cx="122" cy="96" r="8" fill="#F2E2C4"/><circle cx="178" cy="96" r="8" fill="#F2E2C4"/>
-         <circle cx="122" cy="96" r="3" fill="#2A1D12"/><circle cx="178" cy="96" r="3" fill="#2A1D12"/>
-         <path d="M96 148 L106 126 H194 L204 148" fill="#D9C7A6"/>
-       </g>
-       <rect width="300" height="200" fill="url(#${u}l)"/>`),
-
-    "cinématique": u => {
-      const trous = Array.from({ length: 16 }, (_, i) =>
-        `<rect x="${6 + i * 19}" y="6" width="9" height="7" rx="1.5" fill="#E9D79A" opacity=".55"/><rect x="${6 + i * 19}" y="187" width="9" height="7" rx="1.5" fill="#E9D79A" opacity=".55"/>`).join("");
-      const r = graine(73);
-      const poussiere = Array.from({ length: 22 }, () =>
-        `<circle cx="${(60 + r() * 220).toFixed(1)}" cy="${(40 + r() * 120).toFixed(1)}" r="${(r() * 1.1 + .3).toFixed(2)}" fill="#FFF3C8" opacity="${(r() * .6 + .2).toFixed(2)}"/>`).join("");
-      return svg(u,
-        `<linearGradient id="${u}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3A2E0C"/><stop offset="1" stop-color="#0B0904"/></linearGradient>
-         <linearGradient id="${u}b" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#FFE9A3" stop-opacity=".95"/><stop offset="1" stop-color="#C9A227" stop-opacity="0"/></linearGradient>`,
-        `<rect width="300" height="200" fill="url(#${u}a)"/>
-         <polygon points="292,100 10,26 10,174" fill="url(#${u}b)" opacity=".55"/>
-         <circle cx="290" cy="100" r="10" fill="#FFF4CC"/>${poussiere}
-         <rect width="300" height="20" fill="#050403"/><rect y="180" width="300" height="20" fill="#050403"/>${trous}`);
-    },
-
-    festif: u => {
-      const r = graine(97), teintes = ["#FFD60A", "#FF5E7E", "#ffffff", "#34C759", "#FF9F0A", "#BF5AF2"];
-      const confettis = Array.from({ length: 44 }, () =>
-        `<rect x="${(r() * 300).toFixed(1)}" y="${(r() * 200).toFixed(1)}" width="${(3 + r() * 5).toFixed(1)}" height="${(2 + r() * 3).toFixed(1)}" fill="${teintes[Math.floor(r() * teintes.length)]}" transform="rotate(${(r() * 180).toFixed(0)} 150 100)" opacity=".9"/>`).join("");
-      const facettes = [-24, -12, 0, 12, 24].map(d => `<line x1="${206 + d}" y1="34" x2="${206 + d}" y2="102" stroke="#5E6B85" stroke-width=".8" opacity=".6"/><line x1="172" y1="${68 + d}" x2="240" y2="${68 + d}" stroke="#5E6B85" stroke-width=".8" opacity=".6"/>`).join("");
-      return svg(u,
-        `<linearGradient id="${u}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2FD6E8"/><stop offset=".55" stop-color="#3B5BDB"/><stop offset="1" stop-color="#5B21B6"/></linearGradient>
-         <radialGradient id="${u}d" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#C9D3E6"/><stop offset="1" stop-color="#6E7C99"/></radialGradient>
-         <clipPath id="${u}c"><circle cx="206" cy="68" r="32"/></clipPath>`,
-        `<rect width="300" height="200" fill="url(#${u}a)"/>
-         <polygon points="206,68 60,200 120,200" fill="#fff" opacity=".1"/><polygon points="206,68 300,180 300,140" fill="#fff" opacity=".12"/>
-         <line x1="206" y1="0" x2="206" y2="36" stroke="#E6ECF5" stroke-width="1.2"/>
-         <circle cx="206" cy="68" r="32" fill="url(#${u}d)"/><g clip-path="url(#${u}c)">${facettes}</g>${confettis}`);
-    }
+  // [couleur, x, y, rayon] : les taches, de la plus grande a la plus petite
+  const P = {
+    "agressif":     { fond:"#2A050B", taches:[["#E8263C",70,30,130],["#FF7A3D",270,190,110],["#8E0A20",250,20,90]],
+                      glyphe:'<path d="M12 2.8c.6 3.4 4.8 5.4 4.8 10a4.8 4.8 0 0 1-9.6 0c0-2.2 1-3.6 2.1-4.6.3 1.7 1.1 2.8 2.2 3.2-.1-3.2-.6-5.8.5-8.6z"/>' },
+    "sombre":       { fond:"#090C17", taches:[["#34427A",60,170,140],["#6474B8",250,40,90],["#1C2444",280,190,90]],
+                      glyphe:'<path d="M20 14.6A8.2 8.2 0 1 1 9.4 4a6.6 6.6 0 0 0 10.6 10.6z"/>' },
+    "mélancolique": { fond:"#16202E", taches:[["#5B7A9E",240,160,140],["#9DBCE0",50,30,100],["#2E4563",40,190,90]],
+                      glyphe:'<path d="M7 15a4 4 0 0 1-.4-8 5.6 5.6 0 0 1 10.6.6A3.7 3.7 0 0 1 17.4 15z"/><path d="M8.5 18.2 7.6 20.6M12.5 18.2l-.9 2.4M16.5 18.2l-.9 2.4"/>' },
+    "énergique":    { fond:"#3D1500", taches:[["#FF9F0A",230,60,140],["#FFD60A",60,180,100],["#FF4F1F",40,20,90]],
+                      glyphe:'<path d="M13.2 2.6 5.2 13.6h6.1l-1.1 7.8 8-11h-6.1z"/>' },
+    "chill":        { fond:"#062A24", taches:[["#2FB873",60,40,130],["#5EE6C9",260,170,110],["#0F6E57",270,20,80]],
+                      glyphe:'<path d="M2.8 8.6c2.3 0 2.3-1.8 4.6-1.8S9.7 8.6 12 8.6s2.3-1.8 4.6-1.8 2.3 1.8 4.6 1.8M2.8 13c2.3 0 2.3-1.8 4.6-1.8S9.7 13 12 13s2.3-1.8 4.6-1.8 2.3 1.8 4.6 1.8M2.8 17.4c2.3 0 2.3-1.8 4.6-1.8s2.3 1.8 4.6 1.8 2.3-1.8 4.6-1.8 2.3 1.8 4.6 1.8"/>' },
+    "solaire":      { fond:"#3B1D06", taches:[["#FFC531",150,190,150],["#FF8A3D",280,30,100],["#FFE88A",30,40,80]],
+                      glyphe:'<circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4 7 7M17 17l1.6 1.6M5.4 18.6 7 17M17 7l1.6-1.6"/>' },
+    "sensuel":      { fond:"#2B0618", taches:[["#E0457E",240,50,140],["#FFA3C7",50,180,100],["#8E1446",40,30,90]],
+                      glyphe:'<path d="M8 3h8l-.4 5a3.6 3.6 0 0 1-7.2 0z"/><path d="M12 11.6v8.4M8.6 20.4h6.8"/>' },
+    "planant":      { fond:"#120828", taches:[["#8A55F5",70,150,140],["#5B8CFF",260,40,100],["#3B1B7C",280,190,90]],
+                      glyphe:'<circle cx="12" cy="12" r="4.4"/><ellipse cx="12" cy="12" rx="10" ry="3.4" transform="rotate(-20 12 12)"/>' },
+    "nostalgique":  { fond:"#2A1208", taches:[["#C97B52",60,40,130],["#F3C9A2",260,180,100],["#7E3A26",270,30,90]],
+                      glyphe:'<rect x="3" y="6" width="18" height="12" rx="2.2"/><circle cx="9" cy="11.4" r="1.8"/><circle cx="15" cy="11.4" r="1.8"/><path d="M10.8 11.4h2.4M7.4 18l1.4-2.8h6.4l1.4 2.8"/>' },
+    "cinématique":  { fond:"#071315", taches:[["#D9A43A",250,160,140],["#2B7480",50,40,115],["#F2D58A",40,190,70]],
+                      glyphe:'<rect x="3" y="5" width="18" height="14" rx="2.2"/><path d="M7.2 5v14M16.8 5v14M3 9.6h4.2M3 14.4h4.2M16.8 9.6H21M16.8 14.4H21"/>' },
+    "festif":       { fond:"#0A1638", taches:[["#2FC6D8",60,160,130],["#7B5CFF",250,40,110],["#FF5E9C",280,190,70]],
+                      glyphe:'<path d="M12 3v3.6M12 17.4V21M3 12h3.6M17.4 12H21M5.6 5.6l2.5 2.5M15.9 15.9l2.5 2.5M5.6 18.4l2.5-2.5M15.9 8.1l2.5-2.5"/><circle cx="12" cy="12" r="1.6"/>' }
   };
+  const out = {};
+  for (const [m, p] of Object.entries(P)) out[m] = u =>
+    `<svg class="affiche" viewBox="0 0 300 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">` +
+      `<defs><filter id="${u}f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="40"/></filter></defs>` +
+      `<rect width="300" height="200" fill="${p.fond}"/>` +
+      `<g filter="url(#${u}f)">${p.taches.map(([c, x, y, r], i) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity="${[.95, .8, .7][i]}"/>`).join("")}</g>` +
+      `<g transform="translate(250 18) scale(1.45)" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".9">${p.glyphe}</g>` +
+    `</svg>`;
+  return out;
 })();
 
 /* ============ mur des moods ============ */
