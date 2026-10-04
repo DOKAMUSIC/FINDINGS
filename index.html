@@ -8,13 +8,24 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <meta name="theme-color" content="#F5F5F7">
+<script>
+/* Theme pose avant le premier affichage, sinon la page clignote en blanc avant de
+   passer en sombre. Le choix du visiteur prime ; sans choix, celui du systeme. */
+(function(){
+  var t = null;
+  try { t = localStorage.getItem("findings.theme"); } catch (e) {}
+  if (t !== "dark" && t !== "light") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", t);
+  document.querySelector('meta[name="theme-color"]').setAttribute("content", t === "dark" ? "#0E0E10" : "#F5F5F7");
+})();
+</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 /* ═══════════ FINDINGS — thème clair, verre dépoli ═══════════
    Blanc dominant, hairlines, ombres courtes, flou saturé derrière les barres
-   fixes. Les couleurs de style viennent du catalogue : elles n'arrivent que par
+   fixes. Les couleurs de style viennent du catalogue: elles n'arrivent que par
    la variable --c, mélangée à du blanc ou à de l'encre pour rester lisible. */
 :root{
   color-scheme:light;
@@ -52,6 +63,41 @@
   --mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,monospace;
 
   --bar-h:78px;
+
+  /* ce qui change avec le theme, au-dela des couleurs nommees */
+  --fg-rgb:0,0,0;          /* voiles et rails gris: noir tres dilue sur fond clair */
+  --bg-rgb:245,245,247;    /* halos qui gardent le texte lisible sur la note 3D */
+  --on-ink:#fff;           /* texte pose sur un fond couleur d'encre */
+  --thumb:#E8E8ED;         /* fond des vignettes avant chargement */
+}
+/* ── theme sombre: choisi avec le bouton lune, ou celui du systeme par defaut ── */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E0E10;
+  --surface:#1C1C1E;
+  --surface-2:#232326;
+  --glass:rgba(24,24,27,.74);
+  --glass-strong:rgba(28,28,31,.88);
+  --glass-edge:rgba(255,255,255,.08);
+  --ink:#F5F5F7;
+  --ink-2:#D1D1D6;
+  --dim:#9A9AA0;
+  --dimmer:#6E6E75;
+  --line:rgba(255,255,255,.12);
+  --line-soft:rgba(255,255,255,.07);
+  --hover:rgba(255,255,255,.06);
+  --accent-soft:rgba(250,35,59,.18);
+  --sh-1:0 1px 2px rgba(0,0,0,.45);
+  --sh-2:0 2px 6px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.35);
+  --sh-3:0 8px 24px rgba(0,0,0,.45),0 24px 64px rgba(0,0,0,.45);
+  --fg-rgb:255,255,255;
+  --bg-rgb:14,14,16;
+  --on-ink:#111113;
+  --thumb:#2C2C2E;
+}
+/* le passage d'un theme a l'autre se fait en fondu, pas d'un coup */
+html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
+  transition:background-color .35s ease,border-color .35s ease,color .35s ease !important;
 }
 
 *{box-sizing:border-box}
@@ -61,13 +107,13 @@ body{
   font-family:var(--sans);font-size:14px;line-height:1.45;
   letter-spacing:-.011em;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
-  /* L'interface se manipule, elle ne se copie pas : un double-clic sur un titre
+  /* L'interface se manipule, elle ne se copie pas: un double-clic sur un titre
      ou un glisse rate surlignait du texte, ce qui trahit la page web sous l'appli. */
   -webkit-user-select:none;user-select:none;
 }
 /* Les champs de saisie gardent la selection, sans quoi on ne peut plus editer. */
 input,textarea{-webkit-user-select:text;user-select:text}
-/* lavis de couleur très dilués : ce qui donne au blanc sa profondeur */
+/* lavis de couleur très dilués: ce qui donne au blanc sa profondeur */
 body::before{
   content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   background:
@@ -97,7 +143,20 @@ ul{margin:0;padding:0;list-style:none}
   display:flex;align-items:center;gap:22px;
 }
 .brand{display:flex;align-items:center;flex:0 0 auto;text-decoration:none}
-/* La note passe derrière le mot, comme sur l'accueil. Dimensions explicites :
+/* jour / nuit : la lune en clair (pour passer en sombre), le soleil en sombre */
+.theme-btn{
+  width:36px;height:36px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+  color:var(--ink-2);background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-1);
+  transition:transform .2s,box-shadow .15s;margin-left:-10px;
+}
+.theme-btn:hover{box-shadow:var(--sh-2)}
+.theme-btn:active{transform:scale(.92)}
+.theme-btn svg{grid-area:1/1;transition:transform .45s cubic-bezier(.2,.9,.25,1.2),opacity .25s}
+.theme-btn .soleil{opacity:0;transform:rotate(-90deg) scale(.4)}
+:root[data-theme="dark"] .theme-btn .lune{opacity:0;transform:rotate(90deg) scale(.4)}
+:root[data-theme="dark"] .theme-btn .soleil{opacity:1;transform:none;color:#FFD60A}
+@media(max-width:640px){ .theme-btn{width:34px;height:34px;margin-left:-4px} }
+/* La note passe derrière le mot, comme sur l'accueil. Dimensions explicites:
    en contexte flex, width:auto n'hérite pas du rapport du viewBox. */
 .logo{
   font-size:17px;font-weight:800;letter-spacing:-.03em;line-height:1.2;color:var(--ink);
@@ -111,7 +170,7 @@ ul{margin:0;padding:0;list-style:none}
   transition:background .15s,border-color .15s,box-shadow .15s;
 }
 .search input::placeholder{color:var(--dimmer)}
-.search input:focus{outline:none;background:var(--surface);border-color:rgba(0,0,0,.08);box-shadow:var(--sh-2)}
+.search input:focus{outline:none;background:var(--surface);border-color:rgba(var(--fg-rgb),.08);box-shadow:var(--sh-2)}
 .search input::-webkit-search-cancel-button{-webkit-appearance:none}
 .hot{
   display:flex;gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:none;
@@ -126,7 +185,7 @@ ul{margin:0;padding:0;list-style:none}
 }
 .hot button:hover{color:var(--ink);border-color:var(--line);box-shadow:var(--sh-1)}
 
-/* Les trois raccourcis personnels (Pour toi, Historique, Prods likes) forment UNE capsule :
+/* Les trois raccourcis personnels (Pour toi, Historique, Prods likes) forment UNE capsule:
    trois pastilles separees se lisaient comme six boutons quand on y ajoutait la navigation.
    Groupes, ils se lisent comme un seul objet, avec des segments. */
 .seg{
@@ -138,19 +197,19 @@ ul{margin:0;padding:0;list-style:none}
   display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 13px;border-radius:999px;
   font-size:13px;font-weight:560;color:var(--ink-2);transition:background .15s,color .15s;
 }
-/* filet entre deux segments : disparait autour d'un segment actif, qui a son propre fond */
+/* filet entre deux segments: disparait autour d'un segment actif, qui a son propre fond */
 .seg-b + .seg-b{position:relative}
 .seg-b + .seg-b::before{
   content:"";position:absolute;left:-2px;top:8px;bottom:8px;width:1px;background:var(--line-soft);
 }
-.seg-b:hover{background:rgba(0,0,0,.055);color:var(--ink)}
+.seg-b:hover{background:rgba(var(--fg-rgb),.055);color:var(--ink)}
 .seg-b span.mono{font-size:11.5px;color:var(--dim)}
 .seg-b.on{background:var(--accent);color:#fff}
 .seg-b.on span.mono{color:rgba(255,255,255,.85)}
 .seg-b.on::before,.seg-b.on + .seg-b::before{opacity:0}
 .seg-b:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
 @media(max-width:640px){
-  /* a petite largeur seuls les compteurs gardent un libelle : les icones se suffisent */
+  /* a petite largeur seuls les compteurs gardent un libelle: les icones se suffisent */
   .seg-b{padding:0 11px} .hist-t{display:none}
   /* le retour se reduit a sa fleche, sinon la rangee deborde */
   #toutesBtn .sf-t{display:none} #toutesBtn{padding:0 11px}
@@ -161,7 +220,7 @@ ul{margin:0;padding:0;list-style:none}
 .shell > *{min-width:0}
 @media(max-width:1000px){ .shell{padding-top:16px} }
 
-/* ── barre de filtres : une ligne, chaque famille s'ouvre en menu ──
+/* ── barre de filtres: une ligne, chaque famille s'ouvre en menu ──
    Remplace la colonne de 250 px qui empilait cinq blocs (1279 px de haut, donc
    defilante) : Style et Mood a eux seuls en prenaient 760. */
 /* Collee sous l'en-tete : les filtres restent a portee pendant qu'on parcourt 1 500
@@ -172,7 +231,7 @@ ul{margin:0;padding:0;list-style:none}
   position:sticky;top:var(--hh,96px);z-index:30;
   margin-bottom:6px;padding:8px 0;
 }
-/* Le fond flou vit sur un pseudo-element qui deborde des marges de la page : la barre
+/* Le fond flou vit sur un pseudo-element qui deborde des marges de la page: la barre
    est contrainte a la largeur du contenu, le flou doit couvrir tout l'ecran comme celui
    de l'en-tete. --cw est la largeur de la zone visible, barre de defilement exclue :
    100vw l'inclurait et ferait deborder la page sous Windows. Il n'apparait que colle,
@@ -197,8 +256,8 @@ ul{margin:0;padding:0;list-style:none}
 .ftrig[aria-expanded="true"] svg{transform:rotate(180deg)}
 .ftrig .fdot{display:none;width:7px;height:7px;border-radius:50%;background:var(--c,var(--accent));flex:0 0 auto}
 .ftrig.on{
-  background:color-mix(in srgb,var(--c,var(--accent)) 12%,#fff);
-  border-color:color-mix(in srgb,var(--c,var(--accent)) 40%,#fff);
+  background:color-mix(in srgb,var(--c,var(--accent)) 12%,var(--surface));
+  border-color:color-mix(in srgb,var(--c,var(--accent)) 40%,var(--surface));
   color:color-mix(in srgb,var(--c,var(--accent)) 58%,var(--ink));
   font-weight:590;
 }
@@ -217,7 +276,7 @@ ul{margin:0;padding:0;list-style:none}
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
   box-shadow:var(--sh-2);padding:14px;display:grid;gap:10px;align-content:start;
 }
-/* champ de recherche du menu artiste : 175 noms, on cherche plutot qu'on ne defile */
+/* champ de recherche du menu artiste: 175 noms, on cherche plutot qu'on ne defile */
 .fsearch{
   width:100%;height:34px;border:1px solid var(--line);border-radius:9px;
   background:var(--bg);padding:0 11px;font-size:13px;color:var(--ink);
@@ -227,17 +286,17 @@ ul{margin:0;padding:0;list-style:none}
 .fmenu-tempo{width:min(300px,calc(100vw - 28px))}
 /* sur petit ecran les menus prennent la largeur de la barre, sinon ils debordent */
 @media(max-width:640px){
-  /* quatre boutons sur une ligne : a 13 px de marge ils en prenaient deux, et une
+  /* quatre boutons sur une ligne: a 13 px de marge ils en prenaient deux, et une
      barre collee de deux lignes mange l'ecran pendant tout le defilement */
   .fbar{gap:6px}
   .ftrig{padding:0 10px;gap:5px;font-size:12.5px}
   /* un filtre actif porte sa valeur (« Ndombolo / Coupé-décalé », « 130–200 BPM ») :
      on la tronque, et Effacer se reduit a sa croix, sinon la barre repasse a deux lignes */
   .ftrig .flbl{max-width:76px;overflow:hidden;text-overflow:ellipsis}
-  /* les quatre boutons remplissaient deja la largeur au repos : les chevrons (16 px
+  /* les quatre boutons remplissaient deja la largeur au repos: les chevrons (16 px
      chacun) sont la seule marge a reprendre. Au doigt, une pilule se lit comme un bouton. */
   .ftrig svg{display:none}
-  /* « Jamais écoutées » se reduit a son icone : un cinquieme libelle ferait passer la barre sur deux lignes */
+  /* « Jamais écoutées » se reduit a son icone: un cinquieme libelle ferait passer la barre sur deux lignes */
   .ftog svg{display:block}
   .ftog .flbl{display:none}
   .fclear{padding:0 9px}
@@ -260,7 +319,7 @@ ul{margin:0;padding:0;list-style:none}
 }
 .chip:hover{border-color:var(--line);box-shadow:var(--sh-1)}
 .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--c);flex:0 0 auto}
-/* artistes : leur photo a la place de la pastille de couleur */
+/* artistes: leur photo a la place de la pastille de couleur */
 .chip.avec-ph{padding-left:4px}
 .chip .ph{width:22px;height:22px;border-radius:50%;object-fit:cover;flex:0 0 auto;background:var(--line)}
 .ftrig .fph{width:22px;height:22px;border-radius:50%;object-fit:cover;margin-left:-8px;flex:0 0 auto}
@@ -268,20 +327,20 @@ ul{margin:0;padding:0;list-style:none}
 .ftrig.a-photo .fdot{display:none}
 .chip .n{font-family:var(--mono);font-size:10.5px;color:var(--dimmer);font-variant-numeric:tabular-nums}
 .chip[aria-pressed="true"]{
-  background:color-mix(in srgb,var(--c) 13%,#fff);
-  border-color:color-mix(in srgb,var(--c) 40%,#fff);
+  background:color-mix(in srgb,var(--c) 13%,var(--surface));
+  border-color:color-mix(in srgb,var(--c) 40%,var(--surface));
   color:color-mix(in srgb,var(--c) 58%,var(--ink));
   font-weight:590;
 }
 .chip[aria-pressed="true"] .n{color:inherit;opacity:.65}
 .bpm-box{display:grid;gap:8px}
 .hist{display:flex;align-items:flex-end;gap:2px;height:38px}
-.hist i{flex:1;background:rgba(0,0,0,.10);border-radius:2px 2px 0 0;transition:background .14s}
-/* les colonnes comprises dans la plage choisie prennent la couleur d'accent :
+.hist i{flex:1;background:rgba(var(--fg-rgb),.10);border-radius:2px 2px 0 0;transition:background .14s}
+/* les colonnes comprises dans la plage choisie prennent la couleur d'accent:
    on voit d'un coup d'œil quelle part du catalogue le tempo retenu couvre */
 .hist i.in{background:var(--accent)}
 .slider{position:relative;height:22px}
-.slider .track{position:absolute;top:9px;left:0;right:0;height:4px;border-radius:2px;background:rgba(0,0,0,.09)}
+.slider .track{position:absolute;top:9px;left:0;right:0;height:4px;border-radius:2px;background:rgba(var(--fg-rgb),.09)}
 .slider .fill{position:absolute;top:9px;height:4px;border-radius:2px;background:var(--ink)}
 .slider input{
   -webkit-appearance:none;appearance:none;position:absolute;top:0;left:0;width:100%;height:22px;
@@ -289,11 +348,11 @@ ul{margin:0;padding:0;list-style:none}
 }
 .slider input::-webkit-slider-thumb{
   -webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;
-  border:.5px solid rgba(0,0,0,.08);box-shadow:0 1px 3px rgba(0,0,0,.2);
+  border:.5px solid rgba(var(--fg-rgb),.08);box-shadow:0 1px 3px rgba(0,0,0,.2);
   pointer-events:auto;cursor:grab;
 }
 .slider input::-moz-range-thumb{
-  width:20px;height:20px;border-radius:50%;background:#fff;border:.5px solid rgba(0,0,0,.08);
+  width:20px;height:20px;border-radius:50%;background:#fff;border:.5px solid rgba(var(--fg-rgb),.08);
   box-shadow:0 1px 3px rgba(0,0,0,.2);pointer-events:auto;cursor:grab;
 }
 .bpm-read{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--dim)}
@@ -330,7 +389,7 @@ ul{margin:0;padding:0;list-style:none}
 .suivre:hover{box-shadow:var(--sh-2)}
 /* ── page beatmaker, a la maniere d'une page d'artiste ── */
 .profil{
-  /* clip et non hidden : la photo floutee deborde, et un bloc « hidden » qui deborde peut
+  /* clip et non hidden: la photo floutee deborde, et un bloc « hidden » qui deborde peut
      defiler — un clic sur Suivre le faisait glisser de 60 px, la photo coupee en haut */
   position:relative;overflow:hidden;overflow:clip;border-radius:var(--r-lg,18px);margin:0 0 18px;
   min-height:250px;display:flex;align-items:flex-end;padding:26px;
@@ -363,7 +422,7 @@ ul{margin:0;padding:0;list-style:none}
 }
 .profil-acts .pbtn:hover{border-color:#fff;background:rgba(255,255,255,.14)}
 .profil-acts .pbtn.on{background:#fff;color:#111;border-color:#fff}
-/* liens d'ecoute : une pastille a la couleur de la plateforme */
+/* liens d'ecoute: une pastille a la couleur de la plateforme */
 .profil{--pc-spotify:#1ED760;--pc-apple:#FA2D48;--pc-deezer:#A238FF}
 .profil-acts .plat i{width:9px;height:9px;border-radius:50%;background:var(--pc);box-shadow:0 0 0 3px color-mix(in srgb,var(--pc) 30%,transparent)}
 .profil-acts .plat:hover{border-color:var(--pc)}
@@ -383,7 +442,7 @@ body.vue-profil #resTitle,body.vue-profil #resSub,body.vue-profil #suivreBtn,bod
 }
 /* petite photo devant un beatmaker suivi */
 .suivis-chips img{width:20px;height:20px;border-radius:50%;object-fit:cover;margin-left:-5px}
-/* dossiers de likes : une rangee de pastilles au-dessus des filtres */
+/* dossiers de likes: une rangee de pastilles au-dessus des filtres */
 .dossiers{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 10px}
 .dossiers[hidden]{display:none}
 .dos{
@@ -393,13 +452,13 @@ body.vue-profil #resTitle,body.vue-profil #resSub,body.vue-profil #suivreBtn,bod
 }
 .dos:hover{box-shadow:var(--sh-2)}
 .dos span{font-family:var(--mono,ui-monospace,monospace);font-size:11px;color:var(--dimmer)}
-.dos[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.dos[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--on-ink)}
 .dos[aria-pressed="true"] span{color:rgba(255,255,255,.6)}
 .dos.suivi{padding:0 13px 0 6px;gap:7px}
 .dos.suivi img{width:22px;height:22px;margin:0;border-radius:50%;object-fit:cover}
 .dos.suivi i{width:22px;height:22px;border-radius:50%;background:var(--line)}
 a.dos-act{display:inline-flex;align-items:center}
-/* abonnements : les filtres du catalogue n'ont pas de sens ici (ils faisaient quitter la
+/* abonnements: les filtres du catalogue n'ont pas de sens ici (ils faisaient quitter la
    page) — il ne reste que les onglets par personne et « Jamais écoutées » */
 body.vue-suivis #fbar{display:none}
 .dos-neuf{display:inline-flex;align-items:center;gap:6px}
@@ -407,7 +466,7 @@ body.vue-suivis #fbar{display:none}
 .dos.ajout{background:transparent;border-style:dashed;box-shadow:none;color:var(--dim)}
 .dos-input{height:32px;border:1px solid var(--accent);border-radius:999px;padding:0 13px;font-size:13px;width:170px;background:var(--surface);color:var(--ink);outline:none}
 .dos-act{height:32px;padding:0 9px;font-size:12.5px;font-weight:560;color:var(--dim);border-radius:999px}
-.dos-act:hover{color:var(--ink);background:rgba(0,0,0,.05)}
+.dos-act:hover{color:var(--ink);background:rgba(var(--fg-rgb),.05)}
 .dos-act.danger{color:var(--accent)}
 /* menu « ranger dans » ouvert depuis une prod */
 .dosmenu{
@@ -417,11 +476,11 @@ body.vue-suivis #fbar{display:none}
 .dosmenu[hidden]{display:none}
 .dosmenu .eyebrow{display:block;padding:4px 8px 6px}
 .dosmenu label{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;font-size:13px;cursor:pointer}
-.dosmenu label:hover{background:rgba(0,0,0,.04)}
+.dosmenu label:hover{background:rgba(var(--fg-rgb),.04)}
 .dosmenu input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px}
 .dosmenu .dos-input{width:100%;margin-top:6px;border-radius:9px}
 .icon.dans{color:var(--accent)}
-/* sur telephone, dans les likes, l'icone chaine cede sa place au dossier : avec quatre
+/* sur telephone, dans les likes, l'icone chaine cede sa place au dossier: avec quatre
    icones le titre n'avait plus que six lettres */
 @media(max-width:640px){ .row .acts:has([data-act="dossier"]) [data-act="chan"]{display:none} }
 .suivre.on{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
@@ -429,7 +488,7 @@ body.vue-suivis #fbar{display:none}
 .res-head .sub{display:block}
 /* le nom du beatmaker ouvre sa page */
 .prod button{font:inherit;color:inherit;padding:0;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
-/* un bouton ne se tronque pas dans le texte qui l'entoure : « par … » cachait le nom entier.
+/* un bouton ne se tronque pas dans le texte qui l'entoure: « par … » cachait le nom entier.
    En ligne souple, c'est le nom qui se raccourcit, « par » reste. */
 .prod{display:inline-flex;gap:.3em;align-items:baseline}
 .prod button:hover b{text-decoration:underline}
@@ -463,7 +522,7 @@ body.vue-suivis #fbar{display:none}
   transition:.14s;white-space:nowrap;
 }
 .sorts button:hover{color:var(--ink)}
-.sorts button[aria-pressed="true"]{background:#fff;color:var(--ink);font-weight:590;box-shadow:var(--sh-1)}
+.sorts button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:590;box-shadow:var(--sh-1)}
 
 /* ─────────── la liste ─────────── */
 .list{
@@ -481,13 +540,13 @@ body.vue-suivis #fbar{display:none}
 }
 .row:hover{background:var(--hover)}
 .row:hover::before,.row:hover + .row::before{background:transparent}
-.row.playing{background:color-mix(in srgb,var(--c) 10%,#fff)}
+.row.playing{background:color-mix(in srgb,var(--c) 10%,var(--surface))}
 .row.playing::before,.row.playing + .row::before{background:transparent}
 .row.playing .title{color:color-mix(in srgb,var(--c) 62%,var(--ink))}
 
 .play{
   position:relative;width:54px;height:54px;border-radius:9px;overflow:hidden;flex:0 0 auto;
-  background:#E8E8ED;box-shadow:0 1px 3px rgba(0,0,0,.12);
+  background:var(--thumb);box-shadow:0 1px 3px rgba(0,0,0,.12);
 }
 .play img{width:100%;height:100%;object-fit:cover;display:block}
 .play .glyph{
@@ -505,7 +564,7 @@ body.vue-suivis #fbar{display:none}
 .sub2{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:2px;font-size:12px;color:var(--dim);min-width:0}
 .pill{
   font-size:11px;font-weight:590;color:color-mix(in srgb,var(--c) 55%,var(--ink));
-  background:color-mix(in srgb,var(--c) 12%,#fff);
+  background:color-mix(in srgb,var(--c) 12%,var(--surface));
   border-radius:5px;padding:1px 7px;
 }
 .new{
@@ -525,12 +584,12 @@ body.vue-suivis #fbar{display:none}
 .num{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:34px}
 .num .v{font-family:var(--mono);font-size:12.5px;font-weight:500;font-variant-numeric:tabular-nums}
 .num .k{font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--dimmer)}
-/* valeur devinée : grisée et précédée d'un tilde, pour ne pas la faire passer
+/* valeur devinée: grisée et précédée d'un tilde, pour ne pas la faire passer
    pour une mesure */
 .num .v.flou{color:var(--dimmer);font-weight:400;cursor:help}
 .mini{font-size:11px;line-height:1.45;color:var(--dim);margin:2px 0 0}
 .num.pop{min-width:62px;align-items:flex-end}
-.num.pop .bar{width:56px;height:3px;border-radius:2px;background:rgba(0,0,0,.09);margin-top:4px;overflow:hidden}
+.num.pop .bar{width:56px;height:3px;border-radius:2px;background:rgba(var(--fg-rgb),.09);margin-top:4px;overflow:hidden}
 .num.pop .bar i{display:block;height:100%;border-radius:2px;background:var(--dimmer)}
 .num.pop .k{display:none}   /* la barre suffit tant qu'elle est visible */
 .acts{display:flex;gap:2px;margin-left:4px}
@@ -539,11 +598,11 @@ body.vue-suivis #fbar{display:none}
   transition:.14s;position:relative;
 }
 
-/* ── le like : rebond du cœur, anneau qui s'ouvre, éclats qui s'écartent ── */
+/* ── le like: rebond du cœur, anneau qui s'ouvre, éclats qui s'écartent ── */
 .tbtn.like{position:relative}
 .tbtn.like.sav{color:var(--accent)}
 .icon.pop svg,.tbtn.like.pop svg{animation:coeur-rebond .42s cubic-bezier(.2,.9,.25,1.4)}
-/* ── suivre quelqu'un : rebond du bouton, halo autour de la photo, confettis, message ── */
+/* ── suivre quelqu'un: rebond du bouton, halo autour de la photo, confettis, message ── */
 .suivi-pop{animation:suivi-rebond .5s cubic-bezier(.2,.9,.25,1.4)}
 @keyframes suivi-rebond{0%{transform:scale(1)}25%{transform:scale(.88)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
 .ava.halo{animation:ava-halo 1.1s ease-out}
@@ -556,23 +615,23 @@ body.vue-suivis #fbar{display:none}
 .suivi-toast{
   position:fixed;left:50%;bottom:calc(112px + env(safe-area-inset-bottom,0px));z-index:85;
   display:flex;align-items:center;gap:11px;width:max-content;max-width:calc(100vw - 32px);
-  padding:9px 18px 9px 9px;border-radius:22px;background:var(--ink);color:#fff;line-height:1.3;
+  padding:9px 18px 9px 9px;border-radius:22px;background:var(--ink);color:var(--on-ink);line-height:1.3;
   font-size:13.5px;font-weight:560;box-shadow:0 14px 34px rgba(0,0,0,.28);
   transform:translate(-50%,24px);opacity:0;transition:transform .35s cubic-bezier(.2,.9,.25,1.2),opacity .25s;
 }
 .suivi-toast.on{transform:translate(-50%,0);opacity:1}
 .suivi-toast img,.suivi-toast .ini{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:0 0 auto;background:#333;display:grid;place-items:center;font-weight:700}
 .suivi-toast .toast-act{
-  margin-left:4px;height:30px;padding:0 13px;border-radius:999px;background:#fff;color:#111;
+  margin-left:4px;height:30px;padding:0 13px;border-radius:999px;background:var(--bg);color:var(--ink);
   font-size:12.5px;font-weight:650;flex:0 0 auto;
 }
-.suivi-toast .toast-act:hover{background:#f0f0f2}
+.suivi-toast .toast-act:hover{background:var(--surface)}
 .like-toast img{border-radius:8px;width:44px;object-fit:cover}
 .like-toast small{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tbtn.dosb.dans{color:var(--accent)}
-/* la barre d'un telephone est pleine : on y range par le message « Ranger » ou les likes */
+/* la barre d'un telephone est pleine: on y range par le message « Ranger » ou les likes */
 @media(max-width:520px){ #dosBtn{display:none} }
-.suivi-toast small{display:block;font-size:11.5px;font-weight:450;color:rgba(255,255,255,.65)}
+.suivi-toast small{display:block;font-size:11.5px;font-weight:450;color:color-mix(in srgb,var(--on-ink) 62%,transparent)}
 @keyframes coeur-rebond{
   0%{transform:scale(1)}
   22%{transform:scale(.8)}
@@ -597,7 +656,7 @@ body.vue-suivis #fbar{display:none}
   0%{transform:rotate(var(--a)) translateY(-2px) scale(1);opacity:.95}
   100%{transform:rotate(var(--a)) translateY(-15px) scale(.2);opacity:0}
 }
-.icon:hover{background:rgba(0,0,0,.06);color:var(--ink)}
+.icon:hover{background:rgba(var(--fg-rgb),.06);color:var(--ink)}
 .icon.sav{color:var(--accent)}
 .dead{opacity:.45}
 .dead .title{text-decoration:line-through}
@@ -608,7 +667,7 @@ body.vue-suivis #fbar{display:none}
 .empty p{font-size:13.5px;color:var(--dim)}
 
 @media(max-width:1240px){ .row .num.k-key{display:none} }
-/* Le nombre d'écoutes reste lisible bien plus longtemps : on sacrifie d'abord
+/* Le nombre d'écoutes reste lisible bien plus longtemps: on sacrifie d'abord
    sa barre, puis la durée, et lui en dernier. */
 @media(max-width:1100px){
   .row .num.pop .bar{display:none}
@@ -635,7 +694,7 @@ body.vue-suivis #fbar{display:none}
   background:rgba(255,214,10,.16);border:1px solid rgba(180,140,0,.28);
   font-size:12.5px;line-height:1.5;color:#6b5200;
 }
-.hint-file code{font-family:var(--mono);font-size:11.5px;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px}
+.hint-file code{font-family:var(--mono);font-size:11.5px;background:rgba(var(--fg-rgb),.06);padding:1px 5px;border-radius:4px}
 .hint-file b{color:#4a3800}
 @media(max-width:1000px){ .hint-file{margin:12px 14px 0} }
 
@@ -659,10 +718,10 @@ body.vue-suivis #fbar{display:none}
   /* sans ca, glisser sur la barre en tactile fait defiler la page au lieu de chercher */
   touch-action:none}
 /* Le remplissage et la pastille se mesurent sur la piste elle-même, pas sur la
-   barre entière : un pourcentage calculé sur une largeur plus grande que la
+   barre entière: un pourcentage calculé sur une largeur plus grande que la
    piste fait déborder l'indicateur et décale le clic de déplacement. */
-.prog .rail2{position:absolute;top:6px;left:14px;right:14px;height:4px;border-radius:2px;background:rgba(0,0,0,.09)}
-/* Le dégradé est dimensionné sur la piste entière, pas sur le remplissage :
+.prog .rail2{position:absolute;top:6px;left:14px;right:14px;height:4px;border-radius:2px;background:rgba(var(--fg-rgb),.09)}
+/* Le dégradé est dimensionné sur la piste entière, pas sur le remplissage:
    la barre agit comme une fenêtre qui en découvre une part croissante. La
    couleur se construit donc à mesure que la prod avance, au lieu d'être
    comprimée dans les premières secondes. Les teintes dérivent toutes de --c,
@@ -699,17 +758,17 @@ body.vue-suivis #fbar{display:none}
   border-radius:var(--r-md);box-shadow:var(--sh-3);
 }
 @media(max-width:820px){ .vid.big{left:8px} }
-/* en intégration simple, YouTube affiche ses propres commandes : les nôtres,
+/* en intégration simple, YouTube affiche ses propres commandes: les nôtres,
    qui ne peuvent plus rien piloter, s'effacent */
 .bar.plain .prog,.bar.plain #toggle,.bar.plain .times{display:none}
 .vid.big iframe{width:100%;height:100%;margin:0}
-/* Couche transparente au-dessus de l'iframe : sans survol, YouTube n'affiche
+/* Couche transparente au-dessus de l'iframe: sans survol, YouTube n'affiche
    ni son titre, ni ses boutons de partage. C'est notre barre qui pilote la
    lecture, donc rien n'est perdu. En repli, au contraire, les commandes de
    YouTube sont le seul moyen de jouer : la couche s'efface. */
 .vid .shield{position:absolute;inset:0;z-index:2;cursor:default}
 .bar.plain .vid .shield{display:none}
-/* L'iframe YouTube occupe toute la vignette et intercepte les clics : la
+/* L'iframe YouTube occupe toute la vignette et intercepte les clics: la
    commande d'agrandissement doit donc être un bouton posé par-dessus, avec ses
    propres événements. */
 .vid .zoom{
@@ -735,10 +794,10 @@ body.vue-suivis #fbar{display:none}
 
 .transport{display:flex;align-items:center;gap:2px;flex:0 0 auto}
 .tbtn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--ink-2);transition:.14s}
-.tbtn:hover{background:rgba(0,0,0,.06)}
+.tbtn:hover{background:rgba(var(--fg-rgb),.06)}
 .tbtn.on{color:var(--accent);background:var(--accent-soft)}
 .tbtn.big{
-  width:44px;height:44px;margin:0 4px;background:var(--ink);color:#fff;
+  width:44px;height:44px;margin:0 4px;background:var(--ink);color:var(--on-ink);
   box-shadow:var(--sh-1);
 }
 .tbtn.big:hover{background:#000}
@@ -752,11 +811,11 @@ body.vue-suivis #fbar{display:none}
 .vol{display:flex;align-items:center;gap:7px;color:var(--dimmer)}
 .vol input{
   -webkit-appearance:none;appearance:none;width:72px;height:4px;border-radius:2px;
-  background:rgba(0,0,0,.12);cursor:pointer;
+  background:rgba(var(--fg-rgb),.12);cursor:pointer;
 }
 .vol input::-webkit-slider-thumb{
   -webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;
-  border:.5px solid rgba(0,0,0,.08);box-shadow:0 1px 2px rgba(0,0,0,.25);
+  border:.5px solid rgba(var(--fg-rgb),.08);box-shadow:0 1px 2px rgba(0,0,0,.25);
 }
 .vol input::-moz-range-thumb{
   width:13px;height:13px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);
@@ -792,7 +851,7 @@ body.vue-suivis #fbar{display:none}
 
 /* ═══════════ vue accueil ═══════════
    Portée depuis l'ancienne page d'accueil. Le lecteur, lui, est celui du
-   catalogue : il n'y en a plus qu'un dans le document. */
+   catalogue: il n'y en a plus qu'un dans le document. */
 /* ─────────── barre du haut ─────────── */
 .hnav{
   position:sticky;top:0;z-index:30;
@@ -809,8 +868,8 @@ body.vue-suivis #fbar{display:none}
 .hnav .links a{
   padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--dim);transition:.15s;
 }
-.hnav .links a:hover{color:var(--ink);background:rgba(0,0,0,.05)}
-.hnav .links a.cta{background:var(--ink);color:#fff;font-weight:590}
+.hnav .links a:hover{color:var(--ink);background:rgba(var(--fg-rgb),.05)}
+.hnav .links a.cta{background:var(--ink);color:var(--on-ink);font-weight:590}
 .hnav .links a.cta:hover{background:#000}
 
 /* ─────────── héros ─────────── */
@@ -830,7 +889,7 @@ body.vue-suivis #fbar{display:none}
 .stage canvas{display:block;width:100%;height:100%}
 #glnote{position:absolute;inset:0;opacity:0;transition:opacity .9s ease}
 #glnote.on{opacity:1}
-/* repli : la même note, dessinée en SVG, visible tant que la 3D n'a pas pris la main */
+/* repli: la même note, dessinée en SVG, visible tant que la 3D n'a pas pris la main */
 #svgnote{
   width:min(420px,62vw);filter:drop-shadow(0 26px 40px rgba(0,0,0,.18));
   transition:opacity .5s ease;
@@ -842,24 +901,24 @@ body.vue-suivis #fbar{display:none}
   background:radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.18), transparent 70%);
   filter:blur(7px);
 }
-/* voile : le mot reste lisible, la note passe en arrière-plan flou */
+/* voile: le mot reste lisible, la note passe en arrière-plan flou */
 .veil{
   position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(52% 34% at 50% 40%, rgba(245,245,247,.56), rgba(245,245,247,.24) 62%, transparent 84%);
+  background:radial-gradient(52% 34% at 50% 40%, rgba(var(--bg-rgb),.56), rgba(var(--bg-rgb),.24) 62%, transparent 84%);
 }
 .hero-in{position:relative;z-index:2;text-align:center;max-width:820px}
 .kicker{
   font-size:11.5px;font-weight:600;letter-spacing:.16em;color:var(--dim);
   margin:0 0 14px;
-  /* la note passe derrière : un halo blanc garde la ligne lisible */
-  text-shadow:0 0 12px rgba(245,245,247,.98),0 0 24px rgba(245,245,247,.9);
+  /* la note passe derrière: un halo blanc garde la ligne lisible */
+  text-shadow:0 0 12px rgba(var(--bg-rgb),.98),0 0 24px rgba(var(--bg-rgb),.9);
 }
 .wordmark{
   font-size:clamp(52px,12.6vw,168px);font-weight:900;letter-spacing:-.045em;line-height:.92;
-  margin:0 0 26px;color:#0B0B0D;
-  text-shadow:0 0 34px rgba(245,245,247,.92), 0 0 16px rgba(245,245,247,.95), 0 18px 46px rgba(0,0,0,.16);
+  margin:0 0 26px;color:var(--ink);
+  text-shadow:0 0 34px rgba(var(--bg-rgb),.92), 0 0 16px rgba(var(--bg-rgb),.95), 0 18px 46px rgba(0,0,0,.16);
 }
-/* Le champ n'a pas besoin de JavaScript : c'est un formulaire qui pointe sur la
+/* Le champ n'a pas besoin de JavaScript: c'est un formulaire qui pointe sur la
    page des prods, laquelle sait déjà lire ?q= dans son adresse. */
 .hsearch{
   display:flex;align-items:center;gap:9px;
@@ -869,7 +928,7 @@ body.vue-suivis #fbar{display:none}
   border:1px solid var(--glass-edge);box-shadow:var(--sh-2);
   transition:box-shadow .16s,border-color .16s;
 }
-.hsearch:focus-within{box-shadow:var(--sh-3);border-color:rgba(0,0,0,.10)}
+.hsearch:focus-within{box-shadow:var(--sh-3);border-color:rgba(var(--fg-rgb),.10)}
 .hsearch > svg{color:var(--dimmer);flex:0 0 auto}
 .hsearch input{
   flex:1;min-width:0;height:100%;border:0;background:none;outline:none;padding-right:6px;
@@ -894,13 +953,18 @@ body.vue-suivis #fbar{display:none}
 @media(max-width:520px){ .hs-hot{display:none} .hsearch{height:48px} }
 
 .cta-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
-/* le bouton rouge au centre ; sur telephone les trois ne tiennent pas sur une ligne :
+/* le bouton rouge au centre ; sur telephone les trois ne tiennent pas sur une ligne:
    il passe seul au-dessus, les deux autres cote a cote en dessous */
 @media(max-width:640px){
   .cta-row{display:grid;grid-template-columns:auto auto;justify-content:center}
   .cta-row .hbtn.pri{grid-column:1 / -1;justify-self:center;order:-1}
   .cta-row .hbtn{padding:0 15px;justify-content:center;font-size:14px;height:44px}
   .cta-row .hbtn.pri{padding:0 22px;font-size:15px;height:46px}
+}
+/* tres petit telephone (iPhone SE) : les deux boutons du bas ne tiennent plus cote a cote
+   et elargissaient tout l'accueil — on les empile */
+@media(max-width:360px){
+  .cta-row{grid-template-columns:1fr;justify-items:center}
 }
 .hbtn{
   display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 22px;border-radius:999px;
@@ -925,7 +989,7 @@ body.vue-suivis #fbar{display:none}
 /* ─────────── sections ─────────── */
 .wrap{max-width:1220px;margin:0 auto;padding:0 22px}
 .sec{padding:56px 0}
-/* l'en-tête est collant : les ancres doivent s'arrêter en dessous, pas dessous */
+/* l'en-tête est collant: les ancres doivent s'arrêter en dessous, pas dessous */
 #vueLikes,#vueArtistes,#vueStyles,#vueMoods{scroll-margin-top:76px}
 .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
 .sec-head h2{font-size:clamp(21px,3vw,30px);font-weight:700;letter-spacing:-.028em}
@@ -950,7 +1014,7 @@ body.vue-suivis #fbar{display:none}
   border:1px solid var(--glass-edge);box-shadow:var(--sh-1);transition:.18s;
 }
 .tile:hover{transform:translateY(-3px);box-shadow:var(--sh-3)}
-.tile .art{position:relative;aspect-ratio:16/9;background:#E8E8ED;overflow:hidden}
+.tile .art{position:relative;aspect-ratio:16/9;background:var(--thumb);overflow:hidden}
 .tile .art img{width:100%;height:100%;object-fit:cover;display:block}
 .tile .art .go{
   position:absolute;right:10px;bottom:10px;width:34px;height:34px;border-radius:50%;
@@ -964,16 +1028,16 @@ body.vue-suivis #fbar{display:none}
 .tile .t{font-size:14px;font-weight:600;letter-spacing:-.015em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile .s{display:flex;align-items:center;gap:7px;margin-top:3px;font-size:12px;color:var(--dim)}
 .tile .pill{font-size:10.5px;font-weight:650;border-radius:5px;padding:1px 6px;
-  color:color-mix(in srgb,var(--c) 55%,var(--ink));background:color-mix(in srgb,var(--c) 13%,#fff)}
+  color:color-mix(in srgb,var(--c) 55%,var(--ink));background:color-mix(in srgb,var(--c) 13%,var(--surface))}
 
-/* mur des styles : chaque genre montre ses propres pochettes */
+/* mur des styles: chaque genre montre ses propres pochettes */
 .cloud{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
 @media(max-width:1100px){ .cloud{grid-template-columns:repeat(4,1fr)} }
 @media(max-width:820px){ .cloud{grid-template-columns:repeat(3,1fr)} }
 @media(max-width:520px){ .cloud{grid-template-columns:repeat(2,1fr)} }
 .scard{
   position:relative;display:block;aspect-ratio:1;border-radius:var(--r-lg);overflow:hidden;
-  background:#E8E8ED;box-shadow:var(--sh-1);transition:transform .18s,box-shadow .18s;
+  background:var(--thumb);box-shadow:var(--sh-1);transition:transform .18s,box-shadow .18s;
   container-type:inline-size;   /* le nom se dimensionne sur la carte, pas sur l'écran */
 }
 .scard:hover{transform:translateY(-3px);box-shadow:var(--sh-3)}
@@ -982,7 +1046,7 @@ body.vue-suivis #fbar{display:none}
 .mosaic.solo{grid-template-columns:1fr;grid-template-rows:1fr}
 .mosaic img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s cubic-bezier(.2,.7,.3,1)}
 .scard:hover .mosaic img{transform:scale(1.07)}
-/* teinte du style en haut, encre en bas : le nom reste lisible sur n'importe quelle pochette */
+/* teinte du style en haut, encre en bas: le nom reste lisible sur n'importe quelle pochette */
 .scard::after{
   content:"";position:absolute;inset:0;z-index:1;
   background:
@@ -992,7 +1056,7 @@ body.vue-suivis #fbar{display:none}
       rgba(0,0,0,.24) 42%,
       rgba(0,0,0,.72) 100%);
 }
-/* Voile de couleur du survol : une couche à part, en fondu, plutôt qu'un
+/* Voile de couleur du survol: une couche à part, en fondu, plutôt qu'un
    changement de dégradé — les dégradés ne s'animent pas, ils sautent. */
 .scard::before,.mcard::before{
   content:"";position:absolute;inset:0;z-index:2;opacity:0;
@@ -1019,7 +1083,7 @@ body.vue-suivis #fbar{display:none}
   display:block;font-size:clamp(10px,5cqw,12px);opacity:.92;font-variant-numeric:tabular-nums;
   text-shadow:0 1px 3px rgba(0,0,0,.6);
 }
-/* même pastille que sur les vignettes de sorties : elle monte et apparaît au
+/* même pastille que sur les vignettes de sorties: elle monte et apparaît au
    survol. Une flèche, pas un triangle de lecture — une carte de style ouvre le
    catalogue filtré, elle ne joue rien. */
 .scard .go,.mcard .go{
@@ -1033,7 +1097,7 @@ body.vue-suivis #fbar{display:none}
 @media(hover:none){ .scard .go,.mcard .go{opacity:1;transform:none} }
 
 .scard.repliee{display:none}
-/* Mur des moods : format paysage et couleur dominante. Un mood est une
+/* Mur des moods: format paysage et couleur dominante. Un mood est une
    ambiance, pas un rayon de bac — la teinte porte l'idée, la pochette n'est
    qu'une texture derrière. */
 .moodwall{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
@@ -1076,14 +1140,14 @@ body.vue-suivis #fbar{display:none}
 /* bascule entre les deux vues */
 [hidden]{display:none !important}
 .hlinks{display:none;align-items:center;gap:6px}
-/* la recherche est masquee sur l'accueil : sans elle, plus rien ne pousse le groupe
+/* la recherche est masquee sur l'accueil: sans elle, plus rien ne pousse le groupe
    vers la droite. margin-left:auto absorbe l'espace libre a la place. */
 body.vue-accueil .hlinks{display:flex;margin-left:6px}
 body.vue-accueil .top .search{display:none}
-/* vue prods : la recherche plafonne a 640px et cesse de pousser des que l'ecran
+/* vue prods: la recherche plafonne a 640px et cesse de pousser des que l'ecran
    est large. Sans cet auto, les boutons retombent au milieu de la bande. */
 .actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:auto}
-/* N'apparait que sous filtre likes : une sortie visible, plutot qu'un second clic
+/* N'apparait que sous filtre likes: une sortie visible, plutot qu'un second clic
    sur le bouton qui a amene ici — rien ne disait qu'il servait aussi a revenir. */
 .sortie-filtre{
   display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;
@@ -1094,13 +1158,13 @@ body.vue-accueil .top .search{display:none}
 .sortie-filtre:hover{color:var(--ink);background:var(--surface);box-shadow:var(--sh-1)}
 @media(max-width:640px){ .sortie-filtre span,.sortie-filtre{font-size:12.5px;padding:0 10px} }
 .hlinks a{padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--dim);transition:.15s;text-decoration:none}
-.hlinks a:hover{color:var(--ink);background:rgba(0,0,0,.05)}
-/* Le bouton noir est l'action principale de l'accueil : il ferme la rangee, a droite,
+.hlinks a:hover{color:var(--ink);background:rgba(var(--fg-rgb),.05)}
+/* Le bouton noir est l'action principale de l'accueil: il ferme la rangee, a droite,
    a part. Au milieu des liens, il se lisait comme un nom de plus dans la liste. */
 .hcta{
   display:none;align-items:center;gap:7px;flex:0 0 auto;margin-left:4px;
   height:38px;padding:0 18px 0 20px;border-radius:999px;
-  background:var(--ink);color:#fff;font-size:13.5px;font-weight:600;text-decoration:none;
+  background:var(--ink);color:var(--on-ink);font-size:13.5px;font-weight:600;text-decoration:none;
   box-shadow:0 1px 2px rgba(0,0,0,.18),0 4px 14px rgba(0,0,0,.14);
   transition:background .15s,transform .15s,box-shadow .15s;
 }
@@ -1108,7 +1172,7 @@ body.vue-accueil .top .search{display:none}
 .hcta:hover{background:#000;transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,.2),0 8px 20px rgba(0,0,0,.18)}
 .hcta:hover svg{transform:translateX(3px)}
 body.vue-accueil .hcta{display:inline-flex}
-/* petit ecran : le heros porte deja « Toutes les prods », l'en-tete n'a pas la place de le redire */
+/* petit ecran: le heros porte deja « Toutes les prods », l'en-tete n'a pas la place de le redire */
 @media(max-width:640px){ .hlinks a{display:none} body.vue-accueil .hcta{display:none} }
 
 @media(prefers-reduced-motion:reduce){ *{animation-duration:.01ms !important;transition-duration:.01ms !important} }
@@ -1121,6 +1185,10 @@ body.vue-accueil .hcta{display:inline-flex}
     <a class="brand" href="?vue=accueil" data-vue="accueil" title="Accueil">
       <span class="logo">FINDINGS</span>
     </a>
+    <button class="theme-btn" id="themeBtn" aria-label="Passer en mode sombre" title="Mode sombre">
+      <svg class="lune" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a6.8 6.8 0 0 0 10.7 10.7z"/></svg>
+      <svg class="soleil" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>
+    </button>
 
     <div class="search">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
@@ -1519,6 +1587,31 @@ const BEATS = CAT.beats.map(b => ({
   bpmSur: Array.isArray(b.est) && !b.est.includes("bpm"),
   keySur: Array.isArray(b.est) && !b.est.includes("key")
 }));
+
+/* ============ jour / nuit ============ */
+(function themeJourNuit(){
+  const btn = document.getElementById("themeBtn"), racine = document.documentElement;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const poser = (t, anime) => {
+    if (anime) { racine.classList.add("theme-anim"); setTimeout(() => racine.classList.remove("theme-anim"), 450); }
+    racine.setAttribute("data-theme", t);
+    meta && meta.setAttribute("content", t === "dark" ? "#0E0E10" : "#F5F5F7");
+    const sombre = t === "dark";
+    btn.setAttribute("aria-label", sombre ? "Passer en mode clair" : "Passer en mode sombre");
+    btn.title = sombre ? "Mode clair" : "Mode sombre";
+  };
+  poser(racine.getAttribute("data-theme") || "light", false);
+  btn.addEventListener("click", () => {
+    const t = racine.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    try { localStorage.setItem("findings.theme", t); } catch (e) {}
+    poser(t, true);
+  });
+  // sans choix enregistre, on suit le systeme s'il change en cours de visite
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => {
+    let choix = null; try { choix = localStorage.getItem("findings.theme"); } catch (_) {}
+    if (!choix) poser(e.matches ? "dark" : "light", true);
+  });
+})();
 
 /* ============ état ============ */
 const S = {
@@ -1943,7 +2036,7 @@ const elMoods = document.getElementById("moods");
 const MOOD_N = Object.fromEntries(MOODS.map(m => [m, BEATS.filter(b => b.moods.includes(m)).length]));
 function renderMoodChips(){
   elMoods.innerHTML = MOODS.filter(m => dansPortee(nMood(m), S.moods.has(m))).map(m =>
-    `<button class="chip" data-mood="${esc(m)}" aria-pressed="${S.moods.has(m)}" style="--c:${MOOD_TEINTE[m] || "#1D1D1F"}"><span class="dot"></span>${esc(m)}<span class="n">${nMood(m)}</span></button>`
+    `<button class="chip" data-mood="${esc(m)}" aria-pressed="${S.moods.has(m)}" style="--c:${MOOD_TEINTE[m] || "var(--ink)"}"><span class="dot"></span>${esc(m)}<span class="n">${nMood(m)}</span></button>`
   ).join("");
 }
 renderMoodChips();
