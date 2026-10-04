@@ -611,74 +611,14 @@ body.vue-suivis #fbar{display:none}
 .tbtn.like{position:relative}
 .tbtn.like.sav{color:var(--accent)}
 .icon.pop svg,.tbtn.like.pop svg{animation:coeur-rebond .42s cubic-bezier(.2,.9,.25,1.4)}
-/* ── studio : panneau au-dessus du lecteur ── */
+/* ── studio : le bouton micro du lecteur ouvre la station audio (studio.js) ── */
 .tbtn.mic.on{color:#fff;background:var(--accent)}
-.studio{
-  position:fixed;right:16px;bottom:calc(var(--bar-h) + 30px + env(safe-area-inset-bottom,0px));z-index:55;
-  width:min(380px,calc(100vw - 32px));max-height:min(560px,calc(100vh - var(--bar-h) - 120px));overflow-y:auto;
-  padding:16px;border-radius:var(--r-xl);display:grid;gap:12px;
-  background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--glass-edge);box-shadow:var(--sh-3);
-  opacity:0;transform:translateY(10px) scale(.98);transition:opacity .2s,transform .22s cubic-bezier(.2,.9,.25,1.1);
-}
-.studio.on{opacity:1;transform:none}
-.studio[hidden]{display:none}
-.st-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.st-head-t{min-width:0}
-.st-head .eyebrow{display:inline-flex;align-items:center;gap:5px;color:var(--accent)}
-.st-titre{font-size:16px;font-weight:700;letter-spacing:-.02em;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.st-x{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--dim);flex:0 0 auto}
-.st-x:hover{background:var(--hover);color:var(--ink)}
-.st-depart{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;border-radius:11px;background:var(--hover)}
-.st-depart button{height:30px;border-radius:8px;font-size:12.5px;font-weight:560;color:var(--dim)}
-.st-depart button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--sh-1)}
-.studio.en-rec .st-depart{opacity:.45;pointer-events:none}
-.st-rec{
-  height:52px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:10px;
-  background:var(--accent);color:#fff;font-size:15px;font-weight:700;letter-spacing:-.01em;
-  box-shadow:0 8px 22px rgba(250,35,59,.32);transition:transform .15s,background .15s;
-  font-variant-numeric:tabular-nums;
-}
-.st-rec:active{transform:scale(.97)}
-.st-pt{width:12px;height:12px;border-radius:50%;background:#fff}
-.st-rec.compte{background:var(--ink);color:var(--on-ink);box-shadow:var(--sh-2)}
-.st-rec.compte .st-pt{background:var(--accent)}
-.st-rec.rec{background:#1D1D1F;color:#fff;box-shadow:0 0 0 4px rgba(250,35,59,.35)}
-.st-rec.rec .st-pt{border-radius:3px;background:var(--accent);animation:st-pulse 1.1s ease-in-out infinite}
-@keyframes st-pulse{50%{opacity:.35}}
-.st-niveau{height:4px;border-radius:2px;background:var(--hover);overflow:hidden}
-.st-niveau i{display:block;height:100%;background:linear-gradient(90deg,#34C759,#FFD60A 70%,var(--accent));transform:scaleX(0);transform-origin:left;transition:transform .06s linear}
-.st-info{font-size:12px;line-height:1.45;color:var(--dim);margin:0}
-.st-info.alerte{color:var(--accent)}
-.st-prises{display:grid;gap:6px}
-.st-vide{font-size:12px;color:var(--dimmer);text-align:center;padding:8px 0;margin:0}
-.prise{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 8px;border-radius:12px;background:var(--surface);border:1px solid var(--line-soft)}
-.prise.joue{border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
-.pr-play{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--on-ink);flex:0 0 auto}
-.prise.joue .pr-play{background:var(--accent);color:#fff}
-.pr-meta{display:grid;min-width:0;flex:1}
-.pr-meta b{font-size:13px;font-weight:650}
-.pr-meta span{font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums}
-.pr-act{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--dim);flex:0 0 auto}
-.pr-act:hover{background:var(--hover);color:var(--ink)}
-.pr-act.arme{color:#fff;background:var(--accent)}
-.st-reglages{font-size:12.5px;color:var(--dim)}
-.st-reglages summary{cursor:pointer;font-weight:600;color:var(--ink-2);list-style:none}
-.st-reglages summary::-webkit-details-marker{display:none}
-.st-reglages summary::before{content:"›";display:inline-block;margin-right:6px;transition:transform .15s}
-.st-reglages[open] summary::before{transform:rotate(90deg)}
-.st-reglages label{display:grid;gap:4px;margin-top:10px;grid-template-columns:1fr auto}
-.st-reglages label input{grid-column:1/-1;accent-color:var(--accent);width:100%}
-.st-lien{font-size:12px;color:var(--dim);text-align:center}
-.st-lien:hover{color:var(--accent)}
 /* pendant une prise, la barre de progression ne se manipule pas : la synchro serait perdue */
 body.studio-rec .prog{pointer-events:none}
 body.studio-rec #prev,body.studio-rec #next,body.studio-rec #shuffle{opacity:.4;pointer-events:none}
 /* badge des prods qui ont des prises */
 .tl-n{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:650;color:var(--accent);background:var(--accent-soft);border-radius:5px;padding:1px 6px}
-@media(max-width:640px){
-  .studio{left:10px;right:10px;width:auto;bottom:calc(var(--bar-h) + 22px + env(safe-area-inset-bottom,0px))}
-}
+
 /* ── suivre quelqu'un : rebond du bouton, halo autour de la photo, confettis, message ── */
 .suivi-pop{animation:suivi-rebond .5s cubic-bezier(.2,.9,.25,1.4)}
 @keyframes suivi-rebond{0%{transform:scale(1)}25%{transform:scale(.88)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
@@ -1398,6 +1338,13 @@ body.vue-accueil .top .search{display:none}
 /* vue prods : la recherche plafonne a 640px et cesse de pousser des que l'ecran
    est large. Sans cet auto, les boutons retombent au milieu de la bande. */
 .actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:auto}
+/* le studio a son propre bouton : on y entre sans passer par une prod */
+.studio-cta{
+  display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 15px;border-radius:999px;flex:0 0 auto;
+  background:var(--accent);color:#fff;font-size:13.5px;font-weight:650;box-shadow:0 6px 16px rgba(250,35,59,.28);transition:.15s;
+}
+.studio-cta:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(250,35,59,.34)}
+@media(max-width:640px){ .studio-cta{width:38px;padding:0;justify-content:center} .studio-cta span{display:none} }
 /* N'apparait que sous filtre likes : une sortie visible, plutot qu'un second clic
    sur le bouton qui a amene ici — rien ne disait qu'il servait aussi a revenir. */
 .sortie-filtre{
@@ -1454,6 +1401,7 @@ body.vue-accueil .hcta{display:inline-flex}
     </nav>
 
     <div class="actions">
+      <button class="studio-cta" id="studioBtn" title="Studio : pose ta topline sur une prod, ou importe la tienne" aria-label="Ouvrir le studio"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg><span>Studio</span></button>
       <button class="sortie-filtre" id="toutesBtn" hidden aria-label="Toutes les prods" title="Toutes les prods">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
         <span class="sf-t">Toutes les prods</span>
@@ -1795,30 +1743,6 @@ body.vue-accueil .hcta{display:inline-flex}
   </div>
 </div>
 
-<div class="studio" id="studio" hidden role="dialog" aria-label="Studio">
-  <div class="st-head">
-    <div class="st-head-t">
-      <span class="eyebrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg>Studio</span>
-      <p class="st-titre" id="stTitre"></p>
-    </div>
-    <button class="st-x" id="stFermer" aria-label="Fermer le studio"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-  </div>
-  <div class="st-depart" role="group" aria-label="Point de départ">
-    <button data-dep="debut" aria-pressed="true">Depuis le début</button>
-    <button data-dep="ici" aria-pressed="false" id="stIci">Depuis 0:00</button>
-  </div>
-  <button class="st-rec" id="stRec"><span class="st-pt"></span><span id="stRecT">Enregistrer</span></button>
-  <div class="st-niveau" aria-hidden="true"><i id="stNiv"></i></div>
-  <p class="st-info" id="stInfo"></p>
-  <div class="st-prises" id="stPrises"></div>
-  <details class="st-reglages">
-    <summary>Réglages</summary>
-    <label>Volume de la voix <input type="range" id="stVolVoix" min="0" max="150" step="1"></label>
-    <label>Décalage de la voix <span id="stDecalV">0 ms</span><input type="range" id="stDecal" min="-400" max="400" step="10"></label>
-    <p class="mini">Si ta voix arrive en retard ou en avance sur la prod à la réécoute (casque Bluetooth surtout), corrige-la ici.</p>
-  </details>
-  <a class="st-lien" id="stChaine" href="#" target="_blank" rel="noopener">Pour enregistrer pour de vrai, récupère la prod chez son beatmaker ↗</a>
-</div>
 <div class="dosmenu" id="dosMenu" hidden role="menu"></div>
 <script src="catalog.js"></script>
 <script>
@@ -2907,15 +2831,22 @@ document.getElementById("ytLink").addEventListener("click", () => {
 const PRISES_DB = (() => {
   let ouverture = null;
   const ouvrir = () => ouverture || (ouverture = new Promise((ok, ko) => {
-    const r = indexedDB.open("findings-studio", 1);
-    r.onupgradeneeded = () => r.result.createObjectStore("prises", { keyPath: "id" }).createIndex("prod", "prod");
+    // v2 : une table « projets » (l'arrangement du studio, une par prod) a cote des prises
+    // v3 : une table « fichiers » (la prod importee par le visiteur, une par prod)
+    const r = indexedDB.open("findings-studio", 3);
+    r.onupgradeneeded = () => {
+      const db = r.result;
+      if (!db.objectStoreNames.contains("prises")) db.createObjectStore("prises", { keyPath: "id" }).createIndex("prod", "prod");
+      if (!db.objectStoreNames.contains("projets")) db.createObjectStore("projets", { keyPath: "prod" });
+      if (!db.objectStoreNames.contains("fichiers")) db.createObjectStore("fichiers", { keyPath: "prod" });
+    };
     r.onsuccess = () => ok(r.result);
     r.onerror = () => ko(r.error);
   }));
-  const tx = async (mode, f) => {
+  const tx = async (mode, f, table = "prises") => {
     const db = await ouvrir();
     return new Promise((ok, ko) => {
-      const t = db.transaction("prises", mode), req = f(t.objectStore("prises"));
+      const t = db.transaction(table, mode), req = f(t.objectStore(table));
       t.oncomplete = () => ok(req && "result" in req ? req.result : undefined);
       t.onerror = () => ko(t.error);
     });
@@ -2924,332 +2855,18 @@ const PRISES_DB = (() => {
     ajouter: p => tx("readwrite", s => s.put(p)),
     suppr: id => tx("readwrite", s => s.delete(id)),
     duProd: prod => tx("readonly", s => s.index("prod").getAll(prod)),
-    toutes: () => tx("readonly", s => s.getAll())
+    toutes: () => tx("readonly", s => s.getAll()),
+    lireProjet: prod => tx("readonly", s => s.get(prod), "projets"),
+    ecrireProjet: pr => tx("readwrite", s => s.put(pr), "projets"),
+    lireFichier: prod => tx("readonly", s => s.get(prod), "fichiers"),
+    ecrireFichier: f => tx("readwrite", s => s.put(f), "fichiers"),
+    supprFichier: prod => tx("readwrite", s => s.delete(prod), "fichiers")
   };
 })();
 let TOPLINE_N = new Map();        // prod -> nombre de prises
 let PRISES_MEMOIRE = [];          // repli si IndexedDB est indisponible (navigation privee)
 
-const STUDIO = (() => {
-  const el = document.getElementById("studio"), micBtn = document.getElementById("micBtn");
-  const $ = id => document.getElementById(id);
-  let etat = "repos";             // repos | decompte | rec | fin
-  let depart = "debut", flux = null, recorder = null, morceaux = [], recProd = null, t0 = 0, latence = 0, debutRec = 0;
-  let ctx = null, analyse = null, boucleNiv = 0, minuteur = 0, annule = false;
-  let lect = null;                // reecoute en cours
-  let prisesAffichees = [];
-  let decal = 0, volVoix = 1;
-  try { decal = +localStorage.getItem("findings.studio.decalage") || 0; } catch (e) {}
-  try { const v = localStorage.getItem("findings.studio.voix"); if (v !== null) volVoix = +v; } catch (e) {}
-
-  /* --- l'heure de la prod ---
-     getCurrentTime() n'avance que par paliers (les messages de l'iframe). On garde le
-     dernier palier vu et l'instant ou on l'a vu, et on extrapole entre deux. */
-  let palier = { v: 0, at: 0 }, suivi = 0;
-  const lireBeat = () => { try { return player.getCurrentTime() || 0; } catch (e) { return 0; } };
-  function suivre(){
-    clearInterval(suivi);
-    palier = { v: lireBeat(), at: performance.now() };
-    suivi = setInterval(() => { const v = lireBeat(); if (v !== palier.v) palier = { v, at: performance.now() }; }, 25);
-  }
-  const enLecture = () => { try { return player.getPlayerState() === YT.PlayerState.PLAYING; } catch (e) { return false; } };
-  const tempsBeat = () => enLecture() ? palier.v + (performance.now() - palier.at) / 1000 : lireBeat();
-  /* La prod a vraiment demarre quand l'etat est « lecture » ET que le temps a bouge. */
-  function attendreLecture(){
-    const avant = lireBeat(), debut = performance.now();
-    return new Promise((ok, ko) => {
-      const t = setInterval(() => {
-        const v = lireBeat();
-        if (enLecture() && v !== avant) { clearInterval(t); palier = { v, at: performance.now() }; ok(); }
-        else if (performance.now() - debut > 10000) { clearInterval(t); ko(new Error("la prod ne demarre pas")); }
-      }, 20);
-    });
-  }
-  const attendre = ms => new Promise(r => setTimeout(r, ms));
-  const audio = () => { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); return ctx; };
-
-  /* --- interface --- */
-  const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
-  const info = (t, alerte) => { const p = $("stInfo"); p.textContent = t; p.classList.toggle("alerte", !!alerte); };
-  const CONSEIL = "Avec un casque, ta voix sort propre. Sans casque, le micro entend aussi la prod.";
-  function peindreBouton(){
-    const b = $("stRec");
-    b.classList.toggle("rec", etat === "rec");
-    b.classList.toggle("compte", etat === "decompte");
-    el.classList.toggle("en-rec", etat === "rec" || etat === "decompte");
-    document.body.classList.toggle("studio-rec", etat === "rec" || etat === "decompte");
-    if (etat === "repos") $("stRecT").textContent = "Enregistrer";
-    if (etat === "fin") $("stRecT").textContent = "Enregistrement…";
-  }
-  function peindreDepart(){
-    const ici = lireBeat();
-    el.querySelectorAll("[data-dep]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.dep === depart)));
-    $("stIci").textContent = `Depuis ${fmt(ici)}`;
-  }
-  async function peindrePrises(){
-    if (!current) return;
-    let liste = [];
-    try { liste = await PRISES_DB.duProd(current.id); } catch (e) { liste = PRISES_MEMOIRE.filter(p => p.prod === current.id); }
-    liste.sort((a, b) => a.cree - b.cree);
-    prisesAffichees = liste;
-    const zone = $("stPrises");
-    if (!liste.length) { zone.innerHTML = `<p class="st-vide">Tes prises sur cette prod s'afficheront ici.</p>`; return; }
-    zone.innerHTML = liste.map((p, i) => `
-      <div class="prise${lect && lect.id === p.id ? " joue" : ""}" data-id="${p.id}">
-        <button class="pr-play" data-pr="ecouter" aria-label="${lect && lect.id === p.id ? "Arrêter" : "Réécouter avec la prod"}">${lect && lect.id === p.id
-          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>'
-          : '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>'}</button>
-        <div class="pr-meta"><b>Prise ${i + 1}</b><span>depuis ${fmt(p.t0)} · ${fmt(p.dur)}</span></div>
-        <button class="pr-act" data-pr="dl" title="Télécharger ta voix" aria-label="Télécharger ta voix"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg></button>
-        <button class="pr-act" data-pr="suppr" title="Supprimer la prise" aria-label="Supprimer la prise"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.8h6V7M6.5 7l1 12.2h9l1-12.2"/></svg></button>
-      </div>`).join("");
-  }
-  function ouvrir(){
-    if (!current) return;
-    el.hidden = false;
-    requestAnimationFrame(() => el.classList.add("on"));
-    micBtn.classList.add("on");
-    $("stTitre").textContent = current.title;
-    $("stChaine").href = chanUrl(current);
-    peindreDepart();
-    peindreBouton();
-    if (PLAIN) info("Le studio a besoin du lecteur complet : il n'est pas disponible ici.", true);
-    else if (!navigator.mediaDevices || !window.MediaRecorder) info("Ce navigateur ne permet pas d'enregistrer le micro.", true);
-    else info(CONSEIL);
-    peindrePrises();
-  }
-  function fermer(){
-    if (etat === "decompte" || etat === "rec") arreter("fermeture");
-    arreterEcoute();
-    el.classList.remove("on");
-    micBtn.classList.remove("on");
-    setTimeout(() => { if (!el.classList.contains("on")) el.hidden = true; }, 220);
-  }
-
-  /* --- niveau du micro --- */
-  function niveau(){
-    const a = audio(), src = a.createMediaStreamSource(flux);
-    analyse = a.createAnalyser(); analyse.fftSize = 1024;
-    src.connect(analyse);
-    const d = new Float32Array(analyse.fftSize), barre = $("stNiv");
-    (function tour(){
-      analyse.getFloatTimeDomainData(d);
-      let s = 0; for (const x of d) s += x * x;
-      const db = 20 * Math.log10(Math.sqrt(s / d.length) + 1e-6);
-      barre.style.transform = `scaleX(${Math.max(0, Math.min(1, (db + 60) / 60)).toFixed(3)})`;
-      boucleNiv = requestAnimationFrame(tour);
-    })();
-  }
-
-  /* --- enregistrer --- */
-  const MIMES = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
-  async function enregistrer(){
-    if (etat === "decompte" || etat === "rec") return arreter("bouton");
-    if (etat !== "repos" || !current || PLAIN || !playerReady) return;
-    arreterEcoute();
-    try {
-      // pas de traitement : il ecrase la voix, et l'annulation d'echo effacerait la prod du memo sans casque
-      flux = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
-    } catch (e) {
-      info(e && e.name === "NotAllowedError" ? "Micro refusé : autorise-le dans les réglages du navigateur pour enregistrer." : "Aucun micro trouvé.", true);
-      return;
-    }
-    audio().resume();
-    const reglage = flux.getAudioTracks()[0].getSettings();
-    latence = (reglage.latency || .02) + (ctx.outputLatency || ctx.baseLatency || .02);
-    recProd = current.id;
-    const debutBeat = depart === "debut" ? 0 : lireBeat();
-    annule = false;
-    etat = "decompte"; peindreBouton(); niveau(); info(CONSEIL);
-    try { player.pauseVideo(); player.seekTo(debutBeat, true); } catch (e) {}
-    for (const n of [3, 2, 1]) {
-      $("stRecT").textContent = String(n);
-      await attendre(800);
-      if (annule) return;
-    }
-    $("stRecT").textContent = "…";
-    suivre();
-    try { player.playVideo(); await attendreLecture(); }
-    catch (e) { nettoyer(); etat = "repos"; peindreBouton(); info("La prod ne démarre pas, réessaie.", true); return; }
-    if (annule) return;
-    const mime = MIMES.find(m => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m));
-    try {
-      recorder = new MediaRecorder(flux, mime ? { mimeType: mime } : undefined);
-      morceaux = [];
-      recorder.ondataavailable = e => { if (e.data && e.data.size) morceaux.push(e.data); };
-      recorder.start(250);
-    } catch (e) {
-      // micro debranche entre-temps, format refuse… : on le dit, on ne reste pas fige
-      try { player.pauseVideo(); } catch (_) {}
-      nettoyer(); etat = "repos"; peindreBouton(); info("L'enregistrement n'a pas pu démarrer : vérifie ton micro et réessaie.", true);
-      return;
-    }
-    t0 = tempsBeat();
-    debutRec = performance.now();
-    etat = "rec"; peindreBouton();
-    minuteur = setInterval(() => { $("stRecT").textContent = `Stop · ${fmt((performance.now() - debutRec) / 1000)}`; }, 200);
-    $("stRecT").textContent = "Stop · 0:00";
-  }
-  function nettoyer(){
-    clearInterval(minuteur);
-    cancelAnimationFrame(boucleNiv);
-    $("stNiv").style.transform = "scaleX(0)";
-    if (flux) flux.getTracks().forEach(t => t.stop());   // le voyant du micro s'eteint
-    flux = null;
-  }
-  /* raison : bouton, fin (la prod se termine), pause, changement (autre prod), fermeture */
-  async function arreter(raison){
-    if (etat === "decompte") {
-      annule = true; nettoyer(); etat = "repos"; peindreBouton(); return;
-    }
-    if (etat !== "rec") return;
-    etat = "fin"; peindreBouton();
-    const dur = (performance.now() - debutRec) / 1000;
-    await new Promise(ok => { recorder.onstop = ok; try { recorder.stop(); } catch (e) { ok(); } });
-    if (raison !== "changement" && raison !== "pause") { try { player.pauseVideo(); } catch (e) {} }
-    nettoyer();
-    const blob = new Blob(morceaux, { type: recorder.mimeType || "audio/webm" });
-    etat = "repos"; peindreBouton();
-    if (dur < 1.5 || !blob.size) { info("Prise trop courte : elle n'a pas été gardée."); return; }
-    const prise = { id: "p" + Date.now().toString(36), prod: recProd, t0, dur, lat: latence, cree: Date.now(), mime: blob.type, blob };
-    try { await PRISES_DB.ajouter(prise); }
-    catch (e) { PRISES_MEMOIRE.push(prise); info("Ce navigateur ne garde pas les prises : télécharge-la avant de fermer la page.", true); }
-    TOPLINE_N.set(recProd, (TOPLINE_N.get(recProd) || 0) + 1);
-    if (raison === "changement") info("Prise gardée sur la prod précédente : retrouve-la dans « Tes toplines ».");
-    else info(raison === "fin" ? "Fin de la prod : prise gardée." : "Prise gardée. Réécoute-la avec la prod ci-dessous.");
-    peindrePrises();
-    if (typeof majToplines === "function") majToplines();
-    if (raison === "changement" || S.toplines) render();
-  }
-
-  /* --- reecouter une prise, calee sur la prod --- */
-  function jouerDepuis(pos){
-    if (lect.src) { try { lect.src.stop(); } catch (e) {} }
-    const s = ctx.createBufferSource();
-    s.buffer = lect.buf; s.connect(lect.gain);
-    s.start(0, Math.max(0, pos));
-    lect.src = s; lect.debut = ctx.currentTime - pos;
-  }
-  function recaler(){
-    if (!lect) return;
-    if (!enLecture()) { if (lect.src) { try { lect.src.stop(); } catch (e) {} lect.src = null; } lect.ecarts = 0; return; }
-    const attendu = tempsBeat() - lect.t0 + lect.lat + decal / 1000;
-    if (attendu >= lect.buf.duration) { arreterEcoute(true); return; }
-    if (attendu < 0) { if (lect.src) { try { lect.src.stop(); } catch (e) {} lect.src = null; } return; }
-    if (!lect.src) { jouerDepuis(attendu); return; }
-    // deux mesures de suite au-dela de 180 ms : vrai decalage (buffering, recherche), pas du bruit de mesure
-    const ecart = Math.abs((ctx.currentTime - lect.debut) - attendu);
-    lect.ecarts = ecart > .18 ? (lect.ecarts || 0) + 1 : 0;
-    if (lect.ecarts >= 2) { lect.ecarts = 0; jouerDepuis(attendu); }
-  }
-  async function ecouter(prise){
-    if (etat !== "repos") return;
-    if (lect && lect.id === prise.id) { arreterEcoute(true); return; }
-    arreterEcoute(false);
-    const a = audio(); await a.resume();
-    let buf;
-    try { buf = prise.buf || (prise.buf = await a.decodeAudioData(await prise.blob.arrayBuffer())); }
-    catch (e) { info("Cette prise ne peut pas être relue dans ce navigateur.", true); return; }
-    if (!current || current.id !== prise.prod) {
-      const b = BY_ID.get(prise.prod); if (!b) return;
-      playFrom([b], 0);
-      const debut = performance.now();
-      while (!(playerReady && current && current.id === prise.prod && enLecture()) && performance.now() - debut < 10000) await attendre(100);
-    }
-    lect = { id: prise.id, prod: prise.prod, buf, t0: prise.t0, lat: prise.lat || 0, gain: a.createGain(), src: null, debut: 0, ecarts: 0 };
-    lect.gain.gain.value = volVoix;
-    lect.gain.connect(a.destination);
-    suivre();
-    try { player.pauseVideo(); player.seekTo(prise.t0, true); player.playVideo(); await attendreLecture(); }
-    catch (e) { arreterEcoute(false); info("La prod ne démarre pas, réessaie.", true); return; }
-    if (!lect || lect.id !== prise.id) return;
-    lect.boucle = setInterval(recaler, 120);
-    recaler();
-    peindrePrises();
-  }
-  function arreterEcoute(stopProd){
-    if (!lect) return;
-    clearInterval(lect.boucle);
-    if (lect.src) { try { lect.src.stop(); } catch (e) {} }
-    try { lect.gain.disconnect(); } catch (e) {}
-    lect = null;
-    if (stopProd) { try { player.pauseVideo(); } catch (e) {} }
-    peindrePrises();
-  }
-
-  /* --- telecharger / supprimer --- */
-  function telecharger(p, n){
-    const ext = /mp4|aac/.test(p.mime) ? "m4a" : /ogg/.test(p.mime) ? "ogg" : "webm";
-    const titre = (BY_ID.get(p.prod)?.title || "prod").replace(/[\\/:*?"<>|]+/g, "").slice(0, 60).trim();
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(p.blob);
-    a.download = `Topline - ${titre} - prise ${n} (calee a ${Math.floor(p.t0 / 60)}m${String(Math.floor(p.t0 % 60)).padStart(2, "0")}s).${ext}`;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-    info("Ta voix seule est téléchargée. Le nom du fichier indique où la caler sur la prod.");
-  }
-  let supprArmee = null;
-  async function supprimer(p, bouton){
-    if (supprArmee !== p.id) {
-      supprArmee = p.id; bouton.classList.add("arme"); bouton.title = "Toucher encore pour supprimer";
-      setTimeout(() => { if (supprArmee === p.id) { supprArmee = null; bouton.classList.remove("arme"); } }, 2500);
-      return;
-    }
-    supprArmee = null;
-    if (lect && lect.id === p.id) arreterEcoute(false);
-    try { await PRISES_DB.suppr(p.id); } catch (e) { PRISES_MEMOIRE = PRISES_MEMOIRE.filter(x => x.id !== p.id); }
-    const n = (TOPLINE_N.get(p.prod) || 1) - 1;
-    n > 0 ? TOPLINE_N.set(p.prod, n) : TOPLINE_N.delete(p.prod);
-    peindrePrises();
-    if (typeof majToplines === "function") majToplines();
-    if (S.toplines) render();
-  }
-
-  /* --- evenements --- */
-  micBtn.addEventListener("click", () => el.hidden ? ouvrir() : fermer());
-  $("stFermer").addEventListener("click", fermer);
-  $("stRec").addEventListener("click", enregistrer);
-  el.querySelector(".st-depart").addEventListener("click", e => {
-    const b = e.target.closest("[data-dep]"); if (!b || etat !== "repos") return;
-    depart = b.dataset.dep; peindreDepart();
-  });
-  $("stPrises").addEventListener("click", e => {
-    const b = e.target.closest("[data-pr]"); if (!b) return;
-    const ligne = b.closest(".prise"), i = prisesAffichees.findIndex(p => p.id === ligne.dataset.id);
-    const p = prisesAffichees[i]; if (!p) return;
-    if (b.dataset.pr === "ecouter") ecouter(p);
-    if (b.dataset.pr === "dl") telecharger(p, i + 1);
-    if (b.dataset.pr === "suppr") supprimer(p, b);
-  });
-  const vv = $("stVolVoix"), dc = $("stDecal");
-  vv.value = Math.round(volVoix * 100);
-  dc.value = decal; $("stDecalV").textContent = `${decal > 0 ? "+" : ""}${decal} ms`;
-  vv.addEventListener("input", () => {
-    volVoix = vv.value / 100; if (lect) lect.gain.gain.value = volVoix;
-    try { localStorage.setItem("findings.studio.voix", String(volVoix)); } catch (e) {}
-  });
-  dc.addEventListener("input", () => {
-    decal = +dc.value; $("stDecalV").textContent = `${decal > 0 ? "+" : ""}${decal} ms`;
-    if (lect) { lect.ecarts = 0; jouerDepuis(tempsBeat() - lect.t0 + lect.lat + decal / 1000); }
-    try { localStorage.setItem("findings.studio.decalage", String(decal)); } catch (e) {}
-  });
-  // la position « depuis ici » suit la lecture tant que le studio est ouvert
-  setInterval(() => { if (!el.hidden && etat === "repos") peindreDepart(); }, 1000);
-
-  return {
-    ouvert: () => !el.hidden,
-    occupe: () => etat === "rec" || etat === "decompte" || !!lect,
-    // appeles par le lecteur
-    finProd(){ if (etat === "rec") arreter("fin"); else if (lect) arreterEcoute(false); },
-    pause(){ if (etat === "rec") arreter("pause"); },
-    changement(id){
-      if ((etat === "rec" || etat === "decompte") && id !== recProd) arreter("changement");
-      if (lect && lect.prod !== id) arreterEcoute(false);
-      if (!el.hidden) setTimeout(() => { if (current) { $("stTitre").textContent = current.title; $("stChaine").href = chanUrl(current); peindrePrises(); } }, 0);
-    },
-    ouvrir
-  };
-})();
+/* Le studio lui-meme (station audio) vit dans studio.js, charge apres ce script. */
 
 /* Compte des prises par prod, pour « Tes toplines » et le badge des lignes. */
 (async function chargerToplines(){
@@ -4665,6 +4282,7 @@ function appliquerParams(p, reprendreLecture = false){
   history.replaceState({ vue: versProds ? "prods" : "accueil" }, "", location.pathname + location.search);
 })();
 </script>
+<script src="studio.js"></script>
 <script type="module">
 /* ============ la note, en volume ============
    Un vrai maillage extrudé, éclairé et tourné en continu. Si WebGL manque ou si
