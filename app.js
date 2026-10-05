@@ -2643,27 +2643,37 @@ document.getElementById("toplinewall").addEventListener("click", e => {
   Object.values(par).forEach(l => l.sort((a,b) => b.views - a.views));
 
   const live = STYLE_META.filter(s => par[s.key]).sort((a,b) => par[b.key].length - par[a.key].length);
-  document.getElementById("cloud").innerHTML = live.map(s => {
-    const lot = par[s.key];
-    const covers = (lot.length >= 4 ? lot.slice(0, 4) : lot.slice(0, 1))
-      .map(b => `<img src="https://i.ytimg.com/vi/${b.id}/mqdefault.jpg" alt="" loading="lazy">`).join("");
-    return `<a class="scard${s.label.length > 12 ? " long" : ""}" href="${lienStyle(s.key)}" data-vue="prods" style="--c:${esc(s.color)}">
-      <div class="mosaic${lot.length >= 4 ? "" : " solo"}">${covers}</div>
-      <div class="scard-in">
-        <span class="nm">${esc(s.label)}</span>
-        <span class="ct">${lot.length} prod${lot.length > 1 ? "s" : ""}</span>
+  /* Meme DA que « Pour toi » : une affiche par style, la pochette de sa prod la plus
+     ecoutee en plein cadre, texte pose sur un degrade sombre. Le style le plus fourni
+     ouvre le mur en grand. */
+  const FLECHE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg>';
+  const visesPar = lot => {
+    const n = {};
+    lot.forEach(b => b.artists.forEach(a => { if (ARTIST_NAME[a]) n[a] = (n[a] || 0) + 1; }));
+    return Object.keys(n).sort((x, y) => n[y] - n[x]).slice(0, 3).map(a => ARTIST_NAME[a]);
+  };
+  document.getElementById("cloud").innerHTML = live.map((s, i) => {
+    const lot = par[s.key], une = lot[0], vises = visesPar(lot), grand = i === 0;
+    const nb = `${lot.length} prod${lot.length > 1 ? "s" : ""}`;
+    return `<a class="spost${grand ? " grand" : ""}" href="${lienStyle(s.key)}" data-vue="prods" style="--c:${esc(s.color)}">
+      <div class="art"><img src="https://i.ytimg.com/vi/${une.id}/maxresdefault.jpg" alt="" loading="lazy" onload="if(this.naturalWidth<=120){this.onload=null;this.classList.add('hq');this.src=this.src.replace('maxresdefault','hqdefault')}"></div>
+      <div class="v-in">
+        <span class="raison"><i class="pt"></i>${grand ? `Le plus fourni · ${nb}` : nb}</span>
+        <span class="t">${esc(s.label)}</span>
+        ${vises.length ? `<span class="s">${grand ? "Type beats " : ""}${esc(vises.join(", "))}</span>` : ""}
+        ${grand ? `<span class="v-lire">Voir les prods ${FLECHE}</span>` : ""}
       </div>
-      <span class="go"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg></span>
+      ${grand ? "" : `<span class="go">${FLECHE}</span>`}
     </a>`;
   }).join("");
   document.getElementById("stylesSub").textContent =
     `${live.length} styles remplis, du plus fourni au plus rare.`;
 
   // au-delà de dix-huit genres le mur devient un couloir : on replie le reste
-  const SEUIL = 18, btn = document.getElementById("moreStyles");
+  const SEUIL = 15, btn = document.getElementById("moreStyles");   // la grande + 14 : trois rangees pleines sur six colonnes
   let ouvert = false;
   function replier(){
-    document.querySelectorAll("#cloud .scard").forEach((el, i) => el.classList.toggle("repliee", !ouvert && i >= SEUIL));
+    document.querySelectorAll("#cloud .spost").forEach((el, i) => el.classList.toggle("repliee", !ouvert && i >= SEUIL));
     btn.textContent = ouvert ? "Replier" : `Voir les ${live.length - SEUIL} autres styles`;
   }
   if (live.length > SEUIL) {
