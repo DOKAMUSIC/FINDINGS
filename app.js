@@ -717,7 +717,7 @@ function peindreNP(){
   npBtn.setAttribute("aria-pressed", String(npVoulu));
   const actif = npVoulu && !!current;
   document.body.classList.toggle("np-on", actif);
-  if (!actif) { npPeint = null; return; }
+  if (!actif) { npPeint = null; rafaleVideo(0); return; }
   const cle = current.id + "|" + QI + "|" + QUEUE.length + "|" + SHUFFLE;
   if (npPeint !== cle) {
     const autre = !npPeint || !npPeint.startsWith(current.id + "|");
@@ -727,6 +727,7 @@ function peindreNP(){
     if (autre) elNP.scrollTop = 0;
   }
   npEtat();
+  rafaleVideo();
 }
 function poserNP(v){
   npVoulu = v;
@@ -734,6 +735,45 @@ function poserNP(v){
   peindreNP();
 }
 npBtn.addEventListener("click", () => poserNP(!npVoulu));
+
+/* La video elle-meme a droite, a la place de la pochette. Une iframe YouTube deplacee
+   dans la page se recharge et repart de zero : elle reste donc dans le lecteur et vient
+   se poser, en position absolue, exactement sur la pochette du panneau. Elle suit le
+   defilement de la page et celui du panneau, et se rogne quand la pochette en sort. */
+const vidWrap = document.getElementById("vidWrap"), vidPlace = document.getElementById("vidPlace");
+let npCadre = 0, npRafale = 0, npVignette = "";
+function placerVideo(){
+  const cover = elNP.querySelector(".np-cover");
+  const ok = !!(cover && current && document.body.classList.contains("np-on") && elNP.getClientRects().length);
+  document.body.classList.toggle("np-video", ok);
+  vidWrap.classList.toggle("dans-np", ok);
+  if (!ok) { if (vidWrap.style.left) vidWrap.removeAttribute("style"); return; }
+  const v = `url("https://i.ytimg.com/vi/${current.id}/mqdefault.jpg")`;
+  if (npVignette !== v) { npVignette = v; vidPlace.style.backgroundImage = v; }
+  const b = bar.getBoundingClientRect(), c = cover.getBoundingClientRect(), p = elNP.getBoundingClientRect();
+  const haut = Math.max(0, p.top + 1 - c.top), bas = Math.max(0, c.bottom - (p.bottom - 1));
+  vidWrap.style.left = (c.left - b.left - bar.clientLeft) + "px";
+  vidWrap.style.top = (c.top - b.top - bar.clientTop) + "px";
+  vidWrap.style.width = c.width + "px";
+  vidWrap.style.height = c.height + "px";
+  vidWrap.style.clipPath = haut || bas ? `inset(${haut}px 0 ${bas}px 0)` : "";
+  vidWrap.style.visibility = haut + bas >= c.height - 1 ? "hidden" : "";
+}
+/* Une image tout de suite, puis quelques-unes le temps des animations (montee du
+   lecteur, entree du panneau). */
+function rafaleVideo(ms = 650){
+  npRafale = Math.max(npRafale, performance.now() + ms);
+  if (!npCadre) npCadre = requestAnimationFrame(function boucle(){
+    placerVideo();
+    npCadre = performance.now() < npRafale ? requestAnimationFrame(boucle) : 0;
+  });
+}
+addEventListener("scroll", () => rafaleVideo(0), { passive: true });
+addEventListener("resize", () => rafaleVideo(0));
+elNP.addEventListener("scroll", () => rafaleVideo(0), { passive: true });
+if (window.ResizeObserver) new ResizeObserver(() => rafaleVideo(0)).observe(elNP);
+new MutationObserver(() => rafaleVideo()).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+vidWrap.querySelector(".shield").addEventListener("click", () => { if (vidWrap.classList.contains("dans-np")) togglePlay(); });
 elNP.addEventListener("click", e => {
   const el = e.target.closest("[data-np]");
   if (!el || !current) return;
@@ -2178,6 +2218,15 @@ function majBarre(){
   };
   poser();
   if (window.ResizeObserver) new ResizeObserver(poser).observe(top);
+  // le panneau « En lecture » se colle sous la barre de filtres, pas sous l'en-tete
+  const fbar = document.getElementById("fbar");
+  const poserF = () => {
+    const h = fbar.offsetHeight; if (h) racine.setProperty("--fbh", h + "px");
+    racine.setProperty("--fbx", Math.round(fbar.getBoundingClientRect().left) + "px");   // bord gauche, pour la bande floue
+  };
+  poserF();
+  if (window.ResizeObserver) new ResizeObserver(poserF).observe(fbar);
+  addEventListener("resize", poserF);
   let cadre = 0;
   addEventListener("scroll", () => { if (!cadre) cadre = requestAnimationFrame(() => { cadre = 0; testerCollage(); }); }, { passive: true });
 })();
