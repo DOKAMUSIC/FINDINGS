@@ -632,6 +632,7 @@ let npPeint = null, npSims = [];
 const NP_LIRE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>';
 const NP_PAUSE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>';
 const NP_COEUR = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>';
+const icone = id => document.getElementById(id)?.innerHTML.trim() || "";
 /* Une prod par beatmaker : sinon le plus prolifique du style remplit les quatre cases. */
 function similairesDe(b, n){
   const notes = [];
@@ -663,9 +664,19 @@ function npHTML(b){
         <p class="np-raison">Type beat ${esc(b.artists.length ? b.artists.slice(0, 2).map(id => ARTIST_NAME[id] || id).join(" x ") : STYLE_NAME[b.style])}</p>
         <h3 class="np-t" title="${esc(b.title)}">${esc(b.title)}</h3>
         <p class="np-s"><span class="pill">${esc(STYLE_NAME[b.style])}</span><span>par <a href="${lienProd(b.prod)}" data-vue="prods">${esc(b.prod)}</a></span><span${b.bpmSur ? "" : ' title="Tempo estimé"'}>${b.bpmSur ? "" : "~"}${b.bpm} BPM</span>${b.key ? `<span${b.keySur ? "" : ' title="Tonalité estimée"'}>${b.keySur ? "" : "~"}${esc(b.key)}</span>` : ""}</p>
-        <div class="np-une-acts">
-          <button class="np-lire" data-np="lire"><span class="ic">${S.paused ? NP_LIRE : NP_PAUSE}</span><span class="lb">${S.paused ? "Écouter" : "Pause"}</span></button>
+        <div class="np-temps"><span class="np-cur">0:00</span><div class="np-prog" data-np="prog" role="slider" aria-label="Position dans la prod" tabindex="0"><span><i></i></span></div><span class="np-dur">${fmtDur(b.dur)}</span></div>
+        <div class="np-ctrl">
+          <button class="np-c" data-np="shuffle" aria-label="Lecture aléatoire" title="Aléatoire">${icone("shuffle")}</button>
+          <button class="np-c" data-np="prev" aria-label="Prod précédente" title="Précédent (P)">${icone("prev")}</button>
+          <button class="np-play" data-np="lire" aria-label="Lecture ou pause" title="Lecture / pause (Espace)">${S.paused ? NP_LIRE : NP_PAUSE}</button>
+          <button class="np-c" data-np="next" aria-label="Prod suivante" title="Suivant (N)">${icone("next")}</button>
+          <button class="np-c" data-np="rapide" aria-label="Écoute rapide : saute l'intro" title="Écoute rapide : saute l'intro (R)">${icone("rapide")}</button>
+        </div>
+        <div class="np-outils">
           <button class="np-like" data-np="like">${NP_COEUR}</button>
+          <button class="np-c" data-np="mic" aria-label="Studio : poser une topline" title="Studio : pose ta topline">${icone("micBtn")}</button>
+          <span class="vol np-vol" data-niv="2"><button class="vol-ico" data-np="muet" aria-label="Couper le son" title="Couper / remettre le son">${icone("volIco")}</button><input type="range" min="0" max="100" value="${VOL}" aria-label="Volume" data-np="vol"></span>
+          <button class="np-c" data-np="yt" aria-label="Ouvrir sur YouTube" title="Ouvrir sur YouTube"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button>
         </div>
       </div>
     ${b.moods.length ? `<div class="np-tags">${b.moods.map(m => `<span class="np-tag">${esc(m)}</span>`).join("")}</div>` : ""}
@@ -705,8 +716,12 @@ function npEtat(){
   if (!current || !elNP.firstChild) return;
   const go = elNP.querySelector(".np-go");
   if (go) go.innerHTML = S.paused ? NP_LIRE : NP_PAUSE;
-  const lire = elNP.querySelector(".np-lire");
-  if (lire) { lire.querySelector(".ic").innerHTML = S.paused ? NP_LIRE : NP_PAUSE; lire.querySelector(".lb").textContent = S.paused ? "Écouter" : "Pause"; }
+  const play = elNP.querySelector(".np-play");
+  if (play) play.innerHTML = S.paused ? NP_LIRE : NP_PAUSE;
+  elNP.querySelector('[data-np="shuffle"]')?.classList.toggle("on", SHUFFLE);
+  elNP.querySelector('[data-np="rapide"]')?.classList.toggle("on", RAPIDE);
+  const vb = elNP.querySelector(".np-vol");
+  if (vb) { vb.dataset.niv = VOL <= 0 ? "0" : VOL < 50 ? "1" : "2"; const r = vb.querySelector("input"); if (+r.value !== VOL) r.value = VOL; }
   const like = elNP.querySelector('[data-np="like"]');
   if (like) peindreLike(like, CRATE.has(current.id), false);
   const sv = elNP.querySelector('[data-np="suivre"]');
@@ -735,6 +750,32 @@ function poserNP(v){
   peindreNP();
 }
 npBtn.addEventListener("click", () => poserNP(!npVoulu));
+elNP.addEventListener("input", e => { if (e.target.dataset.np === "vol") { poserVol(+e.target.value, true); npEtat(); } });
+/* Progression du panneau : le minuteur du lecteur la nourrit (npTemps). Un clic ou un
+   glisse cherche dans la prod, comme la barre du bas. */
+let npGlisse = false;
+function npTemps(t, d){
+  const pr = elNP.querySelector(".np-prog");
+  if (!pr || npGlisse) return;
+  pr.querySelector("i").style.width = (d ? Math.min(100, t / d * 100) : 0) + "%";
+  elNP.querySelector(".np-cur").textContent = fmtDur(Math.floor(t));
+  if (d) elNP.querySelector(".np-dur").textContent = fmtDur(Math.floor(d));
+}
+elNP.addEventListener("pointerdown", e => {
+  const pr = e.target.closest(".np-prog");
+  if (!pr || !player || !player.getDuration) return;
+  const piste = pr.querySelector("span");
+  const pct = ev => { const r = piste.getBoundingClientRect(); return Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)); };
+  const montrer = p => { piste.querySelector("i").style.width = p * 100 + "%"; elNP.querySelector(".np-cur").textContent = fmtDur(Math.floor(p * (player.getDuration() || 0))); };
+  npGlisse = true; pr.classList.add("glisse"); pr.setPointerCapture(e.pointerId); montrer(pct(e));
+  const bouge = ev => montrer(pct(ev));
+  const fin = ev => {
+    pr.removeEventListener("pointermove", bouge); pr.removeEventListener("pointerup", fin); pr.removeEventListener("pointercancel", fin);
+    npGlisse = false; pr.classList.remove("glisse");
+    chercher(pct(ev) * (player.getDuration() || 0));
+  };
+  pr.addEventListener("pointermove", bouge); pr.addEventListener("pointerup", fin); pr.addEventListener("pointercancel", fin);
+});
 
 /* La video elle-meme a droite, a la place de la pochette. Une iframe YouTube deplacee
    dans la page se recharge et repart de zero : elle reste donc dans le lecteur et vient
@@ -746,6 +787,7 @@ function placerVideo(){
   const cover = elNP.querySelector(".np-cover");
   const ok = !!(cover && current && document.body.classList.contains("np-on") && elNP.getClientRects().length);
   document.body.classList.toggle("np-video", ok);
+  document.body.classList.toggle("np-plain", ok && PLAIN);   // integration simple : YouTube garde ses propres commandes
   vidWrap.classList.toggle("dans-np", ok);
   if (!ok) { if (vidWrap.style.left) vidWrap.removeAttribute("style"); return; }
   const v = `url("https://i.ytimg.com/vi/${current.id}/mqdefault.jpg")`;
@@ -780,9 +822,14 @@ elNP.addEventListener("click", e => {
   const a = el.dataset.np;
   if (a === "fermer") poserNP(false);
   else if (a === "lire") togglePlay();
+  else if (a === "prev") prev();
+  else if (a === "shuffle" || a === "rapide") { document.getElementById(a).click(); npEtat(); }
+  else if (a === "mic") document.getElementById("micBtn").click();
+  else if (a === "muet") { document.getElementById("volIco").click(); npEtat(); }
+  else if (a === "yt") window.open(`https://www.youtube.com/watch?v=${current.id}`, "_blank", "noopener");
   else if (a === "like") basculerLike(current, el);
   else if (a === "chan") openChan(current);
-  else if (a === "suivant") next();
+  else if (a === "suivant" || a === "next") next();
   else if (a === "proches") voirProches(current.id);
   else if (a === "file") { const r = list.querySelector(".row.playing"); if (r) r.scrollIntoView({ behavior: "smooth", block: "center" }); }
   else if (a === "suivre") {
@@ -1142,6 +1189,7 @@ function startTick(){
     if (!player || !player.getDuration) return;
     const d = player.getDuration() || 0, t = player.getCurrentTime() || 0;
     if (!d) return;
+    npTemps(t, d);
     /* Pendant le glissement, la barre appartient au doigt : sans ca le curseur
        reviendrait a la position reelle toutes les 300 ms et le geste accrocherait. */
     if (glisse) return;
