@@ -241,9 +241,16 @@ ul{margin:0;padding:0;list-style:none}
 .np-de span{color:var(--dim);font-weight:500}
 .np-x{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--dim);flex:0 0 auto;transition:background .14s,color .14s}
 .np-x:hover{background:var(--hover);color:var(--ink)}
+/* La carte du haut reprend la DA de la vedette « Pour toi » : fond sombre fait de la
+   miniature floutee, sur-titre en capitales, grand titre, bouton rouge Ecouter. Elle
+   reste sombre en mode clair, comme la vedette. */
+.np-une{position:relative;border-radius:var(--r-lg);overflow:hidden;background:#000;color:#fff;isolation:isolate;box-shadow:0 14px 34px rgba(0,0,0,.3)}
+.np-fond{position:absolute;inset:-40px;z-index:-2;background:center/cover no-repeat;filter:blur(34px) saturate(1.5) brightness(.6);transform:scale(1.15)}
+.np-une::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.45) 65%,rgba(0,0,0,.82) 100%)}
 .np-cover{
-  position:relative;display:block;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;
-  background:var(--thumb);box-shadow:0 10px 30px rgba(0,0,0,.28);cursor:pointer;
+  position:relative;display:block;width:100%;aspect-ratio:16/9;overflow:hidden;
+  background:#000;cursor:pointer;
 }
 .np-cover img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
 .np-cover:hover img{transform:scale(1.03)}
@@ -255,6 +262,28 @@ ul{margin:0;padding:0;list-style:none}
 .np-cover:hover .np-go{transform:scale(1.07)}
 body.yt-charge .np-go svg{opacity:0}
 body.yt-charge .np-go::after{content:"";position:absolute;inset:0;margin:auto;width:18px;height:18px;border-radius:50%;border:2.4px solid currentColor;border-right-color:transparent;animation:yt-tourne .7s linear infinite}
+.np-une-in{padding:16px 18px 18px;display:grid;gap:6px}
+.np-raison{margin:0;font-size:11px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-t{margin:0;font-size:27px;font-weight:800;letter-spacing:-.035em;line-height:1.05;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.np-s{margin:2px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:13px;color:rgba(255,255,255,.8)}
+.np-s .pill{color:#fff;background:rgba(255,255,255,.18)}
+.np-s a{color:#fff;font-weight:600;text-decoration:none}
+.np-s a:hover{text-decoration:underline}
+.np-une-acts{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.np-lire{
+  position:relative;display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 20px 0 16px;
+  border-radius:999px;background:var(--accent);color:#fff;font-size:14px;font-weight:700;
+  box-shadow:0 8px 22px rgba(250,35,59,.4);transition:transform .15s;
+}
+.np-lire:hover{transform:scale(1.04)}
+.np-lire:active{transform:scale(.97)}
+.np-lire .ic{display:grid;place-items:center;width:18px;height:18px}
+.np-lire .ic svg{width:16px;height:16px}
+body.yt-charge .np-lire .ic svg{display:none}
+body.yt-charge .np-lire .ic::before{content:"";width:14px;height:14px;border-radius:50%;border:2.2px solid currentColor;border-right-color:transparent;animation:yt-tourne .7s linear infinite}
+.np-une .np-like{color:rgba(255,255,255,.85)}
+.np-une .np-like:hover{background:rgba(255,255,255,.12);color:#fff}
+.np-une .np-like.sav{color:var(--accent)}
 .np-titre{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start;margin-top:14px}
 .np-titre h3{margin:0;font-size:21px;line-height:1.2;font-weight:720;letter-spacing:-.025em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .np-par{margin:3px 0 0;font-size:14px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -263,7 +292,7 @@ body.yt-charge .np-go::after{content:"";position:absolute;inset:0;margin:auto;wi
 .np-like{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--dim);position:relative;transition:color .14s,background .14s}
 .np-like:hover{background:var(--hover);color:var(--ink)}
 .np-like.sav{color:var(--accent)}
-.np-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.np-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 .np-tag{font-size:11.5px;font-weight:590;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2)}
 .np-tag.st{border-color:transparent;color:color-mix(in srgb,var(--c) 60%,var(--ink));background:color-mix(in srgb,var(--c) 14%,var(--surface))}
 .np-tag.flou{color:var(--dim)}
@@ -312,7 +341,7 @@ body.yt-charge .np-go::after{content:"";position:absolute;inset:0;margin:auto;wi
 /* la video du lecteur posee sur la pochette du panneau (voir placerVideo) */
 .vid.dans-np{
   position:absolute;bottom:auto;right:auto;aspect-ratio:auto;z-index:1;
-  border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.28);transition:none;cursor:pointer;
+  border-radius:var(--r-lg) var(--r-lg) 0 0;box-shadow:none;transition:none;cursor:pointer;
 }
 .vid.dans-np iframe{width:100%;height:100%;margin:0}
 .vid.dans-np .zoom{display:none}
@@ -919,7 +948,10 @@ body.studio-rec #prev,body.studio-rec #next,body.studio-rec #shuffle{opacity:.4;
   width:44px;height:44px;margin:0 4px;background:var(--ink);color:var(--on-ink);
   box-shadow:var(--sh-1);
 }
-.tbtn.big:hover{background:#000}
+/* au survol il grossit un peu en gardant sa couleur : un fond noir fixe l'eteignait en mode sombre */
+.tbtn.big{transition:transform .15s,background .15s}
+.tbtn.big:hover{background:color-mix(in srgb,var(--ink) 90%,var(--bg));transform:scale(1.06)}
+.tbtn.big:active{transform:scale(.96)}
 /* chargement : tant que YouTube charge ou bufferise, le bouton tourne au lieu d'afficher pause */
 .tbtn.big{position:relative}
 .tbtn.big svg{transition:opacity .15s}

@@ -654,23 +654,23 @@ function npHTML(b){
       <p class="np-de">En lecture${ctx ? ` <span>· ${esc(ctx)}</span>` : ""}</p>
       <button class="np-x" data-np="fermer" aria-label="Fermer le panneau" title="Fermer le panneau"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     </div>
-    <button class="np-cover" data-np="lire" aria-label="Lecture / pause">
-      <img src="https://i.ytimg.com/vi/${b.id}/maxresdefault.jpg" alt="" onload="if(this.naturalWidth<=120){this.onload=null;this.src=this.src.replace('maxresdefault','hqdefault')}">
-      <span class="np-go">${S.paused ? NP_LIRE : NP_PAUSE}</span>
-    </button>
-    <div class="np-titre">
-      <div style="min-width:0">
-        <h3 title="${esc(b.title)}">${esc(b.title)}</h3>
-        <p class="np-par">par <a href="${lienProd(b.prod)}" data-vue="prods">${esc(b.prod)}</a></p>
+    <div class="np-une">
+      <div class="np-fond" style="background-image:url('https://i.ytimg.com/vi/${b.id}/hqdefault.jpg')"></div>
+      <button class="np-cover" data-np="lire" aria-label="Lecture / pause">
+        <img src="https://i.ytimg.com/vi/${b.id}/maxresdefault.jpg" alt="" onload="if(this.naturalWidth<=120){this.onload=null;this.src=this.src.replace('maxresdefault','hqdefault')}">
+        <span class="np-go">${S.paused ? NP_LIRE : NP_PAUSE}</span>
+      </button>
+      <div class="np-une-in">
+        <p class="np-raison">Type beat ${esc(b.artists.length ? b.artists.slice(0, 2).map(id => ARTIST_NAME[id] || id).join(" x ") : STYLE_NAME[b.style])}</p>
+        <h3 class="np-t" title="${esc(b.title)}">${esc(b.title)}</h3>
+        <p class="np-s"><span class="pill">${esc(STYLE_NAME[b.style])}</span><span>par <a href="${lienProd(b.prod)}" data-vue="prods">${esc(b.prod)}</a></span><span${b.bpmSur ? "" : ' title="Tempo estimé"'}>${b.bpmSur ? "" : "~"}${b.bpm} BPM</span>${b.key ? `<span${b.keySur ? "" : ' title="Tonalité estimée"'}>${b.keySur ? "" : "~"}${esc(b.key)}</span>` : ""}</p>
+        <div class="np-une-acts">
+          <button class="np-lire" data-np="lire"><span class="ic">${S.paused ? NP_LIRE : NP_PAUSE}</span><span class="lb">${S.paused ? "Écouter" : "Pause"}</span></button>
+          <button class="np-like" data-np="like">${NP_COEUR}</button>
+        </div>
       </div>
-      <button class="np-like" data-np="like">${NP_COEUR}</button>
     </div>
-    <div class="np-tags">
-      <span class="np-tag st">${esc(STYLE_NAME[b.style])}</span>
-      <span class="np-tag${b.bpmSur ? "" : " flou"}"${b.bpmSur ? "" : ' title="Tempo estimé"'}>${b.bpmSur ? "" : "~"}${b.bpm} BPM</span>
-      ${b.key ? `<span class="np-tag${b.keySur ? "" : " flou"}"${b.keySur ? "" : ' title="Tonalité estimée"'}>${b.keySur ? "" : "~"}${esc(b.key)}</span>` : ""}
-      ${b.moods.map(m => `<span class="np-tag">${esc(m)}</span>`).join("")}
-    </div>
+    ${b.moods.length ? `<div class="np-tags">${b.moods.map(m => `<span class="np-tag">${esc(m)}</span>`).join("")}</div>` : ""}
     <p class="np-stats">${b.views ? `${fmtViews(b.views)} vues · ` : ""}${fmtDur(b.dur)} · il y a ${esc(fmtAge(b.days))}</p>
     ${suiv ? `<div class="np-bloc">
       <div class="np-h"><h4>À suivre</h4><button data-np="file">${QI + 1}/${QUEUE.length}</button></div>
@@ -707,6 +707,8 @@ function npEtat(){
   if (!current || !elNP.firstChild) return;
   const go = elNP.querySelector(".np-go");
   if (go) go.innerHTML = S.paused ? NP_LIRE : NP_PAUSE;
+  const lire = elNP.querySelector(".np-lire");
+  if (lire) { lire.querySelector(".ic").innerHTML = S.paused ? NP_LIRE : NP_PAUSE; lire.querySelector(".lb").textContent = S.paused ? "Écouter" : "Pause"; }
   const like = elNP.querySelector('[data-np="like"]');
   if (like) peindreLike(like, CRATE.has(current.id), false);
   const sv = elNP.querySelector('[data-np="suivre"]');
