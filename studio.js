@@ -1,8 +1,10 @@
 /* ═══════════ FINDINGS — studio ═══════════
-   Une petite station audio dans le navigateur, a la maniere de GarageBand : une timeline
-   calee sur la prod, des pistes de voix, des regions qu'on deplace, rogne, coupe, avec
-   fondus, volume, panoramique et effets par piste, enregistrement direct a la position du
-   curseur (il remplace ce qui etait la), annuler/retablir et export WAV.
+   Une petite station audio dans le navigateur, a la maniere de GarageBand ou Studio One : une
+   timeline calee sur la prod, des pistes de voix avec vumetres, des regions qu'on deplace,
+   rogne, coupe, duplique, normalise, avec fondus ; par piste une chaine d'effets complete
+   (coupe-bas, egaliseur, compresseur, saturation, filtre, chorus, reverb, echo) reglee par
+   boutons rotatifs et preregalges ; enregistrement au curseur (il remplace ce qui etait la),
+   annuler/retablir et export WAV.
 
    La contrainte qui decide de tout : le son de la prod reste dans le lecteur YouTube, le
    navigateur interdit d'y toucher. La piste « Prod » n'est donc qu'un repere (on ne voit
@@ -22,68 +24,75 @@ const STUDIO = (() => {
   .daw{
     position:fixed;z-index:58;left:12px;right:12px;top:12px;
     bottom:calc(var(--bar-h) + 30px + env(safe-area-inset-bottom,0px));
-    display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;
+    display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden;
     border-radius:var(--r-xl);background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-3);
     color:var(--ink);opacity:0;transform:translateY(12px) scale(.985);transition:opacity .2s,transform .24s cubic-bezier(.2,.9,.25,1.1);
-    --hw:196px;--rh:74px;
+    --hw:212px;--rh:82px;--lcd:#0B0C0F;--lcd-ink:#E9F7EE;--lcd-dim:#7E8A85;
   }
   .daw.on{opacity:1;transform:none}
-  /* dans la page Studio : le studio occupe la page, sous l'en-tete et au-dessus du lecteur */
   .daw.inline{position:relative;left:auto;right:auto;top:auto;bottom:auto;z-index:1;
-    height:max(520px,calc(100vh - var(--hh,64px) - var(--bar-h) - 64px));box-shadow:var(--sh-2)}
+    height:max(680px,calc(100vh - var(--hh,64px) - var(--bar-h) - 48px));box-shadow:var(--sh-2)}
   .daw.inline #dawFermer{display:none}
   .daw[hidden]{display:none}
   .daw button{color:inherit}
-  /* barre du haut */
-  .daw-haut{display:flex;align-items:center;gap:14px;padding:10px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--surface-2)}
-  .daw-id{min-width:0;flex:1 1 180px;display:grid}
+  /* ── barre du haut : identite | console de transport | outils ── */
+  .daw-haut{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+  .daw-id{min-width:0;display:grid;gap:1px}
   .daw-id .eyebrow{color:var(--accent);display:flex;align-items:center;gap:5px}
   .daw-id b{font-size:15px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .daw-id span.info{font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums}
-  .daw-transport{display:flex;align-items:center;gap:6px;padding:4px;border-radius:999px;background:var(--hover)}
-  .daw-b{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;transition:background .12s,transform .12s}
-  .daw-b:hover{background:var(--hover)}
+  .daw-id span.info{font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .daw-console{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:16px;background:var(--lcd);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.3);color:var(--lcd-ink)}
+  .daw-b{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#D7DBE2;transition:background .12s,transform .12s}
+  .daw-b:hover{background:rgba(255,255,255,.08)}
   .daw-b:active{transform:scale(.94)}
-  .daw-b.lire{width:42px;height:42px;background:var(--ink);color:var(--on-ink)}
-  .daw-b.rec{color:var(--accent)}
-  .daw-b.rec.on{background:var(--accent);color:#fff;animation:daw-pulse 1.1s ease-in-out infinite}
+  .daw-b.lire{width:40px;height:40px;border-radius:12px;background:#F2F4F7;color:#0B0C0F}
+  .daw-b.rec{color:#FF4D5E}
+  .daw-b.rec.on{background:#FF2D45;color:#fff;animation:daw-pulse 1.1s ease-in-out infinite}
   @keyframes daw-pulse{50%{box-shadow:0 0 0 6px rgba(250,35,59,.25)}}
-  .daw-temps{font-family:var(--mono);font-size:15px;font-weight:600;min-width:86px;text-align:center;font-variant-numeric:tabular-nums}
-  .daw-temps small{display:block;font-size:10px;font-weight:500;color:var(--dim)}
-  .daw-outils{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+  .lcd{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:14px;padding:3px 12px;border-left:1px solid rgba(255,255,255,.08);border-right:1px solid rgba(255,255,255,.08);font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .lcd-t{grid-row:1/3;font-size:24px;font-weight:600;letter-spacing:-.02em;align-self:center;min-width:104px}
+  .lcd-m,.lcd-b{font-size:11px;color:var(--lcd-dim);text-align:right}
+  .lcd-m b{color:var(--lcd-ink);font-weight:600}
+  .daw-niv{width:8px;height:34px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;display:flex;align-items:flex-end}
+  .daw-niv i{display:block;width:100%;height:100%;transform-origin:bottom;transform:scaleY(0);background:linear-gradient(0deg,#34C759,#FFD60A 70%,#FF453A)}
+  .daw-outils{display:flex;align-items:center;justify-content:flex-end;gap:3px;flex-wrap:wrap}
   .daw-o{height:34px;min-width:34px;padding:0 9px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
   .daw-o:hover{background:var(--hover)}
   .daw-o[disabled]{opacity:.35;pointer-events:none}
   .daw-o[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
   .daw-o.pri{background:var(--accent);color:#fff;padding:0 14px}
   .daw-zoom{display:flex;align-items:center;gap:6px;color:var(--dim);margin:0 4px}
-  .daw-zoom input{width:90px;accent-color:var(--accent)}
-  .daw-sep{width:1px;height:22px;background:var(--line);margin:0 4px}
-  /* zone des pistes */
+  .daw-zoom input{width:84px;accent-color:var(--accent)}
+  .daw-sep{width:1px;height:22px;background:var(--line);margin:0 3px}
+  /* ── zone des pistes ── */
   .daw-zone{position:relative;overflow:auto;overscroll-behavior:contain;background:var(--bg)}
   .daw-grille{position:relative;min-height:100%}
   .daw-ligne{display:flex;min-height:var(--rh);border-bottom:1px solid var(--line-soft)}
   .daw-coin,.daw-tete{position:sticky;left:0;z-index:4;width:var(--hw);flex:0 0 var(--hw);background:var(--surface);border-right:1px solid var(--line)}
-  .daw-ligne.regle{position:sticky;top:0;z-index:6;min-height:30px;height:30px}
-  .daw-coin{z-index:7;display:flex;align-items:center;padding:0 12px;font-size:10.5px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--dimmer)}
-  .daw-regle{position:relative;height:30px;background:var(--surface);cursor:pointer;flex:0 0 auto}
-  .daw-regle span{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);padding:7px 0 0 5px;font-size:10.5px;font-weight:600;color:var(--dim);font-variant-numeric:tabular-nums;pointer-events:none}
+  .daw-ligne.regle{position:sticky;top:0;z-index:6;min-height:28px;height:28px}
+  .daw-coin{z-index:7;display:flex;align-items:center;padding:0 12px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dimmer)}
+  .daw-regle{position:relative;height:28px;background:var(--surface);cursor:pointer;flex:0 0 auto;border-bottom:1px solid var(--line)}
+  .daw-regle span{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);padding:6px 0 0 5px;font-size:10.5px;font-weight:600;color:var(--dim);font-variant-numeric:tabular-nums;pointer-events:none}
   .daw-voie{position:relative;flex:0 0 auto;align-self:stretch;min-height:var(--rh);cursor:text;touch-action:pan-x pan-y;
     background-image:linear-gradient(to right,var(--line) 1px,transparent 1px),linear-gradient(to right,var(--line-soft) 1px,transparent 1px);
     background-size:var(--mesure) 100%,var(--temps) 100%}
-  .daw-ligne.sel-piste .daw-voie{background-color:color-mix(in srgb,var(--accent) 4%,transparent)}
-  /* en-tetes de piste */
-  .daw-tete{display:grid;align-content:center;gap:6px;padding:8px 10px 8px 14px;cursor:pointer;position:sticky}
+  .daw-ligne.sel-piste .daw-voie{background-color:color-mix(in srgb,var(--pc) 6%,transparent)}
+  /* ── en-tetes de piste ── */
+  .daw-tete{display:grid;align-content:center;gap:7px;padding:8px 12px 8px 16px;cursor:pointer;position:sticky}
   .daw-tete::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--pc)}
-  .daw-ligne.sel-piste .daw-tete{background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
-  .daw-tete .nom{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:650;min-width:0}
-  .daw-tete .nom span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .daw-tete .cible{font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--accent);flex:0 0 auto}
-  .daw-tete .ctl{display:flex;align-items:center;gap:6px}
-  .daw-ms{width:24px;height:22px;border-radius:6px;font-size:11px;font-weight:800;background:var(--hover);color:var(--dim)}
+  .daw-ligne.sel-piste .daw-tete{background:color-mix(in srgb,var(--pc) 9%,var(--surface))}
+  .daw-tete .t1{display:flex;align-items:center;gap:7px;min-width:0}
+  .daw-tete .nom{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .daw-tete .cible{font-size:9px;font-weight:800;letter-spacing:.06em;color:#fff;background:var(--accent);border-radius:4px;padding:1px 5px;flex:0 0 auto}
+  .daw-tete .t2{display:flex;align-items:center;gap:5px}
+  .daw-ms{width:24px;height:22px;border-radius:6px;font-size:10.5px;font-weight:800;background:var(--hover);color:var(--dim)}
   .daw-ms.m[aria-pressed="true"]{background:#FF9F0A;color:#111}
   .daw-ms.s[aria-pressed="true"]{background:#FFD60A;color:#111}
-  .daw-tete input[type=range]{width:100%;min-width:0;flex:1;accent-color:var(--pc)}
+  .daw-fxb{height:22px;padding:0 7px;border-radius:6px;font-size:10.5px;font-weight:800;background:var(--hover);color:var(--dim);display:inline-flex;align-items:center;gap:4px}
+  .daw-fxb.actif{background:color-mix(in srgb,var(--pc) 22%,transparent);color:color-mix(in srgb,var(--pc) 70%,var(--ink))}
+  .vu{flex:1;height:6px;border-radius:3px;background:var(--hover);overflow:hidden;min-width:20px}
+  .vu i{display:block;height:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,#34C759,#FFD60A 75%,#FF453A);transition:transform .05s linear}
+  .daw-tete input[type=range]{width:100%;min-width:0;accent-color:var(--pc);height:14px;margin:0}
   .daw-ligne.prod .daw-tete::before{background:var(--sc)}
   .daw-ligne.prod .daw-voie{cursor:pointer}
   .bloc-prod{position:absolute;top:10px;bottom:10px;left:0;border-radius:10px;overflow:hidden;
@@ -109,40 +118,73 @@ const STUDIO = (() => {
   .ajout-piste{display:flex;align-items:center;justify-content:center;min-height:46px}
   .ajout-piste button{font-size:12.5px;font-weight:650;color:var(--accent);padding:6px 10px;border-radius:8px}
   .ajout-piste button:hover{background:var(--accent-soft)}
-  /* regions */
+  /* ── regions ── */
   .clip{position:absolute;top:7px;bottom:7px;border-radius:9px;overflow:hidden;cursor:grab;touch-action:none;
-    background:color-mix(in srgb,var(--pc) 78%,#000);box-shadow:0 1px 2px rgba(0,0,0,.25);outline:0 solid #fff;transition:outline-width .08s}
+    background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 88%,#fff) 0 17px,color-mix(in srgb,var(--pc) 62%,#000) 17px);
+    box-shadow:0 1px 2px rgba(0,0,0,.25),inset 0 0 0 1px rgba(0,0,0,.18)}
   .clip:active{cursor:grabbing}
-  .clip.sel{outline:2px solid var(--ink);z-index:2}
+  .clip.sel{box-shadow:0 0 0 2px var(--ink),0 6px 18px rgba(0,0,0,.3);z-index:2}
   .clip canvas{position:absolute;left:0;top:18px;height:calc(100% - 20px);pointer-events:none}
-  .clip .clip-nom{position:absolute;left:20px;top:3px;right:20px;font-size:10.5px;font-weight:700;color:rgba(255,255,255,.92);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+  .clip .clip-nom{position:absolute;left:20px;top:2px;right:20px;font-size:10.5px;font-weight:800;color:rgba(0,0,0,.72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
   .clip .poignee{position:absolute;top:0;bottom:0;width:9px;cursor:ew-resize;z-index:2}
   .clip .poignee.g{left:0} .clip .poignee.d{right:0}
-  .clip .poignee::after{content:"";position:absolute;top:50%;width:3px;height:22px;margin-top:-11px;border-radius:2px;background:rgba(255,255,255,.7);opacity:0;transition:opacity .12s}
+  .clip .poignee::after{content:"";position:absolute;top:50%;width:3px;height:22px;margin-top:-11px;border-radius:2px;background:rgba(255,255,255,.75);opacity:0;transition:opacity .12s}
   .clip .poignee.g::after{left:3px} .clip .poignee.d::after{right:3px}
   .clip:hover .poignee::after,.clip.sel .poignee::after{opacity:1}
-  .clip .fondu{position:absolute;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.4);cursor:ew-resize;z-index:3;opacity:0;transition:opacity .12s}
+  .clip .fondu{position:absolute;top:3px;width:11px;height:11px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.45);cursor:ew-resize;z-index:3;opacity:0;transition:opacity .12s}
   .clip:hover .fondu,.clip.sel .fondu{opacity:1}
-  .clip.enreg{background:rgba(250,35,59,.35);border:1px dashed var(--accent);cursor:default}
+  .clip.enreg{background:rgba(250,35,59,.3);box-shadow:inset 0 0 0 1px var(--accent);cursor:default}
   .clip.enreg .clip-nom{color:var(--accent)}
-  /* curseur de lecture */
-  .daw-curseur{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--accent);z-index:5;pointer-events:none}
-  .daw-curseur::before{content:"";position:absolute;top:0;left:-5px;border:6px solid transparent;border-top:8px solid var(--accent)}
-  /* inspecteur */
-  .daw-insp{display:flex;align-items:center;gap:18px;padding:10px 16px;border-top:1px solid var(--line);background:var(--surface-2);overflow-x:auto;min-height:58px;font-size:12px;color:var(--dim)}
-  .daw-insp .titre{font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap}
-  .daw-insp label{display:grid;gap:3px;min-width:110px;white-space:nowrap}
-  .daw-insp label b{font-weight:600;color:var(--ink-2);display:flex;justify-content:space-between;gap:8px}
-  .daw-insp label b i{font-style:normal;font-family:var(--mono);font-weight:500;color:var(--dim)}
-  .daw-insp input[type=range]{width:120px;accent-color:var(--accent)}
-  .daw-insp input[type=text]{height:30px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:0 9px;width:130px}
-  .daw-insp .bascule{height:30px;padding:0 11px;border-radius:8px;background:var(--hover);font-weight:650;color:var(--ink-2)}
-  .daw-insp .bascule[aria-pressed="true"]{background:var(--accent);color:#fff}
-  .daw-insp .danger{color:var(--accent);font-weight:650;padding:0 8px;height:30px;border-radius:8px}
-  .daw-insp .danger:hover{background:var(--accent-soft)}
-  .daw-insp p{margin:0;max-width:520px;line-height:1.4}
-  .daw-niv{width:70px;height:5px;border-radius:3px;background:var(--hover);overflow:hidden}
-  .daw-niv i{display:block;height:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,#34C759,#FFD60A 70%,var(--accent))}
+  .daw-curseur{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--accent);z-index:5;pointer-events:none;box-shadow:0 0 8px rgba(250,35,59,.5)}
+  .daw-curseur::before{content:"";position:absolute;top:0;left:-6px;border:7px solid transparent;border-top:9px solid var(--accent)}
+  /* ── panneau du bas : piste et effets | region | projet ── */
+  .daw-pan{border-top:1px solid var(--line);background:var(--surface-2);display:grid;grid-template-rows:auto auto;min-height:0}
+  .dp-onglets{display:flex;align-items:center;gap:2px;padding:6px 10px 0;border-bottom:1px solid var(--line-soft)}
+  .dp-onglets button{height:32px;padding:0 13px;border-radius:9px 9px 0 0;font-size:12.5px;font-weight:650;color:var(--dim);position:relative;display:inline-flex;align-items:center;gap:7px}
+  .dp-onglets button[aria-selected="true"]{color:var(--ink);background:var(--surface)}
+  .dp-onglets button[aria-selected="true"]::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:2px;border-radius:2px;background:var(--pc,var(--accent))}
+  .dp-onglets .pastille{width:9px;height:9px;border-radius:50%;background:var(--pc,var(--accent))}
+  .dp-onglets .esp{flex:1}
+  .dp-onglets .replier{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--dim);padding:0}
+  .dp-onglets .replier svg{transition:transform .2s}
+  .daw-pan.ferme .replier svg{transform:rotate(180deg)}
+  .daw-pan.ferme .dp-corps{display:none}
+  .dp-corps{display:flex;gap:12px;padding:12px 14px 14px;overflow-x:auto;background:var(--surface);max-height:250px;scrollbar-width:thin}
+  .dp-corps::-webkit-scrollbar{height:8px}
+  .dp-corps::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+  .dp-bloc{flex:0 0 auto;display:grid;align-content:start;gap:10px;padding:12px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line-soft)}
+  .dp-bloc h4{margin:0;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+  .dp-bloc .champ{display:grid;gap:4px;font-size:11.5px;color:var(--dim);font-weight:600}
+  .dp-bloc input[type=text],.dp-bloc select{height:30px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:0 9px;font:inherit;font-size:12.5px;min-width:0}
+  .dp-bloc .ligne{display:flex;gap:6px;flex-wrap:wrap}
+  .dp-act{height:30px;padding:0 11px;border-radius:8px;background:var(--hover);font-size:12px;font-weight:650;color:var(--ink-2)}
+  .dp-act:hover{background:var(--line)}
+  .dp-act.danger{color:var(--accent);background:var(--accent-soft)}
+  .dp-aide{font-size:12px;color:var(--dim);line-height:1.45;max-width:340px;margin:0}
+  /* carte d'effet */
+  .fxc{flex:0 0 auto;display:grid;align-content:start;gap:10px;padding:10px 12px 12px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line-soft);transition:border-color .15s,opacity .15s}
+  .fxc header{display:flex;align-items:center;gap:8px;min-width:0}
+  .fxc header b{font-size:12.5px;font-weight:750;white-space:nowrap}
+  .fxc header select{height:24px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit;font-size:11px;padding:0 4px}
+  .fx-on{width:30px;height:18px;border-radius:9px;background:var(--line);position:relative;flex:0 0 auto;transition:background .15s}
+  .fx-on::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .15s}
+  .fxc.on{border-color:color-mix(in srgb,var(--pc,var(--accent)) 45%,transparent)}
+  .fxc.on .fx-on{background:var(--pc,var(--accent))}
+  .fxc.on .fx-on::after{transform:translateX(12px)}
+  .fxc:not(.on) .fx-boutons{opacity:.45}
+  .fx-boutons{display:flex;gap:6px;flex-wrap:nowrap}
+  .fx-case{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:650;color:var(--dim);cursor:pointer}
+  .fx-case input{accent-color:var(--pc,var(--accent))}
+  /* bouton rotatif */
+  .kn{width:58px;display:grid;justify-items:center;gap:1px;cursor:ns-resize;touch-action:none;user-select:none;outline:none;border-radius:10px;padding:2px 0}
+  .kn:focus-visible{box-shadow:0 0 0 2px var(--accent)}
+  .kn svg{width:42px;height:42px;overflow:visible}
+  .kn .kn-fond{fill:none;stroke:var(--line);stroke-width:4;stroke-linecap:round}
+  .kn .kn-val{fill:none;stroke:var(--pc,var(--accent));stroke-width:4;stroke-linecap:round}
+  .kn .kn-cap{fill:var(--surface);stroke:var(--line);stroke-width:1}
+  .kn .kn-ind{stroke:var(--ink);stroke-width:2.2;stroke-linecap:round}
+  .kn .kn-v{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--ink);white-space:nowrap}
+  .kn .kn-n{font-size:10px;color:var(--dim);white-space:nowrap;max-width:62px;overflow:hidden;text-overflow:ellipsis}
   .daw-decompte{position:absolute;inset:0;z-index:20;display:grid;place-items:center;pointer-events:none;
     font-size:120px;font-weight:900;letter-spacing:-.05em;color:var(--accent);text-shadow:0 10px 40px rgba(250,35,59,.35)}
   .daw-decompte[hidden]{display:none}
@@ -150,18 +192,23 @@ const STUDIO = (() => {
     background:var(--ink);color:var(--on-ink);font-size:12.5px;font-weight:600;box-shadow:var(--sh-2);white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
   .daw-msg[hidden]{display:none}
   body.daw-ouvert{overflow:hidden}
+  @media(max-width:1100px){
+    .daw-haut{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"id console" "outils outils"}
+    .daw-id{grid-area:id} .daw-console{grid-area:console} .daw-outils{grid-area:outils;justify-content:flex-start}
+  }
   @media(max-width:760px){
-    .daw{left:6px;right:6px;top:6px;--hw:104px;--rh:66px;border-radius:18px}
-    .daw-haut{gap:8px;padding:8px 10px}
-    .daw-id{flex:1 1 100%}
-    .daw-zoom input{width:64px}
+    .daw{left:6px;right:6px;top:6px;--hw:112px;--rh:72px;border-radius:18px}
+    .daw-haut{grid-template-columns:1fr;grid-template-areas:"id" "console" "outils";gap:8px;padding:8px 10px}
+    .daw-console{justify-content:space-between}
+    .lcd-t{font-size:19px;min-width:84px}
+    .daw-zoom input{width:60px}
     .daw-tete{padding:6px 6px 6px 10px}
-    .daw-tete .vol{display:none}
-    .daw-insp{gap:12px;padding:8px 10px}
+    .daw-tete input[type=range],.daw-tete .vu{display:none}
     .daw-sep{display:none}
     .daw-o .lib{display:none}
     #dawFermer{position:absolute;top:8px;right:8px}
     .daw-id{padding-right:40px}
+    .dp-corps{max-height:210px}
   }
   </style>`);
 
@@ -173,28 +220,31 @@ const STUDIO = (() => {
     rec:'<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6.5"/></svg>',
     couper:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg>',
     suppr:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.8h6V7M6.5 7l1 12.2h9l1-12.2"/></svg>',
+    dupliquer:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>',
     annuler:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>',
     refaire:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>',
     grille:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4v16M10 4v16M16 4v16M22 4v16"/></svg>',
     export:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg>',
     fermer:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
     micro:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>',
-    loupe:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4M8.5 11h5"/></svg>'
+    loupe:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4M8.5 11h5"/></svg>',
+    chevron:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>'
   };
   document.body.insertAdjacentHTML("beforeend", `
   <div class="daw" id="daw" hidden role="dialog" aria-label="Studio">
     <div class="daw-haut">
       <div class="daw-id"><span class="eyebrow">${I.micro}Studio</span><b id="dawTitre"></b><span class="info" id="dawInfo"></span></div>
-      <div class="daw-transport">
+      <div class="daw-console">
         <button class="daw-b" id="dawDebut" title="Revenir au début (Entrée)" aria-label="Revenir au début">${I.debut}</button>
         <button class="daw-b lire" id="dawLire" title="Lecture / pause (Espace)" aria-label="Lecture ou pause">${I.lire}</button>
         <button class="daw-b rec" id="dawRec" title="Enregistrer au curseur (R)" aria-label="Enregistrer">${I.rec}</button>
-        <span class="daw-temps" id="dawTemps">0:00.0<small>mesure 1</small></span>
-        <span class="daw-niv" aria-hidden="true"><i id="dawNiv"></i></span>
+        <div class="lcd" aria-live="off"><span class="lcd-t" id="dawTemps">0:00.0</span><span class="lcd-m">mes. <b id="dawMesure">1.1</b></span><span class="lcd-b" id="dawBpm">120 BPM</span></div>
+        <span class="daw-niv" aria-hidden="true" title="Niveau du micro"><i id="dawNiv"></i></span>
       </div>
       <div class="daw-outils">
         <button class="daw-o" id="dawBascule" hidden></button>
         <button class="daw-o" id="dawCouper" title="Couper au curseur (S)">${I.couper}<span class="lib">Couper</span></button>
+        <button class="daw-o" id="dawDupliquer" title="Dupliquer la région (D)">${I.dupliquer}</button>
         <button class="daw-o" id="dawSuppr" title="Supprimer la région (Suppr)">${I.suppr}</button>
         <span class="daw-sep"></span>
         <button class="daw-o" id="dawAnnuler" title="Annuler (⌘Z)">${I.annuler}</button>
@@ -210,13 +260,23 @@ const STUDIO = (() => {
       </div>
     </div>
     <div class="daw-zone" id="dawZone"><div class="daw-grille" id="dawGrilleEl"></div></div>
-    <div class="daw-insp" id="dawInsp"></div>
+    <div class="daw-pan" id="dawPan">
+      <div class="dp-onglets" role="tablist">
+        <button role="tab" data-onglet="piste" aria-selected="true"><span class="pastille"></span><span id="dawOngletPiste">Piste et effets</span></button>
+        <button role="tab" data-onglet="region" aria-selected="false">Région</button>
+        <button role="tab" data-onglet="projet" aria-selected="false">Projet</button>
+        <span class="esp"></span>
+        <button class="replier" id="dawReplier" title="Replier le panneau" aria-label="Replier le panneau">${I.chevron}</button>
+      </div>
+      <div class="dp-corps" id="dawCorps"></div>
+    </div>
     <div class="daw-decompte" id="dawDecompte" hidden></div>
     <div class="daw-msg" id="dawMsg" hidden></div>
   </div>`);
 
+
   const $ = id => document.getElementById(id);
-  const el = $("daw"), zone = $("dawZone"), grilleEl = $("dawGrilleEl"), insp = $("dawInsp");
+  const el = $("daw"), zone = $("dawZone"), grilleEl = $("dawGrilleEl");
   const COULEURS = ["#FA233B", "#0A84FF", "#30D158", "#FF9F0A", "#BF5AF2", "#64D2FF", "#FF6FA5"];
   const RES = 200;                       // points de forme d'onde par seconde
   const nid = () => Math.random().toString(36).slice(2, 9);
@@ -296,56 +356,185 @@ const STUDIO = (() => {
   let msgMinuteur = 0;
   function message(t){ const m = $("dawMsg"); m.textContent = t; m.hidden = false; clearTimeout(msgMinuteur); msgMinuteur = setTimeout(() => m.hidden = true, 3200); }
 
-  /* ─────────────────────────── chaine audio ─────────────────────────── */
-  function impulsion(c){
-    const sr = c.sampleRate, n = Math.floor(sr * 2.4), b = c.createBuffer(2, n, sr);
+  /* ─────────────────────────── effets ───────────────────────────
+     Chaque piste a sa chaine complete, dans cet ordre : coupe-bas → egaliseur 3 bandes →
+     compresseur → saturation → filtre → chorus/doubleur → panoramique → volume, puis deux
+     departs paralleles : reverb (pre-delai, taille, brillance) et echo (cale sur le tempo,
+     ping-pong). Un effet eteint est laisse a l'etat neutre, la chaine ne se reconstruit pas. */
+  const FX = [
+    { k: "hpf", nom: "Coupe-bas", p: [["freq", "Fréquence", 20, 400, 1, "Hz", 80]] },
+    { k: "eq", nom: "Égaliseur", p: [["bas", "Graves", -15, 15, .5, "dB", 0], ["basF", "F. graves", 60, 500, 1, "Hz", 200],
+      ["mid", "Médiums", -15, 15, .5, "dB", 0], ["midF", "F. médiums", 300, 5000, 10, "Hz", 1500], ["midQ", "Largeur", .3, 5, .1, "", 1],
+      ["haut", "Aigus", -15, 15, .5, "dB", 0], ["hautF", "F. aigus", 2000, 14000, 50, "Hz", 7000]] },
+    { k: "comp", nom: "Compresseur", p: [["seuil", "Seuil", -60, 0, 1, "dB", -20], ["ratio", "Ratio", 1, 20, .5, ":1", 4],
+      ["attaque", "Attaque", 1, 100, 1, "ms", 6], ["relache", "Relâche", 20, 800, 5, "ms", 150], ["gain", "Gain", 0, 24, .5, "dB", 4]] },
+    { k: "sat", nom: "Saturation", p: [["drive", "Chaleur", 0, 100, 1, "%", 35], ["mix", "Mélange", 0, 100, 1, "%", 50]] },
+    { k: "filtre", nom: "Filtre", types: [["tel", "Téléphone"], ["radio", "Radio"], ["pb", "Passe-bas"], ["ph", "Passe-haut"]],
+      p: [["freq", "Fréquence", 100, 12000, 10, "Hz", 1700], ["q", "Résonance", .3, 12, .1, "", 1.2]] },
+    { k: "chorus", nom: "Chorus / doubleur", p: [["vitesse", "Vitesse", .1, 6, .05, "Hz", 1.1], ["profondeur", "Profondeur", 0, 100, 1, "%", 40], ["mix", "Mélange", 0, 100, 1, "%", 35]] },
+    { k: "reverb", nom: "Réverb", p: [["taille", "Taille", .3, 8, .1, "s", 2.2], ["predelay", "Pré-délai", 0, 200, 1, "ms", 20],
+      ["amorti", "Brillance", 800, 16000, 100, "Hz", 7000], ["mix", "Niveau", 0, 100, 1, "%", 25]] },
+    { k: "delay", nom: "Écho", divisions: [["1/4", "1/4"], ["1/8p", "1/8 pointée"], ["1/8", "1/8"], ["1/16", "1/16"], ["1/4t", "1/4 triolet"]],
+      p: [["retour", "Répétitions", 0, 90, 1, "%", 35], ["filtre", "Brillance", 500, 12000, 100, "Hz", 4000], ["mix", "Niveau", 0, 100, 1, "%", 20]], cases: [["pingpong", "Ping-pong"]] }
+  ];
+  const FX_DEF = () => {
+    const o = {};
+    for (const f of FX) {
+      o[f.k] = { on: f.k === "hpf" };
+      f.p.forEach(([c, , , , , , d]) => o[f.k][c] = d);
+      if (f.types) o[f.k].type = f.types[0][0];
+      if (f.divisions) o[f.k].division = "1/8p";
+      (f.cases || []).forEach(([c]) => o[f.k][c] = true);
+    }
+    return o;
+  };
+  /* Des reglages de depart, comme les presets d'un vrai studio. */
+  const PRESETS = {
+    brut:    { nom: "Brut (aucun effet)", fx: {} },
+    lead:    { nom: "Voix lead", fx: { hpf: { on: 1, freq: 90 }, eq: { on: 1, bas: -1.5, mid: -2, midF: 450, haut: 3 }, comp: { on: 1, seuil: -22, ratio: 4, gain: 5 },
+               reverb: { on: 1, taille: 1.8, mix: 18 }, delay: { on: 1, division: "1/8p", retour: 25, mix: 10 } } },
+    backs:   { nom: "Backs / chœurs", fx: { hpf: { on: 1, freq: 150 }, eq: { on: 1, bas: -4, haut: 2 }, comp: { on: 1, seuil: -24, ratio: 5, gain: 4 },
+               chorus: { on: 1, profondeur: 55, mix: 45 }, reverb: { on: 1, taille: 2.8, mix: 32 } } },
+    adlibs:  { nom: "Ad-libs", fx: { hpf: { on: 1, freq: 200 }, comp: { on: 1, seuil: -20, ratio: 6, gain: 5 }, delay: { on: 1, division: "1/8", retour: 45, mix: 28 }, reverb: { on: 1, taille: 2, mix: 22 } } },
+    tel:     { nom: "Téléphone", fx: { hpf: { on: 1, freq: 300 }, filtre: { on: 1, type: "tel", freq: 1700, q: 1.4 }, sat: { on: 1, drive: 45, mix: 60 }, comp: { on: 1, seuil: -18, ratio: 6, gain: 6 } } },
+    espace:  { nom: "Grand espace", fx: { hpf: { on: 1, freq: 120 }, reverb: { on: 1, taille: 5.5, predelay: 45, amorti: 5000, mix: 45 }, delay: { on: 1, division: "1/4", retour: 40, mix: 22 } } },
+    chaud:   { nom: "Chaud et saturé", fx: { hpf: { on: 1, freq: 80 }, eq: { on: 1, bas: 2, haut: -1.5 }, sat: { on: 1, drive: 60, mix: 55 }, comp: { on: 1, seuil: -24, ratio: 3, gain: 4 } } }
+  };
+  const appliquerPreset = (p, cle) => {
+    const def = FX_DEF();
+    for (const f of FX) def[f.k].on = false;
+    for (const [k, v] of Object.entries(PRESETS[cle].fx)) Object.assign(def[k], v, { on: !!v.on });
+    p.fx = def; p.preset = cle;
+  };
+  /* Les projets d'avant (reverb, echo, graves, aigus, compresseur en simple bouton) gardent leur son. */
+  function migrer(p){
+    const f = p.fx || {};
+    if (f.hpf) { const d = FX_DEF(); for (const k of Object.keys(d)) p.fx[k] = Object.assign(d[k], f[k] || {}); return; }
+    const d = FX_DEF(); d.hpf.on = false;
+    if (f.reverb > 0) Object.assign(d.reverb, { on: true, mix: Math.round(f.reverb * 100) });
+    if (f.echo > 0) Object.assign(d.delay, { on: true, mix: Math.round(f.echo * 100), division: "1/8p" });
+    if (f.grave || f.aigu) Object.assign(d.eq, { on: true, bas: f.grave || 0, haut: f.aigu || 0, basF: 220, hautF: 4500 });
+    if (f.comp) Object.assign(d.comp, { on: true, seuil: -24, ratio: 4, gain: 3 });
+    p.fx = d;
+  }
+  const actifs = p => FX.filter(f => p.fx[f.k] && p.fx[f.k].on).length;
+
+  function impulsion(c, taille = 2.2){
+    const sr = c.sampleRate, n = Math.max(1, Math.floor(sr * taille)), b = c.createBuffer(2, n, sr);
     for (let ch = 0; ch < 2; ch++) {
       const d = b.getChannelData(ch);
       for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3.2) * (i < sr * .012 ? i / (sr * .012) : 1);
     }
     return b;
   }
-  /* bus communs : sortie, reverb (convolution), echo (pointé, cale sur le tempo) */
+  const courbe = drive => {
+    const k = drive / 100 * 40, n = 2048, c = new Float32Array(n);
+    for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; c[i] = (1 + k) * x / (1 + k * Math.abs(x)); }
+    return c;
+  };
+  const DIVISION = { "1/4": 1, "1/8p": .75, "1/8": .5, "1/16": .25, "1/4t": 2 / 3 };
+  /* sortie commune : volume general + limiteur (voix + prod saturaient a l'export) */
   function bus(c){
-    // limiteur de sortie : voix + prod depassaient le plein niveau et saturaient a l'export
     const lim = c.createDynamicsCompressor();
     lim.threshold.value = -2; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = .002; lim.release.value = .12;
     lim.connect(c.destination);
     const master = c.createGain(); master.connect(lim);
-    const conv = c.createConvolver(); conv.buffer = impulsion(c);
-    const reverb = c.createGain(); reverb.connect(conv); conv.connect(master);
-    const dl = c.createDelay(2); dl.delayTime.value = Math.min(1.9, tps() * .75);
-    const fb = c.createGain(); fb.gain.value = .36;
-    const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 3800;
-    const echo = c.createGain(); echo.connect(dl); dl.connect(lp); lp.connect(fb); fb.connect(dl); lp.connect(master);
-    return { master, reverb, echo };
+    master.gain.value = P && P.master != null ? P.master : 1;
+    return { master };
   }
   function chaine(c, b){
-    const entree = c.createGain();
-    const grave = c.createBiquadFilter(); grave.type = "lowshelf"; grave.frequency.value = 220;
-    const aigu = c.createBiquadFilter(); aigu.type = "highshelf"; aigu.frequency.value = 4500;
-    const comp = c.createDynamicsCompressor();
-    const pan = c.createStereoPanner ? c.createStereoPanner() : null;
-    const fader = c.createGain(), envR = c.createGain(), envE = c.createGain();
-    entree.connect(grave); grave.connect(aigu); aigu.connect(comp);
-    if (pan) { comp.connect(pan); pan.connect(fader); } else comp.connect(fader);
-    fader.connect(b.master); fader.connect(envR); envR.connect(b.reverb); fader.connect(envE); envE.connect(b.echo);
-    return { entree, grave, aigu, comp, pan, fader, envR, envE };
+    const G = () => c.createGain(), F = t => { const f = c.createBiquadFilter(); f.type = t; return f; };
+    const n = { c, entree: G() };
+    n.hpf = F("highpass"); n.eqB = F("lowshelf"); n.eqM = F("peaking"); n.eqH = F("highshelf");
+    n.comp = c.createDynamicsCompressor(); n.compG = G();
+    n.satSec = G(); n.ws = c.createWaveShaper(); n.ws.oversample = "2x"; n.satHum = G(); n.satSom = G();
+    n.filtre = F("allpass");
+    n.chSec = G(); n.chHum = G(); n.chSom = G();
+    n.chD1 = c.createDelay(.1); n.chD2 = c.createDelay(.1); n.chD1.delayTime.value = .012; n.chD2.delayTime.value = .017;
+    n.osc = c.createOscillator(); n.oscG1 = G(); n.oscG2 = G(); n.osc.connect(n.oscG1); n.osc.connect(n.oscG2);
+    n.oscG1.connect(n.chD1.delayTime); n.oscG2.connect(n.chD2.delayTime); n.osc.start();
+    const p1 = c.createStereoPanner ? c.createStereoPanner() : G(), p2 = c.createStereoPanner ? c.createStereoPanner() : G();
+    if (p1.pan) { p1.pan.value = -.7; p2.pan.value = .7; }
+    n.pan = c.createStereoPanner ? c.createStereoPanner() : null;
+    n.fader = G();
+    n.mesure = c.createAnalyser ? c.createAnalyser() : null; if (n.mesure) n.mesure.fftSize = 512;
+    // reverb : depart → pre-delai → convolution → brillance → retour
+    n.revDep = G(); n.revPre = c.createDelay(.5); n.conv = c.createConvolver(); n.revLP = F("lowpass");
+    // echo : deux lignes croisees pour le ping-pong
+    n.dlyDep = G(); n.dA = c.createDelay(2.5); n.dB = c.createDelay(2.5); n.fbA = G(); n.fbB = G();
+    n.lpA = F("lowpass"); n.lpB = F("lowpass");
+    n.panA = c.createStereoPanner ? c.createStereoPanner() : G(); n.panB = c.createStereoPanner ? c.createStereoPanner() : G();
+    // cablage
+    n.entree.connect(n.hpf); n.hpf.connect(n.eqB); n.eqB.connect(n.eqM); n.eqM.connect(n.eqH); n.eqH.connect(n.comp); n.comp.connect(n.compG);
+    n.compG.connect(n.satSec); n.compG.connect(n.ws); n.ws.connect(n.satHum); n.satSec.connect(n.satSom); n.satHum.connect(n.satSom);
+    n.satSom.connect(n.filtre);
+    n.filtre.connect(n.chSec); n.filtre.connect(n.chD1); n.filtre.connect(n.chD2);
+    n.chD1.connect(p1); n.chD2.connect(p2); p1.connect(n.chHum); p2.connect(n.chHum);
+    n.chSec.connect(n.chSom); n.chHum.connect(n.chSom);
+    if (n.pan) { n.chSom.connect(n.pan); n.pan.connect(n.fader); } else n.chSom.connect(n.fader);
+    n.fader.connect(b.master); if (n.mesure) n.fader.connect(n.mesure);
+    n.fader.connect(n.revDep); n.revDep.connect(n.revPre); n.revPre.connect(n.conv); n.conv.connect(n.revLP); n.revLP.connect(b.master);
+    n.fader.connect(n.dlyDep); n.dlyDep.connect(n.dA);
+    n.dA.connect(n.fbA); n.fbA.connect(n.dB); n.dB.connect(n.fbB); n.fbB.connect(n.dA);
+    n.dA.connect(n.lpA); n.lpA.connect(n.panA); n.panA.connect(b.master);
+    n.dB.connect(n.lpB); n.lpB.connect(n.panB); n.panB.connect(b.master);
+    return n;
   }
   const soloActif = () => P.pistes.some(p => p.solo);
+  const offline = c => typeof OfflineAudioContext !== "undefined" && c instanceof OfflineAudioContext;
+  const dB = v => Math.pow(10, v / 20);
   function regler(n, p, solo){
-    n.grave.gain.value = p.fx.grave; n.aigu.gain.value = p.fx.aigu;
-    if (p.fx.comp) { n.comp.threshold.value = -24; n.comp.ratio.value = 4; n.comp.knee.value = 8; n.comp.attack.value = .004; n.comp.release.value = .16; }
-    else { n.comp.threshold.value = 0; n.comp.ratio.value = 1; n.comp.knee.value = 0; }
+    const f = p.fx, c = n.c, on = k => f[k] && f[k].on;
+    n.hpf.frequency.value = on("hpf") ? f.hpf.freq : 10;
+    n.eqB.frequency.value = f.eq.basF; n.eqB.gain.value = on("eq") ? f.eq.bas : 0;
+    n.eqM.frequency.value = f.eq.midF; n.eqM.Q.value = f.eq.midQ; n.eqM.gain.value = on("eq") ? f.eq.mid : 0;
+    n.eqH.frequency.value = f.eq.hautF; n.eqH.gain.value = on("eq") ? f.eq.haut : 0;
+    if (on("comp")) { n.comp.threshold.value = f.comp.seuil; n.comp.ratio.value = f.comp.ratio; n.comp.knee.value = 6;
+      n.comp.attack.value = f.comp.attaque / 1000; n.comp.release.value = f.comp.relache / 1000; n.compG.gain.value = dB(f.comp.gain); }
+    else { n.comp.threshold.value = 0; n.comp.ratio.value = 1; n.comp.knee.value = 0; n.compG.gain.value = 1; }
+    if (on("sat")) {
+      if (n.drive !== f.sat.drive) { n.ws.curve = courbe(f.sat.drive); n.drive = f.sat.drive; }
+      const m = f.sat.mix / 100; n.satSec.gain.value = 1 - m; n.satHum.gain.value = m * (1 - f.sat.drive / 250);
+    } else { n.satSec.gain.value = 1; n.satHum.gain.value = 0; }
+    if (on("filtre")) {
+      const t = f.filtre.type;
+      n.filtre.type = t === "pb" ? "lowpass" : t === "ph" ? "highpass" : "bandpass";
+      n.filtre.frequency.value = t === "radio" ? Math.min(f.filtre.freq, 2500) : f.filtre.freq;
+      n.filtre.Q.value = t === "radio" ? Math.max(.5, f.filtre.q * .6) : f.filtre.q;
+    } else n.filtre.type = "allpass";
+    if (on("chorus")) {
+      n.osc.frequency.value = f.chorus.vitesse;
+      const d = f.chorus.profondeur / 100 * .006; n.oscG1.gain.value = d; n.oscG2.gain.value = -d;
+      const m = f.chorus.mix / 100; n.chSec.gain.value = 1 - m * .5; n.chHum.gain.value = m;
+    } else { n.chSec.gain.value = 1; n.chHum.gain.value = 0; n.oscG1.gain.value = 0; n.oscG2.gain.value = 0; }
     if (n.pan) n.pan.pan.value = p.pan;
     n.fader.gain.value = (!p.mute && (!solo || p.solo)) ? p.vol : 0;
-    n.envR.gain.value = p.fx.reverb * .9; n.envE.gain.value = p.fx.echo * .7;
+    // reverb : la convolution se recalcule quand la taille change (un peu apres, pendant qu'on tourne le bouton)
+    n.revDep.gain.value = on("reverb") ? f.reverb.mix / 100 * 1.1 : 0;
+    n.revPre.delayTime.value = f.reverb.predelay / 1000; n.revLP.frequency.value = f.reverb.amorti;
+    if (n.taille !== f.reverb.taille && (on("reverb") || !n.conv.buffer)) {
+      const faire = () => { n.conv.buffer = impulsion(c, f.reverb.taille); n.taille = f.reverb.taille; };
+      if (offline(c) || !n.conv.buffer) faire(); else { clearTimeout(n.tImp); n.tImp = setTimeout(() => {
+        // une nouvelle convolution plutot que reaffecter le tampon de l'ancienne
+        const nc = c.createConvolver(); nc.buffer = impulsion(c, f.reverb.taille);
+        try { n.revPre.disconnect(n.conv); n.conv.disconnect(); } catch (e) {}
+        n.revPre.connect(nc); nc.connect(n.revLP); n.conv = nc; n.taille = f.reverb.taille; }, 160); }
+    }
+    // echo cale sur le tempo
+    const t = Math.min(2.4, DIVISION[f.delay.division] * 60 / bpm());
+    n.dA.delayTime.value = t; n.dB.delayTime.value = t;
+    const r = f.delay.retour / 100; n.fbA.gain.value = r; n.fbB.gain.value = r;
+    n.lpA.frequency.value = f.delay.filtre; n.lpB.frequency.value = f.delay.filtre;
+    if (n.panA.pan) { n.panA.pan.value = f.delay.pingpong ? -.85 : 0; n.panB.pan.value = f.delay.pingpong ? .85 : 0; }
+    n.dlyDep.gain.value = on("delay") ? f.delay.mix / 100 * 1.1 : 0;
   }
+  function liberer(n){ try { n.osc.stop(); } catch (e) {} try { n.fader.disconnect(); n.lpA.disconnect(); n.lpB.disconnect(); n.revLP.disconnect(); } catch (e) {} }
   function construireNoeuds(){
     const c = audio();
-    noeuds.forEach(n => { try { n.fader.disconnect(); } catch (e) {} });
+    noeuds.forEach(liberer);
     noeuds = new Map();
     if (!busV) busV = bus(c);
+    busV.master.gain.value = P.master != null ? P.master : 1;
     const solo = soloActif();
     P.pistes.forEach(p => { const n = chaine(c, busV); regler(n, p, solo); noeuds.set(p.id, n); });
     if (!gainProd) { gainProd = c.createGain(); gainProd.connect(busV.master); }
@@ -354,6 +543,7 @@ const STUDIO = (() => {
   }
   let gainProd = null;
   const reglerTout = () => { const solo = soloActif(); P.pistes.forEach(p => { const n = noeuds.get(p.id); if (n) regler(n, p, solo); }); };
+
   /* volume d'une region dans le temps : gain et fondus, a partir de « dans » secondes */
   function enveloppe(param, c, when, dans){
     const g = c.gain, fi = c.fadeIn, fo = c.fadeOut, d = c.dur;
@@ -409,7 +599,7 @@ const STUDIO = (() => {
   }
 
   /* ─────────────────────────── projet ─────────────────────────── */
-  const nouvellePiste = i => ({ id: nid(), nom: `Voix ${i + 1}`, vol: 1, pan: 0, mute: false, solo: false, fx: { reverb: 0, echo: 0, grave: 0, aigu: 0, comp: false } });
+  const nouvellePiste = i => { const p = { id: nid(), nom: `Voix ${i + 1}`, vol: 1, pan: 0, mute: false, solo: false, fx: FX_DEF(), preset: "brut" }; return p; };
   function pics(buf){
     const n = Math.ceil(buf.duration * RES), out = new Float32Array(n);
     const chs = Array.from({ length: buf.numberOfChannels }, (_, i) => buf.getChannelData(i)), per = buf.sampleRate / RES;
@@ -447,6 +637,7 @@ const STUDIO = (() => {
       pr.clips.push({ id: nid(), piste: pr.pistes[0].id, prise: p.id, start: p.t0 - (p.lat || 0), offset: 0, dur: buf.duration, gain: 1, fadeIn: .01, fadeOut: .02 });
     }
     if (pr.beatStart == null) pr.beatStart = 0;
+    pr.pistes.forEach(migrer);
     P = pr;
     arreterInterne(); fichier = null;
     try {
@@ -457,7 +648,7 @@ const STUDIO = (() => {
     $("dawTitre").textContent = b.id === "libre" ? (fichier ? fichier.nom.replace(/\.[a-z0-9]+$/i, "") : "Projet libre") : b.title;
     $("dawInfo").textContent = b.id === "libre" ? `${bpm()} BPM · ta prod, tes voix` : `${b.bpmSur ? "" : "~"}${b.bpm} BPM · ${STYLE_NAME[b.style] || b.style} · par ${b.prod}`;
     if (P.beatVol != null) { try { player.setVolume(P.beatVol); } catch (e) {} }
-    dessiner(); inspecteur(); outils();
+    entete(); dessiner(); inspecteur(); outils();
     if (document.body.classList.contains("vue-studio") && typeof BASE !== "undefined") {
       const adr = BASE + "studio/" + (b.id === "libre" ? "" : "?beat=" + encodeURIComponent(b.id));
       if (adr !== location.pathname + location.search) history.replaceState({ vue: "studio" }, "", adr);
@@ -525,14 +716,16 @@ const STUDIO = (() => {
     let regle = "";
     for (let m = 0, t = 0; t < W / zoom; m += pasM, t = m * mes()) regle += `<span style="left:${t * zoom}px">${m + 1}</span>`;
     const lignePiste = (p, i) => `
-      <div class="daw-ligne piste${sel && sel.type === "piste" && sel.id === p.id ? " sel-piste" : ""}" data-piste="${p.id}" style="--pc:${COULEURS[i % COULEURS.length]}">
+      <div class="daw-ligne piste${pisteCible().id === p.id ? " sel-piste" : ""}" data-piste="${p.id}" style="--pc:${COULEURS[i % COULEURS.length]}">
         <div class="daw-tete" data-tete="${p.id}">
-          <div class="nom"><span>${esc(p.nom)}</span>${pisteCible() && pisteCible().id === p.id ? '<em class="cible">● REC</em>' : ""}</div>
-          <div class="ctl">
+          <div class="t1"><span class="nom">${esc(p.nom)}</span>${pisteCible().id === p.id ? '<em class="cible" title="Les prochaines prises vont sur cette piste">REC</em>' : ""}</div>
+          <div class="t2">
             <button class="daw-ms m" data-mute="${p.id}" aria-pressed="${p.mute}" title="Muet">M</button>
             <button class="daw-ms s" data-solo="${p.id}" aria-pressed="${p.solo}" title="Solo">S</button>
-            <input class="vol" type="range" min="0" max="150" value="${Math.round(p.vol * 100)}" data-vol="${p.id}" aria-label="Volume de ${esc(p.nom)}">
+            <button class="daw-fxb${actifs(p) ? " actif" : ""}" data-fxpiste="${p.id}" title="Effets de la piste">FX${actifs(p) ? ` <span>${actifs(p)}</span>` : ""}</button>
+            <span class="vu" title="Niveau"><i data-vu="${p.id}"></i></span>
           </div>
+          <input class="vol" type="range" min="0" max="150" value="${Math.round(p.vol * 100)}" data-vol="${p.id}" aria-label="Volume de ${esc(p.nom)}" title="Volume">
         </div>
         <div class="daw-voie" data-voie="${p.id}" style="width:${W}px">
           ${P.clips.filter(k => k.piste === p.id).map(k => regionHTML(k)).join("")}
@@ -610,7 +803,7 @@ const STUDIO = (() => {
     const c = $("dawCurseur"); if (!c) return;
     c.style.left = `calc(var(--hw) + ${t * zoom}px)`;
     const m = Math.floor(t / mes()), tp = Math.floor((t % mes()) / tps());
-    $("dawTemps").innerHTML = `${fmt(t)}<small>mesure ${m + 1}.${tp + 1}</small>`;
+    $("dawTemps").textContent = fmt(t); $("dawMesure").textContent = `${m + 1}.${tp + 1}`;
   }
   function suivreCurseur(){
     cancelAnimationFrame(anim);
@@ -619,6 +812,7 @@ const STUDIO = (() => {
       const t = tempsBeat();
       placerCurseur(t);
       if (rec && rec.el) rec.el.style.width = `${Math.max(2, (t - rec.debut) * zoom)}px`;
+      vumetres();
       const joue = joueStudio();
       $("dawLire").innerHTML = joue ? I.pause : I.lire;
       if (joue) {   // la page suit le curseur
@@ -628,6 +822,16 @@ const STUDIO = (() => {
       anim = requestAnimationFrame(tour);
     };
     anim = requestAnimationFrame(tour);
+  }
+  /* niveau de chaque piste, en sortie de sa chaine */
+  const tamponVu = new Float32Array(512);
+  function vumetres(){
+    noeuds.forEach((n, id) => {
+      const i = grilleEl.querySelector(`[data-vu="${id}"]`); if (!i || !n.mesure) return;
+      n.mesure.getFloatTimeDomainData(tamponVu); let m = 0; for (const x of tamponVu) { const a = x < 0 ? -x : x; if (a > m) m = a; }
+      const v = clamp((20 * Math.log10(m + 1e-6) + 48) / 48, 0, 1);
+      n.vu = Math.max(v, (n.vu || 0) - .04); i.style.transform = `scaleX(${n.vu.toFixed(3)})`;
+    });
   }
   /* Passer du projet libre a la prod en cours, et inversement. */
   function bascule(){
@@ -641,78 +845,196 @@ const STUDIO = (() => {
     $("dawAnnuler").disabled = !histo.length;
     $("dawRefaire").disabled = !refaire.length;
     $("dawSuppr").disabled = !(sel && sel.type === "clip");
+    $("dawDupliquer").disabled = !(sel && sel.type === "clip");
     $("dawExport").disabled = !P || !P.clips.length;
     $("dawGrille").setAttribute("aria-pressed", String(grille));
   }
 
-  /* ─────────────────────────── inspecteur ─────────────────────────── */
-  const curseur = (nom, id, min, max, pas, val, aff) =>
-    `<label><b>${nom}<i id="${id}V">${aff(val)}</i></b><input type="range" id="${id}" min="${min}" max="${max}" step="${pas}" value="${val}"></label>`;
-  function inspecteur(){
+  /* ─────────────────────────── panneau du bas ───────────────────────────
+     Trois onglets : « Piste et effets » (la chaine d'effets de la piste choisie, en cartes),
+     « Region » (volume et fondus de la region choisie), « Projet » (reglages generaux).
+     Les reglages sont des boutons rotatifs : on les tire vers le haut ou le bas (Maj pour
+     affiner), double-clic pour revenir a la valeur d'origine, molette ou fleches au clavier. */
+  let onglet = "piste";
+  const corps = $("dawCorps"), pan = $("dawPan");
+  const ARC = (v01) => { const a0 = -225, a1 = a0 + 270 * v01, r = 17, cx = 21, cy = 21;
+    const pt = a => [cx + r * Math.cos(a * Math.PI / 180), cy + r * Math.sin(a * Math.PI / 180)];
+    const [x0, y0] = pt(a0), [x1, y1] = pt(a1); return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${270 * v01 > 180 ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`; };
+  const LOG = u => u === "Hz";
+  const versPos = (v, min, max, u) => LOG(u) ? Math.log(v / min) / Math.log(max / min) : (v - min) / (max - min);
+  const versVal = (x, min, max, u) => LOG(u) ? min * Math.pow(max / min, x) : min + x * (max - min);
+  const afficher = (v, u) => {
+    if (u === "Hz") return v >= 1000 ? `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)} kHz` : `${Math.round(v)} Hz`;
+    if (u === "dB") return `${v > 0 ? "+" : ""}${(+v).toFixed(Math.abs(v) < 10 && v % 1 ? 1 : 0)} dB`;
+    if (u === "%") return `${Math.round(v)} %`;
+    if (u === "ms") return `${Math.round(v)} ms`;
+    if (u === "s") return `${(+v).toFixed(1)} s`;
+    if (u === ":1") return `${(+v).toFixed(v % 1 ? 1 : 0)}:1`;
+    if (u === "pan") return Math.abs(v) < .02 ? "C" : (v < 0 ? "G" : "D") + Math.round(Math.abs(v) * 100);
+    if (u === "x") return `${Math.round(v * 100)} %`;
+    return (+v).toFixed(1);
+  };
+  const bouton = (cle, nom, min, max, pas, u, val, def) => {
+    const x = clamp(versPos(val, min, max, u), 0, 1);
+    return `<div class="kn" tabindex="0" role="slider" aria-label="${esc(nom)}" aria-valuemin="${min}" aria-valuemax="${max}" aria-valuenow="${val}"
+      data-cle="${cle}" data-min="${min}" data-max="${max}" data-pas="${pas}" data-u="${u}" data-def="${def}" data-val="${val}">
+      <svg viewBox="0 0 42 42"><path class="kn-fond" d="${ARC(1)}"/><path class="kn-val" d="${ARC(Math.max(.001, x))}"/>
+      <circle class="kn-cap" cx="21" cy="21" r="11"/><line class="kn-ind" x1="21" y1="21" x2="${(21 + 8 * Math.cos((-225 + 270 * x) * Math.PI / 180)).toFixed(2)}" y2="${(21 + 8 * Math.sin((-225 + 270 * x) * Math.PI / 180)).toFixed(2)}"/></svg>
+      <span class="kn-v">${afficher(val, u)}</span><span class="kn-n">${esc(nom)}</span></div>`;
+  };
+  function peindreBouton(kn, val){
+    const min = +kn.dataset.min, max = +kn.dataset.max, u = kn.dataset.u, x = clamp(versPos(val, min, max, u), 0, 1);
+    kn.dataset.val = val; kn.setAttribute("aria-valuenow", val);
+    kn.querySelector(".kn-val").setAttribute("d", ARC(Math.max(.001, x)));
+    const a = (-225 + 270 * x) * Math.PI / 180, l = kn.querySelector(".kn-ind");
+    l.setAttribute("x2", (21 + 8 * Math.cos(a)).toFixed(2)); l.setAttribute("y2", (21 + 8 * Math.sin(a)).toFixed(2));
+    kn.querySelector(".kn-v").textContent = afficher(val, u);
+  }
+  const regionSel = () => sel && sel.type === "clip" && P.clips.find(x => x.id === sel.id);
+  /* une cle de reglage → l'objet et la propriete qu'elle designe */
+  function cible(cle){
+    const [quoi, a, b] = cle.split(".");
+    if (quoi === "fx") { const p = pisteCible(); return [p.fx[a], b, p]; }
+    if (quoi === "piste") { const p = pisteCible(); return [p, a, p]; }
+    if (quoi === "region") { const k = regionSel(); return [k, a, null]; }
+    if (quoi === "projet") return [P, a, null];
+  }
+  function appliquer(cle, val){
+    const [o, prop, p] = cible(cle); if (!o) return;
+    o[prop] = val;
+    if (cle.startsWith("region.")) {
+      const k = o; if (prop === "fadeIn") k.fadeIn = Math.min(val, k.dur - k.fadeOut); if (prop === "fadeOut") k.fadeOut = Math.min(val, k.dur - k.fadeIn);
+      const n = grilleEl.querySelector(`.clip[data-clip="${k.id}"]`); if (n) ondeRegion(n);
+      sale = true;
+    } else if (cle === "projet.master") { if (busV) busV.master.gain.value = val; }
+    else if (cle === "projet.beatVol") { if (modeFichier()) { if (gainProd) gainProd.gain.value = val / 100; } else { try { player.setVolume(val); VOL = val; } catch (e) {} } }
+    else if (cle === "projet.decal") sale = true;
+    else if (p) { p.preset = p.preset && cle.startsWith("fx.") ? "perso" : p.preset; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif());
+      if (cle === "piste.vol") { const r = grilleEl.querySelector(`[data-vol="${p.id}"]`); if (r) r.value = Math.round(val * 100); } }
+    sauver();
+  }
+  function panneau(){
     if (!P) return;
-    const k = sel && sel.type === "clip" && P.clips.find(x => x.id === sel.id);
-    const p = sel && sel.type === "piste" && P.pistes.find(x => x.id === sel.id);
-    if (k) {
-      insp.innerHTML = `<span class="titre">Région</span>
-        <span>${fmt(k.start)} → ${fmt(k.start + k.dur)} · ${k.dur.toFixed(1)} s</span>
-        ${curseur("Volume", "iGain", 0, 200, 1, Math.round(k.gain * 100), v => v + " %")}
-        ${curseur("Fondu d'entrée", "iFi", 0, 3, .05, +k.fadeIn.toFixed(2), v => (+v).toFixed(2) + " s")}
-        ${curseur("Fondu de sortie", "iFo", 0, 3, .05, +k.fadeOut.toFixed(2), v => (+v).toFixed(2) + " s")}
-        <button class="danger" id="iSupprClip">Supprimer</button>`;
-      lier("iGain", v => { k.gain = v / 100; }, true);
-      lier("iFi", v => { k.fadeIn = Math.min(+v, k.dur - k.fadeOut); }, true);
-      lier("iFo", v => { k.fadeOut = Math.min(+v, k.dur - k.fadeIn); }, true);
-      $("iSupprClip").onclick = supprimer;
-    } else if (p) {
-      const db = v => `${v > 0 ? "+" : ""}${v} dB`, pct = v => `${Math.round(v * 100)} %`;
-      insp.innerHTML = `<span class="titre">Piste</span>
-        <label><b>Nom</b><input type="text" id="iNom" value="${esc(p.nom)}" maxlength="24"></label>
-        ${curseur("Volume", "iVol", 0, 1.5, .01, p.vol, pct)}
-        ${curseur("Panoramique", "iPan", -1, 1, .05, p.pan, v => +v === 0 ? "centre" : (v < 0 ? "G " : "D ") + Math.round(Math.abs(v) * 100))}
-        ${curseur("Réverb", "iRev", 0, 1, .01, p.fx.reverb, pct)}
-        ${curseur("Écho", "iEcho", 0, 1, .01, p.fx.echo, pct)}
-        ${curseur("Graves", "iGrave", -12, 12, 1, p.fx.grave, db)}
-        ${curseur("Aigus", "iAigu", -12, 12, 1, p.fx.aigu, db)}
-        <button class="bascule" id="iComp" aria-pressed="${p.fx.comp}">Compresseur</button>
-        ${P.pistes.length > 1 ? '<button class="danger" id="iSupprPiste">Supprimer la piste</button>' : ""}`;
-      const reg = () => { const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); };
-      $("iNom").addEventListener("change", e => { memoriser(); p.nom = e.target.value.trim() || p.nom; dessiner(); sauver(); });
-      lier("iVol", v => { p.vol = +v; reg(); });
-      lier("iPan", v => { p.pan = +v; reg(); });
-      lier("iRev", v => { p.fx.reverb = +v; reg(); });
-      lier("iEcho", v => { p.fx.echo = +v; reg(); });
-      lier("iGrave", v => { p.fx.grave = +v; reg(); });
-      lier("iAigu", v => { p.fx.aigu = +v; reg(); });
-      $("iComp").onclick = () => { memoriser(); p.fx.comp = !p.fx.comp; reg(); inspecteur(); };
-      if ($("iSupprPiste")) $("iSupprPiste").onclick = () => {
-        memoriser(); P.clips = P.clips.filter(k => k.piste !== p.id); P.pistes = P.pistes.filter(x => x !== p); sel = null;
-        construireNoeuds(); dessiner(); inspecteur(); modifie();
+    const p = pisteCible(), k = regionSel(), i = P.pistes.indexOf(p);
+    pan.style.setProperty("--pc", COULEURS[i % COULEURS.length]);
+    $("dawOngletPiste").textContent = `${p.nom} · effets`;
+    pan.querySelectorAll("[data-onglet]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.onglet === onglet)));
+    if (onglet === "piste") {
+      const presets = Object.entries(PRESETS).map(([c, x]) => `<option value="${c}"${p.preset === c ? " selected" : ""}>${esc(x.nom)}</option>`).join("")
+        + (p.preset === "perso" ? '<option value="perso" selected>Réglages perso</option>' : "");
+      corps.innerHTML = `
+        <div class="dp-bloc" style="width:200px">
+          <h4>Piste</h4>
+          <label class="champ">Nom<input type="text" id="dpNom" value="${esc(p.nom)}" maxlength="24"></label>
+          <label class="champ">Préréglage<select id="dpPreset">${presets}</select></label>
+          <div class="ligne">${bouton("piste.vol", "Volume", 0, 1.5, .01, "x", p.vol, 1)}${bouton("piste.pan", "Panoramique", -1, 1, .01, "pan", p.pan, 0)}</div>
+          ${P.pistes.length > 1 ? '<button class="dp-act danger" id="dpSupprPiste">Supprimer la piste</button>' : ""}
+        </div>
+        ${FX.map(f => {
+          const v = p.fx[f.k];
+          return `<section class="fxc${v.on ? " on" : ""}" data-fx="${f.k}">
+            <header><button class="fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}"></button><b>${esc(f.nom)}</b>
+              ${f.types ? `<select data-fxtype="${f.k}">${f.types.map(([c, n]) => `<option value="${c}"${v.type === c ? " selected" : ""}>${n}</option>`).join("")}</select>` : ""}
+              ${f.divisions ? `<select data-fxdiv="${f.k}" title="Durée de l'écho, calée sur le tempo">${f.divisions.map(([c, n]) => `<option value="${c}"${v.division === c ? " selected" : ""}>${n}</option>`).join("")}</select>` : ""}
+            </header>
+            <div class="fx-boutons">${f.p.map(([c, n, min, max, pas, u, d]) => bouton(`fx.${f.k}.${c}`, n, min, max, pas, u, v[c], d)).join("")}</div>
+            ${(f.cases || []).map(([c, n]) => `<label class="fx-case"><input type="checkbox" data-fxcase="${f.k}.${c}"${v[c] ? " checked" : ""}>${n}</label>`).join("")}
+          </section>`; }).join("")}`;
+      $("dpNom").addEventListener("change", e => { memoriser(); p.nom = e.target.value.trim() || p.nom; dessiner(); panneau(); sauver(); });
+      $("dpPreset").addEventListener("change", e => { if (e.target.value === "perso") return; memoriser(); appliquerPreset(p, e.target.value); const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); dessiner(); panneau(); sauver(); message(`Préréglage « ${PRESETS[e.target.value].nom} »`); });
+      if ($("dpSupprPiste")) $("dpSupprPiste").onclick = () => {
+        if (!confirm(`Supprimer la piste « ${p.nom} » et ses régions ?`)) return;
+        memoriser(); P.clips = P.clips.filter(x => x.piste !== p.id); P.pistes = P.pistes.filter(x => x !== p); sel = null;
+        construireNoeuds(); dessiner(); panneau(); modifie();
       };
+    } else if (onglet === "region") {
+      corps.innerHTML = k ? `
+        <div class="dp-bloc">
+          <h4>Région</h4>
+          <p class="dp-aide">${fmt(k.start)} → ${fmt(k.start + k.dur)} · ${k.dur.toFixed(2)} s, sur « ${esc((P.pistes.find(x => x.id === k.piste) || {}).nom || "")} »</p>
+          <div class="ligne">${bouton("region.gain", "Volume", 0, 2, .01, "x", k.gain, 1)}${bouton("region.fadeIn", "Fondu entrée", 0, 3, .01, "s", k.fadeIn, .01)}${bouton("region.fadeOut", "Fondu sortie", 0, 3, .01, "s", k.fadeOut, .02)}</div>
+        </div>
+        <div class="dp-bloc">
+          <h4>Actions</h4>
+          <div class="ligne"><button class="dp-act" data-act="couper">Couper au curseur</button><button class="dp-act" data-act="dupliquer">Dupliquer</button><button class="dp-act" data-act="normaliser">Normaliser</button></div>
+          <div class="ligne"><button class="dp-act danger" data-act="supprimer">Supprimer</button></div>
+        </div>` : `<div class="dp-bloc"><h4>Région</h4><p class="dp-aide">Touche une région dans la timeline pour régler son volume et ses fondus. Tire ses bords pour la rogner, les points blancs pour les fondus.</p></div>`;
     } else {
-      const ms = v => `${v > 0 ? "+" : ""}${v} ms`;
-      insp.innerHTML = `<span class="titre">Studio</span>
-        <p>Touche <b>R</b> ou le rond rouge pour enregistrer au curseur sur la piste <b>${esc(pisteCible().nom)}</b> : ce qui était là est remplacé. Fais glisser une région pour la déplacer, ses bords pour la rogner, les points blancs pour les fondus. <b>S</b> coupe au curseur. ${fichier ? "" : "Tu as la prod en fichier ? Importe-la (ou dépose-la ici) : synchro parfaite et export avec la prod."}</p>
-        ${curseur("Décalage des voix", "iDecal", -400, 400, 10, P.decal || 0, ms)}
-        ${estLibre() ? `<label><b>Tempo de ta prod</b><input type="text" id="iBpm" inputmode="numeric" value="${bpm()}" style="width:80px"></label>` : ""}`;
-      lier("iDecal", v => { P.decal = +v; sale = true; }, false, true);
-      if ($("iBpm")) $("iBpm").addEventListener("change", e => { const v = Math.round(+e.target.value); if (v >= 50 && v <= 220) { P.bpm = v; sauver(); dessiner(); $("dawInfo").textContent = `${v} BPM · ta prod, tes voix`; } else e.target.value = bpm(); });
+      corps.innerHTML = `
+        <div class="dp-bloc">
+          <h4>Mix</h4>
+          <div class="ligne">${bouton("projet.master", "Volume général", 0, 1.5, .01, "x", P.master != null ? P.master : 1, 1)}${bouton("projet.beatVol", "Volume prod", 0, 100, 1, "%", volBeat(), 100)}${bouton("projet.decal", "Décalage voix", -400, 400, 5, "ms", P.decal || 0, 0)}</div>
+        </div>
+        <div class="dp-bloc" style="width:250px">
+          <h4>Prod</h4>
+          ${fichier ? `<p class="dp-aide">Prod importée : <b>${esc(fichier.nom)}</b>. Fais glisser sa région pour la caler.</p><button class="dp-act danger" data-act="retirer">Revenir à la version YouTube</button>`
+            : `<p class="dp-aide">${estLibre() ? "Aucune prod pour l'instant." : "Le son vient du lecteur YouTube."} Importe le fichier de la prod pour une synchro parfaite et un export avec la prod.</p><label class="dp-act" style="display:inline-grid;place-items:center;cursor:pointer">↥ Importer ma prod<input type="file" data-act="import" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.aif,.aiff" hidden></label>`}
+          ${estLibre() ? `<label class="champ">Tempo<input type="text" id="dpBpm" inputmode="numeric" value="${bpm()}"></label>` : ""}
+        </div>
+        <div class="dp-bloc" style="width:300px">
+          <h4>Raccourcis</h4>
+          <p class="dp-aide"><b>Espace</b> lecture · <b>R</b> enregistrer · <b>S</b> couper · <b>D</b> dupliquer · <b>Suppr</b> supprimer · <b>⌘Z</b> annuler · <b>←/→</b> un temps (Maj : une mesure) · <b>Entrée</b> début</p>
+        </div>`;
+      if ($("dpBpm")) $("dpBpm").addEventListener("change", e => { const v = Math.round(+e.target.value); if (v >= 50 && v <= 220) { P.bpm = v; reglerTout(); sauver(); dessiner(); entete(); } else e.target.value = bpm(); });
     }
   }
-  /* un curseur de l'inspecteur : une seule entree d'historique par geste */
-  function lier(id, f, redessine, sansMemo){
-    const i = $(id), v = $(id + "V"); let memo = false;
-    i.addEventListener("input", () => {
-      if (!memo && !sansMemo) { memoriser(); memo = true; }
-      f(i.value);
-      if (v) v.textContent = { iGain: x => x + " %", iFi: x => (+x).toFixed(2) + " s", iFo: x => (+x).toFixed(2) + " s",
-        iVol: x => Math.round(x * 100) + " %", iRev: x => Math.round(x * 100) + " %", iEcho: x => Math.round(x * 100) + " %",
-        iGrave: x => `${x > 0 ? "+" : ""}${x} dB`, iAigu: x => `${x > 0 ? "+" : ""}${x} dB`,
-        iPan: x => +x === 0 ? "centre" : (x < 0 ? "G " : "D ") + Math.round(Math.abs(x) * 100), iDecal: x => `${x > 0 ? "+" : ""}${x} ms` }[id](i.value);
-      if (redessine) { const n = grilleEl.querySelector(`.clip[data-clip="${sel.id}"]`); if (n) { const k = P.clips.find(x => x.id === sel.id); n.querySelector(".clip-nom").textContent = n.querySelector(".clip-nom").textContent.replace(/ · \d+ %$/, "") + (k.gain !== 1 ? ` · ${Math.round(k.gain * 100)} %` : ""); ondeRegion(n); } }
-      sale = true; sauver();
-    });
-    i.addEventListener("change", () => { memo = false; });
+  const inspecteur = panneau;
+  pan.addEventListener("click", e => {
+    const o = e.target.closest("[data-onglet]"); if (o) { onglet = o.dataset.onglet; pan.classList.remove("ferme"); panneau(); return; }
+    if (e.target.closest("#dawReplier")) { pan.classList.toggle("ferme"); return; }
+    const on = e.target.closest("[data-fxon]");
+    if (on) { const p = pisteCible(), f = p.fx[on.dataset.fxon]; memoriser(); f.on = !f.on; p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); panneau(); dessiner(); sauver(); return; }
+    const a = e.target.closest("[data-act]")?.dataset.act;
+    if (a === "couper") couper(); else if (a === "dupliquer") dupliquer(); else if (a === "supprimer") supprimer();
+    else if (a === "normaliser") normaliser();
+    else if (a === "retirer") { if (confirm("Retirer ta prod importée et revenir à la version YouTube ?")) retirerFichier(); }
+  });
+  pan.addEventListener("change", e => {
+    const p = pisteCible(), t = e.target;
+    if (t.dataset.fxtype || t.dataset.fxdiv) { memoriser(); p.fx[t.dataset.fxtype || t.dataset.fxdiv][t.dataset.fxtype ? "type" : "division"] = t.value; }
+    else if (t.dataset.fxcase) { const [k, c] = t.dataset.fxcase.split("."); memoriser(); p.fx[k][c] = t.checked; }
+    else if (t.dataset.act === "import") { importer(t.files[0]); return; }
+    else return;
+    p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver();
+  });
+  /* tourner un bouton */
+  let tour = null;
+  pan.addEventListener("pointerdown", e => {
+    const kn = e.target.closest(".kn"); if (!kn) return;
+    e.preventDefault(); kn.focus();
+    tour = { kn, y0: e.clientY, x0: versPos(+kn.dataset.val, +kn.dataset.min, +kn.dataset.max, kn.dataset.u), memo: false };
+    try { kn.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  const fixer = (kn, val) => {
+    const pas = +kn.dataset.pas, min = +kn.dataset.min, max = +kn.dataset.max;
+    val = clamp(Math.round(val / pas) * pas, min, max); val = +val.toFixed(4);
+    if (val === +kn.dataset.val) return;
+    peindreBouton(kn, val); appliquer(kn.dataset.cle, val);
+  };
+  pan.addEventListener("pointermove", e => {
+    if (!tour) return;
+    const d = (tour.y0 - e.clientY) / (e.shiftKey ? 600 : 160);
+    if (!tour.memo && Math.abs(tour.y0 - e.clientY) > 1) { memoriser(); tour.memo = true; }
+    const k = tour.kn; fixer(k, versVal(clamp(tour.x0 + d, 0, 1), +k.dataset.min, +k.dataset.max, k.dataset.u));
+  });
+  pan.addEventListener("pointerup", () => { if (tour && tour.memo && tour.kn.dataset.cle.startsWith("fx.")) dessiner(); tour = null; });
+  pan.addEventListener("dblclick", e => { const kn = e.target.closest(".kn"); if (!kn) return; memoriser(); fixer(kn, +kn.dataset.def); });
+  pan.addEventListener("wheel", e => {
+    const kn = e.target.closest(".kn"); if (!kn) return; e.preventDefault();
+    const x = versPos(+kn.dataset.val, +kn.dataset.min, +kn.dataset.max, kn.dataset.u) + (e.deltaY < 0 ? .02 : -.02);
+    fixer(kn, versVal(clamp(x, 0, 1), +kn.dataset.min, +kn.dataset.max, kn.dataset.u)); sauver();
+  }, { passive: false });
+  pan.addEventListener("keydown", e => {
+    const kn = e.target.closest(".kn"); if (!kn) return;
+    const sens = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1 }[e.key]; if (!sens) return;
+    e.preventDefault(); e.stopPropagation();
+    const x = versPos(+kn.dataset.val, +kn.dataset.min, +kn.dataset.max, kn.dataset.u) + sens * (e.shiftKey ? .005 : .03);
+    fixer(kn, versVal(clamp(x, 0, 1), +kn.dataset.min, +kn.dataset.max, kn.dataset.u));
+  });
+  function entete(){
+    $("dawBpm").textContent = `${bpm()} BPM`;
   }
+
 
   /* ─────────────────────────── edition ─────────────────────────── */
   function couper(){
@@ -736,6 +1058,22 @@ const STUDIO = (() => {
     memoriser();
     P.clips = P.clips.filter(k => k.id !== sel.id); sel = null;
     dessiner(); inspecteur(); modifie();
+  }
+  function dupliquer(){
+    const k = regionSel(); if (!k) return;
+    memoriser();
+    const k2 = { ...k, id: nid(), start: k.start + k.dur };
+    P.clips.push(k2); sel = { type: "clip", id: k2.id };
+    dessiner(); panneau(); modifie(); message("Région dupliquée à la suite");
+  }
+  /* le pic de la region porte a -1 dB */
+  function normaliser(){
+    const k = regionSel(), buf = k && BUF.get(k.prise); if (!buf) return;
+    let m = 0; const a = Math.floor(k.offset * buf.sampleRate), b = Math.min(buf.length, Math.floor((k.offset + k.dur) * buf.sampleRate));
+    for (let c = 0; c < buf.numberOfChannels; c++) { const d = buf.getChannelData(c); for (let i = a; i < b; i++) { const v = d[i] < 0 ? -d[i] : d[i]; if (v > m) m = v; } }
+    if (!m) return;
+    memoriser(); k.gain = +Math.min(2, .891 / m).toFixed(3);
+    dessiner(); panneau(); modifie(); message(`Normalisée : volume ${Math.round(k.gain * 100)} %`);
   }
   /* Une nouvelle prise remplace ce qu'elle recouvre sur sa piste (punch-in). */
   function remplacer(nk){
@@ -775,14 +1113,14 @@ const STUDIO = (() => {
   zone.addEventListener("pointerdown", e => {
     if (rec) return;
     const tete = e.target.closest("[data-tete]");
-    if (tete && !e.target.closest("button,input")) { sel = { type: "piste", id: tete.dataset.tete }; dessiner(); inspecteur(); outils(); return; }
+    if (tete && !e.target.closest("button,input")) { sel = { type: "piste", id: tete.dataset.tete }; onglet = "piste"; dessiner(); inspecteur(); outils(); return; }
     const bf = e.target.closest("#dawBlocFichier");
     if (bf) { e.preventDefault(); geste = { mode: "prod", n: bf, x0: e.clientX, y0: e.clientY, orig: P.beatStart || 0, avant: instantane(), bouge: false }; bf.setPointerCapture(e.pointerId); return; }
     const n = e.target.closest(".clip[data-clip]");
     if (n) {
       e.preventDefault();
       const k = P.clips.find(x => x.id === n.dataset.clip);
-      if (!(sel && sel.id === k.id)) { sel = { type: "clip", id: k.id }; grilleEl.querySelectorAll(".clip.sel").forEach(x => x.classList.remove("sel")); n.classList.add("sel"); inspecteur(); outils(); }
+      if (!(sel && sel.id === k.id)) { const autrePiste = pisteCible().id !== k.piste; sel = { type: "clip", id: k.id }; onglet = onglet === "projet" ? "region" : onglet; grilleEl.querySelectorAll(".clip.sel").forEach(x => x.classList.remove("sel")); n.classList.add("sel"); if (autrePiste) dessiner(); inspecteur(); outils(); }
       const mode = e.target.dataset.poignee ? "trim" + e.target.dataset.poignee : e.target.dataset.fondu || "move";
       geste = { mode, k, n, x0: e.clientX, y0: e.clientY, orig: { ...k }, avant: instantane(), bouge: false };
       n.setPointerCapture(e.pointerId);
@@ -845,6 +1183,8 @@ const STUDIO = (() => {
       if (m) p.mute = !p.mute; else p.solo = !p.solo;
       reglerTout(); dessiner(); sauver(); return;
     }
+    const fxb = e.target.closest("[data-fxpiste]");
+    if (fxb) { sel = { type: "piste", id: fxb.dataset.fxpiste }; onglet = "piste"; pan.classList.remove("ferme"); dessiner(); panneau(); outils(); return; }
     if (e.target.closest("#dawAjout")) ajouterPiste();
     if (e.target.closest("#dawRetirer")) { if (confirm("Retirer ta prod importée et revenir à la version YouTube ?")) retirerFichier(); }
   });
@@ -854,7 +1194,7 @@ const STUDIO = (() => {
   el.addEventListener("drop", e => { const f = e.dataTransfer?.files?.[0]; if (f) { e.preventDefault(); importer(f); } });
   zone.addEventListener("input", e => {
     const v = e.target.closest("[data-vol]");
-    if (v) { const p = P.pistes.find(x => x.id === v.dataset.vol); p.vol = v.value / 100; reglerTout(); sauver(); if (sel && sel.type === "piste" && sel.id === p.id) inspecteur(); }
+    if (v) { const p = P.pistes.find(x => x.id === v.dataset.vol); p.vol = v.value / 100; reglerTout(); sauver(); const kn = corps.querySelector('[data-cle="piste.vol"]'); if (kn && pisteCible() === p) peindreBouton(kn, p.vol); }
     if (e.target.id === "dawVolBeat") {
       const x = +e.target.value; P.beatVol = x; sauver();
       if (modeFichier()) { if (gainProd) gainProd.gain.value = x / 100; return; }
@@ -880,8 +1220,8 @@ const STUDIO = (() => {
     // niveau du micro
     const an = c.createAnalyser(); an.fftSize = 1024; c.createMediaStreamSource(flux).connect(an);
     const d = new Float32Array(an.fftSize);
-    (function niv(){ if (!rec) { $("dawNiv").style.transform = "scaleX(0)"; return; } an.getFloatTimeDomainData(d); let s = 0; for (const x of d) s += x * x;
-      $("dawNiv").style.transform = `scaleX(${clamp((20 * Math.log10(Math.sqrt(s / d.length) + 1e-6) + 60) / 60, 0, 1).toFixed(3)})`; requestAnimationFrame(niv); })();
+    (function niv(){ if (!rec) { $("dawNiv").style.transform = "scaleY(0)"; return; } an.getFloatTimeDomainData(d); let s = 0; for (const x of d) s += x * x;
+      $("dawNiv").style.transform = `scaleY(${clamp((20 * Math.log10(Math.sqrt(s / d.length) + 1e-6) + 60) / 60, 0, 1).toFixed(3)})`; requestAnimationFrame(niv); })();
     try { player.pauseVideo(); } catch (e) {}
     arreterInterne();
     positionner(debut);
@@ -961,6 +1301,7 @@ const STUDIO = (() => {
       const avecProd = !!fichier && mixExport === "tout";
       const fin = Math.max(...P.clips.map(k => k.start + k.dur - dec), avecProd ? (P.beatStart || 0) + fichier.buf.duration : 0) + 2.6;
       const oc = new OfflineAudioContext(2, Math.ceil(sr * fin), sr), b = bus(oc), solo = soloActif();
+      b.master.gain.value = P.master != null ? P.master : 1;
       if (avecProd) {
         const gp = oc.createGain(); gp.gain.value = volBeat() / 100; gp.connect(b.master);
         const s = oc.createBufferSource(); s.buffer = fichier.buf; s.connect(gp);
@@ -977,6 +1318,7 @@ const STUDIO = (() => {
         s.start(when, k.offset + dans, k.dur - dans);
       }
       const rendu = await oc.startRendering();
+      ns.forEach(n => { try { n.osc.stop(); } catch (e) {} });
       const titre = (estLibre() && fichier ? fichier.nom.replace(/\.[a-z0-9]+$/i, "") : prod.title).replace(/[\\/:*?"<>|]+/g, "").slice(0, 60).trim();
       const a = document.createElement("a");
       a.href = URL.createObjectURL(wav(rendu));
@@ -1030,6 +1372,7 @@ const STUDIO = (() => {
   $("dawRec").onclick = enregistrer;
   $("dawCouper").onclick = couper;
   $("dawSuppr").onclick = supprimer;
+  $("dawDupliquer").onclick = dupliquer;
   $("dawAnnuler").onclick = annuler;
   $("dawRefaire").onclick = retablir;
   $("dawGrille").onclick = () => { grille = !grille; outils(); };
@@ -1041,6 +1384,7 @@ const STUDIO = (() => {
     dessiner(); zone.scrollLeft = Math.max(0, t * zoom - avant);
   });
   zoom = Math.round(12 * Math.pow(25, .45));
+  if (window.matchMedia && matchMedia("(max-width:760px)").matches) pan.classList.add("ferme");
   // le micro du lecteur : la page Studio sur la prod en cours ; le bouton « Studio » de l'en-tete (un lien) : le projet libre
   document.getElementById("micBtn")?.addEventListener("click", () => {
     if (!current) return;
@@ -1073,6 +1417,7 @@ const STUDIO = (() => {
     else if ((mod && k === "z" && e.shiftKey) || (mod && k === "y")) retablir();
     else if (mod) fait = false;
     else if (k === "s") couper();
+    else if (k === "d") dupliquer();
     else if (k === "r") enregistrer();
     else if (k === "backspace" || k === "delete") supprimer();
     else if (k === "enter" || k === "home") positionner(0);
