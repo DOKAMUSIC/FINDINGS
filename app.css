@@ -809,6 +809,12 @@ body.yt-charge .tbtn.big::after,body.yt-charge .row.playing .play .glyph::after,
 body.yt-charge .row.playing .play .glyph svg,body.yt-charge .tile.playing .go svg{opacity:0}
 .row .play .glyph,.tile .go{position:relative}
 @keyframes yt-tourne{to{transform:rotate(360deg)}}
+/* le bouton sur lequel on a clique pour lancer (Lire les N, Lire d'un profil, Surprends-moi)
+   tourne aussi tant que la prod charge */
+body.yt-charge .lance svg{display:none}
+body.yt-charge .lance::before{content:"";display:inline-block;flex:0 0 auto;width:14px;height:14px;border-radius:50%;
+  border:2.2px solid currentColor;border-right-color:transparent;animation:yt-tourne .7s linear infinite}
+body.yt-charge #profLire.lance::before{width:20px;height:20px;border-width:2.6px}
 /* volume : le haut-parleur montre le niveau (ondes, croix a zero) et reagit quand on le bouge */
 .vol-ico{width:22px;height:22px;display:grid;place-items:center;color:var(--dim);border-radius:6px;flex:0 0 auto}
 .vol-ico:hover{color:var(--ink)}

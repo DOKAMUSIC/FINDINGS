@@ -1813,6 +1813,17 @@ bMin.addEventListener("change", () => syncBpm(true)); bMax.addEventListener("cha
 document.getElementById("clearBpm").addEventListener("click", () => { bMin.value=BMIN; bMax.value=BMAX; syncBpm(true); });
 
 let t;
+/* Le bouton qui a lance la lecture garde l'anneau de chargement jusqu'au demarrage. */
+let boutonLance = null;
+document.addEventListener("click", e => {
+  const b = e.target.closest("#playall,#profLire,#surprise,#surpriseAcc,.v-lire");
+  if (!b) return;
+  boutonLance?.classList.remove("lance"); b.classList.add("lance"); boutonLance = b;
+}, true);
+new MutationObserver(() => {
+  if (boutonLance && !document.body.classList.contains("yt-charge")) { boutonLance.classList.remove("lance"); boutonLance = null; }
+}).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
 /* La recherche de l'en-tete est une nouvelle recherche : au premier caractere tape, les
    filtres de la page (artiste, style, beatmaker, likes, tempo…) partent. Sans ca, chercher
    « Ninho » depuis la page de Hamza ne cherchait que parmi les prods de Hamza. */

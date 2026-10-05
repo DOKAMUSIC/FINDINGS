@@ -45,7 +45,11 @@ const STUDIO = (() => {
   .daw-b{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#D7DBE2;transition:background .12s,transform .12s}
   .daw-b:hover{background:rgba(255,255,255,.08)}
   .daw-b:active{transform:scale(.94)}
-  .daw-b.lire{width:40px;height:40px;border-radius:12px;background:#F2F4F7;color:#0B0C0F}
+  .daw-b.lire{width:40px;height:40px;border-radius:12px;background:#F2F4F7;color:#0B0C0F;position:relative}
+  /* prod YouTube en cours de chargement : le bouton lecture du studio tourne aussi */
+  body.yt-charge .daw.yt-mode .daw-b.lire svg{opacity:0}
+  body.yt-charge .daw.yt-mode .daw-b.lire::after{content:"";position:absolute;inset:0;margin:auto;width:18px;height:18px;border-radius:50%;
+    border:2.4px solid currentColor;border-right-color:transparent;animation:yt-tourne .7s linear infinite}
   .daw-b.rec{color:#FF4D5E}
   .daw-b.rec.on{background:#FF2D45;color:#fff;animation:daw-pulse 1.1s ease-in-out infinite}
   @keyframes daw-pulse{50%{box-shadow:0 0 0 6px rgba(250,35,59,.25)}}
@@ -854,6 +858,7 @@ const STUDIO = (() => {
       vumetres();
       const joue = joueStudio();
       $("dawLire").innerHTML = joue ? I.pause : I.lire;
+      el.classList.toggle("yt-mode", !horlogeInterne());
       if (joue) {   // la page suit le curseur
         const hw = grilleEl.querySelector(".daw-tete")?.offsetWidth || 196, x = hw + t * zoom;
         if (x > zone.scrollLeft + zone.clientWidth - 40 || x < zone.scrollLeft + hw) zone.scrollLeft = x - hw - 60;
