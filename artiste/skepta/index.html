@@ -48,7 +48,7 @@ if (window.FINDINGS_STATS) {
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="app.css?v=3bf8db46c0">
+<link rel="stylesheet" href="app.css?v=5a44e7559c">
 </head>
 <body>
 
@@ -436,6 +436,8 @@ if (window.FINDINGS_STATS) {
     <ul class="list" id="list"></ul>
   </section>
 
+  <aside class="np" id="np" aria-label="En lecture"></aside>
+
 </main>
 
 <footer class="foot">
@@ -485,6 +487,7 @@ if (window.FINDINGS_STATS) {
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
       </button>
       <button class="tbtn dosb" id="dosBtn" hidden data-act="dossier" aria-label="Ranger dans un dossier" title="Ranger dans un dossier"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>
+      <button class="tbtn npb" id="npBtn" hidden aria-pressed="true" aria-label="Panneau En lecture" title="Afficher la prod en cours à droite"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M14.5 4v16"/><path d="M17 8.5h1.5M17 11.5h1.5"/></svg></button>
       <span class="vol" data-niv="2">
         <button class="vol-ico" id="volIco" aria-label="Couper le son" title="Couper / remettre le son">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -505,7 +508,7 @@ if (window.FINDINGS_STATS) {
 
 <div class="dosmenu" id="dosMenu" hidden role="menu"></div>
 <script src="catalog.js?v=8e3510113d" defer></script>
-<script src="app.js?v=330eeec4cf" defer></script>
+<script src="app.js?v=ab497cebea" defer></script>
 <script src="studio.js?v=a0f09ce1c8" defer></script>
 <script type="module">
 /* ============ la note, en volume ============

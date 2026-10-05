@@ -194,6 +194,7 @@ try {
 } catch (e) {}
 const saveSuivis = () => {
   try { localStorage.setItem(SUIVIS_KEY, JSON.stringify({ artists: [...SUIVIS.artists], prods: [...SUIVIS.prods] })); } catch (e) {}
+  try { npEtat(); } catch (e) {}   // le bouton Suivre du panneau « En lecture »
 };
 const estSuivie = b => SUIVIS.prods.has(b.prod) || b.artists.some(a => SUIVIS.artists.has(a));
 const nbSuivis = () => SUIVIS.artists.size + SUIVIS.prods.size;
@@ -616,7 +617,152 @@ function repeindreLecture(){
     const b = r && BEATS.find(x => x.id === id);
     if (b) r.outerHTML = rowHTML(b);
   });
+  peindreNP();
 }
+
+
+/* ============ panneau « En lecture » ============
+   Sur la page des prods, en grand ecran : la prod en cours, son beatmaker, la suivante
+   et quatre prods dans le meme esprit, comme la vue de droite de Spotify. On le ferme
+   d'un clic, le bouton du lecteur le rouvre, et le choix est retenu. */
+const elNP = document.getElementById("np"), npBtn = document.getElementById("npBtn");
+let npVoulu = true;
+try { npVoulu = localStorage.getItem("findings.np") !== "0"; } catch (e) {}
+let npPeint = null, npSims = [];
+const NP_LIRE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>';
+const NP_PAUSE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>';
+const NP_COEUR = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>';
+/* Une prod par beatmaker : sinon le plus prolifique du style remplit les quatre cases. */
+function similairesDe(b, n){
+  const notes = [];
+  for (const x of BEATS) if (x.id !== b.id && !DEAD.has(x.id)) notes.push([scoreProche(b, x), x]);
+  notes.sort((p, q) => q[0] - p[0]);
+  const vus = new Set(), out = [];
+  for (const [, x] of notes) { if (vus.has(x.prod)) continue; vus.add(x.prod); out.push(x); if (out.length >= n) break; }
+  return out;
+}
+const npSuivante = () => (QUEUE.length > 1 && !SHUFFLE) ? BY_ID.get(QUEUE[(QI + 1) % QUEUE.length]) : null;
+function npHTML(b){
+  const c = profilDe(b.prod) || {};
+  const nom = c.n || b.prod;
+  const nb = BEATS.filter(x => x.prod === b.prod).length;
+  const suiv = npSuivante();
+  npSims = similairesDe(b, 4);
+  const ctx = (document.getElementById("resTitle")?.textContent || "").trim();
+  const vg = id => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+  return `<div class="np-tete">
+      <p class="np-de">En lecture${ctx ? ` <span>· ${esc(ctx)}</span>` : ""}</p>
+      <button class="np-x" data-np="fermer" aria-label="Fermer le panneau" title="Fermer le panneau"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <button class="np-cover" data-np="lire" aria-label="Lecture / pause">
+      <img src="https://i.ytimg.com/vi/${b.id}/maxresdefault.jpg" alt="" onload="if(this.naturalWidth<=120){this.onload=null;this.src=this.src.replace('maxresdefault','hqdefault')}">
+      <span class="np-go">${S.paused ? NP_LIRE : NP_PAUSE}</span>
+    </button>
+    <div class="np-titre">
+      <div style="min-width:0">
+        <h3 title="${esc(b.title)}">${esc(b.title)}</h3>
+        <p class="np-par">par <a href="${lienProd(b.prod)}" data-vue="prods">${esc(b.prod)}</a></p>
+      </div>
+      <button class="np-like" data-np="like">${NP_COEUR}</button>
+    </div>
+    <div class="np-tags">
+      <span class="np-tag st">${esc(STYLE_NAME[b.style])}</span>
+      <span class="np-tag${b.bpmSur ? "" : " flou"}"${b.bpmSur ? "" : ' title="Tempo estimé"'}>${b.bpmSur ? "" : "~"}${b.bpm} BPM</span>
+      ${b.key ? `<span class="np-tag${b.keySur ? "" : " flou"}"${b.keySur ? "" : ' title="Tonalité estimée"'}>${b.keySur ? "" : "~"}${esc(b.key)}</span>` : ""}
+      ${b.moods.map(m => `<span class="np-tag">${esc(m)}</span>`).join("")}
+    </div>
+    <p class="np-stats">${b.views ? `${fmtViews(b.views)} vues · ` : ""}${fmtDur(b.dur)} · il y a ${esc(fmtAge(b.days))}</p>
+    ${suiv ? `<div class="np-bloc">
+      <div class="np-h"><h4>À suivre</h4><button data-np="file">${QI + 1}/${QUEUE.length}</button></div>
+      <button class="np-suiv" data-np="suivant"><img src="${vg(suiv.id)}" alt="" loading="lazy"><span style="min-width:0"><b>${esc(suiv.title)}</b><span>${esc(suiv.prod)} · ${esc(STYLE_NAME[suiv.style])}</span></span></button>
+    </div>` : ""}
+    <div class="np-bloc">
+      <div class="np-h"><h4>Le beatmaker</h4></div>
+      <div class="np-carte">
+        <div class="np-ban">${c.b ? `<img src="${esc(c.b)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</div>
+        <div class="np-carte-in">
+          <div class="np-av">${c.a ? `<img src="${esc(c.a)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : esc((nom.replace(/^prod\.?\s*/i, "")[0] || "?").toUpperCase())}</div>
+          <p class="np-nom">${esc(nom)}</p>
+          <p class="np-nb">${c.s ? `${esc(c.s)} abonnés · ` : ""}${nb} prod${nb > 1 ? "s" : ""} sur FINDINGS</p>
+          <div class="np-acts">
+            <button class="np-suivre" data-np="suivre" aria-pressed="false">Suivre</button>
+            <a class="np-lien" href="${lienProd(b.prod)}" data-vue="prods">Ses prods</a>
+            <button class="np-yt" data-np="chan" aria-label="Chaîne YouTube de ${esc(nom)}" title="Chaîne YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${b.artists.length ? `<div class="np-bloc">
+      <div class="np-h"><h4>Type beat ${b.artists.length > 1 ? "des artistes" : "de"}</h4></div>
+      <div class="np-arts">${b.artists.map(id => { const img = photoArtiste(id).replace("1000x1000", "250x250"), n = ARTIST_NAME[id] || id;
+        return `<a class="np-art" href="${lienArtiste(id)}" data-vue="prods" style="--c:var(--s-${ARTIST_STYLE[id]})"><span class="rd">${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : esc(n[0].toUpperCase())}</span><span style="min-width:0"><b>${esc(n)}</b><span>Artiste · ${ARTIST_N[id] || 0} type beats</span></span></a>`; }).join("")}</div>
+    </div>` : ""}
+    ${npSims.length ? `<div class="np-bloc">
+      <div class="np-h"><h4>Dans le même esprit</h4><button data-np="proches">Tout voir</button></div>
+      <div class="np-sims">${npSims.map((x, i) => `<button class="np-sim" data-np="sim" data-i="${i}" title="${esc(x.title)} · ${esc(x.prod)}"><span class="vg"><img src="${vg(x.id)}" alt="" loading="lazy"><i>${NP_LIRE}</i></span><b>${esc(x.title)}</b><span>${esc(x.prod)}</span></button>`).join("")}</div>
+    </div>` : ""}`;
+}
+/* Ce qui bouge sans changer de prod : lecture/pause, like, abonnement. */
+function npEtat(){
+  if (!current || !elNP.firstChild) return;
+  const go = elNP.querySelector(".np-go");
+  if (go) go.innerHTML = S.paused ? NP_LIRE : NP_PAUSE;
+  const like = elNP.querySelector('[data-np="like"]');
+  if (like) peindreLike(like, CRATE.has(current.id), false);
+  const sv = elNP.querySelector('[data-np="suivre"]');
+  if (sv) { const on = SUIVIS.prods.has(current.prod); sv.setAttribute("aria-pressed", String(on)); sv.textContent = on ? "Abonné" : "Suivre"; }
+}
+function peindreNP(){
+  npBtn.hidden = !current;
+  npBtn.setAttribute("aria-pressed", String(npVoulu));
+  const actif = npVoulu && !!current;
+  document.body.classList.toggle("np-on", actif);
+  if (!actif) { npPeint = null; return; }
+  const cle = current.id + "|" + QI + "|" + QUEUE.length + "|" + SHUFFLE;
+  if (npPeint !== cle) {
+    const autre = !npPeint || !npPeint.startsWith(current.id + "|");
+    npPeint = cle;
+    elNP.style.setProperty("--c", cssVar(current.style));
+    elNP.innerHTML = npHTML(current);
+    if (autre) elNP.scrollTop = 0;
+  }
+  npEtat();
+}
+function poserNP(v){
+  npVoulu = v;
+  try { localStorage.setItem("findings.np", v ? "1" : "0"); } catch (e) {}
+  peindreNP();
+}
+npBtn.addEventListener("click", () => poserNP(!npVoulu));
+elNP.addEventListener("click", e => {
+  const el = e.target.closest("[data-np]");
+  if (!el || !current) return;
+  const a = el.dataset.np;
+  if (a === "fermer") poserNP(false);
+  else if (a === "lire") togglePlay();
+  else if (a === "like") basculerLike(current, el);
+  else if (a === "chan") openChan(current);
+  else if (a === "suivant") next();
+  else if (a === "proches") voirProches(current.id);
+  else if (a === "file") { const r = list.querySelector(".row.playing"); if (r) r.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  else if (a === "suivre") {
+    const p = current.prod, suit = !SUIVIS.prods.has(p);
+    suit ? SUIVIS.prods.add(p) : SUIVIS.prods.delete(p);
+    saveSuivis(); versionGout++;
+    majEntete(LAST);
+    npEtat();
+    if (suit) feterSuivi(el, (profilDe(p) || {}).n || p, avatarDe(p));
+  }
+  else if (a === "sim") {
+    // la prod choisie passe juste apres celle en cours : la file de la liste continue ensuite
+    const x = npSims[+el.dataset.i];
+    if (!x) return;
+    const deja = QUEUE.indexOf(x.id);
+    if (deja >= 0) { QUEUE.splice(deja, 1); if (deja < QI) QI--; }
+    QUEUE.splice(QI + 1, 0, x.id); QI++;
+    load(x.id);
+  }
+});
 
 function rowHTML(b){
   const c = cssVar(b.style);
@@ -1068,6 +1214,7 @@ rapideBtn.addEventListener("click", () => {
 });
 document.getElementById("shuffle").addEventListener("click", e => {
   SHUFFLE = !SHUFFLE;
+  peindreNP();
   const btn = e.currentTarget;
   btn.setAttribute("aria-pressed", SHUFFLE);
   btn.classList.toggle("on", SHUFFLE);
@@ -1243,6 +1390,7 @@ document.addEventListener("keydown", e => {
    sienne. Les deux écrivent dans la même liste, il faut donc les tenir d'accord
    sans rejouer l'animation sur celui qu'on n'a pas cliqué. */
 function syncCoeur(){
+  npEtat();
   const btn = document.getElementById("likeBtn");
   if (!btn) return;
   btn.hidden = !current;
@@ -1373,7 +1521,7 @@ function majProfil(res){
   let v;   // ce qui differe entre un beatmaker et un artiste
   if (S.prod) {
     const c = profilDe(S.prod) || {};
-    v = { type: "Beatmaker", nom: c.n || S.prod, img: c.a, ban: c.b ? `background-image:url('${esc(c.b)}')` : "",
+    v = { type: "Beatmaker", nom: c.n || S.prod, img: c.a, ban: c.b || "",
           chiffre: c.s ? `<span><b>${esc(c.s)}</b> abonnés YouTube</span>` : "",
           compte: `<b>${toutes.length}</b> prod${toutes.length > 1 ? "s" : ""} sur FINDINGS`,
           lien: "Chaîne YouTube ↗", couleur: styles[0] || "trap",
@@ -1382,7 +1530,7 @@ function majProfil(res){
     const c = ARTIST_INFO[art] || {};
     v = { type: "Artiste", nom: ARTIST_NAME[art] || art, img: c.img,
           // pas de banniere chez Deezer : la photo elle-meme, agrandie et floutee
-          ban: c.img ? `background-image:url('${esc(c.img)}');filter:blur(28px) saturate(1.3);transform:scale(1.25)` : "",
+          ban: c.img || "", banFlou: true,
           chiffre: c.fans ? `<span><b>${fmtViews(c.fans)}</b> fans Deezer</span>` : "",
           compte: `<b>${toutes.length}</b> type beat${toutes.length > 1 ? "s" : ""} · <b>${nbProds}</b> beatmaker${nbProds > 1 ? "s" : ""}`,
           lien: "", couleur: ARTIST_STYLE[art] || styles[0] || "trap",
@@ -1399,7 +1547,7 @@ function majProfil(res){
   const initiale = (v.nom.replace(/^prod\.?\s*/i, "")[0] || "?").toUpperCase();
   elProfil.style.setProperty("--c", cssVar(v.couleur));
   elProfil.innerHTML = `
-    ${v.ban ? `<div class="ban" style="${v.ban}"></div>` : ""}
+    ${v.ban ? `<div class="ban"${v.banFlou ? ' style="filter:blur(28px) saturate(1.3);transform:scale(1.25)"' : ""}><img src="${esc(v.ban)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>` : ""}
     <div class="profil-in">
       ${v.img ? `<img class="ava" src="${esc(v.img)}" alt="" referrerpolicy="no-referrer">` : `<div class="ava">${esc(initiale)}</div>`}
       <div class="profil-txt">

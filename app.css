@@ -205,6 +205,111 @@ ul{margin:0;padding:0;list-style:none}
 .shell > *{min-width:0}
 @media(max-width:1000px){ .shell{padding-top:16px} }
 
+/* ── panneau « En lecture » (Toutes les prods, ecran large) ──
+   Comme la vue de droite de Spotify : la prod en cours en grand, son beatmaker, la
+   suivante dans la file et des prods dans le meme esprit. La liste se resserre a gauche
+   et le panneau reste colle pendant qu'on fait defiler. */
+.np,.tbtn.npb{display:none}
+@media(min-width:1100px){
+  .tbtn.npb:not([hidden]){display:inline-grid}
+  body.np-on .shell:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) clamp(300px,25vw,360px);column-gap:20px;align-items:start;max-width:1560px}
+  body.np-on .shell:not([hidden]) > :not(.np){grid-column:1}
+  body.np-on .np{
+    display:block;grid-column:2;grid-row:1 / span 4;align-self:start;
+    position:sticky;top:calc(var(--hh,96px) + 12px);z-index:31;
+    max-height:calc(100vh - var(--hh,96px) - var(--bar-h) - 56px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+    background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+    border:1px solid var(--glass-edge);border-radius:var(--r-lg);box-shadow:var(--sh-2);
+    padding:14px 16px 18px;animation:np-entre .35s cubic-bezier(.2,.7,.3,1);
+  }
+  /* la liste perd ~360 px : elle range les memes colonnes qu'a 1 000 px de large */
+  body.np-on .row .num.k-key, body.np-on .row .nums .num:nth-of-type(3){display:none}
+  body.np-on .row .num.pop .bar{display:none}
+  body.np-on .row .num.pop .k{display:block}
+  body.np-on .row .num.pop{min-width:42px}
+}
+@keyframes np-entre{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+.np{--c:var(--accent)}
+.np::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:300px;z-index:-1;pointer-events:none;
+  border-radius:var(--r-lg) var(--r-lg) 0 0;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c) 26%,transparent),transparent);
+  transition:background .4s;
+}
+.np-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.np-de{margin:0;min-width:0;font-size:13px;font-weight:650;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-de span{color:var(--dim);font-weight:500}
+.np-x{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--dim);flex:0 0 auto;transition:background .14s,color .14s}
+.np-x:hover{background:var(--hover);color:var(--ink)}
+.np-cover{
+  position:relative;display:block;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;
+  background:var(--thumb);box-shadow:0 10px 30px rgba(0,0,0,.28);cursor:pointer;
+}
+.np-cover img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
+.np-cover:hover img{transform:scale(1.03)}
+.np-go{
+  position:absolute;right:10px;bottom:10px;width:46px;height:46px;border-radius:50%;
+  display:grid;place-items:center;color:#fff;background:var(--accent);
+  box-shadow:0 6px 18px rgba(0,0,0,.35);transition:transform .15s;
+}
+.np-cover:hover .np-go{transform:scale(1.07)}
+body.yt-charge .np-go svg{opacity:0}
+body.yt-charge .np-go::after{content:"";position:absolute;inset:0;margin:auto;width:18px;height:18px;border-radius:50%;border:2.4px solid currentColor;border-right-color:transparent;animation:yt-tourne .7s linear infinite}
+.np-titre{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start;margin-top:14px}
+.np-titre h3{margin:0;font-size:21px;line-height:1.2;font-weight:720;letter-spacing:-.025em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.np-par{margin:3px 0 0;font-size:14px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-par a{color:var(--ink-2);font-weight:590;text-decoration:none}
+.np-par a:hover{text-decoration:underline}
+.np-like{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--dim);position:relative;transition:color .14s,background .14s}
+.np-like:hover{background:var(--hover);color:var(--ink)}
+.np-like.sav{color:var(--accent)}
+.np-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.np-tag{font-size:11.5px;font-weight:590;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2)}
+.np-tag.st{border-color:transparent;color:color-mix(in srgb,var(--c) 60%,var(--ink));background:color-mix(in srgb,var(--c) 14%,var(--surface))}
+.np-tag.flou{color:var(--dim)}
+.np-stats{margin:10px 0 0;font-size:12px;color:var(--dim)}
+.np-bloc{margin-top:22px}
+.np-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 0 10px}
+.np-h h4{margin:0;font-size:14.5px;font-weight:700;letter-spacing:-.015em}
+.np-h button{font-size:12px;font-weight:600;color:var(--dim)}
+.np-h button:hover{color:var(--ink);text-decoration:underline}
+.np-suiv{display:grid;grid-template-columns:64px minmax(0,1fr);gap:11px;align-items:center;width:100%;text-align:left;padding:6px;margin:-6px;border-radius:10px;transition:background .14s;width:calc(100% + 12px)}
+.np-suiv:hover{background:var(--hover)}
+.np-suiv img{width:64px;aspect-ratio:16/9;object-fit:cover;border-radius:7px;display:block;background:var(--thumb)}
+.np-suiv b,.np-sim b{display:block;font-size:13px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-suiv span,.np-sim span{display:block;font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-sims{display:grid;grid-template-columns:1fr 1fr;gap:12px 10px}
+.np-sim{display:block;text-align:left;min-width:0;cursor:pointer}
+.np-sim .vg{position:relative;display:block;aspect-ratio:16/9;border-radius:9px;overflow:hidden;background:var(--thumb);margin-bottom:6px}
+.np-sim .vg img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+.np-sim .vg i{position:absolute;inset:0;display:grid;place-items:center;color:#fff;background:rgba(0,0,0,.38);opacity:0;transition:opacity .14s}
+.np-sim:hover .vg img{transform:scale(1.05)}
+.np-sim:hover .vg i{opacity:1}
+.np-carte{border-radius:14px;overflow:hidden;background:var(--surface);border:1px solid var(--line-soft)}
+.np-ban{height:96px;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 55%,#000),color-mix(in srgb,var(--c) 20%,#000))}
+.np-ban img{width:100%;height:100%;object-fit:cover;display:block}
+.np-carte-in{padding:0 14px 14px}
+.np-av{position:relative;width:62px;height:62px;border-radius:50%;margin-top:-31px;border:3px solid var(--surface);background:var(--thumb);overflow:hidden;display:grid;place-items:center;font-weight:700;font-size:22px;color:#fff;background:color-mix(in srgb,var(--c) 70%,#000)}
+.np-av img{width:100%;height:100%;object-fit:cover;display:block}
+.np-nom{margin:8px 0 0;font-size:16px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-nb{margin:2px 0 0;font-size:12.5px;color:var(--dim)}
+.np-acts{display:flex;gap:8px;margin-top:12px;align-items:center}
+.np-suivre{height:32px;padding:0 15px;border-radius:999px;font-size:13px;font-weight:650;border:1px solid var(--line);color:var(--ink);transition:background .14s,border-color .14s,transform .14s}
+.np-suivre:hover{border-color:var(--ink);transform:scale(1.03)}
+.np-suivre[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.np-lien{height:32px;padding:0 13px;border-radius:999px;font-size:13px;font-weight:600;color:var(--dim);display:inline-flex;align-items:center;text-decoration:none}
+.np-lien:hover{color:var(--ink);background:var(--hover)}
+.np-yt{margin-left:auto;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--dim)}
+.np-yt:hover{color:var(--ink);background:var(--hover)}
+.np-arts{display:flex;flex-direction:column;gap:2px}
+.np-art{display:flex;align-items:center;gap:11px;padding:5px 6px;margin:0 -6px;border-radius:10px;text-decoration:none;color:inherit;transition:background .14s}
+.np-art:hover{background:var(--hover)}
+.np-art .rd{width:40px;height:40px;border-radius:50%;overflow:hidden;flex:0 0 auto;display:grid;place-items:center;font-weight:700;color:#fff;background:var(--c)}
+.np-art .rd img{width:100%;height:100%;object-fit:cover;display:block}
+.np-art b{font-size:13.5px;font-weight:600;display:block}
+.np-art span{font-size:12px;color:var(--dim)}
+.npb[aria-pressed="true"]{color:var(--accent)}
+
 /* ── barre de filtres : une ligne, chaque famille s'ouvre en menu ──
    Remplace la colonne de 250 px qui empilait cinq blocs (1279 px de haut, donc
    defilante) : Style et Mood a eux seuls en prenaient 760. */
@@ -383,6 +488,7 @@ ul{margin:0;padding:0;list-style:none}
 }
 .profil[hidden]{display:none}
 .profil .ban{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.55;filter:saturate(1.1)}
+.profil .ban img{width:100%;height:100%;object-fit:cover;display:block}
 .profil::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 45%,rgba(0,0,0,.72) 100%)}
 .profil-in{position:relative;z-index:1;display:flex;align-items:flex-end;gap:24px;width:100%}
 .profil .ava{
