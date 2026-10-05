@@ -922,6 +922,9 @@ function armWatchdog(id){
 }
 
 function onState(e){
+  // le bouton tourne pendant le chargement et le buffering, et seulement la
+  if (e.data === YT.PlayerState.BUFFERING) document.body.classList.add("yt-charge");
+  else if ([YT.PlayerState.PLAYING, YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.CUED].includes(e.data)) document.body.classList.remove("yt-charge");
   if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING){ started = true; clearTimeout(watchdog); }
   // le studio garde la main a la fin d'une prise ou d'une reecoute : pas d'enchainement
   if (e.data === YT.PlayerState.ENDED) { if (STUDIO.occupe()) { STUDIO.finProd(); return; } next(); return; }
@@ -934,6 +937,7 @@ function onState(e){
 /* Certaines chaînes interdisent la lecture hors de YouTube : on marque la prod
    et on passe à la suivante plutôt que de laisser un lecteur noir. */
 function onError(e){
+  document.body.classList.remove("yt-charge");
   const code = e && e.data;
   clearTimeout(watchdog);
   // 101 et 150 : la chaîne refuse l'intégration. 2, 5, 100 : autre chose cloche,
@@ -996,6 +1000,9 @@ function load(id){
   elFill.style.width = "0%"; elKnob.style.left = "0%";
   elCur.textContent = "0:00"; elDur.textContent = fmtDur(b.dur);
   tgIcon.innerHTML = ICON_PAUSE;
+  document.body.classList.toggle("yt-charge", !PLAIN);   // jusqu'a ce que la prod joue vraiment
+  // filet : lecture automatique bloquee par le navigateur, le lecteur reste « non demarre »
+  clearTimeout(window.__chargeMinuteur); window.__chargeMinuteur = setTimeout(() => document.body.classList.remove("yt-charge"), 8000);
   syncCoeur();
   peindreTuiles();
   bar.classList.add("up");
@@ -1064,9 +1071,22 @@ document.getElementById("shuffle").addEventListener("click", e => {
   btn.setAttribute("aria-pressed", SHUFFLE);
   btn.classList.toggle("on", SHUFFLE);
 });
-document.getElementById("vol").addEventListener("input", e => {
-  VOL = +e.target.value;
+const elVol = document.getElementById("vol"), boiteVol = elVol.closest(".vol");
+let volAvantMuet = 100, volMinuteur = 0;
+function peindreVol(anime){
+  boiteVol.dataset.niv = VOL <= 0 ? "0" : VOL < 50 ? "1" : "2";
+  document.getElementById("volIco").setAttribute("aria-label", VOL <= 0 ? "Remettre le son" : "Couper le son");
+  if (anime) { boiteVol.classList.add("bouge"); clearTimeout(volMinuteur); volMinuteur = setTimeout(() => boiteVol.classList.remove("bouge"), 450); }
+}
+function poserVol(v, anime){
+  VOL = v; elVol.value = v;
   if (player && player.setVolume) player.setVolume(VOL);
+  if (player && player.unMute && VOL > 0) try { player.unMute(); } catch (e) {}
+  peindreVol(anime);
+}
+elVol.addEventListener("input", e => poserVol(+e.target.value, true));
+document.getElementById("volIco").addEventListener("click", () => {
+  if (VOL > 0) { volAvantMuet = VOL; poserVol(0, true); } else poserVol(volAvantMuet || 80, true);
 });
 
 /* Le curseur se prend et se deplace, pas seulement se pointe. On suit le pointeur

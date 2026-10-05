@@ -149,7 +149,7 @@ const STUDIO = (() => {
   .dp-onglets .replier svg{transition:transform .2s}
   .daw-pan.ferme .replier svg{transform:rotate(180deg)}
   .daw-pan.ferme .dp-corps{display:none}
-  .dp-corps{display:flex;gap:12px;padding:12px 14px 14px;overflow-x:auto;background:var(--surface);max-height:250px;scrollbar-width:thin}
+  .dp-corps{display:flex;gap:12px;padding:12px 14px 14px;overflow-x:auto;background:var(--surface);max-height:300px;scrollbar-width:thin}
   .dp-corps::-webkit-scrollbar{height:8px}
   .dp-corps::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
   .dp-bloc{flex:0 0 auto;display:grid;align-content:start;gap:10px;padding:12px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line-soft)}
@@ -161,6 +161,25 @@ const STUDIO = (() => {
   .dp-act:hover{background:var(--line)}
   .dp-act.danger{color:var(--accent);background:var(--accent-soft)}
   .dp-aide{font-size:12px;color:var(--dim);line-height:1.45;max-width:340px;margin:0}
+  /* onglet effets : piste | rack de 8 cases | reglages de l'effet ouvert — tout tient sans defiler */
+  .dp-corps.rack{display:grid;grid-template-columns:190px minmax(300px,1fr) minmax(320px,1.35fr);gap:12px;overflow:visible;max-height:none;align-items:start}
+  .rk{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .rk-case{display:flex;align-items:center;gap:8px;min-width:0;padding:8px 10px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line-soft);cursor:pointer;text-align:left;transition:border-color .12s,background .12s}
+  .rk-case:hover{border-color:var(--line)}
+  .rk-case.ouvert{border-color:var(--pc,var(--accent));background:color-mix(in srgb,var(--pc,var(--accent)) 8%,var(--surface-2))}
+  .rk-case .txt{display:grid;min-width:0;flex:1}
+  .rk-case b{font-size:12px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rk-case small{font-size:10.5px;color:var(--dim);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rk-case:not(.on) small{opacity:.55}
+  .rk-case.on .fx-on{background:var(--pc,var(--accent))}
+  .rk-case.on .fx-on::after{transform:translateX(12px)}
+  .fxc.detail{min-height:100%}
+  .fxc.detail .fx-boutons{flex-wrap:wrap;row-gap:10px}
+  .fxc.detail header{justify-content:space-between}
+  .fxc.detail .fx-titre{display:flex;align-items:center;gap:8px}
+  .fxc .fx-aide{font-size:11.5px;color:var(--dim);margin:0;line-height:1.4}
+  @media(max-width:1000px){ .dp-corps.rack{grid-template-columns:1fr 1fr} .dp-corps.rack .dp-bloc{grid-column:1/-1} }
+  @media(max-width:640px){ .dp-corps.rack{grid-template-columns:1fr;max-height:300px;overflow-y:auto} }
   /* carte d'effet */
   .fxc{flex:0 0 auto;display:grid;align-content:start;gap:10px;padding:10px 12px 12px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line-soft);transition:border-color .15s,opacity .15s}
   .fxc header{display:flex;align-items:center;gap:8px;min-width:0}
@@ -377,6 +396,26 @@ const STUDIO = (() => {
     { k: "delay", nom: "Écho", divisions: [["1/4", "1/4"], ["1/8p", "1/8 pointée"], ["1/8", "1/8"], ["1/16", "1/16"], ["1/4t", "1/4 triolet"]],
       p: [["retour", "Répétitions", 0, 90, 1, "%", 35], ["filtre", "Brillance", 500, 12000, 100, "Hz", 4000], ["mix", "Niveau", 0, 100, 1, "%", 20]], cases: [["pingpong", "Ping-pong"]] }
   ];
+  const AIDE = {
+    hpf: "Retire le grave inutile (souffle, pied de micro, plosives). À laisser sur presque toutes les voix.",
+    eq: "Creuse ou renforce des zones : moins de « boue » vers 300–500 Hz, plus d'air dans les aigus.",
+    comp: "Resserre les écarts de volume pour que la voix reste devant. Seuil bas = plus compressé.",
+    sat: "Ajoute de la chaleur et du grain, comme un passage dans une console ou une bande.",
+    filtre: "Coupe une partie du spectre : effet téléphone ou radio pour les ad-libs et les intros.",
+    chorus: "Double et élargit la voix en stéréo : idéal pour les backs et les refrains.",
+    reverb: "Place la voix dans une pièce. Taille = longueur de la queue, pré-délai = détache la voix.",
+    delay: "Répète la voix en rythme, calé sur le tempo de la prod. Ping-pong = gauche puis droite."
+  };
+  const resume = (k, v) => ({
+    hpf: () => `${Math.round(v.freq)} Hz`,
+    eq: () => [v.bas && `${v.bas > 0 ? "+" : ""}${v.bas} graves`, v.mid && `${v.mid > 0 ? "+" : ""}${v.mid} méd.`, v.haut && `${v.haut > 0 ? "+" : ""}${v.haut} aigus`].filter(Boolean).join(" · ") || "à plat",
+    comp: () => `${v.seuil} dB · ${v.ratio}:1`,
+    sat: () => `chaleur ${Math.round(v.drive)} %`,
+    filtre: () => ({ tel: "téléphone", radio: "radio", pb: "passe-bas", ph: "passe-haut" }[v.type] || ""),
+    chorus: () => `${Math.round(v.mix)} %`,
+    reverb: () => `${(+v.taille).toFixed(1)} s · ${Math.round(v.mix)} %`,
+    delay: () => `${(FX.find(f => f.k === "delay").divisions.find(d => d[0] === v.division) || [, ""])[1]} · ${Math.round(v.mix)} %`
+  }[k] || (() => ""))();
   const FX_DEF = () => {
     const o = {};
     for (const f of FX) {
@@ -855,7 +894,7 @@ const STUDIO = (() => {
      « Region » (volume et fondus de la region choisie), « Projet » (reglages generaux).
      Les reglages sont des boutons rotatifs : on les tire vers le haut ou le bas (Maj pour
      affiner), double-clic pour revenir a la valeur d'origine, molette ou fleches au clavier. */
-  let onglet = "piste";
+  let onglet = "piste", fxOuvert = "reverb";
   const corps = $("dawCorps"), pan = $("dawPan");
   const ARC = (v01) => { const a0 = -225, a1 = a0 + 270 * v01, r = 17, cx = 21, cy = 21;
     const pt = a => [cx + r * Math.cos(a * Math.PI / 180), cy + r * Math.sin(a * Math.PI / 180)];
@@ -910,6 +949,7 @@ const STUDIO = (() => {
     else if (cle === "projet.beatVol") { if (modeFichier()) { if (gainProd) gainProd.gain.value = val / 100; } else { try { player.setVolume(val); VOL = val; } catch (e) {} } }
     else if (cle === "projet.decal") sale = true;
     else if (p) { p.preset = p.preset && cle.startsWith("fx.") ? "perso" : p.preset; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif());
+      if (cle.startsWith("fx.")) { const k = cle.split(".")[1], r = corps.querySelector(`[data-resume="${k}"]`); if (r) r.textContent = resume(k, p.fx[k]); }
       if (cle === "piste.vol") { const r = grilleEl.querySelector(`[data-vol="${p.id}"]`); if (r) r.value = Math.round(val * 100); } }
     sauver();
   }
@@ -919,6 +959,7 @@ const STUDIO = (() => {
     pan.style.setProperty("--pc", COULEURS[i % COULEURS.length]);
     $("dawOngletPiste").textContent = `${p.nom} · effets`;
     pan.querySelectorAll("[data-onglet]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.onglet === onglet)));
+    corps.classList.toggle("rack", onglet === "piste");
     if (onglet === "piste") {
       const presets = Object.entries(PRESETS).map(([c, x]) => `<option value="${c}"${p.preset === c ? " selected" : ""}>${esc(x.nom)}</option>`).join("")
         + (p.preset === "perso" ? '<option value="perso" selected>Réglages perso</option>' : "");
@@ -930,16 +971,21 @@ const STUDIO = (() => {
           <div class="ligne">${bouton("piste.vol", "Volume", 0, 1.5, .01, "x", p.vol, 1)}${bouton("piste.pan", "Panoramique", -1, 1, .01, "pan", p.pan, 0)}</div>
           ${P.pistes.length > 1 ? '<button class="dp-act danger" id="dpSupprPiste">Supprimer la piste</button>' : ""}
         </div>
-        ${FX.map(f => {
-          const v = p.fx[f.k];
-          return `<section class="fxc${v.on ? " on" : ""}" data-fx="${f.k}">
-            <header><button class="fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}"></button><b>${esc(f.nom)}</b>
-              ${f.types ? `<select data-fxtype="${f.k}">${f.types.map(([c, n]) => `<option value="${c}"${v.type === c ? " selected" : ""}>${n}</option>`).join("")}</select>` : ""}
-              ${f.divisions ? `<select data-fxdiv="${f.k}" title="Durée de l'écho, calée sur le tempo">${f.divisions.map(([c, n]) => `<option value="${c}"${v.division === c ? " selected" : ""}>${n}</option>`).join("")}</select>` : ""}
-            </header>
-            <div class="fx-boutons">${f.p.map(([c, n, min, max, pas, u, d]) => bouton(`fx.${f.k}.${c}`, n, min, max, pas, u, v[c], d)).join("")}</div>
-            ${(f.cases || []).map(([c, n]) => `<label class="fx-case"><input type="checkbox" data-fxcase="${f.k}.${c}"${v[c] ? " checked" : ""}>${n}</label>`).join("")}
-          </section>`; }).join("")}`;
+        <div class="rk" role="list">${FX.map(f => { const v = p.fx[f.k]; return `
+          <div class="rk-case${v.on ? " on" : ""}${fxOuvert === f.k ? " ouvert" : ""}" role="listitem" data-ouvrir="${f.k}">
+            <button class="fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}"></button>
+            <span class="txt"><b>${esc(f.nom)}</b><small data-resume="${f.k}">${esc(resume(f.k, v))}</small></span>
+          </div>`; }).join("")}</div>
+        ${(() => { const f = FX.find(x => x.k === fxOuvert), v = p.fx[f.k]; return `
+        <section class="fxc detail${v.on ? " on" : ""}" data-fx="${f.k}">
+          <header><span class="fx-titre"><button class="fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}"></button><b>${esc(f.nom)}</b></span>
+            ${f.types ? `<select data-fxtype="${f.k}">${f.types.map(([c, n]) => `<option value="${c}"${v.type === c ? " selected" : ""}>${n}</option>`).join("")}</select>` : ""}
+            ${f.divisions ? `<select data-fxdiv="${f.k}" title="Durée de l'écho, calée sur le tempo">${f.divisions.map(([c, n]) => `<option value="${c}"${v.division === c ? " selected" : ""}>${n}</option>`).join("")}</select>` : ""}
+          </header>
+          <p class="fx-aide">${AIDE[f.k]}</p>
+          <div class="fx-boutons">${f.p.map(([c, n, min, max, pas, u, d]) => bouton(`fx.${f.k}.${c}`, n, min, max, pas, u, v[c], d)).join("")}</div>
+          ${(f.cases || []).map(([c, n]) => `<label class="fx-case"><input type="checkbox" data-fxcase="${f.k}.${c}"${v[c] ? " checked" : ""}>${n}</label>`).join("")}
+        </section>`; })()}`;
       $("dpNom").addEventListener("change", e => { memoriser(); p.nom = e.target.value.trim() || p.nom; dessiner(); panneau(); sauver(); });
       $("dpPreset").addEventListener("change", e => { if (e.target.value === "perso") return; memoriser(); appliquerPreset(p, e.target.value); const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); dessiner(); panneau(); sauver(); message(`Préréglage « ${PRESETS[e.target.value].nom} »`); });
       if ($("dpSupprPiste")) $("dpSupprPiste").onclick = () => {
@@ -982,6 +1028,8 @@ const STUDIO = (() => {
   pan.addEventListener("click", e => {
     const o = e.target.closest("[data-onglet]"); if (o) { onglet = o.dataset.onglet; pan.classList.remove("ferme"); panneau(); return; }
     if (e.target.closest("#dawReplier")) { pan.classList.toggle("ferme"); return; }
+    const ouv = e.target.closest("[data-ouvrir]");
+    if (ouv && !e.target.closest("[data-fxon]")) { fxOuvert = ouv.dataset.ouvrir; panneau(); return; }
     const on = e.target.closest("[data-fxon]");
     if (on) { const p = pisteCible(), f = p.fx[on.dataset.fxon]; memoriser(); f.on = !f.on; p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); panneau(); dessiner(); sauver(); return; }
     const a = e.target.closest("[data-act]")?.dataset.act;
@@ -996,6 +1044,7 @@ const STUDIO = (() => {
     else if (t.dataset.act === "import") { importer(t.files[0]); return; }
     else return;
     p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver();
+    const k = (t.dataset.fxtype || t.dataset.fxdiv || (t.dataset.fxcase || "").split(".")[0]), r = corps.querySelector(`[data-resume="${k}"]`); if (r) r.textContent = resume(k, p.fx[k]);
   });
   /* tourner un bouton */
   let tour = null;

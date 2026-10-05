@@ -799,6 +799,30 @@ body.studio-rec #prev,body.studio-rec #next,body.studio-rec #shuffle{opacity:.4;
   box-shadow:var(--sh-1);
 }
 .tbtn.big:hover{background:#000}
+/* chargement : tant que YouTube charge ou bufferise, le bouton tourne au lieu d'afficher pause */
+.tbtn.big{position:relative}
+.tbtn.big svg{transition:opacity .15s}
+body.yt-charge .tbtn.big svg{opacity:0}
+body.yt-charge .tbtn.big::after,body.yt-charge .row.playing .play .glyph::after,body.yt-charge .tile.playing .go::after{
+  content:"";position:absolute;inset:0;margin:auto;width:18px;height:18px;border-radius:50%;
+  border:2.4px solid currentColor;border-right-color:transparent;animation:yt-tourne .7s linear infinite}
+body.yt-charge .row.playing .play .glyph svg,body.yt-charge .tile.playing .go svg{opacity:0}
+.row .play .glyph,.tile .go{position:relative}
+@keyframes yt-tourne{to{transform:rotate(360deg)}}
+/* volume : le haut-parleur montre le niveau (ondes, croix a zero) et reagit quand on le bouge */
+.vol-ico{width:22px;height:22px;display:grid;place-items:center;color:var(--dim);border-radius:6px;flex:0 0 auto}
+.vol-ico:hover{color:var(--ink)}
+.vol-ico svg{overflow:visible}
+.vol-ico .onde{transition:opacity .18s,transform .25s cubic-bezier(.2,.9,.25,1.4);transform-origin:9px 12px}
+.vol-ico .croix{transition:opacity .15s,transform .2s;transform-origin:18px 12px;opacity:0;transform:scale(.4)}
+.vol[data-niv="0"] .onde{opacity:0;transform:scale(.5)}
+.vol[data-niv="0"] .croix{opacity:1;transform:none}
+.vol[data-niv="1"] .onde.o2{opacity:0;transform:scale(.6)}
+.vol.bouge .vol-ico svg{animation:vol-bump .35s ease}
+.vol.bouge .onde.o1{animation:vol-onde .5s ease infinite}
+.vol.bouge .onde.o2{animation:vol-onde .5s ease .12s infinite}
+@keyframes vol-bump{40%{transform:scale(1.18)}}
+@keyframes vol-onde{50%{transform:translateX(1.5px) scale(1.08)}}
 .times{
   font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:10px;
   white-space:nowrap;font-variant-numeric:tabular-nums;
