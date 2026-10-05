@@ -650,13 +650,12 @@ function npHTML(b){
   npSims = similairesDe(b, 4);
   const ctx = (document.getElementById("resTitle")?.textContent || "").trim();
   const vg = id => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
-  return `<div class="np-tete">
+  return `<div class="np-fond" style="background-image:url('https://i.ytimg.com/vi/${b.id}/hqdefault.jpg')"></div>
+    <div class="np-tete">
       <p class="np-de">En lecture${ctx ? ` <span>· ${esc(ctx)}</span>` : ""}</p>
       <button class="np-x" data-np="fermer" aria-label="Fermer le panneau" title="Fermer le panneau"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     </div>
-    <div class="np-une">
-      <div class="np-fond" style="background-image:url('https://i.ytimg.com/vi/${b.id}/hqdefault.jpg')"></div>
-      <button class="np-cover" data-np="lire" aria-label="Lecture / pause">
+    <button class="np-cover" data-np="lire" aria-label="Lecture / pause">
         <img src="https://i.ytimg.com/vi/${b.id}/maxresdefault.jpg" alt="" onload="if(this.naturalWidth<=120){this.onload=null;this.src=this.src.replace('maxresdefault','hqdefault')}">
         <span class="np-go">${S.paused ? NP_LIRE : NP_PAUSE}</span>
       </button>
@@ -669,7 +668,6 @@ function npHTML(b){
           <button class="np-like" data-np="like">${NP_COEUR}</button>
         </div>
       </div>
-    </div>
     ${b.moods.length ? `<div class="np-tags">${b.moods.map(m => `<span class="np-tag">${esc(m)}</span>`).join("")}</div>` : ""}
     <p class="np-stats">${b.views ? `${fmtViews(b.views)} vues · ` : ""}${fmtDur(b.dur)} · il y a ${esc(fmtAge(b.days))}</p>
     ${suiv ? `<div class="np-bloc">
@@ -2378,6 +2376,13 @@ const ligneProd = (b, rang, fin) => `
     <span class="fin">${fin || ""}</span>
   </a>`;
 // petite carte (grille de Pour toi)
+/* Les petites affiches de « Pour toi » : meme DA que la grande, image plein cadre et texte
+   pose sur un degrade sombre. */
+const carteMiniV = b => `
+  <a class="tile vmini" data-id="${b.id}" href="?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
+    <div class="art"><img src="https://i.ytimg.com/vi/${b.id}/maxresdefault.jpg" alt="" loading="lazy" onload="if(this.naturalWidth<=120){this.onload=null;this.classList.add('hq');this.src=this.src.replace('maxresdefault','hqdefault')}"><span class="go">${ICO_LIRE}</span></div>
+    <div class="v-in"><span class="raison">Type beat ${esc(b.artists.length ? (ARTIST_NAME[b.artists[0]] || b.artists[0]) : (STYLE_NAME[b.style] || b.style))}</span><p class="t">${esc(b.title)}</p><div class="s"><span class="pill">${esc(STYLE_NAME[b.style] || b.style)}</span><span>${esc(b.prod)}</span></div></div>
+  </a>`;
 const carteMini = b => `
   <a class="tile" data-id="${b.id}" href="?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
     <div class="art"><img src="${vignette(b.id)}" alt="" loading="lazy"><span class="go">${ICO_LIRE}</span></div>
@@ -2544,7 +2549,7 @@ function majPourToi(){
         <span class="v-lire">${ICO_LIRE.replace(/13/g, "15")}Écouter</span>
       </div>
     </a>
-    <div class="vgrille">${autres.map(carteMini).join("")}</div>`;
+    <div class="vgrille">${autres.map(carteMiniV).join("")}</div>`;
   document.getElementById("pourtoiSub").textContent = resumeGout();
   peindreTuiles();
 }
