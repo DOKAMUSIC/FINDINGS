@@ -427,7 +427,8 @@ function majTitre(){
   if (document.body.classList.contains("vue-studio")) t = "Studio en ligne : pose ta topline sur une prod | FINDINGS";
   else if (!document.body.classList.contains("vue-accueil")) {
     const ar = S.artists.size === 1 && !S.styles.size && !S.moods.size && !S.prod ? [...S.artists][0] : null;
-    if (S.prod) { t = `${S.prod} : ${n} type beats à écouter | FINDINGS`; d = `Les ${n} prods de ${S.prod} sur FINDINGS, à écouter direct.`; }
+    if (S.q.trim()) { t = `« ${S.q.trim()} » : ${n} prods | FINDINGS`; }
+    else if (S.prod) { t = `${S.prod} : ${n} type beats à écouter | FINDINGS`; d = `Les ${n} prods de ${S.prod} sur FINDINGS, à écouter direct.`; }
     else if (ar) { t = `${ARTIST_NAME[ar] || ar} type beat : ${n} prods à écouter | FINDINGS`; d = `Les meilleurs type beats ${ARTIST_NAME[ar] || ar} du moment : ${n} prods récentes à écouter direct, par ${new Set(LAST.map(b => b.prod)).size} beatmakers.`; }
     else if (S.styles.size === 1 && !S.moods.size && !S.artists.size) { const st = STYLE_NAME[[...S.styles][0]]; t = `${st} type beat : ${n} prods à écouter | FINDINGS`; d = `${n} type beats ${st} récents à écouter direct sur FINDINGS.`; }
     else t = `${document.getElementById("resTitle")?.textContent || "Les prods"} | FINDINGS`;
@@ -1812,8 +1813,23 @@ bMin.addEventListener("change", () => syncBpm(true)); bMax.addEventListener("cha
 document.getElementById("clearBpm").addEventListener("click", () => { bMin.value=BMIN; bMax.value=BMAX; syncBpm(true); });
 
 let t;
-document.getElementById("q").addEventListener("input", e => {
-  clearTimeout(t); t = setTimeout(() => { S.q = e.target.value; render(); }, 120);
+/* La recherche de l'en-tete est une nouvelle recherche : au premier caractere tape, les
+   filtres de la page (artiste, style, beatmaker, likes, tempo…) partent. Sans ca, chercher
+   « Ninho » depuis la page de Hamza ne cherchait que parmi les prods de Hamza. */
+let rechercheNeuve = true;
+const champQ = document.getElementById("q");
+champQ.addEventListener("focus", () => { rechercheNeuve = true; });
+champQ.addEventListener("input", e => {
+  if (rechercheNeuve && e.target.value.trim()) {
+    rechercheNeuve = false;
+    viderFiltres();
+    S.styles.clear(); S.moods.clear(); S.artists.clear();
+    S.bpmSur = false; document.getElementById("bpmSur").checked = false;
+    bMin.value = BMIN; bMax.value = BMAX; syncBpm(true);   // remet aussi la jauge du tempo
+    refletFiltres();
+    if (document.body.classList.contains("vue-accueil") || document.body.classList.contains("vue-studio")) montrerVue("prods", true, "?vue=prods");
+  }
+  clearTimeout(t); t = setTimeout(() => { S.q = e.target.value; render(); majAdresse(); }, 120);
 });
 
 const crateBtn = document.getElementById("crateBtn");
