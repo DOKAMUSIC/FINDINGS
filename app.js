@@ -2391,7 +2391,9 @@ const carteMini = b => `
 /* Bandes : une section visible sur deux, recalcule quand une section apparait ou
    disparait (likes, abonnements, toplines n'existent pas pour tout le monde). */
 function alternerBandes(){
-  [...document.querySelectorAll("#vueAccueil main > section.sec")].filter(x => !x.hidden)
+  // « Pour toi » reste sans cadre : ses affiches se posent directement sur la page
+  document.getElementById("vuePourToi")?.classList.remove("bande");
+  [...document.querySelectorAll("#vueAccueil main > section.sec")].filter(x => !x.hidden && x.id !== "vuePourToi")
     .forEach((x, i) => x.classList.toggle("bande", i % 2 === 0));
 }
 (() => {
