@@ -28,6 +28,10 @@ const STUDIO = (() => {
     --hw:196px;--rh:74px;
   }
   .daw.on{opacity:1;transform:none}
+  /* dans la page Studio : le studio occupe la page, sous l'en-tete et au-dessus du lecteur */
+  .daw.inline{position:relative;left:auto;right:auto;top:auto;bottom:auto;z-index:1;
+    height:max(520px,calc(100vh - var(--hh,64px) - var(--bar-h) - 64px));box-shadow:var(--sh-2)}
+  .daw.inline #dawFermer{display:none}
   .daw[hidden]{display:none}
   .daw button{color:inherit}
   /* barre du haut */
@@ -454,6 +458,10 @@ const STUDIO = (() => {
     $("dawInfo").textContent = b.id === "libre" ? `${bpm()} BPM · ta prod, tes voix` : `${b.bpmSur ? "" : "~"}${b.bpm} BPM · ${STYLE_NAME[b.style] || b.style} · par ${b.prod}`;
     if (P.beatVol != null) { try { player.setVolume(P.beatVol); } catch (e) {} }
     dessiner(); inspecteur(); outils();
+    if (document.body.classList.contains("vue-studio") && typeof BASE !== "undefined") {
+      const adr = BASE + "studio/" + (b.id === "libre" ? "" : "?beat=" + encodeURIComponent(b.id));
+      if (adr !== location.pathname + location.search) history.replaceState({ vue: "studio" }, "", adr);
+    }
   }
   let saveMinuteur = 0;
   function sauver(){ clearTimeout(saveMinuteur); saveMinuteur = setTimeout(() => { try { PRISES_DB.ecrireProjet(JSON.parse(JSON.stringify(P))); } catch (e) {} }, 350); }
@@ -981,13 +989,13 @@ const STUDIO = (() => {
   }
 
   /* ─────────────────────────── ouvrir / fermer ─────────────────────────── */
-  async function ouvrir(libre){
-    const cible = libre || !current ? LIBRE : current;
+  async function ouvrir(arg){
+    const cible = arg && arg.id ? arg : (arg === true || !current ? LIBRE : current);
     if (PLAIN && cible !== LIBRE) { alert("Le studio a besoin du lecteur complet, indisponible ici."); return; }
     audio().resume();
     ouvert = true;
     el.hidden = false; requestAnimationFrame(() => el.classList.add("on"));
-    document.body.classList.add("daw-ouvert");
+    if (!el.classList.contains("inline")) document.body.classList.add("daw-ouvert");
     document.getElementById("micBtn")?.classList.add("on");
     suivre();
     if (!P || P.prod !== cible.id) await charger(cible);
@@ -1033,9 +1041,19 @@ const STUDIO = (() => {
     dessiner(); zone.scrollLeft = Math.max(0, t * zoom - avant);
   });
   zoom = Math.round(12 * Math.pow(25, .45));
-  document.getElementById("micBtn")?.addEventListener("click", () => (ouvert && !estLibre()) ? fermer() : (ouvert ? $("dawBascule").click() : ouvrir()));
-  // le bouton « Studio » de l'en-tete : ton projet libre (ta propre prod) ; le micro du lecteur : la prod en cours
-  document.getElementById("studioBtn")?.addEventListener("click", () => (ouvert && estLibre()) ? fermer() : ouvrir(true));
+  // le micro du lecteur : la page Studio sur la prod en cours ; le bouton « Studio » de l'en-tete (un lien) : le projet libre
+  document.getElementById("micBtn")?.addEventListener("click", () => {
+    if (!current) return;
+    if (ouvert && prod && prod.id === current.id) return;
+    montrerVue("studio", true, `studio/?beat=${encodeURIComponent(current.id)}`);
+  });
+  // « Importer ma prod » de la page Studio
+  document.getElementById("stImport")?.addEventListener("change", async e => {
+    const f = e.target.files[0]; e.target.value = "";
+    if (!f) return;
+    if (!ouvert) await page(true);
+    importer(f);
+  });
   $("dawBascule").onclick = async () => {
     if (rec) return;
     arreterInterne(); arreterSources();
@@ -1058,14 +1076,30 @@ const STUDIO = (() => {
     else if (k === "r") enregistrer();
     else if (k === "backspace" || k === "delete") supprimer();
     else if (k === "enter" || k === "home") positionner(0);
-    else if (k === "escape") { if (rec) arreterRec("bouton"); else if (sel) { sel = null; dessiner(); inspecteur(); outils(); } else fermer(); }
+    else if (k === "escape") { if (rec) arreterRec("bouton"); else if (sel) { sel = null; dessiner(); inspecteur(); outils(); } else if (!el.classList.contains("inline")) fermer(); }
     else if (k === "arrowleft" || k === "arrowright") positionner(tempsBeat() + (k === "arrowleft" ? -1 : 1) * (e.shiftKey ? mes() : tps()));
     else fait = false;
     if (fait) { e.preventDefault(); e.stopImmediatePropagation(); }
   }, true);
 
+  /* La page Studio : le studio s'installe dans la page, sur la prod demandee (?beat=…) ou
+     sur le projet libre. Quitter la page le referme ; le projet reste enregistre. */
+  async function page(on, beatId){
+    if (!on) { if (ouvert) await fermer(); return; }
+    const hote = document.getElementById("studioHote");
+    if (hote && el.parentElement !== hote) hote.appendChild(el);
+    el.classList.add("inline");
+    let cible = LIBRE;
+    const b = beatId && BY_ID.get(beatId);
+    if (b) { cible = b; if (!current || current.id !== b.id) playFrom([b], 0); }
+    if (ouvert && prod && prod.id === cible.id) return;
+    if (ouvert) { arreterInterne(); arreterSources(); clearTimeout(saveMinuteur); try { await PRISES_DB.ecrireProjet(JSON.parse(JSON.stringify(P))); } catch (e) {} await charger(cible); return; }
+    await ouvrir(cible);
+  }
+
   /* ─────────────────────────── branchements avec le lecteur ─────────────────────────── */
   return {
+    page, importer,
     ouvert: () => ouvert,
     occupe: () => ouvert || !!rec,
     finProd(){ if (rec && !horlogeInterne()) arreterRec("fin"); },
@@ -1077,3 +1111,6 @@ const STUDIO = (() => {
     ouvrir
   };
 })();
+
+// arrivee directe sur /studio/ : la page est deja affichee, le studio s'y installe
+if (document.body.classList.contains("vue-studio")) STUDIO.page(true, lireAdresse(location.href).get("beat"));

@@ -1,0 +1,1393 @@
+
+/* ═══════════ FINDINGS — thème clair, verre dépoli ═══════════
+   Blanc dominant, hairlines, ombres courtes, flou saturé derrière les barres
+   fixes. Les couleurs de style viennent du catalogue : elles n'arrivent que par
+   la variable --c, mélangée à du blanc ou à de l'encre pour rester lisible. */
+:root{
+  color-scheme:light;
+
+  --bg:#F5F5F7;
+  --surface:#FFFFFF;
+  --surface-2:#FBFBFD;
+  --glass:rgba(255,255,255,.72);
+  --glass-strong:rgba(255,255,255,.86);
+  --glass-edge:rgba(255,255,255,.75);
+
+  --ink:#1D1D1F;
+  --ink-2:#3A3A3C;
+  --dim:#6E6E73;
+  --dimmer:#98989D;
+
+  --line:rgba(0,0,0,.09);
+  --line-soft:rgba(0,0,0,.055);
+  --hover:rgba(0,0,0,.035);
+
+  --accent:#FA233B;
+  --accent-2:#FB5C74;
+  --accent-soft:rgba(250,35,59,.10);
+  --focus:#0A84FF;
+  --ok:#34C759;
+
+  --r-sm:8px; --r-md:12px; --r-lg:18px; --r-xl:24px;
+  --sh-1:0 1px 2px rgba(0,0,0,.05);
+  --sh-2:0 2px 6px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.05);
+  --sh-3:0 8px 24px rgba(0,0,0,.10),0 24px 64px rgba(0,0,0,.10);
+  --blur:saturate(180%) blur(28px);
+
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Helvetica Neue",Arial,sans-serif;
+  --display:var(--sans);
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,monospace;
+
+  --bar-h:78px;
+
+  /* ce qui change avec le theme, au-dela des couleurs nommees */
+  --fg-rgb:0,0,0;          /* voiles et rails gris: noir tres dilue sur fond clair */
+  --bg-rgb:245,245,247;    /* halos qui gardent le texte lisible sur la note 3D */
+  --on-ink:#fff;           /* texte pose sur un fond couleur d'encre */
+  --thumb:#E8E8ED;         /* fond des vignettes avant chargement */
+}
+/* ── theme sombre : celui du site par defaut ; le clair se choisit avec le bouton ── */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E0E10;
+  --surface:#1C1C1E;
+  --surface-2:#232326;
+  --glass:rgba(24,24,27,.74);
+  --glass-strong:rgba(28,28,31,.88);
+  --glass-edge:rgba(255,255,255,.08);
+  --ink:#F5F5F7;
+  --ink-2:#D1D1D6;
+  --dim:#9A9AA0;
+  --dimmer:#6E6E75;
+  --line:rgba(255,255,255,.12);
+  --line-soft:rgba(255,255,255,.07);
+  --hover:rgba(255,255,255,.06);
+  --accent-soft:rgba(250,35,59,.18);
+  --sh-1:0 1px 2px rgba(0,0,0,.45);
+  --sh-2:0 2px 6px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.35);
+  --sh-3:0 8px 24px rgba(0,0,0,.45),0 24px 64px rgba(0,0,0,.45);
+  --fg-rgb:255,255,255;
+  --bg-rgb:14,14,16;
+  --on-ink:#111113;
+  --thumb:#2C2C2E;
+}
+/* En sombre, les lavis deviennent des lueurs : le violet, fixe en bas au centre de
+   l'ecran, faisait un rond clair au milieu de la page pendant tout le defilement. On ne
+   garde que les deux coins du haut, plus discrets. */
+:root[data-theme="dark"] body::before{
+  background:
+    radial-gradient(900px 560px at 6% -14%, rgba(250,35,59,.09), transparent 62%),
+    radial-gradient(820px 540px at 96% -10%, rgba(10,132,255,.07), transparent 60%),
+    var(--bg);
+}
+/* le passage d'un theme a l'autre se fait en fondu, pas d'un coup */
+html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
+  transition:background-color .35s ease,border-color .35s ease,color .35s ease !important;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;overflow-x:hidden}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:14px;line-height:1.45;
+  letter-spacing:-.011em;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  /* L'interface se manipule, elle ne se copie pas : un double-clic sur un titre
+     ou un glisse rate surlignait du texte, ce qui trahit la page web sous l'appli. */
+  -webkit-user-select:none;user-select:none;
+}
+/* Les champs de saisie gardent la selection, sans quoi on ne peut plus editer. */
+input,textarea{-webkit-user-select:text;user-select:text}
+/* lavis de couleur très dilués : ce qui donne au blanc sa profondeur */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(900px 620px at 10% -12%, rgba(250,35,59,.13), transparent 62%),
+    radial-gradient(820px 600px at 92% -6%, rgba(10,132,255,.12), transparent 60%),
+    radial-gradient(760px 560px at 48% 108%, rgba(175,82,222,.10), transparent 62%),
+    var(--bg);
+}
+button,input,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+button{background:none;border:0;padding:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:6px}
+::selection{background:var(--accent-soft)}
+
+/* ─────────── en-tête ─────────── */
+.top{
+  position:sticky;top:0;z-index:40;
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border-bottom:1px solid var(--line-soft);
+  padding-top:env(safe-area-inset-top,0px);
+}
+.top-in{
+  max-width:1320px;margin:0 auto;padding:12px 22px;
+  display:flex;align-items:center;gap:22px;
+}
+.brand{display:flex;align-items:center;flex:0 0 auto;text-decoration:none}
+/* jour / nuit : la lune en clair (pour passer en sombre), le soleil en sombre */
+.theme-btn{
+  width:36px;height:36px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+  color:var(--ink-2);background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-1);
+  transition:transform .2s,box-shadow .15s;margin-left:-10px;
+}
+.theme-btn:hover{box-shadow:var(--sh-2)}
+.theme-btn:active{transform:scale(.92)}
+.theme-btn svg{grid-area:1/1;transition:transform .45s cubic-bezier(.2,.9,.25,1.2),opacity .25s}
+.theme-btn .soleil{opacity:0;transform:rotate(-90deg) scale(.4)}
+:root[data-theme="dark"] .theme-btn .lune{opacity:0;transform:rotate(90deg) scale(.4)}
+:root[data-theme="dark"] .theme-btn .soleil{opacity:1;transform:none;color:#FFD60A}
+@media(max-width:640px){ .theme-btn{width:34px;height:34px;margin-left:-4px} }
+/* La note passe derrière le mot, comme sur l'accueil. Dimensions explicites:
+   en contexte flex, width:auto n'hérite pas du rapport du viewBox. */
+.logo{
+  font-size:17px;font-weight:800;letter-spacing:-.03em;line-height:1.2;color:var(--ink);
+}
+
+.search{position:relative;flex:1 1 auto;min-width:0;max-width:640px}
+.search > svg{position:absolute;left:12px;top:11px;color:var(--dimmer);pointer-events:none}
+.search input{
+  width:100%;height:38px;border:1px solid transparent;border-radius:11px;
+  background:rgba(118,118,128,.12);padding:0 14px 0 34px;font-size:13.5px;
+  transition:background .15s,border-color .15s,box-shadow .15s;
+}
+.search input::placeholder{color:var(--dimmer)}
+.search input:focus{outline:none;background:var(--surface);border-color:rgba(var(--fg-rgb),.08);box-shadow:var(--sh-2)}
+.search input::-webkit-search-cancel-button{-webkit-appearance:none}
+.hot{
+  display:flex;gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(90deg,#000 90%,transparent);
+  mask-image:linear-gradient(90deg,#000 90%,transparent);
+}
+.hot::-webkit-scrollbar{display:none}
+.hot button{
+  font-size:11.5px;color:var(--dim);background:var(--surface);
+  border:1px solid var(--line-soft);border-radius:999px;padding:3px 10px;
+  white-space:nowrap;transition:.14s;
+}
+.hot button:hover{color:var(--ink);border-color:var(--line);box-shadow:var(--sh-1)}
+
+/* Les trois raccourcis personnels (Pour toi, Historique, Prods likes) forment UNE capsule :
+   trois pastilles separees se lisaient comme six boutons quand on y ajoutait la navigation.
+   Groupes, ils se lisent comme un seul objet, avec des segments. */
+.seg{
+  display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;
+  height:38px;padding:3px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-1);
+}
+.seg-b{
+  display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 13px;border-radius:999px;
+  font-size:13px;font-weight:560;color:var(--ink-2);transition:background .15s,color .15s;
+}
+/* filet entre deux segments : disparait autour d'un segment actif, qui a son propre fond */
+.seg-b + .seg-b{position:relative}
+.seg-b + .seg-b::before{
+  content:"";position:absolute;left:-2px;top:8px;bottom:8px;width:1px;background:var(--line-soft);
+}
+.seg-b:hover{background:rgba(var(--fg-rgb),.055);color:var(--ink)}
+.seg-b span.mono{font-size:11.5px;color:var(--dim)}
+.seg-b.on{background:var(--accent);color:#fff}
+.seg-b.on span.mono{color:rgba(255,255,255,.85)}
+.seg-b.on::before,.seg-b.on + .seg-b::before{opacity:0}
+.seg-b:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+@media(max-width:640px){
+  /* a petite largeur seuls les compteurs gardent un libelle : les icones se suffisent */
+  .seg-b{padding:0 11px} .hist-t{display:none}
+  /* le retour se reduit a sa fleche, sinon la rangee deborde */
+  #toutesBtn .sf-t{display:none} #toutesBtn{padding:0 11px}
+}
+
+/* ─────────── ossature ─────────── */
+.shell{max-width:1320px;margin:0 auto;padding:26px 22px 200px}
+.shell > *{min-width:0}
+@media(max-width:1000px){ .shell{padding-top:16px} }
+
+/* ── barre de filtres : une ligne, chaque famille s'ouvre en menu ──
+   Remplace la colonne de 250 px qui empilait cinq blocs (1279 px de haut, donc
+   defilante) : Style et Mood a eux seuls en prenaient 760. */
+/* Collee sous l'en-tete : les filtres restent a portee pendant qu'on parcourt 1 500
+   prods. --hh est la hauteur reelle de l'en-tete, mesuree en JS, parce qu'elle change
+   avec la largeur (suggestions de recherche, passage sur deux lignes en mobile). */
+.fbar{
+  display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+  position:sticky;top:var(--hh,96px);z-index:30;
+  margin-bottom:6px;padding:8px 0;
+}
+/* Le fond flou vit sur un pseudo-element qui deborde des marges de la page : la barre
+   est contrainte a la largeur du contenu, le flou doit couvrir tout l'ecran comme celui
+   de l'en-tete. --cw est la largeur de la zone visible, barre de defilement exclue :
+   100vw l'inclurait et ferait deborder la page sous Windows. Il n'apparait que colle,
+   sinon une bande floue traverserait la page au milieu du contenu. */
+.fbar::before{
+  content:"";position:absolute;z-index:-1;top:0;bottom:0;left:50%;
+  width:var(--cw,100vw);transform:translateX(-50%);pointer-events:none;
+  background:var(--glass);border-bottom:1px solid var(--line-soft);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  opacity:0;transition:opacity .18s;
+}
+.fbar.collee::before{opacity:1}
+.fitem{position:relative}
+.ftrig{
+  display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);
+  font-size:13px;font-weight:530;color:var(--ink-2);box-shadow:var(--sh-1);
+  cursor:pointer;transition:.15s;white-space:nowrap;
+}
+.ftrig:hover{box-shadow:var(--sh-2)}
+.ftrig svg{opacity:.5;transition:transform .18s}
+.ftrig[aria-expanded="true"] svg{transform:rotate(180deg)}
+.ftrig .fdot{display:none;width:7px;height:7px;border-radius:50%;background:var(--c,var(--accent));flex:0 0 auto}
+.ftrig.on{
+  background:color-mix(in srgb,var(--c,var(--accent)) 12%,var(--surface));
+  border-color:color-mix(in srgb,var(--c,var(--accent)) 40%,var(--surface));
+  color:color-mix(in srgb,var(--c,var(--accent)) 58%,var(--ink));
+  font-weight:590;
+}
+.ftrig.on .fdot{display:block}
+.ftog svg{opacity:.7}
+.ftog.on svg{opacity:1}
+.fclear{
+  display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 10px;
+  font-size:12.5px;font-weight:560;color:var(--accent);border-radius:999px;transition:.15s;
+}
+.fclear:hover{background:rgba(250,35,59,.08)}
+.fmenu{
+  position:absolute;top:calc(100% + 8px);left:0;z-index:35;
+  width:min(440px,calc(100vw - 28px));max-height:min(420px,max(200px,calc(100vh - var(--hh,96px) - 170px)));overflow-y:auto;
+  overscroll-behavior:contain;scrollbar-width:thin;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:var(--sh-2);padding:14px;display:grid;gap:10px;align-content:start;
+}
+/* champ de recherche du menu artiste : 175 noms, on cherche plutot qu'on ne defile */
+.fsearch{
+  width:100%;height:34px;border:1px solid var(--line);border-radius:9px;
+  background:var(--bg);padding:0 11px;font-size:13px;color:var(--ink);
+}
+.fsearch:focus{outline:none;border-color:var(--accent)}
+.fsearch::-webkit-search-cancel-button{-webkit-appearance:none}
+.fmenu-tempo{width:min(300px,calc(100vw - 28px))}
+/* sur petit ecran les menus prennent la largeur de la barre, sinon ils debordent */
+@media(max-width:640px){
+  /* quatre boutons sur une ligne : a 13 px de marge ils en prenaient deux, et une
+     barre collee de deux lignes mange l'ecran pendant tout le defilement */
+  .fbar{gap:6px}
+  .ftrig{padding:0 10px;gap:5px;font-size:12.5px}
+  /* un filtre actif porte sa valeur (« Ndombolo / Coupé-décalé », « 130–200 BPM ») :
+     on la tronque, et Effacer se reduit a sa croix, sinon la barre repasse a deux lignes */
+  .ftrig .flbl{max-width:76px;overflow:hidden;text-overflow:ellipsis}
+  /* les quatre boutons remplissaient deja la largeur au repos : les chevrons (16 px
+     chacun) sont la seule marge a reprendre. Au doigt, une pilule se lit comme un bouton. */
+  .ftrig svg{display:none}
+  /* « Jamais écoutées » se reduit a son icone : un cinquieme libelle ferait passer la barre sur deux lignes */
+  .ftog svg{display:block}
+  .ftog .flbl{display:none}
+  .fclear{padding:0 9px}
+  .fclear-t{display:none}
+  .fitem{position:static}
+  .fmenu,.fmenu-tempo{left:0;right:0;width:auto}
+}
+.fset{display:grid;gap:10px}
+.fhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--dim)}
+.fhead button{font-size:11.5px;color:var(--accent)}
+.fhead button:hover{text-decoration:underline}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:999px;font-size:12.5px;font-weight:500;
+  background:var(--surface);border:1px solid var(--line-soft);color:var(--ink-2);
+  transition:.14s;
+}
+.chip:hover{border-color:var(--line);box-shadow:var(--sh-1)}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--c);flex:0 0 auto}
+/* artistes : leur photo a la place de la pastille de couleur */
+.chip.avec-ph{padding-left:4px}
+.chip .ph{width:22px;height:22px;border-radius:50%;object-fit:cover;flex:0 0 auto;background:var(--line)}
+.ftrig .fph{width:22px;height:22px;border-radius:50%;object-fit:cover;margin-left:-8px;flex:0 0 auto}
+.ftrig .fph[hidden]{display:none}
+.ftrig.a-photo .fdot{display:none}
+.chip .n{font-family:var(--mono);font-size:10.5px;color:var(--dimmer);font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{
+  background:color-mix(in srgb,var(--c) 13%,var(--surface));
+  border-color:color-mix(in srgb,var(--c) 40%,var(--surface));
+  color:color-mix(in srgb,var(--c) 58%,var(--ink));
+  font-weight:590;
+}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.65}
+.bpm-box{display:grid;gap:8px}
+.hist{display:flex;align-items:flex-end;gap:2px;height:38px}
+.hist i{flex:1;background:rgba(var(--fg-rgb),.10);border-radius:2px 2px 0 0;transition:background .14s}
+/* les colonnes comprises dans la plage choisie prennent la couleur d'accent :
+   on voit d'un coup d'œil quelle part du catalogue le tempo retenu couvre */
+.hist i.in{background:var(--accent)}
+.slider{position:relative;height:22px}
+.slider .track{position:absolute;top:9px;left:0;right:0;height:4px;border-radius:2px;background:rgba(var(--fg-rgb),.09)}
+.slider .fill{position:absolute;top:9px;height:4px;border-radius:2px;background:var(--ink)}
+.slider input{
+  -webkit-appearance:none;appearance:none;position:absolute;top:0;left:0;width:100%;height:22px;
+  background:none;pointer-events:none;margin:0;
+}
+.slider input::-webkit-slider-thumb{
+  -webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;
+  border:.5px solid rgba(var(--fg-rgb),.08);box-shadow:0 1px 3px rgba(0,0,0,.2);
+  pointer-events:auto;cursor:grab;
+}
+.slider input::-moz-range-thumb{
+  width:20px;height:20px;border-radius:50%;background:#fff;border:.5px solid rgba(var(--fg-rgb),.08);
+  box-shadow:0 1px 3px rgba(0,0,0,.2);pointer-events:auto;cursor:grab;
+}
+.bpm-read{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--dim)}
+
+.switch{display:flex;align-items:center;gap:10px;cursor:pointer}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.switch .box{
+  width:42px;height:25px;border-radius:999px;background:rgba(120,120,128,.20);
+  position:relative;transition:background .2s;flex:0 0 auto;
+}
+.switch .box::after{
+  content:"";position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s;
+}
+.switch input:checked + .box{background:var(--ok)}
+.switch input:checked + .box::after{transform:translateX(17px)}
+.switch input:focus-visible + .box{outline:2px solid var(--focus);outline-offset:2px}
+.switch .lbl{font-size:13px}
+
+.note{font-size:11.5px;line-height:1.5;color:var(--dim);padding-top:14px;border-top:1px solid var(--line-soft)}
+
+/* ─────────── bandeau de résultats ─────────── */
+.res-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  margin-bottom:14px;
+}
+.res-head h2{font-size:26px;font-weight:700;letter-spacing:-.025em;line-height:1.15;display:inline;vertical-align:middle}
+/* « Suivre » : a cote du titre, quand la liste est celle d'un artiste ou d'un beatmaker */
+.suivre{
+  display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;margin-left:10px;vertical-align:middle;
+  border-radius:999px;border:1px solid var(--line);background:var(--surface);
+  font-size:12.5px;font-weight:600;color:var(--ink-2);box-shadow:var(--sh-1);transition:.15s;
+}
+.suivre:hover{box-shadow:var(--sh-2)}
+/* ── page beatmaker, a la maniere d'une page d'artiste ── */
+.profil{
+  /* clip et non hidden : la photo floutee deborde, et un bloc « hidden » qui deborde peut
+     defiler — un clic sur Suivre le faisait glisser de 60 px, la photo coupee en haut */
+  position:relative;overflow:hidden;overflow:clip;border-radius:var(--r-lg,18px);margin:0 0 18px;
+  min-height:250px;display:flex;align-items:flex-end;padding:26px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--c,var(--accent)) 70%,#000),color-mix(in srgb,var(--c,var(--accent)) 30%,#111));
+  color:#fff;box-shadow:var(--sh-2);
+}
+.profil[hidden]{display:none}
+.profil .ban{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.55;filter:saturate(1.1)}
+.profil::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 45%,rgba(0,0,0,.72) 100%)}
+.profil-in{position:relative;z-index:1;display:flex;align-items:flex-end;gap:24px;width:100%}
+.profil .ava{
+  width:148px;height:148px;border-radius:50%;flex:0 0 auto;object-fit:cover;background:#222;
+  box-shadow:0 14px 40px rgba(0,0,0,.45);border:3px solid rgba(255,255,255,.14);
+  display:grid;place-items:center;font-size:52px;font-weight:700;color:rgba(255,255,255,.85);
+}
+.profil-txt{min-width:0;flex:1 1 280px}
+.profil .eyebrow{color:rgba(255,255,255,.75);display:flex;align-items:center;gap:6px}
+.profil h2{font-size:clamp(34px,6vw,64px);font-weight:800;letter-spacing:-.04em;line-height:1;margin:6px 0 10px;overflow-wrap:anywhere}
+.profil .meta{font-size:13.5px;color:rgba(255,255,255,.82);display:flex;flex-wrap:wrap;gap:4px 14px}
+.profil .meta b{color:#fff;font-weight:650}
+.profil-acts{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.profil-acts .lire{
+  width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;
+  box-shadow:0 8px 22px rgba(250,35,59,.45);transition:.15s;
+}
+.profil-acts .lire:hover{transform:scale(1.05)}
+.profil-acts .pbtn{
+  height:34px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.5);color:#fff;
+  font-size:13px;font-weight:650;display:inline-flex;align-items:center;gap:6px;transition:.15s;background:rgba(255,255,255,.06);
+}
+.profil-acts .pbtn:hover{border-color:#fff;background:rgba(255,255,255,.14)}
+.profil-acts .pbtn.on{background:#fff;color:#111;border-color:#fff}
+/* liens d'ecoute : une pastille a la couleur de la plateforme */
+.profil{--pc-spotify:#1ED760;--pc-apple:#FA2D48;--pc-deezer:#A238FF}
+.profil-acts .plat i{width:9px;height:9px;border-radius:50%;background:var(--pc);box-shadow:0 0 0 3px color-mix(in srgb,var(--pc) 30%,transparent)}
+.profil-acts .plat:hover{border-color:var(--pc)}
+.profil .cibles{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+.profil .cibles a{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff}
+.profil .cibles a:hover{background:rgba(255,255,255,.24)}
+.profil .cibles a{display:inline-flex;align-items:center;gap:6px}
+.profil .cibles img{width:18px;height:18px;border-radius:50%;object-fit:cover;margin-left:-5px}
+.profil .prof-toi{margin:12px 0 0;font-size:12.5px;color:rgba(255,255,255,.72);max-width:520px;line-height:1.45}
+.profil .cibles-t{font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.6);align-self:center;margin-right:2px}
+body.vue-profil #resTitle,body.vue-profil #resSub,body.vue-profil #suivreBtn,body.vue-profil #playall{display:none}
+@media(max-width:640px){
+  .profil{padding:20px 18px;min-height:0;padding-top:28px}
+  .profil-in{flex-direction:column;align-items:flex-start;gap:14px;flex-wrap:nowrap}
+  .profil-txt{flex:0 0 auto;width:100%}
+  .profil .ava{width:104px;height:104px;font-size:38px}
+  .profil h2{margin:4px 0 8px}
+}
+/* petite photo devant un beatmaker suivi */
+.suivis-chips img{width:20px;height:20px;border-radius:50%;object-fit:cover;margin-left:-5px}
+/* dossiers de likes : une rangee de pastilles au-dessus des filtres */
+.dossiers{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 10px}
+.dossiers[hidden]{display:none}
+.dos{
+  display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);font-size:13px;font-weight:560;color:var(--ink-2);
+  box-shadow:var(--sh-1);transition:.15s;cursor:pointer;
+}
+.dos:hover{box-shadow:var(--sh-2)}
+.dos span{font-family:var(--mono,ui-monospace,monospace);font-size:11px;color:var(--dimmer)}
+.dos[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--on-ink)}
+.dos[aria-pressed="true"] span{color:rgba(255,255,255,.6)}
+.dos.suivi{padding:0 13px 0 6px;gap:7px}
+.dos.suivi img{width:22px;height:22px;margin:0;border-radius:50%;object-fit:cover}
+.dos.suivi i{width:22px;height:22px;border-radius:50%;background:var(--line)}
+a.dos-act{display:inline-flex;align-items:center}
+/* abonnements : les filtres du catalogue n'ont pas de sens ici (ils faisaient quitter la
+   page) — il ne reste que les onglets par personne et « Jamais écoutées » */
+body.vue-suivis #fbar{display:none}
+.dos-neuf{display:inline-flex;align-items:center;gap:6px}
+.dos-neuf[aria-pressed="true"]{color:var(--accent);background:var(--accent-soft)}
+.dos.ajout{background:transparent;border-style:dashed;box-shadow:none;color:var(--dim)}
+.dos-input{height:32px;border:1px solid var(--accent);border-radius:999px;padding:0 13px;font-size:13px;width:170px;background:var(--surface);color:var(--ink);outline:none}
+.dos-act{height:32px;padding:0 9px;font-size:12.5px;font-weight:560;color:var(--dim);border-radius:999px}
+.dos-act:hover{color:var(--ink);background:rgba(var(--fg-rgb),.05)}
+.dos-act.danger{color:var(--accent)}
+/* menu « ranger dans » ouvert depuis une prod */
+.dosmenu{
+  position:fixed;z-index:60;width:240px;max-height:320px;overflow-y:auto;padding:8px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg,14px);box-shadow:var(--sh-2);
+}
+.dosmenu[hidden]{display:none}
+.dosmenu .eyebrow{display:block;padding:4px 8px 6px}
+.dosmenu label{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;font-size:13px;cursor:pointer}
+.dosmenu label:hover{background:rgba(var(--fg-rgb),.04)}
+.dosmenu input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px}
+.dosmenu .dos-input{width:100%;margin-top:6px;border-radius:9px}
+.icon.dans{color:var(--accent)}
+/* sur telephone, dans les likes, l'icone chaine cede sa place au dossier : avec quatre
+   icones le titre n'avait plus que six lettres */
+@media(max-width:640px){ .row .acts:has([data-act="dossier"]) [data-act="chan"]{display:none} }
+.suivre.on{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.suivre[hidden]{display:none}
+.res-head .sub{display:block}
+/* le nom du beatmaker ouvre sa page */
+.prod button{font:inherit;color:inherit;padding:0;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+/* un bouton ne se tronque pas dans le texte qui l'entoure : « par … » cachait le nom entier.
+   En ligne souple, c'est le nom qui se raccourcit, « par » reste. */
+.prod{display:inline-flex;gap:.3em;align-items:baseline}
+.prod button:hover b{text-decoration:underline}
+.res-head .sub{font-size:12.5px;color:var(--dim);margin-top:3px}
+
+.playall{
+  display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 15px;border-radius:999px;
+  background:var(--accent);color:#fff;font-size:13px;font-weight:600;box-shadow:var(--sh-1);
+  transition:.15s;
+}
+.playall:hover{background:#e51f35;box-shadow:var(--sh-2)}
+.surprise{
+  display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink-2);
+  font-size:13px;font-weight:560;box-shadow:var(--sh-1);transition:.15s;
+}
+.surprise:hover{box-shadow:var(--sh-2)}
+.surprise svg{transition:transform .35s cubic-bezier(.2,.9,.25,1.4)}
+.surprise:active svg,.hbtn:active svg{transform:rotate(90deg)}
+@media(max-width:640px){ .surprise span{display:none} .surprise{padding:0 10px} }
+
+.head-acts{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0;max-width:100%}
+.sorts{
+  display:inline-flex;gap:2px;padding:2px;border-radius:999px;max-width:100%;
+  background:rgba(118,118,128,.10);border:1px solid var(--line-soft);
+  overflow-x:auto;scrollbar-width:none;
+}
+.sorts::-webkit-scrollbar{display:none}
+.sorts button{
+  padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:500;color:var(--dim);
+  transition:.14s;white-space:nowrap;
+}
+.sorts button:hover{color:var(--ink)}
+.sorts button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:590;box-shadow:var(--sh-1)}
+
+/* ─────────── la liste ─────────── */
+.list{
+  background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);border-radius:var(--r-lg);box-shadow:var(--sh-2);
+  padding:6px;
+}
+.row{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;
+  padding:8px 10px;border-radius:var(--r-md);cursor:pointer;position:relative;
+  transition:background .14s;
+}
+.row + .row::before{
+  content:"";position:absolute;top:0;left:78px;right:10px;height:1px;background:var(--line-soft);
+}
+.row:hover{background:var(--hover)}
+.row:hover::before,.row:hover + .row::before{background:transparent}
+.row.playing{background:color-mix(in srgb,var(--c) 10%,var(--surface))}
+.row.playing::before,.row.playing + .row::before{background:transparent}
+.row.playing .title{color:color-mix(in srgb,var(--c) 62%,var(--ink))}
+
+.play{
+  position:relative;width:54px;height:54px;border-radius:9px;overflow:hidden;flex:0 0 auto;
+  background:var(--thumb);box-shadow:0 1px 3px rgba(0,0,0,.12);
+}
+.play img{width:100%;height:100%;object-fit:cover;display:block}
+.play .glyph{
+  position:absolute;inset:0;display:grid;place-items:center;color:#fff;
+  background:rgba(0,0,0,.42);backdrop-filter:blur(2px);
+  opacity:0;transition:opacity .14s;
+}
+.row:hover .glyph,.row.playing .glyph{opacity:1}
+
+.meta{min-width:0}
+.title{
+  font-size:14.5px;font-weight:590;letter-spacing:-.015em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.sub2{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:2px;font-size:12px;color:var(--dim);min-width:0}
+.pill{
+  font-size:11px;font-weight:590;color:color-mix(in srgb,var(--c) 55%,var(--ink));
+  background:color-mix(in srgb,var(--c) 12%,var(--surface));
+  border-radius:5px;padding:1px 7px;
+}
+.new{
+  font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+  color:#fff;background:var(--accent);border-radius:5px;padding:1px 6px;
+}
+.prod{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:100%}
+.prod b{font-weight:590;color:var(--ink-2)}
+.refs{display:flex;gap:5px;flex-wrap:wrap}
+.refs button{
+  font-size:11px;color:var(--dim);background:rgba(118,118,128,.10);
+  border-radius:999px;padding:1px 8px;transition:.14s;
+}
+.refs button:hover{background:rgba(118,118,128,.18);color:var(--ink)}
+
+.nums{display:flex;align-items:center;gap:20px;flex:0 0 auto}
+.num{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:34px}
+.num .v{font-family:var(--mono);font-size:12.5px;font-weight:500;font-variant-numeric:tabular-nums}
+.num .k{font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--dimmer)}
+/* valeur devinée : grisée et précédée d'un tilde, pour ne pas la faire passer
+   pour une mesure */
+.num .v.flou{color:var(--dimmer);font-weight:400;cursor:help}
+.mini{font-size:11px;line-height:1.45;color:var(--dim);margin:2px 0 0}
+.num.pop{min-width:62px;align-items:flex-end}
+.num.pop .bar{width:56px;height:3px;border-radius:2px;background:rgba(var(--fg-rgb),.09);margin-top:4px;overflow:hidden}
+.num.pop .bar i{display:block;height:100%;border-radius:2px;background:var(--dimmer)}
+.num.pop .k{display:none}   /* la barre suffit tant qu'elle est visible */
+.acts{display:flex;gap:2px;margin-left:4px}
+.icon{
+  width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--dimmer);
+  transition:.14s;position:relative;
+}
+
+/* ── le like : rebond du cœur, anneau qui s'ouvre, éclats qui s'écartent ── */
+.tbtn.like{position:relative}
+.tbtn.like.sav{color:var(--accent)}
+.icon.pop svg,.tbtn.like.pop svg{animation:coeur-rebond .42s cubic-bezier(.2,.9,.25,1.4)}
+/* ── studio : le bouton micro du lecteur ouvre la station audio (studio.js) ── */
+.tbtn.mic.on{color:#fff;background:var(--accent)}
+/* pendant une prise, la barre de progression ne se manipule pas : la synchro serait perdue */
+body.studio-rec .prog{pointer-events:none}
+body.studio-rec #prev,body.studio-rec #next,body.studio-rec #shuffle{opacity:.4;pointer-events:none}
+/* badge des prods qui ont des prises */
+.tl-n{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:650;color:var(--accent);background:var(--accent-soft);border-radius:5px;padding:1px 6px}
+
+/* ── suivre quelqu'un : rebond du bouton, halo autour de la photo, confettis, message ── */
+.suivi-pop{animation:suivi-rebond .5s cubic-bezier(.2,.9,.25,1.4)}
+@keyframes suivi-rebond{0%{transform:scale(1)}25%{transform:scale(.88)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
+.ava.halo{animation:ava-halo 1.1s ease-out}
+@keyframes ava-halo{
+  0%{box-shadow:0 14px 40px rgba(0,0,0,.45),0 0 0 0 rgba(255,255,255,.75);transform:scale(1)}
+  30%{transform:scale(1.06)}
+  100%{box-shadow:0 14px 40px rgba(0,0,0,.45),0 0 0 34px rgba(255,255,255,0);transform:scale(1)}
+}
+.confetti{position:fixed;z-index:80;width:8px;height:8px;border-radius:2px;pointer-events:none}
+.suivi-toast{
+  position:fixed;left:50%;bottom:calc(112px + env(safe-area-inset-bottom,0px));z-index:85;
+  display:flex;align-items:center;gap:11px;width:max-content;max-width:calc(100vw - 32px);
+  padding:9px 18px 9px 9px;border-radius:22px;background:var(--ink);color:var(--on-ink);line-height:1.3;
+  font-size:13.5px;font-weight:560;box-shadow:0 14px 34px rgba(0,0,0,.28);
+  transform:translate(-50%,24px);opacity:0;transition:transform .35s cubic-bezier(.2,.9,.25,1.2),opacity .25s;
+}
+.suivi-toast.on{transform:translate(-50%,0);opacity:1}
+.suivi-toast img,.suivi-toast .ini{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:0 0 auto;background:#333;display:grid;place-items:center;font-weight:700}
+.suivi-toast .toast-act{
+  margin-left:4px;height:30px;padding:0 13px;border-radius:999px;background:var(--bg);color:var(--ink);
+  font-size:12.5px;font-weight:650;flex:0 0 auto;
+}
+.suivi-toast .toast-act:hover{background:var(--surface)}
+.like-toast img{border-radius:8px;width:44px;object-fit:cover}
+.like-toast small{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbtn.dosb.dans{color:var(--accent)}
+/* la barre d'un telephone est pleine : on y range par le message « Ranger » ou les likes */
+@media(max-width:520px){ #dosBtn{display:none} }
+/* avec le micro, six boutons ne tiennent plus : l'aleatoire cede d'abord sa place,
+   puis l'ecoute rapide sur les plus petits ecrans — sinon le coeur sortait de l'ecran */
+@media(max-width:420px){ #shuffle{display:none} }
+@media(max-width:350px){ #rapide{display:none} }
+.suivi-toast small{display:block;font-size:11.5px;font-weight:450;color:color-mix(in srgb,var(--on-ink) 62%,transparent)}
+@keyframes coeur-rebond{
+  0%{transform:scale(1)}
+  22%{transform:scale(.8)}
+  55%{transform:scale(1.3)}
+  100%{transform:scale(1)}
+}
+.burst{position:absolute;inset:0;pointer-events:none}
+.burst .ring{
+  position:absolute;inset:1px;border-radius:50%;border:2px solid var(--accent);
+  animation:like-anneau .5s ease-out forwards;
+}
+@keyframes like-anneau{
+  from{transform:scale(.4);opacity:.85}
+  to{transform:scale(1.85);opacity:0}
+}
+.burst .spark{
+  position:absolute;left:calc(50% - 1.5px);top:calc(50% - 1.5px);
+  width:3px;height:3px;border-radius:50%;background:var(--accent);
+  animation:like-eclat .55s cubic-bezier(.2,.7,.3,1) forwards;
+}
+@keyframes like-eclat{
+  0%{transform:rotate(var(--a)) translateY(-2px) scale(1);opacity:.95}
+  100%{transform:rotate(var(--a)) translateY(-15px) scale(.2);opacity:0}
+}
+.icon:hover{background:rgba(var(--fg-rgb),.06);color:var(--ink)}
+.icon.sav{color:var(--accent)}
+.dead{opacity:.45}
+.dead .title{text-decoration:line-through}
+
+.empty{padding:56px 24px;text-align:center}
+.list > .suite{height:1px;list-style:none}
+.empty h3{font-size:19px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+.empty p{font-size:13.5px;color:var(--dim)}
+
+@media(max-width:1240px){ .row .num.k-key{display:none} }
+/* Le nombre d'écoutes reste lisible bien plus longtemps : on sacrifie d'abord
+   sa barre, puis la durée, et lui en dernier. */
+@media(max-width:1100px){
+  .row .num.pop .bar{display:none}
+  .row .num.pop .k{display:block}
+  .row .num.pop{min-width:42px}
+}
+@media(max-width:1000px){ .row .nums .num:nth-of-type(3){display:none} }
+@media(max-width:860px){ .res-head h2{font-size:22px} }
+@media(max-width:780px){ .row .num.pop{display:none} }
+@media(max-width:640px){
+  .row .nums .num{display:none}
+  .row .refs{display:none}
+  .row{gap:11px;padding:7px 8px}
+  .row + .row::before{left:66px}
+  .play{width:46px;height:46px}
+  .hot{display:none}
+  .top-in{gap:12px;padding:10px 14px;flex-wrap:wrap}
+  .shell{padding:14px 14px 210px}
+}
+
+/* ─────────── pied de page ─────────── */
+.hint-file{
+  max-width:1320px;margin:14px auto 0;padding:12px 16px;border-radius:var(--r-md);
+  background:rgba(255,214,10,.16);border:1px solid rgba(180,140,0,.28);
+  font-size:12.5px;line-height:1.5;color:#6b5200;
+}
+.hint-file code{font-family:var(--mono);font-size:11.5px;background:rgba(var(--fg-rgb),.06);padding:1px 5px;border-radius:4px}
+.hint-file b{color:#4a3800}
+@media(max-width:1000px){ .hint-file{margin:12px 14px 0} }
+
+.foot{
+  max-width:1320px;margin:0 auto;padding:6px 22px 40px;
+  font-size:11.5px;line-height:1.6;color:var(--dim);
+}
+.foot p{margin:0 0 6px;max-width:80ch}
+.foot b{color:var(--ink-2);font-weight:590}
+
+/* ─────────── le lecteur ─────────── */
+.bar{
+  position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;
+  border-radius:var(--r-lg);
+  background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);box-shadow:var(--sh-3);
+  transform:translateY(calc(100% + 28px));transition:transform .32s cubic-bezier(.32,.72,0,1);
+}
+.bar.up{transform:none}
+.prog{position:absolute;top:0;left:0;right:0;height:14px;cursor:pointer;z-index:2;
+  /* sans ca, glisser sur la barre en tactile fait defiler la page au lieu de chercher */
+  touch-action:none}
+/* Le remplissage et la pastille se mesurent sur la piste elle-même, pas sur la
+   barre entière : un pourcentage calculé sur une largeur plus grande que la
+   piste fait déborder l'indicateur et décale le clic de déplacement. */
+.prog .rail2{position:absolute;top:6px;left:14px;right:14px;height:4px;border-radius:2px;background:rgba(var(--fg-rgb),.09)}
+/* Le dégradé est dimensionné sur la piste entière, pas sur le remplissage :
+   la barre agit comme une fenêtre qui en découvre une part croissante. La
+   couleur se construit donc à mesure que la prod avance, au lieu d'être
+   comprimée dans les premières secondes. Les teintes dérivent toutes de --c,
+   la couleur du style : chaque genre garde la sienne. */
+.prog .rail2 i{
+  position:absolute;left:0;top:0;height:100%;width:0;border-radius:2px;
+  background-image:linear-gradient(90deg,
+    color-mix(in srgb, var(--c) 76%, #fff) 0%,
+    var(--c) 38%,
+    color-mix(in srgb, var(--c) 72%, #101014) 100%);
+  background-repeat:no-repeat;background-position:left center;
+  transition:width .18s linear;
+}
+.prog .rail2 .knob{
+  position:absolute;top:-3px;left:0;width:10px;height:10px;border-radius:50%;background:var(--c);
+  margin-left:-5px;opacity:0;transition:opacity .12s;box-shadow:0 1px 3px rgba(0,0,0,.25);
+}
+.prog:hover .knob,.prog:focus-visible .knob,.prog.glisse .knob{opacity:1}
+.prog.glisse{cursor:grabbing}
+
+.bar-in{
+  max-width:1320px;margin:0 auto;padding:12px 16px;height:var(--bar-h);
+  display:flex;align-items:center;gap:16px;
+}
+.vid{
+  width:96px;height:54px;border-radius:8px;overflow:hidden;background:#000;
+  flex:0 0 auto;position:relative;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.18);
+  transition:width .2s,height .2s;
+}
+.vid iframe{width:100%;height:100%;border:0;display:block}
+.vid.big{
+  position:absolute;bottom:calc(100% + 14px);left:16px;
+  width:min(340px, calc(100vw - 56px));height:auto;aspect-ratio:16/9;
+  border-radius:var(--r-md);box-shadow:var(--sh-3);
+}
+@media(max-width:820px){ .vid.big{left:8px} }
+/* en intégration simple, YouTube affiche ses propres commandes : les nôtres,
+   qui ne peuvent plus rien piloter, s'effacent */
+.bar.plain .prog,.bar.plain #toggle,.bar.plain .times{display:none}
+.vid.big iframe{width:100%;height:100%;margin:0}
+/* Couche transparente au-dessus de l'iframe : sans survol, YouTube n'affiche
+   ni son titre, ni ses boutons de partage. C'est notre barre qui pilote la
+   lecture, donc rien n'est perdu. En repli, au contraire, les commandes de
+   YouTube sont le seul moyen de jouer : la couche s'efface. */
+.vid .shield{position:absolute;inset:0;z-index:2;cursor:default}
+.bar.plain .vid .shield{display:none}
+/* L'iframe YouTube occupe toute la vignette et intercepte les clics : la
+   commande d'agrandissement doit donc être un bouton posé par-dessus, avec ses
+   propres événements. */
+.vid .zoom{
+  position:absolute;top:3px;right:3px;z-index:3;
+  width:21px;height:21px;border-radius:7px;display:grid;place-items:center;
+  background:rgba(0,0,0,.55);color:#fff;border:0;padding:0;cursor:pointer;
+  opacity:.9;transition:background .14s,opacity .14s,transform .14s;
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+}
+.vid .zoom:hover{opacity:1;background:rgba(0,0,0,.78);transform:scale(1.08)}
+.vid .zoom:focus-visible{outline:2px solid #fff;outline-offset:1px}
+.vid.big .zoom{top:8px;right:8px;width:28px;height:28px;border-radius:9px}
+
+.now{min-width:0;flex:1 1 200px}
+.now .t{
+  font-size:14.5px;font-weight:650;letter-spacing:-.018em;margin:0 0 1px;
+  color:color-mix(in srgb,var(--c) 58%,var(--ink));
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.now .d{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.now .d span + span{margin-left:10px}
+.now .d b{font-weight:590;color:var(--ink-2)}
+
+.transport{display:flex;align-items:center;gap:2px;flex:0 0 auto}
+.tbtn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--ink-2);transition:.14s}
+.tbtn:hover{background:rgba(var(--fg-rgb),.06)}
+.tbtn.on{color:var(--accent);background:var(--accent-soft)}
+.tbtn.big{
+  width:44px;height:44px;margin:0 4px;background:var(--ink);color:var(--on-ink);
+  box-shadow:var(--sh-1);
+}
+.tbtn.big:hover{background:#000}
+.times{
+  font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:10px;
+  white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+.times b{color:var(--ink-2);font-weight:500}
+
+.bar-acts{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.vol{display:flex;align-items:center;gap:7px;color:var(--dimmer)}
+.vol input{
+  -webkit-appearance:none;appearance:none;width:72px;height:4px;border-radius:2px;
+  background:rgba(var(--fg-rgb),.12);cursor:pointer;
+}
+.vol input::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;
+  border:.5px solid rgba(var(--fg-rgb),.08);box-shadow:0 1px 2px rgba(0,0,0,.25);
+}
+.vol input::-moz-range-thumb{
+  width:13px;height:13px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);
+}
+
+.btn{
+  display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:999px;
+  font-size:12.5px;font-weight:590;white-space:nowrap;
+  background:rgba(118,118,128,.12);color:var(--ink);transition:.15s;
+}
+.btn:hover{background:rgba(118,118,128,.2)}
+.btn.pri{background:var(--accent);color:#fff}
+.btn.pri:hover{background:#e51f35}
+
+@media(max-width:1180px){ .vol{display:none} }
+@media(max-width:1060px){ .bar-acts .btn.ghost{display:none} }
+@media(max-width:380px){
+  .bar-in{gap:8px}
+  .transport{gap:0}
+  .tbtn{width:32px;height:32px}
+  .tbtn.big{width:40px;height:40px;margin:0 2px}
+  .vid{width:46px;height:46px}
+  .now .t{font-size:13.5px}
+}
+@media(max-width:820px){
+  .bar{left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+  .bar-in{padding:10px 12px;gap:10px}
+  .vid{width:54px;height:54px;border-radius:9px}
+  .vid iframe{width:96px;height:54px;margin-left:-21px}
+  .times{display:none}
+  .bar-acts .btn{display:none}
+}
+
+/* ═══════════ vue accueil ═══════════
+   Portée depuis l'ancienne page d'accueil. Le lecteur, lui, est celui du
+   catalogue : il n'y en a plus qu'un dans le document. */
+/* ─────────── barre du haut ─────────── */
+.hnav{
+  position:sticky;top:0;z-index:30;
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border-bottom:1px solid var(--line-soft);
+  padding-top:env(safe-area-inset-top,0px);
+}
+.hnav-in{
+  max-width:1220px;margin:0 auto;padding:11px 22px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.hnav .mark{font-size:17px;font-weight:800;letter-spacing:-.03em}
+.hnav .links{display:flex;align-items:center;gap:6px}
+.hnav .links a{
+  padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--dim);transition:.15s;
+}
+.hnav .links a:hover{color:var(--ink);background:rgba(var(--fg-rgb),.05)}
+.hnav .links a.cta{background:var(--ink);color:var(--on-ink);font-weight:590}
+.hnav .links a.cta:hover{background:#000}
+
+/* ─────────── héros ─────────── */
+.hero{
+  position:relative;
+  min-height:min(86vh,760px);
+  display:grid;place-items:center;
+  padding:56px 22px 40px;
+  overflow:hidden;
+}
+.stage{
+  position:absolute;top:50%;left:50%;
+  width:min(780px,94vw);height:min(560px,64vh);
+  transform:translate(-50%,-66%);
+  display:grid;place-items:center;pointer-events:none;
+}
+.stage canvas{display:block;width:100%;height:100%}
+#glnote{position:absolute;inset:0;opacity:0;transition:opacity .9s ease}
+#glnote.on{opacity:1}
+/* repli : la même note, dessinée en SVG, visible tant que la 3D n'a pas pris la main */
+#svgnote{
+  width:min(420px,62vw);filter:drop-shadow(0 26px 40px rgba(0,0,0,.18));
+  transition:opacity .5s ease;
+}
+#svgnote.off{opacity:0}
+/* ombre de contact, pour poser la note sur quelque chose */
+.stage::after{
+  content:"";position:absolute;bottom:4%;width:min(300px,46vw);height:44px;
+  background:radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.18), transparent 70%);
+  filter:blur(7px);
+}
+/* voile : le mot reste lisible, la note passe en arrière-plan flou */
+.veil{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(52% 34% at 50% 40%, rgba(var(--bg-rgb),.56), rgba(var(--bg-rgb),.24) 62%, transparent 84%);
+}
+.hero-in{position:relative;z-index:2;text-align:center;max-width:820px}
+.kicker{
+  font-size:11.5px;font-weight:600;letter-spacing:.16em;color:var(--dim);
+  margin:0 0 14px;
+  /* la note passe derrière : un halo blanc garde la ligne lisible */
+  text-shadow:0 0 12px rgba(var(--bg-rgb),.98),0 0 24px rgba(var(--bg-rgb),.9);
+}
+.wordmark{
+  font-size:clamp(52px,12.6vw,168px);font-weight:900;letter-spacing:-.045em;line-height:.92;
+  margin:0 0 26px;color:var(--ink);
+  text-shadow:0 0 34px rgba(var(--bg-rgb),.92), 0 0 16px rgba(var(--bg-rgb),.95), 0 18px 46px rgba(0,0,0,.16);
+}
+/* Le champ n'a pas besoin de JavaScript : c'est un formulaire qui pointe sur la
+   page des prods, laquelle sait déjà lire ?q= dans son adresse. */
+.hsearch{
+  display:flex;align-items:center;gap:9px;
+  width:min(560px,100%);margin:0 auto 12px;padding:0 6px 0 15px;height:52px;
+  border-radius:999px;background:var(--glass-strong);
+  -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);box-shadow:var(--sh-2);
+  transition:box-shadow .16s,border-color .16s;
+}
+.hsearch:focus-within{box-shadow:var(--sh-3);border-color:rgba(var(--fg-rgb),.10)}
+.hsearch > svg{color:var(--dimmer);flex:0 0 auto}
+.hsearch input{
+  flex:1;min-width:0;height:100%;border:0;background:none;outline:none;padding-right:6px;
+  text-overflow:ellipsis;
+  font-size:15px;letter-spacing:-.011em;color:var(--ink);
+}
+.hsearch input::placeholder{color:var(--dimmer)}
+.hsearch input::-webkit-search-cancel-button{-webkit-appearance:none}
+.hsearch button{
+  flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent);color:#fff;border:0;cursor:pointer;transition:.15s;
+}
+.hsearch button:hover{background:#e51f35;transform:scale(1.05)}
+
+.hs-hot{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:22px}
+.hs-hot a{
+  font-size:12px;color:var(--dim);background:var(--glass-strong);
+  -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);border-radius:999px;padding:4px 11px;transition:.14s;
+}
+.hs-hot a:hover{color:var(--ink);box-shadow:var(--sh-1);transform:translateY(-1px)}
+@media(max-width:520px){ .hs-hot{display:none} .hsearch{height:48px} }
+
+.cta-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
+/* le bouton rouge au centre ; sur telephone les trois ne tiennent pas sur une ligne :
+   il passe seul au-dessus, les deux autres cote a cote en dessous */
+@media(max-width:640px){
+  .cta-row{display:grid;grid-template-columns:auto auto;justify-content:center}
+  .cta-row .hbtn.pri{grid-column:1 / -1;justify-self:center;order:-1}
+  .cta-row .hbtn{padding:0 15px;justify-content:center;font-size:14px;height:44px}
+  .cta-row .hbtn.pri{padding:0 22px;font-size:15px;height:46px}
+}
+/* tres petit telephone (iPhone SE) : les deux boutons du bas ne tiennent plus cote a cote
+   et elargissaient tout l'accueil — on les empile */
+@media(max-width:360px){
+  .cta-row{grid-template-columns:1fr;justify-items:center}
+}
+.hbtn{
+  display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 22px;border-radius:999px;
+  font-size:15px;font-weight:590;transition:.16s;white-space:nowrap;
+}
+.hbtn.pri{background:var(--accent);color:#fff;box-shadow:0 6px 18px rgba(250,35,59,.28)}
+.hbtn.pri:hover{background:#e51f35;transform:translateY(-1px);box-shadow:0 10px 26px rgba(250,35,59,.32)}
+.hbtn.ghost{background:var(--glass-strong);backdrop-filter:var(--blur);border:1px solid var(--glass-edge);box-shadow:var(--sh-1)}
+.hbtn.ghost:hover{box-shadow:var(--sh-2);transform:translateY(-1px)}
+
+.stats{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:0;
+  background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);box-shadow:var(--sh-2);
+  border-radius:var(--r-lg);padding:4px;margin:0 auto;width:fit-content;max-width:100%;
+}
+.stat{padding:10px 22px;text-align:center;position:relative}
+.stat + .stat::before{content:"";position:absolute;left:0;top:22%;bottom:22%;width:1px;background:var(--line-soft)}
+.stat .v{display:block;font-size:20px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .k{display:block;font-size:11px;color:var(--dim);margin-top:1px}
+
+/* ─────────── sections ─────────── */
+.wrap{max-width:1220px;margin:0 auto;padding:0 22px}
+.sec{padding-top:56px;padding-bottom:56px}   /* pas le raccourci : il effacait la marge laterale de .wrap, collee au bord sous 1220 px */
+@media(max-width:520px){ .wrap{padding:0 16px} .sec{padding-top:40px;padding-bottom:40px} }
+/* l'en-tête est collant : les ancres doivent s'arrêter en dessous, pas dessous */
+#vueLikes,#vueArtistes,#vueStyles,#vueMoods{scroll-margin-top:76px}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.sec-head h2{font-size:clamp(21px,3vw,30px);font-weight:700;letter-spacing:-.028em}
+.sec-head p{font-size:13.5px;color:var(--dim);margin-top:3px}
+.sec-head a{font-size:13.5px;font-weight:590;color:var(--accent)}
+.sec-head a:hover{text-decoration:underline}
+.suivis-chips{display:flex;flex-wrap:wrap;gap:6px;margin:-6px 0 16px}
+.suivis-chips a{
+  display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);font-size:12.5px;font-weight:560;color:var(--ink-2);transition:.15s;
+}
+.suivis-chips a:hover{box-shadow:var(--sh-1)}
+.suivis-chips i{width:7px;height:7px;border-radius:50%;background:var(--c,var(--dimmer))}
+
+/* dernières arrivées */
+.fresh{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:980px){ .fresh{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:520px){ .fresh{grid-template-columns:1fr} }
+.tile{
+  display:block;border-radius:var(--r-lg);overflow:hidden;
+  background:var(--glass-strong);backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);box-shadow:var(--sh-1);transition:.18s;
+}
+.tile:hover{transform:translateY(-3px);box-shadow:var(--sh-3)}
+.tile .art{position:relative;aspect-ratio:16/9;background:var(--thumb);overflow:hidden}
+.tile .art img{width:100%;height:100%;object-fit:cover;display:block}
+.tile .art .go{
+  position:absolute;right:10px;bottom:10px;width:34px;height:34px;border-radius:50%;
+  display:grid;place-items:center;background:rgba(255,255,255,.92);color:#1D1D1F;   /* pastille toujours blanche : icone toujours sombre, quel que soit le theme */
+  box-shadow:0 2px 8px rgba(0,0,0,.25);opacity:0;transform:translateY(4px);transition:.18s;
+}
+.tile:hover .go{opacity:1;transform:none}
+/* sans survol — donc sur tactile — le bouton de lecture doit être visible d'emblée */
+@media(hover:none){ .tile .go{opacity:1;transform:none} }
+.tile .body{padding:11px 13px 13px}
+.tile .t{font-size:14px;font-weight:600;letter-spacing:-.015em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .s{display:flex;align-items:center;gap:7px;margin-top:3px;font-size:12px;color:var(--dim)}
+.tile .pill{font-size:10.5px;font-weight:650;border-radius:5px;padding:1px 6px;
+  color:color-mix(in srgb,var(--c) 55%,var(--ink));background:color-mix(in srgb,var(--c) 13%,var(--surface))}
+
+
+
+/* ═══ page Studio ═══ */
+#vueStudio{padding-bottom:calc(var(--bar-h) + 40px)}
+.st-intro{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:end;padding-top:34px;padding-bottom:22px}
+.st-intro .eyebrow{color:var(--accent)}
+.st-intro h1{font-size:clamp(28px,4.4vw,48px);font-weight:800;letter-spacing:-.04em;line-height:1.04;margin:8px 0 12px}
+.st-intro p{font-size:15px;line-height:1.55;color:var(--dim);max-width:560px}
+.st-intro-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.st-import{cursor:pointer}
+.st-points{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.st-points li{padding:13px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line-soft);display:grid;gap:3px}
+.st-points b{font-size:13.5px}
+.st-points span{font-size:12.5px;color:var(--dim);line-height:1.4}
+.st-hote{min-height:520px}
+@media(max-width:860px){ .st-intro{grid-template-columns:1fr;align-items:start} }
+@media(max-width:520px){ .st-points{grid-template-columns:1fr} .st-intro{padding-top:22px} }
+/* contenu pre-rendu des pages artistes, styles et beatmakers (pour Google et l'affichage
+   immediat) : l'application le remplace des qu'elle a charge le catalogue */
+.studio-promo{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.studio-promo .eyebrow{color:var(--accent)}
+.studio-promo h2{font-size:clamp(21px,3vw,30px);font-weight:700;letter-spacing:-.028em;margin:6px 0 6px}
+.studio-promo p{color:var(--dim);font-size:14px;max-width:560px;line-height:1.5}
+.pied-liens{display:grid;gap:10px;margin-top:18px;text-align:left}
+.pied-liens b{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dimmer)}
+.pied-liens div{display:flex;flex-wrap:wrap;gap:4px 12px}
+.pied-liens a{font-size:12.5px;color:var(--dim)}
+.pied-liens a:hover{color:var(--ink)}
+.seo-pre{padding:26px 0 10px}
+.seo-pre .eyebrow{color:var(--accent)}
+.seo-pre h1{font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-.035em;margin:6px 0 10px}
+.seo-pre p{color:var(--dim);font-size:14.5px;line-height:1.55;max-width:720px}
+.seo-pre ol{margin:18px 0 0;padding:0;list-style:none;display:grid;gap:2px}
+.seo-pre li{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:14px}
+.seo-pre li img{width:62px;height:40px;object-fit:cover;border-radius:8px;flex:0 0 auto;background:var(--thumb)}
+.seo-pre li span{color:var(--dim);font-size:12.5px}
+.seo-pre nav{margin-top:18px;display:flex;flex-wrap:wrap;gap:6px}
+.seo-pre nav a{font-size:12.5px;padding:5px 11px;border-radius:999px;background:var(--surface);border:1px solid var(--line-soft)}
+
+/* ═══ accueil : une forme par section ═══
+   Avant, quatre grilles de huit vignettes identiques se suivaient. Chaque section a
+   desormais la forme de son role : rangee qui defile (raccourcis), avatars + liste
+   (abonnements), mise en avant (Pour toi), classement (sorties), cercles (artistes). */
+
+/* rangee qui defile : deborde dans les marges, la carte suivante depasse a droite */
+.rail-wrap{position:relative}
+.rail{
+  display:grid;grid-auto-flow:column;grid-auto-columns:172px;gap:16px;
+  overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;
+  margin:0 -22px;padding:4px 22px 14px;scroll-padding:0 22px;scrollbar-width:none;
+}
+.rail::-webkit-scrollbar{display:none}
+.rail > *{scroll-snap-align:start}
+.rail-nav{
+  position:absolute;top:70px;z-index:3;width:38px;height:38px;border-radius:50%;
+  display:none;place-items:center;color:var(--ink);
+  background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);box-shadow:var(--sh-2);transition:opacity .15s;
+}
+.rail-nav.g{left:-16px} .rail-nav.d{right:-16px}
+.rail-nav[disabled]{opacity:0;pointer-events:none}
+@media(hover:hover) and (min-width:760px){ .rail-wrap:hover .rail-nav{display:grid} }
+.rail.avatars + .rail-nav,.rail.avatars ~ .rail-nav{top:30px}
+.rail.cercles ~ .rail-nav{top:62px}
+
+/* Une section sur deux dans un panneau arrondi qui flotte dans la page, sans couleur ni
+   liseré, comme les cartes de l'App Store. Le fond de page gris clair fait ressortir le
+   panneau blanc ; en sombre, le panneau est d'un cran plus clair que le fond. Les bandes
+   pleine largeur teintées faisaient lourd. */
+#vueAccueil main > .sec{position:relative;isolation:isolate}
+#vueAccueil main > .sec.bande{padding-left:50px;padding-right:50px}
+#vueAccueil main > .sec.bande::before{
+  content:"";position:absolute;z-index:-1;inset:18px 12px;border-radius:32px;
+  background:var(--panneau);box-shadow:var(--panneau-ombre);
+}
+/* volontairement discret : un voile, pas un bloc */
+:root{--panneau:rgba(255,255,255,.5);--panneau-ombre:inset 0 0 0 1px rgba(0,0,0,.035)}
+:root[data-theme="dark"]{--panneau:rgba(255,255,255,.022);--panneau-ombre:inset 0 0 0 1px rgba(255,255,255,.04)}
+/* dans un panneau, les petites cartes prennent le fond de la page : blanc sur blanc, elles disparaissaient */
+#vueAccueil .sec.bande .tile:not(.rcard):not(.lrow):not(.vcard){background:var(--surface);border-color:var(--line-soft);box-shadow:none;backdrop-filter:none}
+@media(max-width:620px){
+  #vueAccueil main > .sec.bande{padding-left:26px;padding-right:26px}
+  #vueAccueil main > .sec.bande::before{inset:14px 6px;border-radius:24px}
+}
+
+
+/* carte de rangee : pochette carree, texte libre dessous */
+.tile.rcard{background:none;border:0;box-shadow:none;backdrop-filter:none;border-radius:0;overflow:visible}
+.tile.rcard:hover{transform:none;box-shadow:none}
+.rcard .art{aspect-ratio:1;border-radius:14px;box-shadow:var(--sh-2);transition:transform .2s,box-shadow .2s}
+.rcard:hover .art{transform:translateY(-3px);box-shadow:var(--sh-3)}
+.rcard .art img{transform:scale(1.34)}   /* la miniature YouTube est en 16/9 : on recadre sur le centre */
+.rcard .t{margin-top:9px;font-size:13.5px}
+.rcard .s{margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.rcard.playing .t{color:var(--accent)}
+
+/* abonnements : avatars ronds, puis liste */
+.rail.avatars{grid-auto-columns:84px;gap:14px;padding-bottom:6px;margin-bottom:10px}
+.avatar{display:grid;justify-items:center;gap:7px;text-align:center}
+.avatar .rond{
+  width:72px;height:72px;border-radius:50%;overflow:hidden;display:grid;place-items:center;
+  background:var(--c,var(--thumb));color:#fff;font-size:26px;font-weight:700;
+  box-shadow:0 0 0 2px var(--bg),0 0 0 4px color-mix(in srgb,var(--accent) 70%,transparent);transition:transform .18s;
+}
+.avatar:hover .rond{transform:scale(1.05)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.avatar .nm{font-size:12px;font-weight:600;max-width:84px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* liste compacte (abonnements) et classement (sorties) : une ligne = une prod */
+.liste{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 28px}
+.classement{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:repeat(5,auto);grid-auto-flow:column;gap:4px 28px}
+.tile.lrow{
+  display:flex;align-items:center;gap:13px;padding:8px 10px;border-radius:14px;
+  background:none;border:0;box-shadow:none;backdrop-filter:none;overflow:visible;
+}
+.tile.lrow:hover{transform:none;box-shadow:none;background:var(--hover)}
+.lrow .rang{width:26px;flex:0 0 auto;text-align:right;font-size:22px;font-weight:800;letter-spacing:-.04em;color:var(--dimmer);font-variant-numeric:tabular-nums}
+.lrow .art{width:54px;height:54px;flex:0 0 auto;border-radius:10px;aspect-ratio:auto;box-shadow:var(--sh-1)}
+.lrow .art img{transform:scale(1.34)}
+.lrow .art .go{inset:0;margin:auto;width:28px;height:28px;right:auto;bottom:auto}
+.lrow .lr-txt{min-width:0;flex:1}
+.lrow .t{font-size:14px}
+.lrow .s{margin-top:2px;white-space:nowrap;overflow:hidden}
+.lrow .s b{font-weight:560;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis}
+.lrow .fin{flex:0 0 auto;font-size:12px;color:var(--dimmer);font-variant-numeric:tabular-nums}
+.lrow.playing .t,.lrow.playing .rang{color:var(--accent)}
+.classement li{display:block;min-width:0;border-bottom:1px solid var(--line-soft)}
+.liste .lrow{border-bottom:1px solid var(--line-soft);border-radius:14px 14px 0 0}
+
+/* Pour toi : une prod mise en avant, quatre a cote */
+.vedette{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
+.tile.vcard{position:relative;border:0;min-height:100%;background:#000;display:flex;flex-direction:column;justify-content:flex-end}
+.vcard .art{position:absolute;inset:0;aspect-ratio:auto}
+.vcard .art img{transition:transform .5s cubic-bezier(.2,.7,.3,1)}
+.vcard:hover .art img{transform:scale(1.04)}
+/* repli en hqdefault (4/3 avec bandes noires) : on agrandit pour les sortir du cadre */
+.vcard .art img.hq{transform:scale(1.34)}
+.vcard:hover .art img.hq{transform:scale(1.39)}
+.vcard::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(0,0,0,.35) 55%,rgba(0,0,0,.86) 100%)}
+.vcard .v-in{position:relative;z-index:2;padding:22px 22px 20px;color:#fff;display:grid;gap:6px}
+.vcard .raison{font-size:11.5px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.vcard .t{font-size:clamp(22px,2.6vw,32px);font-weight:800;letter-spacing:-.035em;line-height:1.05;white-space:normal;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vcard .s{color:rgba(255,255,255,.8);margin-top:0}
+.vcard .s .pill{color:#fff;background:rgba(255,255,255,.18)}
+.vcard .v-lire{
+  justify-self:start;margin-top:8px;display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 20px 0 16px;
+  border-radius:999px;background:var(--accent);color:#fff;font-size:14px;font-weight:700;box-shadow:0 8px 22px rgba(250,35,59,.4);
+}
+.vcard .art .go{display:none}
+.vgrille{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.vgrille .tile .body{padding:9px 11px 11px}
+.vgrille .tile .t{font-size:13px}
+
+/* artistes : photos rondes */
+.rail.cercles{grid-auto-columns:128px;gap:18px}
+.cercle{display:grid;justify-items:center;gap:4px;text-align:center}
+.cercle .rond{
+  width:128px;height:128px;border-radius:50%;overflow:hidden;margin-bottom:6px;
+  background:var(--c,var(--thumb));box-shadow:var(--sh-2);transition:transform .2s,box-shadow .2s;
+  display:grid;place-items:center;color:#fff;font-size:40px;font-weight:800;
+}
+.cercle:hover .rond{transform:scale(1.04);box-shadow:var(--sh-3)}
+.cercle img{width:100%;height:100%;object-fit:cover}
+.cercle .nm{font-size:14px;font-weight:650;letter-spacing:-.015em;max-width:128px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cercle .ct{font-size:12px;color:var(--dim)}
+
+/* Une rangee montre toujours un nombre exact de cartes entieres : 6 pochettes ou 7 cercles
+   sur ordinateur, 2 ou 3 sur telephone. Rien n'est coupe au bord ; les fleches (ordinateur)
+   ou le doigt font defiler page par page. */
+@media(min-width:0px){
+  .rail,.rail.cercles,.rail.avatars{--n:6;--g:16px;gap:var(--g);margin:0;padding:8px 0 16px;scroll-padding:0;
+    grid-auto-columns:calc((100% - (var(--n) - 1) * var(--g)) / var(--n))}
+  .rail.cercles{--n:7;--g:18px}
+  .rail.avatars{--n:10;--g:14px;padding-bottom:6px}
+  .rail-nav.g{left:-19px} .rail-nav.d{right:-19px}
+}
+@media(max-width:1100px){
+  .rail{--n:4} .rail.cercles{--n:5} .rail.avatars{--n:7}
+}
+@media(max-width:620px){
+  .rail,.rail.cercles,.rail.avatars{--g:12px}
+  .rail{--n:2} .rail.cercles{--n:3} .rail.avatars{--n:4}
+  .rail{scroll-snap-type:x mandatory}
+}
+.cercle .rond{width:min(128px,100%);height:auto;aspect-ratio:1}
+.avatar .rond{width:min(72px,100%);height:auto;aspect-ratio:1}
+@media(max-width:860px){
+  .vedette{grid-template-columns:1fr}
+  .tile.vcard{min-height:300px}
+  .liste,.classement{grid-template-columns:minmax(0,1fr);grid-auto-flow:row;grid-template-rows:none}
+}
+@media(max-width:520px){
+  .cercle .nm{max-width:100%}
+  .tile.vcard{min-height:260px}
+  .vcard .v-in{padding:18px}
+}
+
+/* mur des styles : chaque genre montre ses propres pochettes */
+.cloud{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+@media(max-width:1100px){ .cloud{grid-template-columns:repeat(4,1fr)} }
+@media(max-width:820px){ .cloud{grid-template-columns:repeat(3,1fr)} }
+@media(max-width:520px){ .cloud{grid-template-columns:repeat(2,1fr)} }
+.scard{
+  position:relative;display:block;aspect-ratio:1;border-radius:var(--r-lg);overflow:hidden;
+  background:var(--thumb);box-shadow:var(--sh-1);transition:transform .18s,box-shadow .18s;
+  container-type:inline-size;   /* le nom se dimensionne sur la carte, pas sur l'écran */
+}
+.scard:hover{transform:translateY(-3px);box-shadow:var(--sh-3)}
+.scard:focus-visible{outline-offset:3px}
+.mosaic{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.mosaic.solo{grid-template-columns:1fr;grid-template-rows:1fr}
+.mosaic img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s cubic-bezier(.2,.7,.3,1)}
+.scard:hover .mosaic img{transform:scale(1.07)}
+/* teinte du style en haut, encre en bas : le nom reste lisible sur n'importe quelle pochette */
+.scard::after{
+  content:"";position:absolute;inset:0;z-index:1;
+  background:
+    radial-gradient(72% 62% at 50% 50%, rgba(0,0,0,.52), transparent 78%),
+    linear-gradient(175deg,
+      color-mix(in srgb,var(--c) 40%,transparent) 0%,
+      rgba(0,0,0,.24) 42%,
+      rgba(0,0,0,.72) 100%);
+}
+/* Voile de couleur du survol : une couche à part, en fondu, plutôt qu'un
+   changement de dégradé — les dégradés ne s'animent pas, ils sautent. */
+.scard::before,.mcard::before{
+  content:"";position:absolute;inset:0;z-index:2;opacity:0;
+  transition:opacity .22s ease;pointer-events:none;
+  background:linear-gradient(160deg,
+    color-mix(in srgb,var(--c) 88%,transparent) 0%,
+    color-mix(in srgb,var(--c) 62%,transparent) 55%,
+    color-mix(in srgb,var(--c) 30%,transparent) 100%);
+}
+.scard:hover::before,.mcard:hover::before{opacity:1}
+
+.scard-in{
+  position:absolute;inset:0;z-index:3;padding:10px;color:#fff;
+  display:grid;place-content:center;justify-items:center;gap:5px;text-align:center;
+}
+.scard .nm{
+  display:block;font-size:clamp(15px,15.5cqw,30px);font-weight:800;line-height:1.02;
+  letter-spacing:-.01em;text-transform:uppercase;text-wrap:balance;
+  text-shadow:0 2px 12px rgba(0,0,0,.55),0 1px 3px rgba(0,0,0,.6);
+}
+/* les intitulés à rallonge — « Ndombolo / Coupé-décalé » — ont besoin d'air */
+.scard.long .nm{font-size:clamp(12px,9.5cqw,19px);letter-spacing:0}
+.scard .ct{
+  display:block;font-size:clamp(10px,5cqw,12px);opacity:.92;font-variant-numeric:tabular-nums;
+  text-shadow:0 1px 3px rgba(0,0,0,.6);
+}
+/* même pastille que sur les vignettes de sorties : elle monte et apparaît au
+   survol. Une flèche, pas un triangle de lecture — une carte de style ouvre le
+   catalogue filtré, elle ne joue rien. */
+.scard .go,.mcard .go{
+  position:absolute;right:10px;bottom:10px;z-index:4;
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.92);color:#1D1D1F;   /* pastille toujours blanche : icone toujours sombre, quel que soit le theme */
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+  opacity:0;transform:translateY(4px);transition:.18s;
+}
+.scard:hover .go,.mcard:hover .go{opacity:1;transform:none}
+@media(hover:none){ .scard .go,.mcard .go{opacity:1;transform:none} }
+
+.scard.repliee{display:none}
+/* Mur des moods : format paysage et couleur dominante. Un mood est une
+   ambiance, pas un rayon de bac — la teinte porte l'idée, la pochette n'est
+   qu'une texture derrière. */
+.moodwall{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:1000px){ .moodwall{grid-template-columns:repeat(3,1fr)} }
+@media(max-width:760px){ .moodwall{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:420px){ .moodwall{grid-template-columns:1fr} }
+.mcard{
+  position:relative;display:block;aspect-ratio:3/2;overflow:hidden;
+  border-radius:var(--r-lg);background:var(--c);box-shadow:var(--sh-1);
+  transition:transform .18s,box-shadow .18s;
+}
+.mcard:hover{transform:translateY(-3px);box-shadow:var(--sh-3)}
+.mcard img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:.62;transition:transform .45s cubic-bezier(.2,.7,.3,1);
+}
+.mcard:hover img{transform:scale(1.06)}
+/* nos affiches : pleine opacite, un simple degrade en bas pour lire le nom */
+.mcard .affiche{position:absolute;inset:0;width:100%;height:100%;display:block;transition:transform .45s cubic-bezier(.2,.7,.3,1)}
+.mcard:hover .affiche{transform:scale(1.06)}
+.mcard.a-affiche::after{background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.28) 100%)}
+/* titre a la maniere d'Apple Music : grand, gras, sans ombre portee lourde */
+.mcard.a-affiche .mcard-in{padding:14px 16px}
+.mcard.a-affiche .nm{font-size:23px;font-weight:800;letter-spacing:-.035em;line-height:1.05;text-shadow:none}
+.mcard.a-affiche .ct{font-size:12px;opacity:.72;text-shadow:none;margin-top:2px}
+.mcard::after{
+  content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--c) 78%,transparent) 0%,
+    color-mix(in srgb,var(--c) 42%,transparent) 48%,
+    rgba(0,0,0,.72) 100%);
+}
+.mcard-in{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:13px 14px;color:#fff}
+.mcard .nm{
+  display:block;font-size:17px;font-weight:700;letter-spacing:-.02em;
+  text-shadow:0 1px 5px rgba(0,0,0,.5);text-transform:capitalize;
+}
+.mcard .ct{display:block;font-size:11.5px;opacity:.88;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+
+.more-row{display:flex;justify-content:center;margin-top:16px}
+.more-btn{
+  height:38px;padding:0 18px;border-radius:999px;font-size:13.5px;font-weight:590;
+  background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);box-shadow:var(--sh-1);transition:.15s;
+}
+.more-btn:hover{box-shadow:var(--sh-2);transform:translateY(-1px)}
+
+/* bascule entre les deux vues */
+[hidden]{display:none !important}
+.hlinks{display:none;align-items:center;gap:6px}
+/* la recherche est masquee sur l'accueil : sans elle, plus rien ne pousse le groupe
+   vers la droite. margin-left:auto absorbe l'espace libre a la place. */
+body.vue-accueil .hlinks{display:flex;margin-left:6px}
+body.vue-accueil .top .search{display:none}
+/* vue prods : la recherche plafonne a 640px et cesse de pousser des que l'ecran
+   est large. Sans cet auto, les boutons retombent au milieu de la bande. */
+.actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:auto}
+/* le studio a son propre bouton : on y entre sans passer par une prod */
+.studio-cta{
+  display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 15px;border-radius:999px;flex:0 0 auto;
+  background:var(--accent);color:#fff;font-size:13.5px;font-weight:650;box-shadow:0 6px 16px rgba(250,35,59,.28);transition:.15s;
+}
+.studio-cta:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(250,35,59,.34)}
+@media(max-width:640px){ .studio-cta{width:38px;padding:0;justify-content:center} .studio-cta span{display:none} }
+/* avec le bouton Studio, l'en-tete ecrasait la recherche vers 1000 px : « Toutes les prods » se reduit a sa fleche */
+@media(max-width:1180px){ #toutesBtn .sf-t{display:none} #toutesBtn{padding:0 11px} }
+/* N'apparait que sous filtre likes : une sortie visible, plutot qu'un second clic
+   sur le bouton qui a amene ici — rien ne disait qu'il servait aussi a revenir. */
+.sortie-filtre{
+  display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;
+  height:38px;padding:0 13px;border-radius:999px;
+  background:transparent;border:1px solid var(--line);
+  font-size:13px;font-weight:530;color:var(--dim);transition:.15s;
+}
+.sortie-filtre:hover{color:var(--ink);background:var(--surface);box-shadow:var(--sh-1)}
+@media(max-width:640px){ .sortie-filtre span,.sortie-filtre{font-size:12.5px;padding:0 10px} }
+.hlinks a{padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--dim);transition:.15s;text-decoration:none}
+.hlinks a:hover{color:var(--ink);background:rgba(var(--fg-rgb),.05)}
+/* Le bouton noir est l'action principale de l'accueil : il ferme la rangee, a droite,
+   a part. Au milieu des liens, il se lisait comme un nom de plus dans la liste. */
+.hcta{
+  display:none;align-items:center;gap:7px;flex:0 0 auto;margin-left:4px;
+  height:38px;padding:0 18px 0 20px;border-radius:999px;
+  background:var(--ink);color:var(--on-ink);font-size:13.5px;font-weight:600;text-decoration:none;
+  box-shadow:0 1px 2px rgba(0,0,0,.18),0 4px 14px rgba(0,0,0,.14);
+  transition:background .15s,transform .15s,box-shadow .15s;
+}
+.hcta svg{transition:transform .18s}
+.hcta:hover{background:#000;transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,.2),0 8px 20px rgba(0,0,0,.18)}
+.hcta:hover svg{transform:translateX(3px)}
+body.vue-accueil .hcta{display:inline-flex}
+/* petit ecran : le heros porte deja « Toutes les prods », l'en-tete n'a pas la place de le redire */
+@media(max-width:640px){ .hlinks a{display:none} body.vue-accueil .hcta{display:none} }
+
+@media(prefers-reduced-motion:reduce){ *{animation-duration:.01ms !important;transition-duration:.01ms !important} }
