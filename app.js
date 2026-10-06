@@ -7,7 +7,13 @@
    artistes) ne sont jamais traduites : elles ne figurent pas au dictionnaire, et les zones
    qui les affichent portent translate="no". */
 const LANGUES = { fr: "Français", en: "English", es: "Español" };
+/* Sur le site publie, chaque page porte sa langue (data-langue, posee par build.mjs) :
+   /en/… est anglais, /es/… espagnol, le reste francais. C'est l'adresse qui decide, y
+   compris pour Google. Sans elle (la page source en local), on prend ?lang=, le choix
+   retenu ou la langue du navigateur. */
+const PAGE_LANGUE = LANGUES[document.documentElement.dataset.langue] ? document.documentElement.dataset.langue : null;
 const LANG = (() => {
+  if (PAGE_LANGUE) return PAGE_LANGUE;
   // ?lang=en dans l'adresse choisit la langue (lien partage) et la retient
   const q = new URLSearchParams(location.search).get("lang");
   if (LANGUES[q]) { try { localStorage.setItem("findings.lang", q); } catch (e) {} return q; }
@@ -3295,10 +3301,37 @@ document.getElementById("toplinewall").addEventListener("click", e => {
   menu.addEventListener("click", e => {
     const b = e.target.closest("[data-lang]"); if (!b) return;
     if (b.dataset.lang === LANG) { fermer(); return; }
-    try { localStorage.setItem("findings.lang", b.dataset.lang); } catch (e) {}
-    location.reload();
+    allerLangue(b.dataset.lang);
   });
+  // ?lang= sur une page publiee : on rejoint la meme page dans cette langue
+  const q = new URLSearchParams(location.search).get("lang");
+  if (PAGE_LANGUE && LANGUES[q] && q !== LANG) { allerLangue(q, true); return; }
+  // une fois, si le navigateur parle une autre langue que la page : on le propose, sans rediriger
+  let choisi = null; try { choisi = localStorage.getItem("findings.lang"); } catch (e) {}
+  const nav = (navigator.languages && navigator.languages[0] || navigator.language || "").slice(0, 2).toLowerCase();
+  if (PAGE_LANGUE && !choisi && LANGUES[nav] && nav !== LANG) {
+    const TXT = { fr: ["Cette page existe aussi en français.", "Passer en français"], en: ["This page is also available in English.", "Switch to English"], es: ["Esta página también está disponible en español.", "Cambiar a español"] }[nav];
+    const bandeau = document.createElement("div");
+    bandeau.className = "lang-bandeau"; bandeau.setAttribute("translate", "no"); bandeau.setAttribute("role", "status");
+    bandeau.innerHTML = `<span>${TXT[0]}</span><button data-oui>${TXT[1]}</button><button data-non aria-label="✕">✕</button>`;
+    document.body.appendChild(bandeau);
+    bandeau.addEventListener("click", e => {
+      if (e.target.closest("[data-oui]")) allerLangue(nav);
+      else if (e.target.closest("[data-non]")) { try { localStorage.setItem("findings.lang", LANG); } catch (e) {} bandeau.remove(); }
+    });
+  }
 })();
+/* La meme page dans une autre langue : /artiste/hamza/ ↔ /en/artiste/hamza/. En local
+   (page source, sans langue de page), on recharge simplement dans la langue choisie. */
+function allerLangue(k, remplacer){
+  try { localStorage.setItem("findings.lang", k); } catch (e) {}
+  if (!PAGE_LANGUE) { location.reload(); return; }
+  const racine = PAGE_LANGUE !== "fr" && BASE.endsWith(`/${PAGE_LANGUE}/`) ? BASE.slice(0, -(PAGE_LANGUE.length + 1)) : BASE;
+  const reste = location.pathname.startsWith(BASE) ? location.pathname.slice(BASE.length) : "";
+  const p = new URLSearchParams(location.search); p.delete("lang");
+  const url = racine + (k === "fr" ? "" : k + "/") + reste + (p.toString() ? "?" + p : "");
+  remplacer ? location.replace(url) : (location.href = url);
+}
 
 /* ============ page Studio : « Tes projets » ============
    Un projet par prod (plus le projet libre) : on le rouvre, on le renomme, on le

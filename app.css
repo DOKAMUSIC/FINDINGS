@@ -144,6 +144,11 @@ ul{margin:0;padding:0;list-style:none}
 .lang-menu button span{font-size:11px;font-weight:700;color:var(--dim)}
 .lang-menu button[aria-checked="true"]{color:var(--accent)}
 .lang-menu button[aria-checked="true"] span{color:var(--accent)}
+.lang-bandeau{position:fixed;left:50%;top:calc(var(--hh,72px) + 10px);transform:translateX(-50%);z-index:80;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 24px);padding:8px 8px 8px 16px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-3);font-size:13px;color:var(--ink);animation:np-entre .3s ease}
+.lang-bandeau span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lang-bandeau [data-oui]{height:30px;padding:0 13px;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;font-size:12.5px;white-space:nowrap}
+.lang-bandeau [data-non]{width:30px;height:30px;border-radius:50%;color:var(--dim)}
+.lang-bandeau [data-non]:hover{background:var(--hover);color:var(--ink)}
 .theme-btn:active{transform:scale(.92)}
 .theme-btn svg{grid-area:1/1;transition:transform .45s cubic-bezier(.2,.9,.25,1.2),opacity .25s}
 .theme-btn .soleil{opacity:0;transform:rotate(-90deg) scale(.4)}
