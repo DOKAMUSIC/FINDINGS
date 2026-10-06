@@ -1270,6 +1270,30 @@ body.yt-charge #profLire.lance::before{width:20px;height:20px;border-width:2.6px
 .st-points b{font-size:13.5px}
 .st-points span{font-size:12.5px;color:var(--dim);line-height:1.4}
 .st-hote{min-height:520px}
+/* « Tes projets » sur la page Studio */
+.st-projets{padding-top:34px;padding-bottom:40px}
+.st-liste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(max-width:860px){ .st-liste{grid-template-columns:minmax(0,1fr)} }
+.st-proj{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;padding:10px 12px 10px 10px;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line-soft);box-shadow:var(--sh-1);transition:border-color .15s}
+.st-proj.ouvert{border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
+.st-vg{position:relative;width:118px;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000;flex:0 0 auto}
+.st-vg img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+.st-vg:hover img{transform:scale(1.06)}
+.st-libre{position:absolute;inset:0;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#FA233B,#7B1FA2)}
+.st-txt{display:grid;gap:2px;min-width:0}
+.st-txt .raison{font-size:10px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-txt .raison i{font-style:normal;color:var(--accent)}
+.st-txt .t{font-size:16px;font-weight:800;letter-spacing:-.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-txt .s{font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-champ{font:800 16px/1.2 inherit;letter-spacing:-.025em;color:var(--ink);background:var(--bg);border:1px solid var(--accent);border-radius:8px;padding:3px 7px;margin:-2px 0;min-width:0;width:100%;outline:none}
+.st-acts{display:flex;align-items:center;gap:4px}
+.st-ouvrir{height:32px;padding:0 14px;border-radius:999px;background:var(--accent);color:#fff;font-size:13px;font-weight:700;transition:transform .15s}
+.st-ouvrir:hover{transform:scale(1.04)}
+.st-ic{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--dim);transition:color .14s,background .14s}
+.st-ic:hover{color:var(--ink);background:var(--hover)}
+.st-ic.danger:hover{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+@media(max-width:520px){ .st-vg{width:84px} .st-ouvrir{display:none} }
+
 @media(max-width:860px){ .st-intro{grid-template-columns:1fr;align-items:start} }
 @media(max-width:520px){ .st-points{grid-template-columns:1fr} .st-intro{padding-top:22px} }
 /* contenu pre-rendu des pages artistes, styles et beatmakers (pour Google et l'affichage

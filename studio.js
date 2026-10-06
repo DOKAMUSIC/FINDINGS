@@ -40,6 +40,11 @@ const STUDIO = (() => {
   .daw-id{min-width:0;display:grid;gap:1px}
   .daw-id .eyebrow{color:var(--accent);display:flex;align-items:center;gap:5px}
   .daw-id b{font-size:15px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .daw-titre{display:flex;align-items:center;gap:6px;min-width:0;max-width:100%;padding:1px 6px;margin:0 -6px;border-radius:7px;color:inherit;text-align:left;cursor:text}
+  .daw-titre svg{flex:0 0 auto;color:var(--dim);opacity:0;transition:opacity .15s}
+  .daw-titre:hover{background:rgba(255,255,255,.07)}
+  .daw-titre:hover svg,.daw-titre:focus-visible svg{opacity:1}
+  .daw-titre-champ{font:700 15px/1.2 inherit;letter-spacing:-.02em;color:inherit;background:rgba(255,255,255,.08);border:1px solid var(--accent);border-radius:7px;padding:2px 6px;margin:-1px -6px;min-width:0;width:100%;outline:none}
   .daw-id span.info{font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .daw-console{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:16px;background:var(--lcd);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.3);color:var(--lcd-ink)}
   .daw-b{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#D7DBE2;transition:background .12s,transform .12s}
@@ -237,6 +242,7 @@ const STUDIO = (() => {
 
   /* ─────────────────────────── balisage ─────────────────────────── */
   const I = {
+    crayon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>',
     debut:'<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2.2v14H6zM19 5v14L9 12z"/></svg>',
     lire:'<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>',
     pause:'<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>',
@@ -256,7 +262,7 @@ const STUDIO = (() => {
   document.body.insertAdjacentHTML("beforeend", `
   <div class="daw" id="daw" hidden role="dialog" aria-label="Studio">
     <div class="daw-haut">
-      <div class="daw-id"><span class="eyebrow">${I.micro}Studio</span><b id="dawTitre"></b><span class="info" id="dawInfo"></span></div>
+      <div class="daw-id"><span class="eyebrow">${I.micro}Studio</span><button class="daw-titre" id="dawTitreBtn" title="Renommer le projet" aria-label="Renommer le projet"><b id="dawTitre"></b>${I.crayon}</button><span class="info" id="dawInfo"></span></div>
       <div class="daw-console">
         <button class="daw-b" id="dawDebut" title="Revenir au début (Entrée)" aria-label="Revenir au début">${I.debut}</button>
         <button class="daw-b lire" id="dawLire" title="Lecture / pause (Espace)" aria-label="Lecture ou pause">${I.lire}</button>
@@ -688,7 +694,7 @@ const STUDIO = (() => {
       if (f && f.blob) { const buf = await audio().decodeAudioData(await f.blob.arrayBuffer()); fichier = { nom: f.nom, buf, pic: pics(buf) }; }
     } catch (e) { fichier = null; }
     construireNoeuds();
-    $("dawTitre").textContent = b.id === "libre" ? (fichier ? fichier.nom.replace(/\.[a-z0-9]+$/i, "") : "Projet libre") : b.title;
+    peindreTitre();
     $("dawInfo").textContent = b.id === "libre" ? `${bpm()} BPM · ta prod, tes voix` : `${b.bpmSur ? "" : "~"}${b.bpm} BPM · ${STYLE_NAME[b.style] || b.style} · par ${b.prod}`;
     if (P.beatVol != null) { try { player.setVolume(P.beatVol); } catch (e) {} }
     entete(); dessiner(); inspecteur(); outils();
@@ -698,7 +704,58 @@ const STUDIO = (() => {
     }
   }
   let saveMinuteur = 0;
-  function sauver(){ clearTimeout(saveMinuteur); saveMinuteur = setTimeout(() => { try { PRISES_DB.ecrireProjet(JSON.parse(JSON.stringify(P))); } catch (e) {} }, 350); }
+  /* Nom du projet : celui que le visiteur a donne, sinon le titre de la prod (ou du fichier
+     importe pour le projet libre). Le nom vit dans le projet, avec l'arrangement. */
+  const titreParDefaut = () => !prod ? "" : prod.id === "libre" ? (fichier ? fichier.nom.replace(/\.[a-z0-9]+$/i, "") : "Projet libre") : prod.title;
+  const titreProjet = () => (P && P.nom) || titreParDefaut();
+  function peindreTitre(){ const t = $("dawTitre"); if (t) t.textContent = titreProjet(); }
+  const signalerProjets = () => window.dispatchEvent(new Event("findings:projets"));
+  // le nom s'ecrit tout de suite : la liste des projets le relit juste apres
+  async function sauverNom(){ clearTimeout(saveMinuteur); if (!P) return; P.maj = Date.now(); try { await PRISES_DB.ecrireProjet(JSON.parse(JSON.stringify(P))); } catch (e) {} signalerProjets(); }
+  function renommer(){
+    if (!P) return;
+    const btn = $("dawTitreBtn");
+    if (!btn || btn.hidden) return;
+    const champ = document.createElement("input");
+    champ.className = "daw-titre-champ"; champ.value = titreProjet(); champ.maxLength = 60;
+    champ.setAttribute("aria-label", "Nom du projet");
+    btn.hidden = true; btn.after(champ); champ.focus(); champ.select();
+    let fini = false;
+    const finir = garder => {
+      if (fini) return; fini = true;
+      const v = champ.value.trim();
+      if (garder) { if (!v || v === titreParDefaut()) delete P.nom; else P.nom = v; sauverNom(); message("Projet renommé"); }
+      champ.remove(); btn.hidden = false; peindreTitre();
+    };
+    champ.addEventListener("keydown", e => { e.stopPropagation(); if (e.key === "Enter") finir(true); else if (e.key === "Escape") finir(false); });
+    champ.addEventListener("blur", () => finir(true));
+  }
+  /* Supprimer un projet : l'arrangement, toutes ses prises et la prod importee. Si c'est
+     celui qui est ouvert, le studio repart d'un projet vide sur la meme prod. */
+  async function supprimerProjet(id){
+    let prises = [];
+    try { prises = await PRISES_DB.duProd(id); } catch (e) {}
+    try { await PRISES_DB.supprProjet(id); } catch (e) {}
+    prises.forEach(p => { BUF.delete(p.id); PIC.delete(p.id); });
+    if (typeof PRISES_MEMOIRE !== "undefined") for (let i = PRISES_MEMOIRE.length - 1; i >= 0; i--) if (PRISES_MEMOIRE[i].prod === id) PRISES_MEMOIRE.splice(i, 1);
+    TOPLINE_N.delete(id);
+    if (typeof majToplines === "function") majToplines();
+    if (S.toplines || document.querySelector(".row")) render();
+    if (P && P.prod === id) { clearTimeout(saveMinuteur); P = null; if (ouvert && prod) { arreterSources(); await charger(prod); } }
+    signalerProjets();
+  }
+  async function renommerProjet(id, nom){
+    nom = (nom || "").trim();
+    if (P && P.prod === id) { if (!nom || nom === titreParDefaut()) delete P.nom; else P.nom = nom; peindreTitre(); clearTimeout(saveMinuteur); try { await PRISES_DB.ecrireProjet(JSON.parse(JSON.stringify(P))); } catch (e) {} }
+    else {
+      let pr = null; try { pr = await PRISES_DB.lireProjet(id); } catch (e) {}
+      if (!pr) pr = { prod: id, pistes: [nouvellePiste(0)], clips: [], decal: 0, beatVol: null };
+      if (nom) pr.nom = nom; else delete pr.nom;
+      try { await PRISES_DB.ecrireProjet(pr); } catch (e) {}
+    }
+    signalerProjets();
+  }
+  function sauver(){ clearTimeout(saveMinuteur); saveMinuteur = setTimeout(() => { if (!P) return; P.maj = Date.now(); try { PRISES_DB.ecrireProjet(JSON.parse(JSON.stringify(P))); } catch (e) {} }, 350); }
   const instantane = () => JSON.stringify({ pistes: P.pistes, clips: P.clips, decal: P.decal, beatStart: P.beatStart });
   function memoriser(avant){ histo.push(avant || instantane()); if (histo.length > 60) histo.shift(); refaire = []; outils(); }
   function restaurer(json){
@@ -724,7 +781,7 @@ const STUDIO = (() => {
     fichier = { nom: file.name, buf, pic: pics(buf) };
     posArret = tempsBeatYT(); interne.joue = false;
     construireNoeuds(); dessiner(); inspecteur(); outils(); sauver();
-    if (estLibre()) $("dawTitre").textContent = file.name.replace(/\.[a-z0-9]+$/i, "");
+    peindreTitre();
     message(estLibre() ? "Prod importée : touche R pour enregistrer dessus" : "Prod importée : fais glisser sa région pour la caler sur tes voix si besoin");
   }
   const tempsBeatYT = () => { try { return memeProd() ? lireBeat() : posArret; } catch (e) { return 0; } };
@@ -1012,6 +1069,11 @@ const STUDIO = (() => {
         </div>` : `<div class="dp-bloc"><h4>Région</h4><p class="dp-aide">Touche une région dans la timeline pour régler son volume et ses fondus. Tire ses bords pour la rogner, les points blancs pour les fondus.</p></div>`;
     } else {
       corps.innerHTML = `
+        <div class="dp-bloc" style="width:230px">
+          <h4>Projet</h4>
+          <label class="champ">Nom<input type="text" id="dpNomProjet" value="${esc(titreProjet())}" maxlength="60"></label>
+          <button class="dp-act danger" data-act="supprProjet">Supprimer le projet</button>
+        </div>
         <div class="dp-bloc">
           <h4>Mix</h4>
           <div class="ligne">${bouton("projet.master", "Volume général", 0, 1.5, .01, "x", P.master != null ? P.master : 1, 1)}${bouton("projet.beatVol", "Volume prod", 0, 100, 1, "%", volBeat(), 100)}${bouton("projet.decal", "Décalage voix", -400, 400, 5, "ms", P.decal || 0, 0)}</div>
@@ -1026,6 +1088,7 @@ const STUDIO = (() => {
           <h4>Raccourcis</h4>
           <p class="dp-aide"><b>Espace</b> lecture · <b>R</b> enregistrer · <b>S</b> couper · <b>D</b> dupliquer · <b>Suppr</b> supprimer · <b>⌘Z</b> annuler · <b>←/→</b> un temps (Maj : une mesure) · <b>Entrée</b> début</p>
         </div>`;
+      $("dpNomProjet").addEventListener("change", e => { const v = e.target.value.trim(); if (!v || v === titreParDefaut()) delete P.nom; else P.nom = v; peindreTitre(); sauverNom(); message("Projet renommé"); });
       if ($("dpBpm")) $("dpBpm").addEventListener("change", e => { const v = Math.round(+e.target.value); if (v >= 50 && v <= 220) { P.bpm = v; reglerTout(); sauver(); dessiner(); entete(); } else e.target.value = bpm(); });
     }
   }
@@ -1040,6 +1103,7 @@ const STUDIO = (() => {
     const a = e.target.closest("[data-act]")?.dataset.act;
     if (a === "couper") couper(); else if (a === "dupliquer") dupliquer(); else if (a === "supprimer") supprimer();
     else if (a === "normaliser") normaliser();
+    else if (a === "supprProjet") { if (confirm(`Supprimer le projet « ${titreProjet()} » ? Ses prises et la prod importée seront effacées de cet appareil.`)) supprimerProjet(P.prod).then(() => message("Projet supprimé")); }
     else if (a === "retirer") { if (confirm("Retirer ta prod importée et revenir à la version YouTube ?")) retirerFichier(); }
   });
   pan.addEventListener("change", e => {
@@ -1331,6 +1395,7 @@ const STUDIO = (() => {
     sel = { type: "clip", id: k.id };
     dessiner(); inspecteur(); modifie();
     message(raison === "fin" ? "Fin de la prod : prise gardée" : "Prise gardée");
+    signalerProjets();
     if (typeof majToplines === "function") majToplines();
   }
 
@@ -1426,6 +1491,7 @@ const STUDIO = (() => {
   $("dawRec").onclick = enregistrer;
   $("dawCouper").onclick = couper;
   $("dawSuppr").onclick = supprimer;
+  $("dawTitreBtn").onclick = renommer;
   $("dawDupliquer").onclick = dupliquer;
   $("dawAnnuler").onclick = annuler;
   $("dawRefaire").onclick = retablir;
@@ -1498,7 +1564,7 @@ const STUDIO = (() => {
 
   /* ─────────────────────────── branchements avec le lecteur ─────────────────────────── */
   return {
-    page, importer,
+    page, importer, supprimerProjet, renommerProjet,
     ouvert: () => ouvert,
     occupe: () => ouvert || !!rec,
     finProd(){ if (rec && !horlogeInterne()) arreterRec("fin"); },

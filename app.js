@@ -1441,7 +1441,15 @@ const PRISES_DB = (() => {
     ecrireProjet: pr => tx("readwrite", s => s.put(pr), "projets"),
     lireFichier: prod => tx("readonly", s => s.get(prod), "fichiers"),
     ecrireFichier: f => tx("readwrite", s => s.put(f), "fichiers"),
-    supprFichier: prod => tx("readwrite", s => s.delete(prod), "fichiers")
+    supprFichier: prod => tx("readwrite", s => s.delete(prod), "fichiers"),
+    tousProjets: () => tx("readonly", s => s.getAll(), "projets"),
+    // un projet entier : son arrangement, sa prod importee et toutes ses prises
+    async supprProjet(prod){
+      await tx("readwrite", s => s.delete(prod), "projets");
+      await tx("readwrite", s => s.delete(prod), "fichiers");
+      const ids = (await tx("readonly", s => s.index("prod").getAllKeys(prod))) || [];
+      for (const id of ids) await tx("readwrite", s => s.delete(id));
+    }
   };
 })();
 let TOPLINE_N = new Map();        // prod -> nombre de prises
@@ -2655,6 +2663,7 @@ function majToplines(){
   if (!TOPLINES.length) return;
   const prises = [...TOPLINE_N.values()].reduce((a, n) => a + n, 0);
   document.getElementById("toplinesSub").textContent = `${prises} prise${prises > 1 ? "s" : ""} sur ${TOPLINES.length} prod${TOPLINES.length > 1 ? "s" : ""}`;
+  if (document.body.classList.contains("vue-studio")) majProjets();
   document.getElementById("toplinewall").innerHTML = TOPLINES.slice(0, 20).map(b => carteRail(b, `<span class="tl-n">🎙 ${TOPLINE_N.get(b.id)}</span> ${esc(b.prod)}`)).join("");
   brancherRangees();
   peindreTuiles();
@@ -2666,6 +2675,78 @@ document.getElementById("toplinewall").addEventListener("click", e => {
   if (i < 0) return;
   playFrom(TOPLINES, i);
   montrerVue("studio", true, `studio/?beat=${encodeURIComponent(TOPLINES[i].id)}`);
+});
+
+
+/* ============ page Studio : « Tes projets » ============
+   Un projet par prod (plus le projet libre) : on le rouvre, on le renomme, on le
+   supprime. Tout reste sur l'appareil du visiteur, comme les prises. */
+let PROJETS = [];
+async function majProjets(){
+  const sec = document.getElementById("stProjets");
+  if (!sec) return;
+  let projets = [], prises = [];
+  try { projets = await PRISES_DB.tousProjets(); } catch (e) {}
+  try { prises = await PRISES_DB.toutes(); } catch (e) {}
+  const n = new Map(), der = new Map();
+  prises.forEach(p => { n.set(p.prod, (n.get(p.prod) || 0) + 1); der.set(p.prod, Math.max(der.get(p.prod) || 0, p.cree || 0)); });
+  const par = new Map(projets.map(pr => [pr.prod, pr]));
+  n.forEach((_, prod) => { if (!par.has(prod)) par.set(prod, { prod }); });   // prises posees hors du studio
+  PROJETS = [...par.values()]
+    .filter(pr => (n.get(pr.prod) || 0) > 0 || pr.nom)
+    .filter(pr => pr.prod === "libre" || BY_ID.has(pr.prod))
+    .map(pr => ({ id: pr.prod, nom: pr.nom || "", prises: n.get(pr.prod) || 0, maj: Math.max(pr.maj || 0, der.get(pr.prod) || 0) }))
+    .sort((a, b) => b.maj - a.maj);
+  sec.hidden = !PROJETS.length;
+  if (!PROJETS.length) return;
+  document.getElementById("stProjetsSub").textContent = `${PROJETS.length} projet${PROJETS.length > 1 ? "s" : ""}, gardé${PROJETS.length > 1 ? "s" : ""} sur cet appareil.`;
+  const ouvertId = typeof STUDIO !== "undefined" && STUDIO.ouvert() ? (lireAdresse(location.href).get("beat") || "libre") : null;
+  document.getElementById("stListe").innerHTML = PROJETS.map(pr => {
+    const b = BY_ID.get(pr.id), libre = pr.id === "libre";
+    const titre = pr.nom || (libre ? "Projet libre" : b.title);
+    const jours = pr.maj ? (Date.now() - pr.maj) / 864e5 : null;
+    const quand = jours == null ? "" : jours < 1 ? "modifié aujourd'hui" : `modifié il y a ${fmtAge(jours)}`;
+    return `<div class="st-proj${pr.id === ouvertId ? " ouvert" : ""}" data-id="${esc(pr.id)}" style="--c:${libre ? "var(--accent)" : `var(--s-${b.style})`}">
+      <button class="st-vg" data-pa="ouvrir" aria-label="Ouvrir ${esc(titre)}">${libre ? `<span class="st-libre">${'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>'}</span>` : `<img src="https://i.ytimg.com/vi/${b.id}/mqdefault.jpg" alt="" loading="lazy">`}</button>
+      <div class="st-txt">
+        <span class="raison">${pr.prises} prise${pr.prises > 1 ? "s" : ""}${quand ? ` · ${quand}` : ""}${pr.id === ouvertId ? ' · <i>ouvert</i>' : ""}</span>
+        <span class="t" title="${esc(titre)}">${esc(titre)}</span>
+        <span class="s">${libre ? "Ta prod, tes voix" : `${pr.nom ? `sur « ${esc(b.title)} » · ` : ""}par ${esc(b.prod)}`}</span>
+      </div>
+      <div class="st-acts">
+        <button class="st-ouvrir" data-pa="ouvrir">Ouvrir</button>
+        <button class="st-ic" data-pa="renommer" aria-label="Renommer" title="Renommer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>
+        <button class="st-ic danger" data-pa="suppr" aria-label="Supprimer" title="Supprimer le projet"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>
+      </div>
+    </div>`;
+  }).join("");
+}
+window.addEventListener("findings:projets", () => majProjets());
+document.getElementById("stListe").addEventListener("click", e => {
+  const el = e.target.closest("[data-pa]"); if (!el) return;
+  const carte = el.closest(".st-proj"), id = carte.dataset.id, pr = PROJETS.find(x => x.id === id);
+  if (!pr) return;
+  const b = BY_ID.get(id), titre = pr.nom || (id === "libre" ? "Projet libre" : b.title);
+  if (el.dataset.pa === "ouvrir") {
+    montrerVue("studio", true, id === "libre" ? "studio/" : `studio/?beat=${encodeURIComponent(id)}`);
+    document.getElementById("studioHote").scrollIntoView({ behavior: "smooth", block: "start" });
+  } else if (el.dataset.pa === "suppr") {
+    if (confirm(`Supprimer le projet « ${titre} » ? Ses ${pr.prises} prise${pr.prises > 1 ? "s" : ""} et la prod importée seront effacées de cet appareil.`)) STUDIO.supprimerProjet(id);
+  } else if (el.dataset.pa === "renommer") {
+    const t = carte.querySelector(".t");
+    const champ = document.createElement("input");
+    champ.className = "st-champ"; champ.value = titre; champ.maxLength = 60; champ.setAttribute("aria-label", "Nom du projet");
+    t.replaceWith(champ); champ.focus(); champ.select();
+    let fini = false;
+    const finir = garder => {
+      if (fini) return; fini = true;
+      const v = champ.value.trim();
+      if (garder && v !== titre) STUDIO.renommerProjet(id, v === (id === "libre" ? "Projet libre" : b.title) ? "" : v);
+      else majProjets();
+    };
+    champ.addEventListener("keydown", ev => { if (ev.key === "Enter") finir(true); else if (ev.key === "Escape") finir(false); });
+    champ.addEventListener("blur", () => finir(true));
+  }
 });
 
 /* ============ mur des artistes ============
@@ -2856,7 +2937,7 @@ function montrerVue(nom, pousser = true, params = ""){
   }
   // la page Studio monte le studio dans la page ; la quitter le referme (le projet est garde)
   if (typeof STUDIO !== "undefined") {
-    if (studio) STUDIO.page(true, lireAdresse(location.href).get("beat"));
+    if (studio) { STUDIO.page(true, lireAdresse(location.href).get("beat")); majProjets(); }
     else if (STUDIO.ouvert()) STUDIO.page(false);
   }
   majTitre(); if (pousser) mesurer();
