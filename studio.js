@@ -262,7 +262,7 @@ const STUDIO = (() => {
   document.body.insertAdjacentHTML("beforeend", `
   <div class="daw" id="daw" hidden role="dialog" aria-label="Studio">
     <div class="daw-haut">
-      <div class="daw-id"><span class="eyebrow">${I.micro}Studio</span><button class="daw-titre" id="dawTitreBtn" title="Renommer le projet" aria-label="Renommer le projet"><b id="dawTitre"></b>${I.crayon}</button><span class="info" id="dawInfo"></span></div>
+      <div class="daw-id"><span class="eyebrow">${I.micro}Studio</span><button class="daw-titre" id="dawTitreBtn" title="Renommer le projet" aria-label="Renommer le projet"><b id="dawTitre" translate="no"></b>${I.crayon}</button><span class="info" id="dawInfo"></span></div>
       <div class="daw-console">
         <button class="daw-b" id="dawDebut" title="Revenir au début (Entrée)" aria-label="Revenir au début">${I.debut}</button>
         <button class="daw-b lire" id="dawLire" title="Lecture / pause (Espace)" aria-label="Lecture ou pause">${I.lire}</button>
@@ -648,7 +648,7 @@ const STUDIO = (() => {
   }
 
   /* ─────────────────────────── projet ─────────────────────────── */
-  const nouvellePiste = i => { const p = { id: nid(), nom: `Voix ${i + 1}`, vol: 1, pan: 0, mute: false, solo: false, fx: FX_DEF(), preset: "brut" }; return p; };
+  const nouvellePiste = i => { const p = { id: nid(), nom: typeof T === "function" ? T(`Voix ${i + 1}`) : `Voix ${i + 1}`, vol: 1, pan: 0, mute: false, solo: false, fx: FX_DEF(), preset: "brut" }; return p; };
   function pics(buf){
     const n = Math.ceil(buf.duration * RES), out = new Float32Array(n);
     const chs = Array.from({ length: buf.numberOfChannels }, (_, i) => buf.getChannelData(i)), per = buf.sampleRate / RES;
@@ -706,7 +706,7 @@ const STUDIO = (() => {
   let saveMinuteur = 0;
   /* Nom du projet : celui que le visiteur a donne, sinon le titre de la prod (ou du fichier
      importe pour le projet libre). Le nom vit dans le projet, avec l'arrangement. */
-  const titreParDefaut = () => !prod ? "" : prod.id === "libre" ? (fichier ? fichier.nom.replace(/\.[a-z0-9]+$/i, "") : "Projet libre") : prod.title;
+  const titreParDefaut = () => !prod ? "" : prod.id === "libre" ? (fichier ? fichier.nom.replace(/\.[a-z0-9]+$/i, "") : (typeof T === "function" ? T("Projet libre") : "Projet libre")) : prod.title;
   const titreProjet = () => (P && P.nom) || titreParDefaut();
   function peindreTitre(){ const t = $("dawTitre"); if (t) t.textContent = titreProjet(); }
   const signalerProjets = () => window.dispatchEvent(new Event("findings:projets"));

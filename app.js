@@ -1,4 +1,604 @@
 
+/* ============ langues : français, anglais, espagnol ============
+   Le site est ecrit en francais. Pour l'anglais et l'espagnol, une couche de traduction
+   remplace les textes au moment ou ils s'affichent : un dictionnaire pour les textes fixes,
+   des regles pour ceux qui portent un nombre ou un nom (« 1931 prods », « Lire X »), et un
+   decoupage sur « · » pour les lignes composees. Les donnees (titres des prods, beatmakers,
+   artistes) ne sont jamais traduites : elles ne figurent pas au dictionnaire, et les zones
+   qui les affichent portent translate="no". */
+const LANGUES = { fr: "Français", en: "English", es: "Español" };
+const LANG = (() => {
+  // ?lang=en dans l'adresse choisit la langue (lien partage) et la retient
+  const q = new URLSearchParams(location.search).get("lang");
+  if (LANGUES[q]) { try { localStorage.setItem("findings.lang", q); } catch (e) {} return q; }
+  try { const l = localStorage.getItem("findings.lang"); if (LANGUES[l]) return l; } catch (e) {}
+  const n = (navigator.languages && navigator.languages[0] || navigator.language || "fr").slice(0, 2).toLowerCase();
+  return LANGUES[n] ? n : "fr";
+})();
+const LOCALE = { fr: "fr-FR", en: "en-US", es: "es-ES" }[LANG];
+document.documentElement.lang = LANG;
+const I18N = (() => {
+  const L = LANG === "en" ? 0 : LANG === "es" ? 1 : -1;
+  const D = {
+    // ── navigation, en-tete
+    "Accueil": ["Home", "Inicio"],
+    "Artistes": ["Artists", "Artistas"],
+    "Artiste": ["Artist", "Artista"],
+    "Styles": ["Styles", "Estilos"],
+    "Style": ["Style", "Estilo"],
+    "Outils": ["Tools", "Herramientas"],
+    "Les prods": ["Beats", "Beats"],
+    "Studio": ["Studio", "Estudio"],
+    "Pour toi": ["For you", "Para ti"],
+    "Suivis": ["Following", "Seguidos"],
+    "Historique": ["History", "Historial"],
+    "Prods likés": ["Liked beats", "Beats con like"],
+    "Prods likées": ["Liked beats", "Beats con like"],
+    "Mode sombre": ["Dark mode", "Modo oscuro"],
+    "Mode clair": ["Light mode", "Modo claro"],
+    "Passer en mode sombre": ["Switch to dark mode", "Cambiar a modo oscuro"],
+    "Passer en mode clair": ["Switch to light mode", "Cambiar a modo claro"],
+    "Langue": ["Language", "Idioma"],
+    "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
+    "Rechercher": ["Search", "Buscar"],
+    "Rechercher une prod": ["Search for a beat", "Buscar un beat"],
+    "Un artiste, un mood, un titre : « Werenoi », « Clams Casino », « sombre »…": ["An artist, a mood, a title: “Werenoi”, “Clams Casino”, “dark”…", "Un artista, un mood, un título: «Werenoi», «Clams Casino», «oscuro»…"],
+    "Un artiste, un mood, un titre : « Werenoi », « sombre »…": ["An artist, a mood, a title: “Werenoi”, “dark”…", "Un artista, un mood, un título: «Werenoi», «oscuro»…"],
+    "Cherche une prod, un artiste, un mood…": ["Search for a beat, an artist, a mood…", "Busca un beat, un artista, un mood…"],
+    "Mes abonnements": ["My follows", "Mis seguidos"],
+    "Mes prods": ["My beats", "Mis beats"],
+    "prods sur FINDINGS": ["beats on FINDINGS", "beats en FINDINGS"],
+    "prod sur FINDINGS": ["beat on FINDINGS", "beat en FINDINGS"],
+    "Mes abonnements : artistes et beatmakers suivis": ["My follows: artists and beatmakers you follow", "Mis seguidos: artistas y beatmakers que sigues"],
+    "Pour toi : prods choisies d'après tes goûts": ["For you: beats picked from your taste", "Para ti: beats elegidos según tus gustos"],
+    "Historique d'écoute": ["Listening history", "Historial de escucha"],
+    "Studio : pose ta topline sur une prod, ou importe la tienne": ["Studio: record your topline on a beat, or import your own", "Estudio: graba tu topline sobre un beat o importa el tuyo"],
+    "Studio en ligne : pose ta topline sur une prod": ["Online studio: record your topline on a beat", "Estudio online: graba tu topline sobre un beat"],
+    "Studio en ligne : pose ta topline": ["Online studio: record your topline", "Estudio online: graba tu topline"],
+    "FINDINGS : type beats à écouter et studio pour poser ta topline": ["FINDINGS: type beats to listen to, and a studio to record your topline", "FINDINGS: type beats para escuchar y un estudio para grabar tu topline"],
+    "FINDINGS ne héberge aucun fichier : chaque prod est une vidéo YouTube publique, lue depuis YouTube, et chaque clic renvoie du trafic au beatmaker.": ["FINDINGS hosts no files: every beat is a public YouTube video, played from YouTube, and every click sends traffic to the beatmaker.", "FINDINGS no aloja ningún archivo: cada beat es un vídeo público de YouTube, reproducido desde YouTube, y cada clic envía tráfico al beatmaker."],
+    "FINDINGS est ouvert depuis le disque.": ["FINDINGS is open from your disk.", "FINDINGS está abierto desde el disco."],
+    "Le son passe quand même, mais le lecteur complet (enchaînement, file d'attente, barre de progression) a besoin du serveur local : double-clique": ["Sound still works, but the full player (autoplay, queue, progress bar) needs the local server: double-click", "El sonido funciona igual, pero el reproductor completo (encadenado, cola, barra de progreso) necesita el servidor local: haz doble clic en"],
+    ", puis ouvre": [", then open", " y abre"],
+    // pied de page
+    "Titres, beatmakers, durées et écoutes viennent de YouTube, relevés lors des passages automatiques. Le": ["Titles, beatmakers, durations and plays come from YouTube, collected during automatic passes. The", "Títulos, beatmakers, duraciones y reproducciones vienen de YouTube, recogidos en las pasadas automáticas. El"],
+    "tempo": ["tempo", "tempo"],
+    "tonalité": ["key", "tonalidad"],
+    "moods": ["moods", "moods"],
+    "sont déduits du texte de la vidéo, à défaut du style : des repères, pas une mesure.": ["are inferred from the video text, or else from the style: pointers, not measurements.", "se deducen del texto del vídeo o, si no, del estilo: referencias, no mediciones."],
+    "mise à jour": ["update", "actualización"],
+    // ── accueil
+    "Dernières sorties": ["Latest releases", "Últimos lanzamientos"],
+    "Les dernières sorties": ["The latest releases", "Los últimos lanzamientos"],
+    "Tout voir": ["See all", "Ver todo"],
+    "Tout voir →": ["See all →", "Ver todo →"],
+    "Par artiste": ["By artist", "Por artista"],
+    "Par style": ["By style", "Por estilo"],
+    "Par mood": ["By mood", "Por mood"],
+    "Moods": ["Moods", "Moods"],
+    "Mood": ["Mood", "Mood"],
+    "La sélection du moment": ["Current picks", "La selección del momento"],
+    "Une découverte pour toi": ["A discovery for you", "Un descubrimiento para ti"],
+    "Écoute ou like quelques prods : cette sélection s'adaptera à tes goûts.": ["Play or like a few beats: this selection will adapt to your taste.", "Escucha o da like a algunos beats: esta selección se adaptará a tus gustos."],
+    "Écouter": ["Listen", "Escuchar"],
+    "Voir les prods": ["See the beats", "Ver los beats"],
+    "Le plus fourni": ["Most beats", "El más surtido"],
+    "La plus fournie": ["Most beats", "La más surtida"],
+    "Sortie aujourd'hui": ["Out today", "Salió hoy"],
+    "Sortie hier": ["Out yesterday", "Salió ayer"],
+    "Nouveau": ["New", "Nuevo"],
+    "Une prod te plaît ? Pose ta topline dessus.": ["Like a beat? Record your topline on it.", "¿Te gusta un beat? Graba tu topline encima."],
+    "Enregistre ta voix direct sur la prod, coupe, ajoute de la réverb ou de l'écho, puis exporte. Tu peux aussi importer ta propre prod. Gratuit, sans compte.": ["Record your voice right on the beat, cut, add reverb or echo, then export. You can also import your own beat. Free, no account.", "Graba tu voz directamente sobre el beat, corta, añade reverb o eco y exporta. También puedes importar tu propio beat. Gratis, sin cuenta."],
+    "Ouvrir le studio": ["Open the studio", "Abrir el estudio"],
+    "Replier": ["Collapse", "Plegar"],
+    "Tes abonnements": ["Your follows", "Tus seguidos"],
+    "Tes toplines": ["Your toplines", "Tus toplines"],
+    "Tes prods likées": ["Your liked beats", "Tus beats con like"],
+    "Une prod mise de côté.": ["One beat saved.", "Un beat guardado."],
+    "Rien pour l'instant.": ["Nothing yet.", "Nada por ahora."],
+    "Tu ne suis personne pour l'instant.": ["You're not following anyone yet.", "Todavía no sigues a nadie."],
+    "Ouvre un artiste (menu Artiste) ou clique sur le nom d'un beatmaker, puis touche « + Suivre » à côté du titre.": ["Open an artist (Artist menu) or click a beatmaker's name, then tap “+ Follow” next to the title.", "Abre un artista (menú Artista) o haz clic en el nombre de un beatmaker y toca «+ Seguir» junto al título."],
+    "Pas encore de topline.": ["No topline yet.", "Todavía no hay topline."],
+    "Lance une prod, touche le micro dans le lecteur et pose ta voix dessus : tes prises se rangeront ici.": ["Play a beat, tap the mic in the player and record your voice on it: your takes will be saved here.", "Pon un beat, toca el micro en el reproductor y graba tu voz encima: tus tomas se guardarán aquí."],
+    "Lance une prod au hasard parmi celles que tu n'as jamais écoutées": ["Play a random beat you've never heard", "Reproduce un beat al azar entre los que nunca has escuchado"],
+    "Nouveau depuis ta visite": ["New since your visit", "Nuevo desde tu visita"],
+    // ── liste des prods
+    "Toutes les prods": ["All beats", "Todos los beats"],
+    "Tout lire": ["Play all", "Reproducir todo"],
+    "Surprends-moi": ["Surprise me", "Sorpréndeme"],
+    "Une prod au hasard dans cette liste, parmi celles que tu n'as jamais écoutées": ["A random beat from this list, among the ones you've never played", "Un beat al azar de esta lista, entre los que nunca has escuchado"],
+    "Pertinence": ["Relevance", "Relevancia"],
+    "Nouveautés": ["Newest", "Novedades"],
+    "Les prods publiées le plus récemment par leur beatmaker": ["Beats most recently published by their beatmaker", "Los beats publicados más recientemente por su beatmaker"],
+    "Tempo": ["Tempo", "Tempo"],
+    "Jamais écoutées": ["Never played", "Nunca escuchados"],
+    "jamais écoutées": ["never played", "nunca escuchados"],
+    "N'afficher que les prods jamais écoutées": ["Only show beats you've never played", "Mostrar solo beats nunca escuchados"],
+    "Effacer": ["Clear", "Borrar"],
+    "effacer": ["clear", "borrar"],
+    "Effacer les filtres": ["Clear filters", "Borrar filtros"],
+    "Effacer l'historique": ["Clear history", "Borrar historial"],
+    "réinitialiser": ["reset", "restablecer"],
+    "Chercher un artiste": ["Search for an artist", "Buscar un artista"],
+    "Chercher un style": ["Search for a style", "Buscar un estilo"],
+    "Aucun artiste de la liste ne correspond.": ["No artist in the list matches.", "Ningún artista de la lista coincide."],
+    "Aucun style ne correspond.": ["No style matches.", "Ningún estilo coincide."],
+    "Aucune prod ne correspond.": ["No beat matches.", "Ningún beat coincide."],
+    "BPM minimum": ["Minimum BPM", "BPM mínimo"],
+    "BPM maximum": ["Maximum BPM", "BPM máximo"],
+    "Tempo vérifié uniquement": ["Verified tempo only", "Solo tempo verificado"],
+    "tempo vérifié": ["verified tempo", "tempo verificado"],
+    "Tempo estimé": ["Estimated tempo", "Tempo estimado"],
+    "Tempo estimé d'après le style : le beatmaker ne l'a pas indiqué.": ["Tempo estimated from the style: the beatmaker didn't state it.", "Tempo estimado según el estilo: el beatmaker no lo indicó."],
+    "Tonalité estimée": ["Estimated key", "Tonalidad estimada"],
+    "Tonalité estimée : non indiquée par le beatmaker.": ["Estimated key: not stated by the beatmaker.", "Tonalidad estimada: no indicada por el beatmaker."],
+    "bpm": ["bpm", "bpm"],
+    "clé": ["key", "tono"],
+    "durée": ["length", "duración"],
+    "vues": ["views", "vistas"],
+    "âge": ["age", "edad"],
+    "nouveau": ["new", "nuevo"],
+    "par": ["by", "por"],
+    "prods": ["beats", "beats"],
+    "beatmakers": ["beatmakers", "beatmakers"],
+    "Liker cette prod": ["Like this beat", "Dar like a este beat"],
+    "Retirer des prods likées": ["Remove from liked beats", "Quitar de los beats con like"],
+    "Prods similaires": ["Similar beats", "Beats similares"],
+    "Similaires": ["Similar", "Similares"],
+    "Prods dans le même esprit que celle-ci": ["Beats with the same vibe as this one", "Beats con la misma onda que este"],
+    "Voir la chaîne": ["View channel", "Ver canal"],
+    "Voir la chaîne YouTube du beatmaker": ["View the beatmaker's YouTube channel", "Ver el canal de YouTube del beatmaker"],
+    "Ouvrir sur YouTube": ["Open on YouTube", "Abrir en YouTube"],
+    "Ajoutée ces derniers jours": ["Added in the last few days", "Añadido estos últimos días"],
+    "Ajoutée depuis ta dernière visite": ["Added since your last visit", "Añadido desde tu última visita"],
+    "Ajoutée à tes likes": ["Added to your likes", "Añadido a tus likes"],
+    "Tes prises sur cette prod": ["Your takes on this beat", "Tus tomas en este beat"],
+    "Ranger": ["Organize", "Ordenar"],
+    "Ranger dans": ["Save to", "Guardar en"],
+    "Ranger dans un dossier": ["Save to a folder", "Guardar en una carpeta"],
+    "Nouveau dossier": ["New folder", "Nueva carpeta"],
+    "+ Nouveau dossier": ["+ New folder", "+ Nueva carpeta"],
+    "Nom du dossier": ["Folder name", "Nombre de la carpeta"],
+    "Tous": ["All", "Todos"],
+    "Tout": ["All", "Todo"],
+    "Renommer": ["Rename", "Renombrar"],
+    "Supprimer": ["Delete", "Eliminar"],
+    "Confirmer la suppression": ["Confirm deletion", "Confirmar eliminación"],
+    "Ne plus suivre": ["Unfollow", "Dejar de seguir"],
+    "Voir la page →": ["View page →", "Ver página →"],
+    "Élargis le tempo ou enlève un filtre — le catalogue en compte": ["Widen the tempo or remove a filter — the catalog has", "Amplía el tempo o quita un filtro — el catálogo tiene"],
+    // profils
+    "Beatmaker": ["Beatmaker", "Beatmaker"],
+    "Suivre": ["Follow", "Seguir"],
+    "+ Suivre": ["+ Follow", "+ Seguir"],
+    "Suivi": ["Following", "Siguiendo"],
+    "✓ Suivi": ["✓ Following", "✓ Siguiendo"],
+    "Abonné": ["Following", "Siguiendo"],
+    "Partager": ["Share", "Compartir"],
+    "↗ Partager": ["↗ Share", "↗ Compartir"],
+    "Partager cette page": ["Share this page", "Compartir esta página"],
+    "Lien copié": ["Link copied", "Enlace copiado"],
+    "Lien copié !": ["Link copied!", "¡Enlace copiado!"],
+    "Chaîne YouTube": ["YouTube channel", "Canal de YouTube"],
+    "Chaîne YouTube ↗": ["YouTube channel ↗", "Canal de YouTube ↗"],
+    "abonnés YouTube": ["YouTube subscribers", "suscriptores de YouTube"],
+    "fans Deezer": ["Deezer fans", "fans en Deezer"],
+    "C'est toi ? Mets le lien de cette page dans ta bio : tes auditeurs y trouvent toutes tes prods, et peuvent poser leur topline dessus.": ["Is this you? Put this page's link in your bio: your listeners will find all your beats here, and can record their topline on them.", "¿Eres tú? Pon el enlace de esta página en tu bio: tus oyentes encontrarán todos tus beats y podrán grabar su topline encima."],
+    "style, tempo, tonalité et artistes en commun": ["style, tempo, key and artists in common", "estilo, tempo, tonalidad y artistas en común"],
+    // ── lecteur et panneau
+    "En lecture": ["Now playing", "Reproduciendo"],
+    "Panneau En lecture": ["Now playing panel", "Panel de reproducción"],
+    "Afficher la prod en cours à droite": ["Show the current beat on the right", "Mostrar el beat actual a la derecha"],
+    "Fermer le panneau": ["Close panel", "Cerrar panel"],
+    "Lecture / pause": ["Play / pause", "Reproducir / pausa"],
+    "Lecture / pause (Espace)": ["Play / pause (Space)", "Reproducir / pausa (Espacio)"],
+    "Lecture ou pause": ["Play or pause", "Reproducir o pausar"],
+    "Prod précédente": ["Previous beat", "Beat anterior"],
+    "Prod suivante": ["Next beat", "Beat siguiente"],
+    "Précédent": ["Previous", "Anterior"],
+    "Précédent (P)": ["Previous (P)", "Anterior (P)"],
+    "Suivant": ["Next", "Siguiente"],
+    "Suivant (N)": ["Next (N)", "Siguiente (N)"],
+    "Aléatoire": ["Shuffle", "Aleatorio"],
+    "Lecture aléatoire": ["Shuffle", "Reproducción aleatoria"],
+    "Écoute rapide : démarrer chaque prod après l'intro": ["Quick listen: start each beat after the intro", "Escucha rápida: empezar cada beat tras la intro"],
+    "Écoute rapide : saute l'intro": ["Quick listen: skip the intro", "Escucha rápida: salta la intro"],
+    "Écoute rapide : saute l'intro (R)": ["Quick listen: skip the intro (R)", "Escucha rápida: salta la intro (R)"],
+    "Couper le son": ["Mute", "Silenciar"],
+    "Remettre le son": ["Unmute", "Activar sonido"],
+    "Couper / remettre le son": ["Mute / unmute", "Silenciar / activar sonido"],
+    "Volume": ["Volume", "Volumen"],
+    "Position dans la prod": ["Position in the beat", "Posición en el beat"],
+    "Agrandir la vidéo": ["Enlarge video", "Ampliar el vídeo"],
+    "Réduire la vidéo": ["Shrink video", "Reducir el vídeo"],
+    "Studio : enregistrer une topline sur cette prod": ["Studio: record a topline on this beat", "Estudio: graba una topline en este beat"],
+    "Studio : pose ta topline": ["Studio: record your topline", "Estudio: graba tu topline"],
+    "Studio : poser une topline": ["Studio: record a topline", "Estudio: grabar una topline"],
+    "Le beatmaker": ["The beatmaker", "El beatmaker"],
+    "Ses prods": ["Their beats", "Sus beats"],
+    "À suivre": ["Up next", "A continuación"],
+    "Dans le même esprit": ["Same vibe", "En la misma onda"],
+    "Type beat de": ["Type beat for", "Type beat de"],
+    "Type beat des artistes": ["Type beat for", "Type beat de"],
+    "Cette chaîne bloque la lecture hors YouTube — prod suivante.": ["This channel blocks playback outside YouTube — next beat.", "Este canal bloquea la reproducción fuera de YouTube — siguiente beat."],
+    // ── moods
+    "agressif": ["aggressive", "agresivo"],
+    "sombre": ["dark", "oscuro"],
+    "mélancolique": ["melancholic", "melancólico"],
+    "énergique": ["energetic", "enérgico"],
+    "chill": ["chill", "chill"],
+    "solaire": ["sunny", "soleado"],
+    "sensuel": ["sensual", "sensual"],
+    "planant": ["spacey", "etéreo"],
+    "nostalgique": ["nostalgic", "nostálgico"],
+    "cinématique": ["cinematic", "cinemático"],
+    "festif": ["festive", "festivo"],
+    // styles dont le nom est francais
+    "Piano triste": ["Sad piano", "Piano triste"],
+    "Emo rap / guitare": ["Emo rap / guitar", "Emo rap / guitarra"],
+    // ── page studio
+    "Pose ta topline, direct sur la prod.": ["Record your topline, right on the beat.", "Graba tu topline, directamente sobre el beat."],
+    "Choisis une prod du site ou importe la tienne, enregistre ta voix au micro, coupe, déplace, ajoute de la réverb ou de l'écho, puis exporte en WAV. Gratuit, dans le navigateur, et tes projets restent sur ton appareil.": ["Pick a beat from the site or import your own, record your voice on the mic, cut, move, add reverb or echo, then export as WAV. Free, in your browser, and your projects stay on your device.", "Elige un beat del sitio o importa el tuyo, graba tu voz con el micro, corta, mueve, añade reverb o eco y exporta en WAV. Gratis, en el navegador, y tus proyectos se quedan en tu dispositivo."],
+    "↥ Importer ma prod": ["↥ Import my beat", "↥ Importar mi beat"],
+    "Choisir une prod du site": ["Pick a beat from the site", "Elegir un beat del sitio"],
+    "Pistes illimitées": ["Unlimited tracks", "Pistas ilimitadas"],
+    "Voix, backs, ad-libs : une piste par idée, muet et solo.": ["Vocals, backs, ad-libs: one track per idea, mute and solo.", "Voces, coros, ad-libs: una pista por idea, mute y solo."],
+    "Édition au doigt": ["Hands-on editing", "Edición al dedo"],
+    "Couper, rogner, déplacer, fondus, annuler à volonté.": ["Cut, trim, move, fades, unlimited undo.", "Corta, recorta, mueve, fundidos, deshaz sin límite."],
+    "Effets par piste": ["Effects per track", "Efectos por pista"],
+    "Réverb, écho calé sur le tempo, graves, aigus, compresseur.": ["Reverb, tempo-synced echo, lows, highs, compressor.", "Reverb, eco sincronizado con el tempo, graves, agudos, compresor."],
+    "Export WAV": ["WAV export", "Exportación WAV"],
+    "Ta voix seule, ou mixée avec ta prod si tu l'as importée.": ["Your voice alone, or mixed with your beat if you imported it.", "Tu voz sola, o mezclada con tu beat si lo importaste."],
+    "Tes projets": ["Your projects", "Tus proyectos"],
+    "Ouvrir": ["Open", "Abrir"],
+    "Ta prod, tes voix": ["Your beat, your vocals", "Tu beat, tus voces"],
+    "ta prod, tes voix": ["your beat, your vocals", "tu beat, tus voces"],
+    "modifié aujourd'hui": ["edited today", "modificado hoy"],
+    "ouvert": ["open", "abierto"],
+    "Projet libre": ["Free project", "Proyecto libre"],
+    "Ton projet libre : importe ta propre prod": ["Your free project: import your own beat", "Tu proyecto libre: importa tu propio beat"],
+    // ── station audio
+    "Fermer": ["Close", "Cerrar"],
+    "Fermer le studio (Échap)": ["Close studio (Esc)", "Cerrar estudio (Esc)"],
+    "Revenir au début": ["Back to start", "Volver al inicio"],
+    "Revenir au début (Entrée)": ["Back to start (Enter)", "Volver al inicio (Intro)"],
+    "Enregistrer": ["Record", "Grabar"],
+    "Enregistrer au curseur (R)": ["Record at cursor (R)", "Grabar en el cursor (R)"],
+    "● Enregistrement…": ["● Recording…", "● Grabando…"],
+    "Niveau du micro": ["Mic level", "Nivel del micro"],
+    "Couper": ["Cut", "Cortar"],
+    "Couper au curseur": ["Cut at cursor", "Cortar en el cursor"],
+    "Couper au curseur (S)": ["Cut at cursor (S)", "Cortar en el cursor (S)"],
+    "Dupliquer": ["Duplicate", "Duplicar"],
+    "Dupliquer la région (D)": ["Duplicate region (D)", "Duplicar región (D)"],
+    "Supprimer la région (Suppr)": ["Delete region (Del)", "Eliminar región (Supr)"],
+    "Annuler (⌘Z)": ["Undo (⌘Z)", "Deshacer (⌘Z)"],
+    "Rétablir (⇧⌘Z)": ["Redo (⇧⌘Z)", "Rehacer (⇧⌘Z)"],
+    "Aimanter à la grille (Alt pour s'en affranchir)": ["Snap to grid (hold Alt to bypass)", "Ajustar a la cuadrícula (Alt para ignorarla)"],
+    "Grille": ["Grid", "Cuadrícula"],
+    "Zoom": ["Zoom", "Zoom"],
+    "Exporter": ["Export", "Exportar"],
+    "Exporter en WAV": ["Export as WAV", "Exportar en WAV"],
+    "Contenu de l'export": ["Export content", "Contenido de la exportación"],
+    "Voix seule": ["Vocals only", "Solo voz"],
+    "Voix + prod": ["Vocals + beat", "Voz + beat"],
+    "Le son de la prod reste dans le lecteur YouTube": ["The beat's sound stays in the YouTube player", "El sonido del beat se queda en el reproductor de YouTube"],
+    "Mesures": ["Bars", "Compases"],
+    "mes.": ["bar", "comp."],
+    "Prod": ["Beat", "Beat"],
+    "Piste": ["Track", "Pista"],
+    "+ Piste": ["+ Track", "+ Pista"],
+    "Piste et effets": ["Track & effects", "Pista y efectos"],
+    "Effets de la piste": ["Track effects", "Efectos de la pista"],
+    "effets": ["effects", "efectos"],
+    "Région": ["Region", "Región"],
+    "Projet": ["Project", "Proyecto"],
+    "Replier le panneau": ["Collapse panel", "Plegar panel"],
+    "Les prochaines prises vont sur cette piste": ["Next takes go on this track", "Las próximas tomas van a esta pista"],
+    "Muet": ["Mute", "Silencio"],
+    "Solo": ["Solo", "Solo"],
+    "Nom": ["Name", "Nombre"],
+    "Préréglage": ["Preset", "Preset"],
+    "Réglages perso": ["Custom settings", "Ajustes personalizados"],
+    "Brut (aucun effet)": ["Dry (no effect)", "Seco (sin efectos)"],
+    "Voix lead": ["Lead vocal", "Voz principal"],
+    "Backs / chœurs": ["Backs / choir", "Coros"],
+    "Ad-libs": ["Ad-libs", "Ad-libs"],
+    "Téléphone": ["Phone", "Teléfono"],
+    "téléphone": ["phone", "teléfono"],
+    "Grand espace": ["Big space", "Gran espacio"],
+    "Chaud et saturé": ["Warm and saturated", "Cálido y saturado"],
+    "Panoramique": ["Pan", "Panorama"],
+    "Supprimer la piste": ["Delete track", "Eliminar pista"],
+    "Coupe-bas": ["Low cut", "Corte de graves"],
+    "Égaliseur": ["Equalizer", "Ecualizador"],
+    "Compresseur": ["Compressor", "Compresor"],
+    "Saturation": ["Saturation", "Saturación"],
+    "Filtre": ["Filter", "Filtro"],
+    "Chorus / doubleur": ["Chorus / doubler", "Chorus / doblador"],
+    "Réverb": ["Reverb", "Reverb"],
+    "Écho": ["Echo", "Eco"],
+    "Fréquence": ["Frequency", "Frecuencia"],
+    "Graves": ["Lows", "Graves"],
+    "Médiums": ["Mids", "Medios"],
+    "Aigus": ["Highs", "Agudos"],
+    "F. graves": ["Low freq.", "Frec. graves"],
+    "F. médiums": ["Mid freq.", "Frec. medios"],
+    "F. aigus": ["High freq.", "Frec. agudos"],
+    "Seuil": ["Threshold", "Umbral"],
+    "Ratio": ["Ratio", "Ratio"],
+    "Gain": ["Gain", "Ganancia"],
+    "Relâche": ["Release", "Liberación"],
+    "Chaleur": ["Warmth", "Calidez"],
+    "Mélange": ["Mix", "Mezcla"],
+    "Résonance": ["Resonance", "Resonancia"],
+    "Passe-bas": ["Low-pass", "Paso bajo"],
+    "Passe-haut": ["High-pass", "Paso alto"],
+    "Radio": ["Radio", "Radio"],
+    "Vitesse": ["Speed", "Velocidad"],
+    "Profondeur": ["Depth", "Profundidad"],
+    "Largeur": ["Width", "Anchura"],
+    "Taille": ["Size", "Tamaño"],
+    "Pré-délai": ["Pre-delay", "Pre-delay"],
+    "Brillance": ["Brightness", "Brillo"],
+    "Niveau": ["Level", "Nivel"],
+    "Répétitions": ["Feedback", "Repeticiones"],
+    "Ping-pong": ["Ping-pong", "Ping-pong"],
+    "Durée de l'écho, calée sur le tempo": ["Echo length, synced to the tempo", "Duración del eco, sincronizada con el tempo"],
+    "à plat": ["flat", "plano"],
+    "Retire le grave inutile (souffle, pied de micro, plosives). À laisser sur presque toutes les voix.": ["Removes useless low end (breath, mic stand, plosives). Leave it on almost every vocal.", "Quita los graves inútiles (soplidos, pie de micro, plosivas). Déjalo en casi todas las voces."],
+    "Creuse ou renforce des zones : moins de « boue » vers 300–500 Hz, plus d'air dans les aigus.": ["Cuts or boosts areas: less “mud” around 300–500 Hz, more air in the highs.", "Recorta o refuerza zonas: menos «barro» hacia 300–500 Hz, más aire en los agudos."],
+    "Resserre les écarts de volume pour que la voix reste devant. Seuil bas = plus compressé.": ["Evens out volume so the vocal stays up front. Lower threshold = more compression.", "Reduce las diferencias de volumen para que la voz quede delante. Umbral bajo = más compresión."],
+    "Ajoute de la chaleur et du grain, comme un passage dans une console ou une bande.": ["Adds warmth and grit, like running through a console or tape.", "Añade calidez y grano, como pasar por una consola o una cinta."],
+    "Coupe une partie du spectre : effet téléphone ou radio pour les ad-libs et les intros.": ["Cuts part of the spectrum: phone or radio effect for ad-libs and intros.", "Corta parte del espectro: efecto teléfono o radio para ad-libs e intros."],
+    "Double et élargit la voix en stéréo : idéal pour les backs et les refrains.": ["Doubles and widens the vocal in stereo: ideal for backs and hooks.", "Dobla y ensancha la voz en estéreo: ideal para coros y estribillos."],
+    "Place la voix dans une pièce. Taille = longueur de la queue, pré-délai = détache la voix.": ["Places the vocal in a room. Size = tail length, pre-delay = separates the vocal.", "Coloca la voz en una sala. Tamaño = longitud de la cola, pre-delay = separa la voz."],
+    "Répète la voix en rythme, calé sur le tempo de la prod. Ping-pong = gauche puis droite.": ["Repeats the vocal in rhythm, synced to the beat's tempo. Ping-pong = left then right.", "Repite la voz en ritmo, sincronizada con el tempo del beat. Ping-pong = izquierda y luego derecha."],
+    "Mix": ["Mix", "Mezcla"],
+    "Volume général": ["Master volume", "Volumen general"],
+    "Volume prod": ["Beat volume", "Volumen del beat"],
+    "Volume de la prod": ["Beat volume", "Volumen del beat"],
+    "Décalage voix": ["Vocal offset", "Desfase de voz"],
+    "Raccourcis": ["Shortcuts", "Atajos"],
+    "Espace": ["Space", "Espacio"],
+    "Entrée": ["Enter", "Intro"],
+    "Suppr": ["Del", "Supr"],
+    "lecture ·": ["play ·", "reproducir ·"],
+    "enregistrer ·": ["record ·", "grabar ·"],
+    "couper ·": ["cut ·", "cortar ·"],
+    "dupliquer ·": ["duplicate ·", "duplicar ·"],
+    "supprimer ·": ["delete ·", "eliminar ·"],
+    "annuler ·": ["undo ·", "deshacer ·"],
+    "un temps (Maj : une mesure) ·": ["one beat (Shift: one bar) ·", "un tiempo (Mayús: un compás) ·"],
+    "début": ["start", "inicio"],
+    "Actions": ["Actions", "Acciones"],
+    "Normaliser": ["Normalize", "Normalizar"],
+    "Touche une région dans la timeline pour régler son volume et ses fondus. Tire ses bords pour la rogner, les points blancs pour les fondus.": ["Tap a region in the timeline to set its volume and fades. Drag its edges to trim it, and the white dots for fades.", "Toca una región en la línea de tiempo para ajustar su volumen y fundidos. Arrastra sus bordes para recortarla y los puntos blancos para los fundidos."],
+    "Aucune prod : importe la tienne (ou dépose le fichier ici)": ["No beat: import yours (or drop the file here)", "Ningún beat: importa el tuyo (o suelta el archivo aquí)"],
+    "Aucune prod pour l'instant. Importe le fichier de la prod pour une synchro parfaite et un export avec la prod.": ["No beat yet. Import the beat's file for perfect sync and an export with the beat.", "Todavía no hay beat. Importa el archivo del beat para una sincronización perfecta y una exportación con el beat."],
+    "Le son vient du lecteur YouTube. Importe le fichier de la prod pour une synchro parfaite et un export avec la prod.": ["The sound comes from the YouTube player. Import the beat's file for perfect sync and an export with the beat.", "El sonido viene del reproductor de YouTube. Importa el archivo del beat para una sincronización perfecta y una exportación con el beat."],
+    "Importer la prod que tu as récupérée (mp3, wav…)": ["Import your copy of the beat (mp3, wav…)", "Importa tu copia del beat (mp3, wav…)"],
+    "Revenir à la version YouTube": ["Back to the YouTube version", "Volver a la versión de YouTube"],
+    "Retirer le fichier (revenir à YouTube)": ["Remove file (back to YouTube)", "Quitar archivo (volver a YouTube)"],
+    "Prod importée :": ["Imported beat:", "Beat importado:"],
+    ". Fais glisser sa région pour la caler.": [". Drag its region to line it up.", ". Arrastra su región para ajustarla."],
+    "Fais glisser pour caler la prod sur tes voix": ["Drag to line the beat up with your vocals", "Arrastra para ajustar el beat a tus voces"],
+    "Renommer le projet": ["Rename project", "Renombrar proyecto"],
+    "Nom du projet": ["Project name", "Nombre del proyecto"],
+    "Supprimer le projet": ["Delete project", "Eliminar proyecto"],
+    "Supprimer le projet ?": ["Delete project?", "¿Eliminar proyecto?"],
+    "REC": ["REC", "REC"],
+    // messages
+    "Annulé": ["Undone", "Deshecho"],
+    "Rétabli": ["Redone", "Rehecho"],
+    "Projet renommé": ["Project renamed", "Proyecto renombrado"],
+    "Projet supprimé": ["Project deleted", "Proyecto eliminado"],
+    "Prise gardée": ["Take saved", "Toma guardada"],
+    "Fin de la prod : prise gardée": ["End of the beat: take saved", "Fin del beat: toma guardada"],
+    "Prise trop courte : elle n'a pas été gardée": ["Take too short: it wasn't saved", "Toma demasiado corta: no se guardó"],
+    "La prise n'a pas pu être lue": ["The take couldn't be read", "No se pudo leer la toma"],
+    "Ce navigateur ne garde pas les prises : exporte avant de fermer": ["This browser doesn't keep takes: export before closing", "Este navegador no guarda las tomas: exporta antes de cerrar"],
+    "Ce navigateur ne permet pas d'enregistrer le micro": ["This browser can't record the mic", "Este navegador no permite grabar el micro"],
+    "L'enregistrement n'a pas pu démarrer : vérifie ton micro": ["Recording couldn't start: check your mic", "La grabación no pudo empezar: revisa tu micro"],
+    "Lance la prod dans le lecteur pour enregistrer": ["Play the beat in the player to record", "Pon el beat en el reproductor para grabar"],
+    "La prod ne démarre pas, réessaie": ["The beat won't start, try again", "El beat no arranca, vuelve a intentarlo"],
+    "Place le curseur sur une région pour la couper": ["Put the cursor on a region to cut it", "Pon el cursor sobre una región para cortarla"],
+    "Région dupliquée à la suite": ["Region duplicated right after", "Región duplicada a continuación"],
+    "Export en cours…": ["Exporting…", "Exportando…"],
+    "L'export a échoué": ["Export failed", "La exportación falló"],
+    "Import de la prod…": ["Importing the beat…", "Importando el beat…"],
+    "Ce fichier n'a pas pu être lu par le navigateur": ["The browser couldn't read this file", "El navegador no pudo leer este archivo"],
+    "Choisis un fichier audio (mp3, wav, m4a…)": ["Pick an audio file (mp3, wav, m4a…)", "Elige un archivo de audio (mp3, wav, m4a…)"],
+    "Le fichier sera perdu en fermant la page (stockage indisponible)": ["The file will be lost when you close the page (storage unavailable)", "El archivo se perderá al cerrar la página (almacenamiento no disponible)"],
+    "Retour à la version YouTube": ["Back to the YouTube version", "Vuelta a la versión de YouTube"],
+    "Le studio a besoin du lecteur complet, indisponible ici.": ["The studio needs the full player, which isn't available here.", "El estudio necesita el reproductor completo, que no está disponible aquí."],
+    "Retirer ta prod importée et revenir à la version YouTube ?": ["Remove your imported beat and go back to the YouTube version?", "¿Quitar tu beat importado y volver a la versión de YouTube?"],
+    "il y a moins d'une heure": ["less than an hour ago", "hace menos de una hora"],
+    "aujourd'hui": ["today", "hoy"],
+    "hier": ["yesterday", "ayer"],
+    "il y a un mois": ["a month ago", "hace un mes"]
+  };
+  // nombre suivi d'un mot qui s'accorde : n, puis [singulier, pluriel] par langue
+  const nb = (n, en, es) => { const v = parseFloat(String(n).replace(/[^\d.]/g, "")) || 0, un = v <= 1; return L === 0 ? `${n} ${un ? en[0] : en[1]}` : `${n} ${un ? es[0] : es[1]}`; };
+  const N = "(\\d[\\d\\u202f\\u00a0 ,.]*\\d|\\d)";
+  /* Regles : [expression, anglais, espagnol]. Une chaine porte $1, $2… ; une fonction
+     recoit les groupes et peut traduire un morceau a son tour (t). */
+  const R = [
+    [`^${N} prods?$`, m => nb(m[1], ["beat", "beats"], ["beat", "beats"])],
+    [`^${N} prods? sur FINDINGS$`, m => nb(m[1], ["beat", "beats"], ["beat", "beats"]) + (L === 0 ? " on FINDINGS" : " en FINDINGS")],
+    [`^${N} prods? proches$`, m => nb(m[1], ["similar beat", "similar beats"], ["beat parecido", "beats parecidos"])],
+    [`^${N} prods? en tout$`, m => nb(m[1], ["beat", "beats"], ["beat", "beats"]) + (L === 0 ? " in total" : " en total")],
+    [`^${N} en tout$`, "$1 in total", "$1 en total"],
+    [`^${N} prods? mises? de côté\\.$`, m => nb(m[1], ["beat saved.", "beats saved."], ["beat guardado.", "beats guardados."])],
+    [`^${N} prods? pas encore écoutées?$`, m => nb(m[1], ["beat not played yet", "beats not played yet"], ["beat sin escuchar", "beats sin escuchar"])],
+    [`^${N} nouvelles? depuis ta visite$`, "$1 new since your visit", "$1 nuevos desde tu visita"],
+    [`^${N} artistes?$`, m => nb(m[1], ["artist", "artists"], ["artista", "artistas"])],
+    [`^${N} artistes, du plus fourni au plus rare : fais défiler\\.$`, "$1 artists, from most to fewest beats: scroll through.", "$1 artistas, del más al menos surtido: desliza."],
+    [`^${N} styles remplis, du plus fourni au plus rare\\.$`, "$1 styles, from most to fewest beats.", "$1 estilos, del más al menos surtido."],
+    [`^${N} ambiances, déduites du titre et de la description de chaque prod\\.$`, "$1 moods, inferred from each beat's title and description.", "$1 ambientes, deducidos del título y la descripción de cada beat."],
+    [`^${N} styles$`, "$1 styles", "$1 estilos"],
+    [`^${N} dans tes likes$`, "$1 in your likes", "$1 en tus likes"],
+    [`^(.+) abonnés$`, "$1 subscribers", "$1 suscriptores"],
+    [`^(.+) vues$`, "$1 views", "$1 vistas"],
+    [`^${N} j$`, "$1d", "$1 d"],
+    [`^${N} jours$`, "$1 days", "$1 días"],
+    [`^${N} sem\\.$`, "$1w", "$1 sem."],
+    [`^${N} mois$`, m => L === 0 ? `${m[1]} mo` : nb(m[1], [], ["mes", "meses"])],
+    [`^${N} h$`, "$1 h", "$1 h"],
+    [`^[Ii]l y a (.+)$`, m => L === 0 ? `${t(m[1])} ago` : `hace ${t(m[1])}`],
+    [`^modifié il y a (.+)$`, m => L === 0 ? `edited ${t(m[1])} ago` : `modificado hace ${t(m[1])}`],
+    [`^${N} prises?$`, m => nb(m[1], ["take", "takes"], ["toma", "tomas"])],
+    [`^${N} projets?, gardés? sur cet appareil\\.$`, m => nb(m[1], ["project", "projects"], ["proyecto", "proyectos"]) + (L === 0 ? ", saved on this device." : ", guardados en este dispositivo.")],
+    [`^Prise ${N}$`, "Take $1", "Toma $1"],
+    [`^Sur (.+)$`, "On $1", "Sobre $1"],
+    [`^Voix ${N}$`, "Vocal $1", "Voz $1"],
+    [`^Volume de (.+)$`, m => L === 0 ? `${t(m[1])} volume` : `Volumen de ${t(m[1])}`],
+    [`^file (\\d+)/(\\d+)$`, "queue $1/$2", "cola $1/$2"],
+    [`^(\\d+/\\d+) pointée$`, "dotted $1", "$1 con puntillo"],
+    [`^(\\d+/\\d+) triolet$`, "$1 triplet", "$1 tresillo"],
+    [`^chaleur ${N} %$`, "warmth $1 %", "calidez $1 %"],
+    [`^([+\\-−]?[\\d.]+) graves$`, "$1 lows", "$1 graves"],
+    [`^([+\\-−]?[\\d.]+) méd\\.$`, "$1 mids", "$1 medios"],
+    [`^([+\\-−]?[\\d.]+) aigus$`, "$1 highs", "$1 agudos"],
+    [`^\\+${N} à la dernière passe$`, "+$1 in the last pass", "+$1 en la última pasada"],
+    [`^mis à jour le (.+)$`, "updated $1", "actualizado el $1"],
+    [`^ingestion automatique tous les ${N} jours, rien de plus vieux que ${N} mois \\(jusqu'à ${N} mois pour compléter un artiste à ${N} type beats\\), tout se lit ici sans quitter la page\\.$`,
+      "automatic import every $1 days, nothing older than $2 months (up to $3 months to fill an artist up to $4 type beats), everything plays right here without leaving the page.",
+      "importación automática cada $1 días, nada de más de $2 meses (hasta $3 meses para completar un artista con $4 type beats), todo se escucha aquí sin salir de la página."],
+    [`^ingestion automatique tous les ${N} jours, rien de plus vieux que ${N} mois, tout se lit ici sans quitter la page\\.$`,
+      "automatic import every $1 days, nothing older than $2 months, everything plays right here without leaving the page.",
+      "importación automática cada $1 días, nada de más de $2 meses, todo se escucha aquí sin salir de la página."],
+    [`^\\(${N} % des prods\\) et la$`, "($1 % of beats) and the", "($1 % de los beats) y la"],
+    [`^\\(${N} %\\) sont lus dans le titre ou la description quand le beatmaker les indique ; sinon ils sont estimés d'après le style et s'affichent en gris, précédés d'un « ~ »\\. Les$`,
+      "($1 %) are read from the title or description when the beatmaker states them; otherwise they're estimated from the style and shown in grey, preceded by a “~”. The",
+      "($1 %) se leen en el título o la descripción cuando el beatmaker los indica; si no, se estiman según el estilo y aparecen en gris, precedidos de «~». Los"],
+    [`^${N} prods sur ${N} annoncent leur tempo\\. Pour les autres, la valeur affichée est une estimation, signalée par un ~\\.$`,
+      "$1 of $2 beats state their tempo. For the others, the value shown is an estimate, marked with a ~.",
+      "$1 de $2 beats indican su tempo. Para los demás, el valor mostrado es una estimación, marcada con ~."],
+    [`^La plus récente est sortie le (.+)\\.$`, "The latest came out on $1.", "El más reciente salió el $1."],
+    [`^Élargis le tempo ou enlève un filtre — le catalogue en compte ${N}\\.$`, "Widen the tempo or remove a filter — the catalog has $1.", "Amplía el tempo o quita un filtro — el catálogo tiene $1."],
+    [`^Voir les ${N} autres styles$`, "See $1 more styles", "Ver $1 estilos más"],
+    [`^Lire les ${N}$`, "Play all $1", "Reproducir los $1"],
+    [`^Lire (.+)$`, "Play $1", "Reproducir $1"],
+    [`^Chaîne YouTube de (.+)$`, "$1's YouTube channel", "Canal de YouTube de $1"],
+    [`^Voir la chaîne YouTube de (.+)$`, "View $1's YouTube channel", "Ver el canal de YouTube de $1"],
+    [`^Toutes les prods de (.+)$`, "All beats by $1", "Todos los beats de $1"],
+    [`^Prods similaires à (.+)$`, "Beats similar to $1", "Beats similares a $1"],
+    [`^Dans l'esprit de « (.+) »$`, "Similar to “$1”", "En la onda de «$1»"],
+    [`^Activer (.+)$`, m => (L === 0 ? "Enable " : "Activar ") + t(m[1])],
+    [`^Préréglage « (.+) »$`, m => (L === 0 ? `Preset “${t(m[1])}”` : `Preset «${t(m[1])}»`)],
+    [`^Normalisée : volume ${N} %$`, "Normalized: volume $1 %", "Normalizado: volumen $1 %"],
+    [`^Prod décalée de (.+) s$`, "Beat shifted by $1 s", "Beat desplazado $1 s"],
+    [`^Supprimer la piste « (.+) » et ses régions \\?$`, "Delete track “$1” and its regions?", "¿Eliminar la pista «$1» y sus regiones?"],
+    [`^Supprimer le projet « (.+) » \\? Ses prises et la prod importée seront effacées de cet appareil\\.$`, "Delete project “$1”? Its takes and the imported beat will be erased from this device.", "¿Eliminar el proyecto «$1»? Sus tomas y el beat importado se borrarán de este dispositivo."],
+    [`^Supprimer le projet « (.+) » \\? Ses ${N} prises? et la prod importée seront effacées de cet appareil\\.$`, "Delete project “$1”? Its $2 take(s) and the imported beat will be erased from this device.", "¿Eliminar el proyecto «$1»? Sus $2 toma(s) y el beat importado se borrarán de este dispositivo."],
+    [`^sur « (.+) »$`, "on “$1”", "sobre «$1»"],
+    [`^Ouvrir le studio sur la prod en cours : (.+)$`, "Open the studio on the current beat: $1", "Abrir el estudio con el beat actual: $1"],
+    [`^Suivre (.+) : ses nouvelles prods remontent dans l'accueil$`, "Follow $1: their new beats show up on the home page", "Seguir a $1: sus nuevos beats aparecen en el inicio"],
+    [`^Ne plus suivre (.+)$`, "Unfollow $1", "Dejar de seguir a $1"],
+    [`^Parce que tu écoutes beaucoup de (.+)$`, m => (L === 0 ? "Because you listen to a lot of " : "Porque escuchas mucho ") + t(m[1])],
+    [`^Parce que tu écoutes (.+)$`, "Because you listen to $1", "Porque escuchas a $1"],
+    [`^D'après tes ${N} likes? et ${N} écoutes? : (.+)\\.$`, m => (L === 0 ? `Based on your ${m[1]} like(s) and ${m[2]} play(s): ` : `Según tus ${m[1]} likes y ${m[2]} escuchas: `) + liste(m[3]) + "."],
+    [`^Surtout (.+)$`, m => (L === 0 ? "Mostly " : "Sobre todo ") + liste(m[1])],
+    [`^Type beats (.+) par$`, "$1 type beats by", "Type beats de $1 por"],
+    [`^Type beats (.+)$`, m => L === 0 ? `${liste(m[1])} type beats` : `Type beats ${liste(m[1])}`],
+    [`^Type beat (.+)$`, m => L === 0 ? `${t(m[1])} type beat` : `Type beat ${t(m[1])}`],
+    [`^Cherche (.+)$`, m => (L === 0 ? "Search " : "Busca ") + m[1].replace(/« ([^»]+) »/g, (_, x) => L === 0 ? `“${t(x)}”` : `«${t(x)}»`)],
+    [`^(.+) type beat : ${N} prods? à écouter$`, "$1 type beat: $2 beats to listen to", "$1 type beat: $2 beats para escuchar"],
+    [`^(.+) : ${N} type beats? à écouter$`, "$1: $2 type beats to listen to", "$1: $2 type beats para escuchar"],
+    [`^« (.+) » : ${N} prods?$`, "“$1”: $2 beats", "«$1»: $2 beats"],
+    [`^par (.+)$`, "by $1", "por $1"]
+  ].map(([re, en, es]) => [new RegExp(re, "u"), typeof en === "function" ? en : (L === 0 ? en : es)]);
+  const appliquer = (r, m) => typeof r === "function" ? r(m) : r.replace(/\$(\d)/g, (_, i) => m[+i] ?? "");
+  // une liste « A, B, C » : chaque element se traduit s'il est connu (moods, styles)
+  const liste = s => s.split(", ").map(x => t(x)).join(", ");
+  const cache = new Map();
+  function exact(s){
+    if (s in D) return D[s][L];
+    // la casse de tete suit l'original : « Sombre » comme « sombre »
+    const bas = s[0].toLowerCase() + s.slice(1), haut = s[0].toUpperCase() + s.slice(1);
+    if (s !== bas && bas in D) { const v = D[bas][L]; return v[0].toUpperCase() + v.slice(1); }
+    if (s !== haut && haut in D) { const v = D[haut][L]; return v[0].toLowerCase() + v.slice(1); }
+    return null;
+  }
+  function segment(s){
+    const e = exact(s); if (e != null) return e;
+    const bord = s.match(/^(· )(.+)$|^(.+)( ·)$/);
+    if (bord) { const c = bord[2] || bord[3], v = segment(c); if (v != null) return bord[1] ? "· " + v : v + " ·"; }
+    for (const [re, r] of R) { const m = s.match(re); if (m) return appliquer(r, m); }
+    return null;
+  }
+  // traduit un texte entier ; null quand rien n'est connu (il reste tel quel)
+  function t(s){
+    if (L < 0 || !s) return s;
+    if (cache.has(s)) return cache.get(s);
+    let out = segment(s);
+    if (out == null && / · | \| /.test(s)) {
+      const morceaux = s.split(/( · | \| )/);
+      let change = false;
+      const tr = morceaux.map(p => { if (p === " · " || p === " | ") return p; const v = segment(p.trim()); if (v == null) return p; change = true; return p.replace(p.trim(), v); });
+      out = change ? tr.join("") : null;
+    }
+    const res = out == null ? s : out;
+    if (cache.size < 20000) cache.set(s, res);
+    return res;
+  }
+  /* ── application au document ── */
+  const ATTRS = ["title", "aria-label", "placeholder"];
+  const faits = new WeakMap();   // noeud -> dernier texte pose par nous, pour ne pas boucler
+  const exclu = el => !!(el && el.closest && el.closest('[translate="no"],script,style,textarea'));
+  function texte(n){
+    if (faits.get(n) === n.nodeValue) return;
+    const brut = n.nodeValue, coeur = brut.replace(/\s+/g, " ").trim();
+    if (!coeur || !/\p{L}/u.test(coeur) || exclu(n.parentElement)) return;
+    const v = t(coeur);
+    if (v === coeur) return;
+    const nv = brut.replace(/^(\s*)[\s\S]*?(\s*)$/, `$1${v}$2`);
+    faits.set(n, nv); n.nodeValue = nv;
+  }
+  function attrs(el){
+    if (exclu(el)) return;
+    for (const a of ATTRS) {
+      const v = el.getAttribute(a); if (!v) continue;
+      const k = "_t_" + a; if (el[k] === v) continue;
+      const tv = t(v.replace(/\s+/g, " ").trim());
+      el[k] = tv; if (tv !== v) el.setAttribute(a, tv);
+    }
+  }
+  function arbre(racine){
+    if (L < 0 || !racine) return;
+    if (racine.nodeType === 3) { texte(racine); return; }
+    if (racine.nodeType !== 1) return;
+    if (exclu(racine)) return;
+    attrs(racine);
+    racine.querySelectorAll("[title],[aria-label],[placeholder]").forEach(attrs);
+    const w = document.createTreeWalker(racine, NodeFilter.SHOW_TEXT);
+    let n; while ((n = w.nextNode())) texte(n);
+  }
+  function demarrer(){
+    if (L < 0) return;
+    arbre(document.body);
+    document.title = t(document.title);
+    new MutationObserver(ms => {
+      for (const m of ms) {
+        if (m.type === "characterData") texte(m.target);
+        else if (m.type === "attributes") attrs(m.target);
+        else m.addedNodes.forEach(arbre);
+      }
+    }).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS });
+    const titre = document.querySelector("title");
+    if (titre) new MutationObserver(() => { const v = t(document.title); if (v !== document.title) document.title = v; }).observe(titre, { childList: true, characterData: true, subtree: true });
+    // boites de dialogue du navigateur
+    const c = window.confirm.bind(window), a = window.alert.bind(window);
+    window.confirm = m => c(t(String(m)));
+    window.alert = m => a(t(String(m)));
+  }
+  return { t, demarrer, arbre, L };
+})();
+const T = I18N.t;
+
+I18N.demarrer();
+
 /* ============ données ============ */
 /* Le catalogue vit dans catalog.js, régénéré par ingest.mjs. */
 const CAT = window.FINDINGS_CATALOG || window.PRODYFIND_CATALOG || window.DIGGR_CATALOG
@@ -134,10 +734,12 @@ function fmtAge(d){
 const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
+// les moods en anglais et en espagnol, pour la recherche (« dark », « oscuro »)
+const MOODS_AILLEURS = { agressif: "aggressive agresivo", sombre: "dark oscuro", "mélancolique": "melancholic sad melancolico triste", "énergique": "energetic energy energico", chill: "chill relax", solaire: "sunny summer soleado verano", sensuel: "sensual sexy", planant: "spacey dreamy etereo", nostalgique: "nostalgic nostalgico", "cinématique": "cinematic epic cinematico epico", festif: "festive party festivo fiesta" };
 function haystack(b){
   // les noms du registre en plus des references : l'etiquette est plus sure que le titre
   const noms = (b.artists || []).map(id => (CAT.artists || []).find(a => a.id === id)?.name || "").join(" ");
-  return norm([b.title,b.prod,STYLE_NAME[b.style],b.key,b.moods.join(" "),b.refs.join(" "),noms,b.fr?"francais fr france":""].join(" "));
+  return norm([b.title,b.prod,STYLE_NAME[b.style],b.key,b.moods.join(" "),b.moods.map(m => MOODS_AILLEURS[m] || "").join(" "),b.refs.join(" "),noms,b.fr?"francais fr france":""].join(" "));
 }
 /* ============ artistes ============
    Le registre vient du catalogue (ingest.mjs le tient). On ne montre que les artistes
@@ -662,7 +1264,7 @@ function npHTML(b){
       </button>
       <div class="np-une-in">
         <p class="np-raison">Type beat ${esc(b.artists.length ? b.artists.slice(0, 2).map(id => ARTIST_NAME[id] || id).join(" x ") : STYLE_NAME[b.style])}</p>
-        <h3 class="np-t" title="${esc(b.title)}">${esc(b.title)}</h3>
+        <h3 class="np-t" translate="no" title="${esc(b.title)}">${esc(b.title)}</h3>
         <p class="np-s"><span class="pill">${esc(STYLE_NAME[b.style])}</span><span>par <a href="${lienProd(b.prod)}" data-vue="prods">${esc(b.prod)}</a></span><span${b.bpmSur ? "" : ' title="Tempo estimé"'}>${b.bpmSur ? "" : "~"}${b.bpm} BPM</span>${b.key ? `<span${b.keySur ? "" : ' title="Tonalité estimée"'}>${b.keySur ? "" : "~"}${esc(b.key)}</span>` : ""}</p>
         <div class="np-temps"><span class="np-cur">0:00</span><div class="np-prog" data-np="prog" role="slider" aria-label="Position dans la prod" tabindex="0"><span><i></i></span></div><span class="np-dur">${fmtDur(b.dur)}</span></div>
         <div class="np-ctrl">
@@ -683,7 +1285,7 @@ function npHTML(b){
     <p class="np-stats">${b.views ? `${fmtViews(b.views)} vues · ` : ""}${fmtDur(b.dur)} · il y a ${esc(fmtAge(b.days))}</p>
     ${suiv ? `<div class="np-bloc">
       <div class="np-h"><h4>À suivre</h4><button data-np="file">${QI + 1}/${QUEUE.length}</button></div>
-      <button class="np-suiv" data-np="suivant"><img src="${vg(suiv.id)}" alt="" loading="lazy"><span style="min-width:0"><b>${esc(suiv.title)}</b><span>${esc(suiv.prod)} · ${esc(STYLE_NAME[suiv.style])}</span></span></button>
+      <button class="np-suiv" data-np="suivant"><img src="${vg(suiv.id)}" alt="" loading="lazy"><span style="min-width:0"><b translate="no">${esc(suiv.title)}</b><span>${esc(suiv.prod)} · ${esc(STYLE_NAME[suiv.style])}</span></span></button>
     </div>` : ""}
     <div class="np-bloc">
       <div class="np-h"><h4>Le beatmaker</h4></div>
@@ -708,7 +1310,7 @@ function npHTML(b){
     </div>` : ""}
     ${npSims.length ? `<div class="np-bloc">
       <div class="np-h"><h4>Dans le même esprit</h4><button data-np="proches">Tout voir</button></div>
-      <div class="np-sims">${npSims.map((x, i) => `<button class="np-sim" data-np="sim" data-i="${i}" title="${esc(x.title)} · ${esc(x.prod)}"><span class="vg"><img src="${vg(x.id)}" alt="" loading="lazy"><i>${NP_LIRE}</i></span><b>${esc(x.title)}</b><span>${esc(x.prod)}</span></button>`).join("")}</div>
+      <div class="np-sims">${npSims.map((x, i) => `<button class="np-sim" data-np="sim" data-i="${i}" title="${esc(x.title)} · ${esc(x.prod)}"><span class="vg"><img src="${vg(x.id)}" alt="" loading="lazy"><i>${NP_LIRE}</i></span><b translate="no">${esc(x.title)}</b><span>${esc(x.prod)}</span></button>`).join("")}</div>
     </div>` : ""}`;
 }
 /* Ce qui bouge sans changer de prod : lecture/pause, like, abonnement. */
@@ -864,7 +1466,7 @@ function rowHTML(b){
     </button>
 
     <div class="meta">
-      <p class="title">${esc(b.title)}</p>
+      <p class="title" translate="no">${esc(b.title)}</p>
       <div class="sub2">
         <span class="pill">${esc(STYLE_NAME[b.style])}</span>
         ${TOPLINE_N.get(b.id)?`<span class="tl-n" title="Tes prises sur cette prod">🎙 ${TOPLINE_N.get(b.id)}</span>`:""}
@@ -1889,7 +2491,7 @@ function proposerDossier(b){
   t.className = "suivi-toast like-toast";
   t.setAttribute("role", "status");
   t.innerHTML = `<img src="https://i.ytimg.com/vi/${b.id}/mqdefault.jpg" alt="">` +
-    `<span>Ajoutée à tes likes<small>${esc(b.title)}</small></span>` +
+    `<span>Ajoutée à tes likes<small translate="no">${esc(b.title)}</small></span>` +
     `<button class="toast-act" data-act="dossier">Ranger</button>`;
   document.body.appendChild(t);
   requestAnimationFrame(() => t.classList.add("on"));
@@ -2210,7 +2812,7 @@ document.getElementById("surpriseAcc").addEventListener("click", () => surprendr
 /* pied de page : état réel du catalogue */
 (function footStats(){
   const d = CAT.updatedAt ? new Date(CAT.updatedAt) : null;
-  const when = d ? d.toLocaleDateString("fr-FR", { day:"numeric", month:"long", year:"numeric" }) : "—";
+  const when = d ? d.toLocaleDateString(LOCALE, { day:"numeric", month:"long", year:"numeric" }) : "—";
   const add = CAT.lastRun ? ` · +${CAT.lastRun.added} à la dernière passe` : "";
   const age = CAT.maxAgeMonths || 9;
   const styles = new Set(BEATS.map(b => b.style)).size;
@@ -2392,14 +2994,14 @@ addEventListener("pagehide", memoriser);
 addEventListener("beforeunload", memoriser);
 
 /* ============ vue accueil : données d'affichage ============ */
-const nf = n => n.toLocaleString("fr-FR");
+const nf = n => n.toLocaleString(LOCALE);
 
 /* ============ chiffres du héros ============ */
 (function stats(){
   const prods = new Set(BEATS.map(b => b.prod)).size;
   const styles = new Set(BEATS.map(b => b.style)).size;
   const d = CAT.updatedAt ? new Date(CAT.updatedAt) : null;
-  const maj = d ? d.toLocaleDateString("fr-FR", { day:"numeric", month:"short" }) : "—";
+  const maj = d ? d.toLocaleDateString(LOCALE, { day:"numeric", month:"short" }) : "—";
   const rows = [
     [nf(BEATS.length), "prods"],
     [styles, "styles"],
@@ -2417,7 +3019,7 @@ const vignette = id => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
 const carteRail = (b, sous) => `
   <a class="tile rcard" data-id="${b.id}" href="?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
     <div class="art"><img src="${vignette(b.id)}" alt="" loading="lazy"><span class="go">${ICO_LIRE}</span></div>
-    <p class="t">${esc(b.title)}</p>
+    <p class="t" translate="no">${esc(b.title)}</p>
     <p class="s">${sous || esc(b.prod)}</p>
   </a>`;
 // ligne de liste ou de classement
@@ -2426,7 +3028,7 @@ const ligneProd = (b, rang, fin) => `
     ${rang ? `<span class="rang">${rang}</span>` : ""}
     <div class="art"><img src="${vignette(b.id)}" alt="" loading="lazy"><span class="go">${ICO_LIRE}</span></div>
     <div class="lr-txt">
-      <p class="t">${esc(b.title)}</p>
+      <p class="t" translate="no">${esc(b.title)}</p>
       <div class="s"><b>${esc(b.prod)}</b><span class="pill">${esc(STYLE_NAME[b.style] || b.style)}</span></div>
     </div>
     <span class="fin">${fin || ""}</span>
@@ -2437,12 +3039,12 @@ const ligneProd = (b, rang, fin) => `
 const carteMiniV = b => `
   <a class="tile vmini" data-id="${b.id}" href="?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
     <div class="art"><img src="https://i.ytimg.com/vi/${b.id}/maxresdefault.jpg" alt="" loading="lazy" onload="if(this.naturalWidth<=120){this.onload=null;this.classList.add('hq');this.src=this.src.replace('maxresdefault','hqdefault')}"><span class="go">${ICO_LIRE}</span></div>
-    <div class="v-in"><span class="raison">Type beat ${esc(b.artists.length ? (ARTIST_NAME[b.artists[0]] || b.artists[0]) : (STYLE_NAME[b.style] || b.style))}</span><p class="t">${esc(b.title)}</p><div class="s"><span class="pill">${esc(STYLE_NAME[b.style] || b.style)}</span><span>${esc(b.prod)}</span></div></div>
+    <div class="v-in"><span class="raison">Type beat ${esc(b.artists.length ? (ARTIST_NAME[b.artists[0]] || b.artists[0]) : (STYLE_NAME[b.style] || b.style))}</span><p class="t" translate="no">${esc(b.title)}</p><div class="s"><span class="pill">${esc(STYLE_NAME[b.style] || b.style)}</span><span>${esc(b.prod)}</span></div></div>
   </a>`;
 const carteMini = b => `
   <a class="tile" data-id="${b.id}" href="?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
     <div class="art"><img src="${vignette(b.id)}" alt="" loading="lazy"><span class="go">${ICO_LIRE}</span></div>
-    <div class="body"><p class="t">${esc(b.title)}</p><div class="s"><span class="pill">${esc(STYLE_NAME[b.style] || b.style)}</span><span>${esc(b.prod)}</span></div></div>
+    <div class="body"><p class="t" translate="no">${esc(b.title)}</p><div class="s"><span class="pill">${esc(STYLE_NAME[b.style] || b.style)}</span><span>${esc(b.prod)}</span></div></div>
   </a>`;
 /* Bandes : une section visible sur deux, recalcule quand une section apparait ou
    disparait (likes, abonnements, toplines n'existent pas pour tout le monde). */
@@ -2491,14 +3093,14 @@ const FRESH = BEATS.slice().sort((a,b) =>
       <span class="rang" aria-hidden="true">${String(n + 1).padStart(2, "0")}</span>
       <div class="v-in">
         <span class="raison">${estNouvelle(b) ? '<i class="neuf">Nouveau</i>' : ""}${esc(quand(b))}</span>
-        <span class="t">${esc(b.title)}</span>
+        <span class="t" translate="no">${esc(b.title)}</span>
         <span class="s"><span class="pill">${esc(STYLE_NAME[b.style] || b.style)}</span><span class="pr">${esc(b.prod)}</span><span>${b.bpmSur ? "" : "~"}${b.bpm} BPM</span></span>
       </div>
       <span class="go">${ICO_LIRE}</span>
     </a>`).join("");
   const dates = recent.map(b => b.published).filter(Boolean).sort();
   document.getElementById("freshSub").textContent =
-    dates.length ? `La plus récente est sortie le ${new Date(dates[dates.length-1]+"T12:00:00Z").toLocaleDateString("fr-FR",{day:"numeric",month:"long"})}.` : "";
+    dates.length ? `La plus récente est sortie le ${new Date(dates[dates.length-1]+"T12:00:00Z").toLocaleDateString(LOCALE,{day:"numeric",month:"long"})}.` : "";
 })();
 
 /* ============ suggestions de recherche ============
@@ -2615,7 +3217,7 @@ function majPourToi(){
       <div class="art"><img src="https://i.ytimg.com/vi/${une.id}/maxresdefault.jpg" alt="" onload="if(this.naturalWidth<=120){this.onload=null;this.classList.add('hq');this.src=this.src.replace('maxresdefault','hqdefault')}"><span class="go">${ICO_LIRE}</span></div>
       <div class="v-in">
         <span class="raison">${esc(raisonPourToi(une))}</span>
-        <p class="t">${esc(une.title)}</p>
+        <p class="t" translate="no">${esc(une.title)}</p>
         <div class="s"><span class="pill">${esc(STYLE_NAME[une.style] || une.style)}</span><span>par ${esc(une.prod)}</span><span>${une.bpmSur ? "" : "~"}${une.bpm} BPM</span></div>
         <span class="v-lire">${ICO_LIRE.replace(/13/g, "15")}Écouter</span>
       </div>
@@ -2678,6 +3280,26 @@ document.getElementById("toplinewall").addEventListener("click", e => {
 });
 
 
+
+/* ============ choix de la langue ============
+   Le choix est retenu ; la page se recharge pour tout reprendre dans la nouvelle langue. */
+(function choixLangue(){
+  const btn = document.getElementById("langBtn"), menu = document.getElementById("langMenu");
+  if (!btn) return;
+  btn.textContent = LANG.toUpperCase();
+  menu.innerHTML = Object.entries(LANGUES).map(([k, nom]) => `<button role="menuitemradio" aria-checked="${k === LANG}" data-lang="${k}">${nom}<span>${k.toUpperCase()}</span></button>`).join("");
+  const fermer = () => { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); };
+  btn.addEventListener("click", e => { e.stopPropagation(); menu.hidden = !menu.hidden; btn.setAttribute("aria-expanded", String(!menu.hidden)); });
+  document.addEventListener("click", e => { if (!e.target.closest("#langBox")) fermer(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") fermer(); });
+  menu.addEventListener("click", e => {
+    const b = e.target.closest("[data-lang]"); if (!b) return;
+    if (b.dataset.lang === LANG) { fermer(); return; }
+    try { localStorage.setItem("findings.lang", b.dataset.lang); } catch (e) {}
+    location.reload();
+  });
+})();
+
 /* ============ page Studio : « Tes projets » ============
    Un projet par prod (plus le projet libre) : on le rouvre, on le renomme, on le
    supprime. Tout reste sur l'appareil du visiteur, comme les prises. */
@@ -2710,7 +3332,7 @@ async function majProjets(){
       <button class="st-vg" data-pa="ouvrir" aria-label="Ouvrir ${esc(titre)}">${libre ? `<span class="st-libre">${'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>'}</span>` : `<img src="https://i.ytimg.com/vi/${b.id}/mqdefault.jpg" alt="" loading="lazy">`}</button>
       <div class="st-txt">
         <span class="raison">${pr.prises} prise${pr.prises > 1 ? "s" : ""}${quand ? ` · ${quand}` : ""}${pr.id === ouvertId ? ' · <i>ouvert</i>' : ""}</span>
-        <span class="t" title="${esc(titre)}">${esc(titre)}</span>
+        <span class="t" translate="no" title="${esc(titre)}">${esc(pr.nom ? titre : T(titre))}</span>
         <span class="s">${libre ? "Ta prod, tes voix" : `${pr.nom ? `sur « ${esc(b.title)} » · ` : ""}par ${esc(b.prod)}`}</span>
       </div>
       <div class="st-acts">
