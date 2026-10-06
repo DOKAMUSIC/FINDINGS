@@ -1351,6 +1351,66 @@ body.yt-charge #profLire.lance::before{width:20px;height:20px;border-width:2.6px
 .rcard .s{margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .rcard.playing .t{color:var(--accent)}
 
+
+/* ── Dernieres sorties : ruban de grandes cartes numerotees (DA « Pour toi ») ── */
+.rail.sorties{grid-auto-columns:min(380px,82vw);gap:14px}
+.rail.sorties ~ .rail-nav{top:calc(50% - 26px)}
+.tile.sortie{
+  position:relative;display:flex;flex-direction:column;justify-content:flex-end;aspect-ratio:16/10;
+  border:0;border-radius:var(--r-lg);overflow:hidden;background:#000;color:#fff;isolation:isolate;
+  box-shadow:var(--sh-1);backdrop-filter:none;
+}
+.tile.sortie:hover{transform:translateY(-3px);box-shadow:var(--sh-3)}
+.sortie .art{position:absolute;inset:0;z-index:-2;aspect-ratio:auto;background:#000}
+.sortie .art img{filter:brightness(.78);transition:transform .5s cubic-bezier(.2,.7,.3,1),filter .3s}
+.sortie:hover .art img{transform:scale(1.05);filter:brightness(.9)}
+.sortie .art img.hq{transform:scale(1.34)}
+.sortie:hover .art img.hq{transform:scale(1.4)}
+.sortie::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,.45) 58%,rgba(0,0,0,.92) 100%)}
+.sortie .rang{
+  position:absolute;top:8px;left:14px;font-size:58px;font-weight:800;letter-spacing:-.05em;line-height:1;
+  color:transparent;-webkit-text-stroke:1.6px rgba(255,255,255,.85);font-variant-numeric:tabular-nums;
+}
+.sortie .v-in{padding:14px 16px 15px;display:grid;gap:4px;min-width:0}
+.sortie .raison{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8)}
+.sortie .neuf{font-style:normal;color:#fff;background:var(--accent);border-radius:5px;padding:2px 6px;letter-spacing:.04em}
+.sortie .t{font-size:21px;font-weight:800;letter-spacing:-.03em;line-height:1.08;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+.sortie .s{display:flex;align-items:center;gap:8px;min-width:0;margin-top:2px;font-size:12.5px;color:rgba(255,255,255,.8);white-space:nowrap}
+.sortie .s .pill{color:#fff;background:rgba(255,255,255,.18);flex:0 0 auto}
+.sortie .s .pr{overflow:hidden;text-overflow:ellipsis;font-weight:600;color:#fff}
+.sortie .go{position:absolute;top:12px;right:12px;bottom:auto;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent);color:#fff;box-shadow:0 6px 18px rgba(250,35,59,.45);opacity:0;transform:scale(.85);transition:.18s}
+.sortie:hover .go,.sortie.playing .go{opacity:1;transform:none}
+@media(hover:none){ .sortie .go{opacity:1;transform:none} }
+.sortie.playing{box-shadow:0 0 0 2px var(--accent),var(--sh-3)}
+
+/* ── Par artiste : ruban de portraits (DA « Pour toi ») ── */
+.rail.portraits{grid-auto-columns:clamp(150px,16vw,200px);gap:12px}
+.rail.portraits ~ .rail-nav{top:calc(50% - 26px)}
+.aport{
+  position:relative;display:flex;flex-direction:column;justify-content:flex-end;aspect-ratio:3/4;min-width:0;
+  border-radius:var(--r-lg);overflow:hidden;background:var(--c);color:#fff;isolation:isolate;
+  box-shadow:var(--sh-1);transition:transform .18s,box-shadow .18s;text-decoration:none;
+}
+.aport:hover{transform:translateY(-3px);box-shadow:var(--sh-3)}
+.aport .art{position:absolute;inset:0;z-index:-2}
+.aport .art img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.82);transition:transform .5s cubic-bezier(.2,.7,.3,1),filter .3s}
+.aport .art img.yt{transform:scale(1.34)}
+.aport:hover .art img{transform:scale(1.06);filter:brightness(.95)}
+.aport:hover .art img.yt{transform:scale(1.4)}
+.aport .ini{position:absolute;inset:0;display:grid;place-items:center;font-size:64px;font-weight:800;color:rgba(255,255,255,.85)}
+.aport::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.5) 68%,rgba(0,0,0,.92) 100%)}
+.aport .v-in{padding:12px 13px 13px;display:grid;gap:3px;min-width:0}
+.aport .raison{display:flex;align-items:center;gap:6px;font-size:9.5px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8)}
+.aport .pt{width:7px;height:7px;border-radius:50%;background:var(--c);flex:0 0 auto;box-shadow:0 0 0 2px rgba(0,0,0,.25)}
+.aport .t{font-size:19px;font-weight:800;letter-spacing:-.03em;line-height:1.05;overflow-wrap:anywhere;text-shadow:0 2px 12px rgba(0,0,0,.55)}
+.aport .s{font-size:11.5px;color:rgba(255,255,255,.78);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aport .go{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.92);color:#1D1D1F;box-shadow:0 2px 8px rgba(0,0,0,.25);opacity:0;transform:translateY(4px);transition:.18s}
+.aport:hover .go{opacity:1;transform:none}
+
 /* abonnements : avatars ronds, puis liste */
 .rail.avatars{grid-auto-columns:84px;gap:14px;padding-bottom:6px;margin-bottom:10px}
 .avatar{display:grid;justify-items:center;gap:7px;text-align:center}

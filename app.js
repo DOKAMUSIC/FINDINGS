@@ -2474,7 +2474,20 @@ const FRESH = BEATS.slice().sort((a,b) =>
 
 (function fresh(){
   const recent = FRESH;
-  document.getElementById("fresh").innerHTML = recent.map((b, n) => `<li>${ligneProd(b, n + 1, fmtAge(b.days))}</li>`).join("");
+  /* Meme DA que « Pour toi », autre forme : un ruban de grandes cartes numerotees, la
+     miniature en plein cadre et un gros numero en contour, facon classement. */
+  const quand = b => { const a = fmtAge(b.days); return /^aujourd/.test(a) ? "Sortie aujourd'hui" : a === "1 j" || a === "hier" ? "Sortie hier" : `Il y a ${a}`; };
+  document.getElementById("fresh").innerHTML = recent.map((b, n) => `
+    <a class="tile sortie" data-id="${b.id}" href="?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
+      <div class="art"><img src="https://i.ytimg.com/vi/${b.id}/maxresdefault.jpg" alt="" loading="lazy" onload="if(this.naturalWidth<=120){this.onload=null;this.classList.add('hq');this.src=this.src.replace('maxresdefault','hqdefault')}"></div>
+      <span class="rang" aria-hidden="true">${String(n + 1).padStart(2, "0")}</span>
+      <div class="v-in">
+        <span class="raison">${estNouvelle(b) ? '<i class="neuf">Nouveau</i>' : ""}${esc(quand(b))}</span>
+        <span class="t">${esc(b.title)}</span>
+        <span class="s"><span class="pill">${esc(STYLE_NAME[b.style] || b.style)}</span><span class="pr">${esc(b.prod)}</span><span>${b.bpmSur ? "" : "~"}${b.bpm} BPM</span></span>
+      </div>
+      <span class="go">${ICO_LIRE}</span>
+    </a>`).join("");
   const dates = recent.map(b => b.published).filter(Boolean).sort();
   document.getElementById("freshSub").textContent =
     dates.length ? `La plus récente est sortie le ${new Date(dates[dates.length-1]+"T12:00:00Z").toLocaleDateString("fr-FR",{day:"numeric",month:"long"})}.` : "";
@@ -2668,13 +2681,22 @@ document.getElementById("toplinewall").addEventListener("click", e => {
   const coul = id => (STYLE_META.find(x => x.key === ARTIST_STYLE[id]) || {}).color || "#888";
   document.getElementById("artcloud").innerHTML = LIVE_ARTISTS.map(a => {
     const lot = par[a.id] || [];
-    const photo = photoArtiste(a.id).replace("1000x1000", "250x250");
+    const photo = photoArtiste(a.id).replace("1000x1000", "500x500");
     // sans photo Deezer : la pochette de son type beat le plus ecoute
-    const img = photo || (lot[0] ? `https://i.ytimg.com/vi/${lot[0].id}/mqdefault.jpg` : "");
-    return `<a class="cercle" href="${lienArtiste(a.id)}" data-vue="prods">
-      <span class="rond" style="--c:${esc(coul(a.id))}">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : esc(a.name[0])}</span>
-      <span class="nm">${esc(a.name)}</span>
-      <span class="ct">${lot.length} type beat${lot.length > 1 ? "s" : ""}</span>
+    const img = photo || (lot[0] ? `https://i.ytimg.com/vi/${lot[0].id}/hqdefault.jpg` : "");
+    const n = {};
+    lot.forEach(b => n[b.style] = (n[b.style] || 0) + 1);
+    const styles = Object.keys(n).sort((x, y) => n[y] - n[x]).slice(0, 2).map(k => STYLE_NAME[k] || k);
+    /* Meme DA, autre forme : des portraits a la verticale, la photo de l'artiste en plein
+       cadre, son nom en grand. */
+    return `<a class="aport" href="${lienArtiste(a.id)}" data-vue="prods" style="--c:${esc(coul(a.id))}">
+      <div class="art">${img ? `<img src="${esc(img)}" alt="" loading="lazy"${photo ? "" : ' class="yt"'}>` : `<span class="ini">${esc(a.name[0])}</span>`}</div>
+      <div class="v-in">
+        <span class="raison"><i class="pt"></i>${lot.length} type beat${lot.length > 1 ? "s" : ""}</span>
+        <span class="t">${esc(a.name)}</span>
+        ${styles.length ? `<span class="s">${esc(styles.join(" · "))}</span>` : ""}
+      </div>
+      <span class="go"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg></span>
     </a>`;
   }).join("");
   document.getElementById("artistesSub").textContent =
