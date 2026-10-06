@@ -2783,16 +2783,29 @@ const AFFICHES = (() => {
   live.forEach(m => par[m].sort((a,b) => b.views - a.views));
   live.sort((a,b) => par[b].length - par[a].length);
 
+  /* Meme DA que « Pour toi » et « Par style » : notre affiche en plein cadre, sur-titre
+     en capitales, nom en gras, les styles ou on la trouve le plus. L'ambiance la plus
+     fournie ouvre le mur en grand, sur deux colonnes. */
+  const FLECHE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg>';
+  const stylesDe = lot => {
+    const n = {};
+    lot.forEach(b => n[b.style] = (n[b.style] || 0) + 1);
+    return Object.keys(n).sort((x, y) => n[y] - n[x]).slice(0, 3).map(k => STYLE_NAME[k] || k);
+  };
   document.getElementById("moodwall").innerHTML = live.map((m, i) => {
-    const lot = par[m], cover = lot[0];
-    // notre affiche ; la miniature de la prod la plus vue ne sert plus que de secours
-    return `<a class="mcard${AFFICHES[m] ? " a-affiche" : ""}" href="?mood=${encodeURIComponent(m)}" data-vue="prods" style="--c:${TEINTES[m]}">
-      ${AFFICHES[m] ? AFFICHES[m]("af" + i) : `<img src="https://i.ytimg.com/vi/${cover.id}/mqdefault.jpg" alt="" loading="lazy">`}
-      <div class="mcard-in">
-        <span class="nm">${esc(m)}</span>
-        <span class="ct">${lot.length} prod${lot.length > 1 ? "s" : ""}</span>
+    const lot = par[m], cover = lot[0], grand = i === 0, st = stylesDe(lot);
+    const nb = `${lot.length} prod${lot.length > 1 ? "s" : ""}`;
+    // l'affiche cale son pictogramme en haut a droite, meme sur la grande carte etiree
+    const art = AFFICHES[m] ? AFFICHES[m]("af" + i).replace('preserveAspectRatio="xMidYMid slice"', `preserveAspectRatio="${grand ? "xMaxYMin" : "xMidYMid"} slice"`)
+      : `<img src="https://i.ytimg.com/vi/${cover.id}/mqdefault.jpg" alt="" loading="lazy">`;
+    return `<a class="spost humeur${grand ? " grand" : ""}" href="?mood=${encodeURIComponent(m)}" data-vue="prods" style="--c:${TEINTES[m]}">
+      <div class="art">${art}</div>
+      <div class="v-in">
+        <span class="raison"><i class="pt"></i>${grand ? `La plus fournie · ${nb}` : nb}</span>
+        <span class="t">${esc(m[0].toUpperCase() + m.slice(1))}</span>
+        ${st.length ? `<span class="s">Surtout ${esc(st.join(", "))}</span>` : ""}
+        ${grand ? `<span class="v-lire">Voir les prods ${FLECHE}</span>` : ""}
       </div>
-      <span class="go"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg></span>
     </a>`;
   }).join("");
   document.getElementById("moodsSub").textContent =
