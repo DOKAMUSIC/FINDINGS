@@ -230,8 +230,8 @@ ul{margin:0;padding:0;list-style:none}
   body.np-on .shell:not([hidden]) > :not(.np){grid-column:1}
   body.np-on .np{
     display:block;grid-column:2;grid-row:1 / span 4;align-self:start;
-    position:sticky;top:calc(var(--hh,96px) + var(--fbh,54px) + 4px);z-index:29;
-    max-height:calc(100vh - var(--hh,96px) - var(--fbh,54px) - var(--bar-h) - 48px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+    position:sticky;top:calc(var(--hh,96px) + 26px);z-index:29;   /* 26 px : la marge haute du contenu, pour s'aligner sur la premiere carte */
+    max-height:calc(100vh - var(--hh,96px) - var(--bar-h) - 70px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
     background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
     border:1px solid var(--glass-edge);border-radius:var(--r-lg);box-shadow:var(--sh-2);
     padding:14px 16px 18px;animation:np-entre .35s cubic-bezier(.2,.7,.3,1);
@@ -417,7 +417,7 @@ body.np-video .np-go{display:none}
 body.np-video .bar{background:none;border-color:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;pointer-events:none}
 body.np-video .bar .prog,body.np-video .bar-in > :not(.vid){visibility:hidden}
 body.np-video .bar .vid{pointer-events:auto}
-body.np-video .np{max-height:calc(100vh - var(--hh,96px) - var(--fbh,54px) - 30px)}
+body.np-video .np{max-height:calc(100vh - var(--hh,96px) - 52px)}
 
 /* ── barre de filtres : une ligne, chaque famille s'ouvre en menu ──
    Remplace la colonne de 250 px qui empilait cinq blocs (1279 px de haut, donc
