@@ -1001,6 +1001,19 @@ const PROD_SLUG = new Map(), SLUG_PROD = new Map();
   });
 })();
 const lienArtiste = id => `${BASE}artiste/${encodeURIComponent(id)}/`;
+/* Un nom tel qu'il est ecrit dans un titre (« HAMZA », « A$AP Rocky », « Saïf ») ramene a
+   une forme comparable : la meme que l'ingestion (ingest.mjs, normArt). */
+const cleNom = t => norm(String(t || "")).replace(/\$/g, "s").replace(/[^a-z0-9]+/g, " ").trim();
+const ARTISTE_PAR_NOM = new Map(LIVE_ARTISTS.map(a => [cleNom(a.name), a.id]));
+/* L'artiste du site que designe une etiquette de prod : son nom exact, sinon l'un des
+   artistes deja rattaches a cette prod dont le nom contient l'etiquette (« Heuss » pour
+   « Heuss l'Enfoiré »). Rien sinon : l'etiquette lance alors une recherche. */
+function artisteDeRef(ref, b){
+  const k = cleNom(ref); if (!k) return null;
+  if (ARTISTE_PAR_NOM.has(k)) return ARTISTE_PAR_NOM.get(k);
+  const mot = new RegExp(`(^| )${k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}( |$)`);
+  return (b && b.artists || []).find(id => ARTIST_N[id] && mot.test(cleNom(ARTIST_NAME[id]))) || null;
+}
 const lienStyle = k => `${BASE}style/${encodeURIComponent(k)}/`;
 const lienProd = p => PROD_SLUG.has(p) ? `${BASE}beatmaker/${PROD_SLUG.get(p)}/` : `${BASE}?prod=${encodeURIComponent(p)}`;
 /* Adresse -> parametres de l'application. */
@@ -1478,7 +1491,7 @@ function rowHTML(b){
         ${TOPLINE_N.get(b.id)?`<span class="tl-n" title="Tes prises sur cette prod">🎙 ${TOPLINE_N.get(b.id)}</span>`:""}
         ${estNouvelle(b)?`<span class="new" title="${VISITE_PREC ? "Ajoutée depuis ta dernière visite" : "Ajoutée ces derniers jours"}">nouveau</span>`:""}
         <span class="prod">par <button data-act="prod" title="Toutes les prods de ${esc(b.prod)}"><b>${esc(b.prod)}</b></button></span>
-        ${b.refs.length?`<span class="refs">${b.refs.map(r=>`<button data-act="ref" data-ref="${esc(r)}">${esc(r)}</button>`).join("")}</span>`:""}
+        ${b.refs.length?`<span class="refs">${b.refs.map(r=>{ const id = artisteDeRef(r, b); return id ? `<a class="ref-art" href="${lienArtiste(id)}" data-vue="prods" title="Page de ${esc(ARTIST_NAME[id])}">${esc(r)}</a>` : `<button data-act="ref" data-ref="${esc(r)}">${esc(r)}</button>`; }).join("")}</span>`:""}
       </div>
     </div>
 
@@ -1557,10 +1570,38 @@ function dejaEcoutees(){
   S.neuf = true;
   return n;
 }
+/* Recherche : les artistes et beatmakers dont le nom correspond a la saisie, en tete des
+   resultats, pour ouvrir leur page d'un clic (« hamza » ou « hamza type beat » montrent
+   Hamza). Le nom exact passe en premier, puis les plus fournis. */
+const elHits = document.getElementById("qHits");
+function majHits(){
+  const q = cleNom(S.q);
+  const montrer = q.length >= 2 && !document.body.classList.contains("vue-profil");
+  if (!montrer) { elHits.hidden = true; elHits.innerHTML = ""; return; }
+  const q2 = q.replace(/ ?type beats?$/, "").trim() || q;
+  const colle = nom => { const k = cleNom(nom); return k === q2 ? 3 : k.startsWith(q2) ? 2 : (k.includes(q2) && q2.length >= 3) || (k.length >= 3 && new RegExp(`(^| )${k}( |$)`).test(q)) ? 1 : 0; };
+  const arts = LIVE_ARTISTS.map(a => [a, colle(a.name)]).filter(x => x[1]).sort((x, y) => y[1] - x[1] || ARTIST_N[y[0].id] - ARTIST_N[x[0].id]).slice(0, 6);
+  const n = {}; BEATS.forEach(b => { if (PROD_SLUG.has(b.prod)) n[b.prod] = (n[b.prod] || 0) + 1; });
+  const bms = Object.keys(n).map(p => [p, colle(p)]).filter(x => x[1]).sort((x, y) => y[1] - x[1] || n[y[0]] - n[x[0]]).slice(0, 4);
+  if (!arts.length && !bms.length) { elHits.hidden = true; elHits.innerHTML = ""; return; }
+  const fleche = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg>';
+  const rond = (img, nom, c) => `<span class="qh-rond" style="--c:${c}">${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : esc((nom.replace(/^prod\.?\s*/i, "")[0] || "?").toUpperCase())}</span>`;
+  elHits.innerHTML = arts.map(([a, sc]) => `<a class="qh${sc === 3 ? " exact" : ""}" href="${lienArtiste(a.id)}" data-vue="prods">
+      ${rond(photoArtiste(a.id).replace("1000x1000", "250x250"), a.name, `var(--s-${ARTIST_STYLE[a.id]})`)}
+      <span class="qh-txt"><b>${esc(a.name)}</b><small>Artiste · ${ARTIST_N[a.id]} type beat${ARTIST_N[a.id] > 1 ? "s" : ""}</small></span>
+      <span class="qh-go">${fleche}</span></a>`).join("")
+    + bms.map(([p, sc]) => { const b = BEATS.find(x => x.prod === p); return `<a class="qh${sc === 3 ? " exact" : ""}" href="${lienProd(p)}" data-vue="prods">
+      ${rond(avatarDe(p), p, b ? `var(--s-${b.style})` : "var(--thumb)")}
+      <span class="qh-txt"><b>${esc(p)}</b><small>Beatmaker · ${n[p]} prod${n[p] > 1 ? "s" : ""}</small></span>
+      <span class="qh-go">${fleche}</span></a>`; }).join("");
+  elHits.hidden = false;
+}
+
 function render(){
   const res = filtered();
   LAST = res;
   majEntete(res);
+  majHits();   // apres l'en-tete : il sait alors si une page d'artiste ou de beatmaker s'affiche
 
   /* Etagere vide et « rien ne correspond » ont la meme apparence mais pas la meme
      cause : le dire evite de chercher un filtre fautif qui n'existe pas. */
@@ -2173,6 +2214,7 @@ document.getElementById("likeBtn").addEventListener("click", () => { if (current
 
 /* ============ interactions ============ */
 list.addEventListener("click", e => {
+  if (e.target.closest("a[data-vue]")) return;
   const row = e.target.closest(".row"); if(!row) return;
   const b = BEATS.find(x => x.id === row.dataset.id);
   const act = e.target.closest("[data-act]")?.dataset.act;

@@ -576,6 +576,18 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .note{font-size:11.5px;line-height:1.5;color:var(--dim);padding-top:14px;border-top:1px solid var(--line-soft)}
 
 /* ─────────── bandeau de résultats ─────────── */
+.q-hits{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:2px 0 14px;padding:2px}
+.q-hits::-webkit-scrollbar{display:none}
+.qh{flex:0 0 auto;display:flex;align-items:center;gap:11px;padding:7px 14px 7px 7px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-1);text-decoration:none;color:var(--ink);transition:border-color .15s,transform .15s,box-shadow .15s}
+.qh:hover{border-color:color-mix(in srgb,var(--accent) 55%,transparent);transform:translateY(-1px);box-shadow:var(--sh-2)}
+.qh.exact{border-color:color-mix(in srgb,var(--accent) 45%,transparent);background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.qh-rond{width:42px;height:42px;border-radius:50%;overflow:hidden;flex:0 0 auto;display:grid;place-items:center;background:var(--c);color:#fff;font-weight:700;font-size:17px}
+.qh-rond img{width:100%;height:100%;object-fit:cover;display:block}
+.qh-txt{display:grid;gap:1px;min-width:0}
+.qh-txt b{font-size:14.5px;font-weight:700;letter-spacing:-.015em;white-space:nowrap}
+.qh-txt small{font-size:12px;color:var(--dim);white-space:nowrap}
+.qh-go{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--dim);transition:color .15s,background .15s}
+.qh:hover .qh-go{color:#fff;background:var(--accent)}
 .res-head{
   display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;
   margin-bottom:14px;
@@ -782,6 +794,11 @@ body.vue-suivis #fbar{display:none}
   border-radius:999px;padding:1px 8px;transition:.14s;
 }
 .refs button:hover{background:rgba(118,118,128,.18);color:var(--ink)}
+.refs a.ref-art{
+  font-size:11px;color:var(--ink-2);font-weight:600;background:rgba(118,118,128,.14);text-decoration:none;
+  border-radius:999px;padding:1px 8px;transition:.14s;
+}
+.refs a.ref-art:hover{background:var(--accent-soft);color:var(--accent)}
 
 .nums{display:flex;align-items:center;gap:20px;flex:0 0 auto}
 .num{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:34px}
