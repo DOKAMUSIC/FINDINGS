@@ -496,6 +496,34 @@ const STUDIO = (() => {
   :root:not([data-theme="dark"]) .rk-case.on .fx-on::after{background:var(--pc,var(--accent));box-shadow:0 0 6px var(--pc,var(--accent)),0 0 2px #fff inset}
   :root:not([data-theme="dark"]) .daw-poignee i{background:#C4C6CB;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
   :root:not([data-theme="dark"]) .daw-poignee:hover i,:root:not([data-theme="dark"]) .daw-poignee.tire i{background:#8E9198}
+  
+  /* ── l'inspecteur tient dans sa hauteur : colonnes qui defilent chacune, plug-in qui s'adapte ── */
+  .daw .dp-corps.rack{overflow:hidden;align-items:stretch;grid-template-rows:minmax(0,1fr)}
+  .daw .dp-corps.rack > .dp-bloc{overflow-y:auto;align-self:start;max-height:100%}
+  .daw .dp-corps.rack > .rk{overflow-y:auto;max-height:100%;align-content:start}
+  .fxc.detail.plug{display:flex;flex-direction:column;min-height:0;max-height:100%;overflow-y:auto;scrollbar-width:thin}
+  .fxc.detail.plug > *{flex:0 0 auto}
+  .fxc.detail.plug .plug-main{flex:1 1 auto;min-height:0;grid-template-rows:minmax(0,1fr)}
+  .fxc.detail.plug .plug-gauche{display:flex;flex-direction:column;gap:10px;min-height:0}
+  .fxc.detail.plug .plug-gauche .plug-vis{flex:1 1 auto;height:auto;min-height:78px}
+  .fxc.detail.plug .plug-boutons{padding:12px 14px 2px}
+  .fxc.detail.plug .plug-tgs{padding-top:8px}
+  .fxc.detail.plug .at-art{flex:1 1 auto}
+  
+  /* Tune RT en largeur : menus en haut, puis indicateur | gros bouton | petits boutons */
+  .fxc.detail.plug .at-art{display:flex;flex-direction:column;gap:10px;padding:12px 14px 0;min-height:0}
+  .fxc.detail.plug .at-menus{justify-content:flex-start;align-items:flex-end}
+  .fxc.detail.plug .at-menus .plug-tg{margin-left:auto}
+  .fxc.detail.plug .at-menus .plug-menu select{min-width:120px}
+  .at-ligne{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(170px,1fr) auto auto;gap:12px;align-items:center}
+  .fxc.detail.plug .plug-vis.at-metre{width:auto;height:100%;min-height:118px;max-height:190px}
+  .fxc.detail.plug .kn.grand{width:116px}
+  .fxc.detail.plug .kn.grand svg{width:92px;height:92px}
+  .at-grille{display:grid;grid-template-columns:repeat(3,auto);gap:2px 4px}
+  .at-grille .kn{width:62px!important}
+  .at-grille .kn svg{width:40px!important;height:40px!important}
+  .at-grille .kn .kn-n{font-size:8.5px!important}
+  @media(max-width:640px){ .at-ligne{grid-template-columns:1fr} }
   </style>`);
 
   /* ─────────────────────────── balisage ─────────────────────────── */
@@ -1823,17 +1851,12 @@ const STUDIO = (() => {
         <label class="plug-menu">Gamme<select data-atsel="gamme">
           ${Object.entries(GAMMES).map(([c, g]) => opt(c, g.nom, valGamme === c)).join("")}${opt("chroma", "Chromatique", valGamme === "chroma")}${opt("libre", "Aucune (pitch seul)", valGamme === "libre")}</select></label>
         <label class="plug-menu">Tessiture<select data-fxmenu="autotune.tessiture">${Object.entries(TESSITURES).map(([c, t]) => opt(c, t.nom, v.tessiture === c)).join("")}</select></label>
-      </div>
-      <div class="at-centre">
-        <div class="at-cote">${par("humain")}${par("demitons")}</div>
-        <div class="at-coeur">
-          <div class="plug-vis at-metre" data-vis="autotune"><canvas></canvas></div>
-          <div class="at-grand">${par("vitesse").replace('class="kn"', 'class="kn grand"')}</div>
-        </div>
-        <div class="at-cote">${par("tolerance")}${par("diapason")}</div>
-      </div>
-      <div class="at-pied">${par("mix")}
         <button class="plug-tg" data-tg aria-pressed="${coche}"><i></i>Formants préservés<input type="checkbox" hidden data-fxcase="autotune.formant"${coche ? " checked" : ""}></button>
+      </div>
+      <div class="at-ligne">
+        <div class="plug-vis at-metre" data-vis="autotune"><canvas></canvas></div>
+        <div class="at-grand">${par("vitesse").replace('class="kn"', 'class="kn grand"')}</div>
+        <div class="at-grille">${par("humain")}${par("tolerance")}${par("mix")}${par("demitons")}${par("diapason")}</div>
       </div>
     </div>`;
   }
@@ -2141,7 +2164,10 @@ const STUDIO = (() => {
     if (el.style.height !== h + "px") el.style.height = h + "px";
     const lim = limiteHaut();
     if (hautPan > lim) { hautPan = lim; appliquerHaut(); }
-    corps.style.maxHeight = hautPan ? "none" : lim + "px";
+    // sans hauteur choisie, le panneau prend la moitie du studio (dans la limite) : une hauteur
+    // definie, que l'ecran du plug-in remplit au lieu d'etre coupe
+    corps.style.maxHeight = "none";
+    corps.style.height = (hautPan || Math.max(120, Math.min(lim, Math.round(el.clientHeight * .5)))) + "px";
   }
   window.addEventListener("resize", ajusterHauteur);
   setInterval(ajusterHauteur, 400);   // le lecteur du bas apparait / disparait avec la lecture
