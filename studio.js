@@ -21,217 +21,275 @@
 const STUDIO = (() => {
   /* ─────────────────────────── styles ─────────────────────────── */
   document.head.insertAdjacentHTML("beforeend", `<style>
+  /* Le studio a sa propre palette, graphite, dans les deux themes du site : comme Logic Pro
+     ou Studio One, une station audio se regarde dans le noir. Les jetons du site sont
+     redefinis ici pour que tout ce qui est a l'interieur suive. */
   .daw{
+    --bg:#1B1C1F;--surface:#2A2B2F;--surface-2:#303135;--ink:#E6E7EA;--ink-2:#C8CACF;--dim:#8D9097;--dimmer:#5F626A;
+    --line:rgba(0,0,0,.6);--line-soft:rgba(255,255,255,.045);--hover:rgba(255,255,255,.07);--thumb:#3A3B40;
+    --accent-soft:rgba(250,35,59,.16);--on-ink:#111;
+    --barre:linear-gradient(180deg,#3A3B40,#2D2E32);--creux:#17181B;--lcd:#0E0F11;--lcd-ink:#DCE6EF;--lcd-dim:#6C7580;
+    --hw:224px;--rh:84px;
     position:fixed;z-index:58;left:12px;right:12px;top:12px;
     bottom:calc(var(--bar-h) + 30px + env(safe-area-inset-bottom,0px));
     display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden;
-    border-radius:var(--r-xl);background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-3);
-    color:var(--ink);opacity:0;transform:translateY(12px) scale(.985);transition:opacity .2s,transform .24s cubic-bezier(.2,.9,.25,1.1);
-    --hw:212px;--rh:82px;--lcd:#0B0C0F;--lcd-ink:#E9F7EE;--lcd-dim:#7E8A85;
+    border-radius:12px;background:var(--bg);border:1px solid #0B0B0D;
+    box-shadow:0 0 0 1px rgba(255,255,255,.05) inset,0 24px 70px rgba(0,0,0,.45);
+    color:var(--ink);font-size:12px;color-scheme:dark;
+    opacity:0;transform:translateY(12px) scale(.985);transition:opacity .2s,transform .24s cubic-bezier(.2,.9,.25,1.1);
   }
   .daw.on{opacity:1;transform:none}
   .daw.inline{position:relative;left:auto;right:auto;top:auto;bottom:auto;z-index:1;
-    height:max(680px,calc(100vh - var(--hh,64px) - var(--bar-h) - 48px));box-shadow:var(--sh-2)}
+    height:max(680px,calc(100vh - var(--hh,64px) - var(--bar-h) - 48px))}
   .daw.inline #dawFermer{display:none}
   .daw[hidden]{display:none}
   .daw button{color:inherit}
-  /* ── barre du haut : identite | console de transport | outils ── */
-  .daw-haut{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
-  .daw-id{min-width:0;display:grid;gap:1px}
-  .daw-id .eyebrow{color:var(--accent);display:flex;align-items:center;gap:5px}
-  .daw-id b{font-size:15px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .daw-titre{display:flex;align-items:center;gap:6px;min-width:0;max-width:100%;padding:1px 6px;margin:0 -6px;border-radius:7px;color:inherit;text-align:left;cursor:text}
+  .daw ::selection{background:rgba(250,35,59,.35)}
+
+  /* ── barre de controle : projet | transport + LCD | outils ── */
+  .daw-haut{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:14px;padding:8px 12px;
+    background:var(--barre);border-bottom:1px solid #0B0B0D;box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+  .daw-id{min-width:0;display:grid;gap:0}
+  .daw-id .eyebrow{color:var(--accent);display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:800;letter-spacing:.14em}
+  .daw-id b{font-size:14px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .daw-titre{display:flex;align-items:center;gap:6px;min-width:0;max-width:100%;padding:1px 6px;margin:0 -6px;border-radius:5px;color:inherit;text-align:left;cursor:text}
   .daw-titre svg{flex:0 0 auto;color:var(--dim);opacity:0;transition:opacity .15s}
   .daw-titre:hover{background:rgba(255,255,255,.07)}
   .daw-titre:hover svg,.daw-titre:focus-visible svg{opacity:1}
-  .daw-titre-champ{font:700 15px/1.2 inherit;letter-spacing:-.02em;color:inherit;background:rgba(255,255,255,.08);border:1px solid var(--accent);border-radius:7px;padding:2px 6px;margin:-1px -6px;min-width:0;width:100%;outline:none}
-  .daw-id span.info{font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .daw-console{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:16px;background:var(--lcd);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.3);color:var(--lcd-ink)}
-  .daw-b{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#D7DBE2;transition:background .12s,transform .12s}
-  .daw-b:hover{background:rgba(255,255,255,.08)}
-  .daw-b:active{transform:scale(.94)}
-  .daw-b.lire{width:40px;height:40px;border-radius:12px;background:#F2F4F7;color:#0B0C0F;position:relative}
-  /* prod YouTube en cours de chargement : le bouton lecture du studio tourne aussi */
+  .daw-titre-champ{font:700 14px/1.2 inherit;color:inherit;background:var(--creux);border:1px solid var(--accent);border-radius:5px;padding:2px 6px;margin:-1px -6px;min-width:0;width:100%;outline:none}
+  .daw-id span.info{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .daw-console{display:flex;align-items:stretch;gap:8px}
+  .daw-transport{display:flex;align-items:center;gap:2px;padding:3px;border-radius:7px;background:var(--creux);box-shadow:inset 0 1px 3px rgba(0,0,0,.6),0 1px 0 rgba(255,255,255,.06)}
+  .daw-b{width:36px;height:30px;border-radius:5px;display:grid;place-items:center;color:#C9CCD2;transition:background .1s,color .1s}
+  .daw-b:hover{background:rgba(255,255,255,.08);color:#fff}
+  .daw-b:active{background:rgba(255,255,255,.14)}
+  .daw-b svg{width:15px;height:15px}
+  .daw-b.lire{position:relative;color:#E8EAED}
+  .daw.joue .daw-b.lire{color:#3DDC84;background:rgba(61,220,132,.12)}
   body.yt-charge .daw.yt-mode .daw-b.lire svg{opacity:0}
-  body.yt-charge .daw.yt-mode .daw-b.lire::after{content:"";position:absolute;inset:0;margin:auto;width:18px;height:18px;border-radius:50%;
-    border:2.4px solid currentColor;border-right-color:transparent;animation:yt-tourne .7s linear infinite}
+  body.yt-charge .daw.yt-mode .daw-b.lire::after{content:"";position:absolute;inset:0;margin:auto;width:14px;height:14px;border-radius:50%;
+    border:2px solid currentColor;border-right-color:transparent;animation:yt-tourne .7s linear infinite}
   .daw-b.rec{color:#FF4D5E}
-  .daw-b.rec.on{background:#FF2D45;color:#fff;animation:daw-pulse 1.1s ease-in-out infinite}
-  @keyframes daw-pulse{50%{box-shadow:0 0 0 6px rgba(250,35,59,.25)}}
-  .lcd{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:14px;padding:3px 12px;border-left:1px solid rgba(255,255,255,.08);border-right:1px solid rgba(255,255,255,.08);font-family:var(--mono);font-variant-numeric:tabular-nums}
-  .lcd-t{grid-row:1/3;font-size:24px;font-weight:600;letter-spacing:-.02em;align-self:center;min-width:104px}
-  .lcd-m,.lcd-b{font-size:11px;color:var(--lcd-dim);text-align:right}
-  .lcd-m b{color:var(--lcd-ink);font-weight:600}
-  .daw-niv{width:8px;height:34px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;display:flex;align-items:flex-end}
-  .daw-niv i{display:block;width:100%;height:100%;transform-origin:bottom;transform:scaleY(0);background:linear-gradient(0deg,#34C759,#FFD60A 70%,#FF453A)}
-  .daw-outils{display:flex;align-items:center;justify-content:flex-end;gap:3px;flex-wrap:wrap}
-  .daw-o{height:34px;min-width:34px;padding:0 9px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
-  .daw-o:hover{background:var(--hover)}
+  .daw-b.rec.on{background:#E5233A;color:#fff;animation:daw-pulse 1.1s ease-in-out infinite}
+  @keyframes daw-pulse{50%{box-shadow:0 0 0 4px rgba(250,35,59,.28)}}
+  /* l'ecran : des cases separees, comme l'afficheur de Logic */
+  .lcd{display:flex;align-items:stretch;border-radius:7px;background:var(--lcd);font-family:var(--mono);color:var(--lcd-ink);
+    box-shadow:inset 0 1px 4px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.06);overflow:hidden}
+  .lcd-seg{display:grid;align-content:center;justify-items:center;gap:1px;padding:3px 14px;border-left:1px solid rgba(255,255,255,.06);min-width:62px}
+  .lcd-seg:first-child{border-left:0}
+  .lcd-seg b{font-size:19px;font-weight:600;letter-spacing:-.01em;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .lcd-seg small{font-family:var(--sans);font-size:8.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--lcd-dim)}
+  .lcd-seg.t b{min-width:86px;text-align:center}
+  .daw-niv{width:7px;align-self:center;height:30px;border-radius:2px;background:var(--creux);box-shadow:inset 0 1px 2px rgba(0,0,0,.7);overflow:hidden;display:flex;align-items:flex-end}
+  .daw-niv i{display:block;width:100%;height:100%;transform-origin:bottom;transform:scaleY(0);background:linear-gradient(0deg,#3DDC84,#E5D84C 72%,#FF453A)}
+  .daw-outils{display:flex;align-items:center;justify-content:flex-end;gap:2px;flex-wrap:wrap}
+  .daw-o{height:28px;min-width:30px;padding:0 8px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink-2);
+    background:linear-gradient(180deg,#45464B,#393A3F);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 1px 1px rgba(0,0,0,.5)}
+  .daw-o:hover{background:linear-gradient(180deg,#4D4E54,#414247);color:#fff}
+  .daw-o:active{background:#2F3034;box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
+  .daw-o svg{width:14px;height:14px}
   .daw-o[disabled]{opacity:.35;pointer-events:none}
-  .daw-o[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
-  .daw-o.pri{background:var(--accent);color:#fff;padding:0 14px}
-  .daw-zoom{display:flex;align-items:center;gap:6px;color:var(--dim);margin:0 4px}
-  .daw-zoom input{width:84px;accent-color:var(--accent)}
-  .daw-sep{width:1px;height:22px;background:var(--line);margin:0 3px}
+  .daw-o[aria-pressed="true"]{background:linear-gradient(180deg,#5A2A31,#47222A);color:#FF8A96;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 1px 1px rgba(0,0,0,.5)}
+  .daw-o.pri{background:linear-gradient(180deg,#FF3A50,#E01E36);color:#fff;padding:0 12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 1px 2px rgba(0,0,0,.5)}
+  .daw-o.pri:hover{background:linear-gradient(180deg,#FF5065,#EA2A42)}
+  .daw-zoom{display:flex;align-items:center;gap:6px;color:var(--dim);margin:0 6px}
+  .daw-zoom input{width:80px}
+  .daw-sep{width:1px;height:20px;background:rgba(0,0,0,.55);box-shadow:1px 0 0 rgba(255,255,255,.06);margin:0 5px}
+  /* curseurs plats, facon fader de console */
+  .daw input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;height:16px;margin:0;cursor:pointer}
+  .daw input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--pc,var(--accent)) var(--p,50%),#141517 var(--p,50%));box-shadow:inset 0 1px 1px rgba(0,0,0,.6)}
+  .daw input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:#141517}
+  .daw input[type=range]::-moz-range-progress{height:4px;border-radius:2px;background:var(--pc,var(--accent))}
+  .daw input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:16px;margin-top:-6px;border-radius:2px;
+    background:linear-gradient(180deg,#F2F3F5,#B9BCC2);box-shadow:0 1px 2px rgba(0,0,0,.6),inset 0 -1px 0 rgba(0,0,0,.2)}
+  .daw input[type=range]::-moz-range-thumb{width:11px;height:16px;border:0;border-radius:2px;background:linear-gradient(180deg,#F2F3F5,#B9BCC2);box-shadow:0 1px 2px rgba(0,0,0,.6)}
+
   /* ── zone des pistes ── */
-  .daw-zone{position:relative;overflow:auto;overscroll-behavior:contain;background:var(--bg)}
+  .daw-zone{position:relative;overflow:auto;overscroll-behavior:contain;background:var(--bg);scrollbar-color:#45464B var(--bg)}
   .daw-grille{position:relative;min-height:100%}
-  .daw-ligne{display:flex;min-height:var(--rh);border-bottom:1px solid var(--line-soft)}
-  .daw-coin,.daw-tete{position:sticky;left:0;z-index:4;width:var(--hw);flex:0 0 var(--hw);background:var(--surface);border-right:1px solid var(--line)}
-  .daw-ligne.regle{position:sticky;top:0;z-index:6;min-height:28px;height:28px}
-  .daw-coin{z-index:7;display:flex;align-items:center;padding:0 12px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dimmer)}
-  .daw-regle{position:relative;height:28px;background:var(--surface);cursor:pointer;flex:0 0 auto;border-bottom:1px solid var(--line)}
-  .daw-regle span{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);padding:6px 0 0 5px;font-size:10.5px;font-weight:600;color:var(--dim);font-variant-numeric:tabular-nums;pointer-events:none}
+  .daw-ligne{display:flex;min-height:var(--rh);border-bottom:1px solid #121315}
+  .daw-coin,.daw-tete{position:sticky;left:0;z-index:4;width:var(--hw);flex:0 0 var(--hw);background:var(--surface);border-right:1px solid #0B0B0D;box-shadow:1px 0 0 rgba(255,255,255,.04)}
+  .daw-ligne.regle{position:sticky;top:0;z-index:6;min-height:26px;height:26px;border-bottom:1px solid #0B0B0D}
+  .daw-coin{z-index:7;display:flex;align-items:center;padding:0 12px;font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer);background:var(--barre)}
+  .daw-regle{position:relative;height:26px;background:var(--barre);cursor:pointer;flex:0 0 auto;
+    background-image:linear-gradient(to right,rgba(255,255,255,.12) 1px,transparent 1px),var(--barre);background-size:var(--temps) 6px,100% 100%;background-repeat:repeat-x,no-repeat;background-position:0 100%,0 0}
+  .daw-regle span{position:absolute;top:0;bottom:0;border-left:1px solid rgba(255,255,255,.28);padding:4px 0 0 5px;font-size:10px;font-weight:700;color:#A9ACB3;font-family:var(--mono);pointer-events:none}
   .daw-voie{position:relative;flex:0 0 auto;align-self:stretch;min-height:var(--rh);cursor:text;touch-action:pan-x pan-y;
-    background-image:linear-gradient(to right,var(--line) 1px,transparent 1px),linear-gradient(to right,var(--line-soft) 1px,transparent 1px);
+    background-image:linear-gradient(to right,rgba(255,255,255,.075) 1px,transparent 1px),linear-gradient(to right,rgba(255,255,255,.028) 1px,transparent 1px);
     background-size:var(--mesure) 100%,var(--temps) 100%}
-  .daw-ligne.sel-piste .daw-voie{background-color:color-mix(in srgb,var(--pc) 6%,transparent)}
+  .daw-ligne.sel-piste .daw-voie{background-color:rgba(255,255,255,.025)}
+
   /* ── en-tetes de piste ── */
-  .daw-tete{display:grid;align-content:center;gap:7px;padding:8px 12px 8px 16px;cursor:pointer;position:sticky}
+  .daw-tete{display:grid;align-content:center;gap:6px;padding:7px 10px 7px 14px;cursor:pointer;position:sticky}
   .daw-tete::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--pc)}
-  .daw-ligne.sel-piste .daw-tete{background:color-mix(in srgb,var(--pc) 9%,var(--surface))}
+  .daw-ligne.sel-piste .daw-tete{background:#36373C}
   .daw-tete .t1{display:flex;align-items:center;gap:7px;min-width:0}
-  .daw-tete .nom{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-  .daw-tete .cible{font-size:9px;font-weight:800;letter-spacing:.06em;color:#fff;background:var(--accent);border-radius:4px;padding:1px 5px;flex:0 0 auto}
-  .daw-tete .t2{display:flex;align-items:center;gap:5px}
-  .daw-ms{width:24px;height:22px;border-radius:6px;font-size:10.5px;font-weight:800;background:var(--hover);color:var(--dim)}
-  .daw-ms.m[aria-pressed="true"]{background:#FF9F0A;color:#111}
-  .daw-ms.s[aria-pressed="true"]{background:#FFD60A;color:#111}
-  .daw-fxb{height:22px;padding:0 7px;border-radius:6px;font-size:10.5px;font-weight:800;background:var(--hover);color:var(--dim);display:inline-flex;align-items:center;gap:4px}
-  .daw-fxb.actif{background:color-mix(in srgb,var(--pc) 22%,transparent);color:color-mix(in srgb,var(--pc) 70%,var(--ink))}
-  .vu{flex:1;height:6px;border-radius:3px;background:var(--hover);overflow:hidden;min-width:20px}
-  .vu i{display:block;height:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,#34C759,#FFD60A 75%,#FF453A);transition:transform .05s linear}
-  .daw-tete input[type=range]{width:100%;min-width:0;accent-color:var(--pc);height:14px;margin:0}
+  .daw-tete .num{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--dimmer);min-width:12px}
+  .daw-tete .nom{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+  .daw-tete .cible{font-style:normal;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;font-size:9px;font-weight:900;color:#fff;
+    background:radial-gradient(circle at 50% 35%,#FF5A6C,#C4142B);box-shadow:0 0 8px rgba(250,35,59,.55)}
+  .daw-tete .t2{display:flex;align-items:center;gap:4px}
+  .daw-ms{width:22px;height:18px;border-radius:3px;font-size:10px;font-weight:800;color:#AEB1B8;
+    background:linear-gradient(180deg,#45464B,#38393E);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 1px rgba(0,0,0,.5)}
+  .daw-ms:hover{color:#fff}
+  .daw-ms.m[aria-pressed="true"]{background:linear-gradient(180deg,#5DA2FF,#2F7CF0);color:#fff}
+  .daw-ms.s[aria-pressed="true"]{background:linear-gradient(180deg,#FFD866,#E9B52C);color:#1A1405}
+  .daw-fxb{height:18px;padding:0 6px;border-radius:3px;font-size:9.5px;font-weight:800;letter-spacing:.04em;color:#AEB1B8;display:inline-flex;align-items:center;gap:4px;
+    background:linear-gradient(180deg,#45464B,#38393E);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 1px rgba(0,0,0,.5)}
+  .daw-fxb.actif{color:#fff;background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 70%,#45464B),color-mix(in srgb,var(--pc) 55%,#2a2b2f))}
+  .vu{flex:1;height:5px;border-radius:1px;background:#141517;box-shadow:inset 0 1px 1px rgba(0,0,0,.7);overflow:hidden;min-width:20px}
+  .vu i{display:block;height:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,#3DDC84,#E5D84C 75%,#FF453A);transition:transform .05s linear}
+  .daw-tete input[type=range]{width:100%;min-width:0}
+  /* la ligne porte la classe « prod », que le site emploie aussi (nom du beatmaker dans la
+     liste, avec overflow:hidden) : sans ceci l'en-tete ne restait pas colle a gauche */
+  .daw-ligne.prod{overflow:visible;max-width:none;white-space:normal;text-overflow:clip}
   .daw-ligne.prod .daw-tete::before{background:var(--sc)}
+  .daw-ligne.prod .daw-tete .nom{flex:0 0 auto;font-size:12px}
+  .daw-ligne.prod .daw-tete{--pc:var(--sc)}
   .daw-ligne.prod .daw-voie{cursor:pointer}
-  .bloc-prod{position:absolute;top:10px;bottom:10px;left:0;border-radius:10px;overflow:hidden;
-    background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--sc) 30%,transparent) 0 2px,transparent 2px 6px),color-mix(in srgb,var(--sc) 16%,var(--surface));
-    border:1px solid color-mix(in srgb,var(--sc) 45%,transparent);display:flex;align-items:center;padding:0 12px;
-    font-size:12px;font-weight:600;color:color-mix(in srgb,var(--sc) 55%,var(--ink));white-space:nowrap}
-  .bloc-fichier{position:absolute;top:8px;bottom:8px;border-radius:9px;overflow:hidden;cursor:grab;touch-action:none;
-    background:color-mix(in srgb,var(--sc) 70%,#000);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+  .bloc-prod{position:absolute;top:8px;bottom:8px;left:0;border-radius:4px;overflow:hidden;
+    background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--sc) 12%,transparent) 0 6px,transparent 6px 12px),color-mix(in srgb,var(--sc) 14%,#1d1e21);
+    border:1px solid color-mix(in srgb,var(--sc) 55%,#000);display:flex;align-items:flex-start;padding:3px 8px;
+    font-size:10.5px;font-weight:700;color:color-mix(in srgb,var(--sc) 45%,#fff);white-space:nowrap;box-shadow:inset 0 14px 0 color-mix(in srgb,var(--sc) 38%,#1d1e21)}
+  .bloc-fichier{position:absolute;top:6px;bottom:6px;border-radius:4px;overflow:hidden;cursor:grab;touch-action:none;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--sc) 85%,#fff) 0 15px,color-mix(in srgb,var(--sc) 32%,#17181b) 15px);
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.45)}
   .bloc-fichier:active{cursor:grabbing}
   .bloc-fichier canvas{position:absolute;left:0;top:16px;height:calc(100% - 18px);pointer-events:none}
-  .bloc-fichier .clip-nom{left:8px}
-  .daw-importer{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:7px;font-size:11px;font-weight:700;
-    background:var(--accent-soft);color:var(--accent);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .bloc-fichier .clip-nom{left:7px}
+  .daw-importer{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 8px;border-radius:3px;font-size:10.5px;font-weight:700;
+    background:linear-gradient(180deg,#45464B,#38393E);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 1px rgba(0,0,0,.5);color:#E6E7EA;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .daw-importer:hover{color:#fff;background:linear-gradient(180deg,#4D4E54,#414247)}
   .daw-importer input{display:none}
   .daw-fichier{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--dim);min-width:0}
   .daw-fichier span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .daw-fichier button{width:18px;height:18px;border-radius:50%;flex:0 0 auto;font-size:13px;line-height:1;color:var(--dim)}
+  .daw-fichier button{width:18px;height:18px;border-radius:3px;flex:0 0 auto;font-size:13px;line-height:1;color:var(--dim)}
   .daw-fichier button:hover{background:var(--hover);color:var(--accent)}
-  .daw-mix{display:flex;padding:2px;border-radius:9px;background:var(--hover)}
+  .daw-mix{display:flex;padding:2px;border-radius:6px;background:var(--creux);box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
   .daw-mix[hidden]{display:none}
-  .daw-mix button{height:30px;padding:0 9px;border-radius:7px;font-size:11.5px;font-weight:650;color:var(--dim)}
-  .daw-mix button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--sh-1)}
-  .ajout-piste{display:flex;align-items:center;justify-content:center;min-height:46px}
-  .ajout-piste button{font-size:12.5px;font-weight:650;color:var(--accent);padding:6px 10px;border-radius:8px}
-  .ajout-piste button:hover{background:var(--accent-soft)}
-  /* ── regions ── */
-  .clip{position:absolute;top:7px;bottom:7px;border-radius:9px;overflow:hidden;cursor:grab;touch-action:none;
-    background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 88%,#fff) 0 17px,color-mix(in srgb,var(--pc) 62%,#000) 17px);
-    box-shadow:0 1px 2px rgba(0,0,0,.25),inset 0 0 0 1px rgba(0,0,0,.18)}
+  .daw-mix button{height:24px;padding:0 9px;border-radius:4px;font-size:11px;font-weight:650;color:var(--dim)}
+  .daw-mix button[aria-pressed="true"]{background:linear-gradient(180deg,#4A4B50,#3C3D42);color:#fff;box-shadow:0 1px 1px rgba(0,0,0,.5)}
+  .ajout-piste{display:flex;align-items:center;justify-content:center;min-height:40px}
+  .ajout-piste button{font-size:11.5px;font-weight:700;color:var(--ink-2);padding:5px 10px;border-radius:4px;background:linear-gradient(180deg,#45464B,#38393E);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 1px rgba(0,0,0,.5)}
+  .ajout-piste button:hover{color:#fff}
+
+  /* ── regions : bandeau de titre a la couleur de la piste, corps sombre ── */
+  .clip{position:absolute;top:5px;bottom:5px;border-radius:4px;overflow:hidden;cursor:grab;touch-action:none;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 92%,#fff) 0 15px,color-mix(in srgb,var(--pc) 30%,#16171a) 15px);
+    box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pc) 55%,#000),0 1px 2px rgba(0,0,0,.4)}
   .clip:active{cursor:grabbing}
-  .clip.sel{box-shadow:0 0 0 2px var(--ink),0 6px 18px rgba(0,0,0,.3);z-index:2}
-  .clip canvas{position:absolute;left:0;top:18px;height:calc(100% - 20px);pointer-events:none}
-  .clip .clip-nom{position:absolute;left:20px;top:2px;right:20px;font-size:10.5px;font-weight:800;color:rgba(0,0,0,.72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
-  .clip .poignee{position:absolute;top:0;bottom:0;width:9px;cursor:ew-resize;z-index:2}
+  .clip.sel{box-shadow:inset 0 0 0 1px #fff,0 0 0 1px #fff,0 4px 16px rgba(0,0,0,.45);z-index:2}
+  .clip canvas{position:absolute;left:0;top:16px;height:calc(100% - 18px);pointer-events:none}
+  .clip .clip-nom{position:absolute;left:8px;top:1px;right:18px;font-size:10px;font-weight:800;color:rgba(0,0,0,.78);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;line-height:14px}
+  .clip .poignee{position:absolute;top:15px;bottom:0;width:8px;cursor:ew-resize;z-index:2}
   .clip .poignee.g{left:0} .clip .poignee.d{right:0}
-  .clip .poignee::after{content:"";position:absolute;top:50%;width:3px;height:22px;margin-top:-11px;border-radius:2px;background:rgba(255,255,255,.75);opacity:0;transition:opacity .12s}
-  .clip .poignee.g::after{left:3px} .clip .poignee.d::after{right:3px}
+  .clip .poignee::after{content:"";position:absolute;top:50%;width:2px;height:18px;margin-top:-9px;border-radius:1px;background:rgba(255,255,255,.7);opacity:0;transition:opacity .12s}
+  .clip .poignee.g::after{left:2px} .clip .poignee.d::after{right:2px}
   .clip:hover .poignee::after,.clip.sel .poignee::after{opacity:1}
-  .clip .fondu{position:absolute;top:3px;width:11px;height:11px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.45);cursor:ew-resize;z-index:3;opacity:0;transition:opacity .12s}
+  .clip .fondu{position:absolute;top:2px;width:10px;height:10px;border-radius:2px;background:#fff;border:1px solid rgba(0,0,0,.5);cursor:ew-resize;z-index:3;opacity:0;transition:opacity .12s}
   .clip:hover .fondu,.clip.sel .fondu{opacity:1}
-  .clip.enreg{background:rgba(250,35,59,.3);box-shadow:inset 0 0 0 1px var(--accent);cursor:default}
-  .clip.enreg .clip-nom{color:var(--accent)}
-  .daw-curseur{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--accent);z-index:5;pointer-events:none;box-shadow:0 0 8px rgba(250,35,59,.5)}
-  .daw-curseur::before{content:"";position:absolute;top:0;left:-6px;border:7px solid transparent;border-top:9px solid var(--accent)}
-  /* ── panneau du bas : piste et effets | region | projet ── */
-  .daw-pan{border-top:1px solid var(--line);background:var(--surface-2);display:grid;grid-template-rows:auto auto;min-height:0}
-  .dp-onglets{display:flex;align-items:center;gap:2px;padding:6px 10px 0;border-bottom:1px solid var(--line-soft)}
-  .dp-onglets button{height:32px;padding:0 13px;border-radius:9px 9px 0 0;font-size:12.5px;font-weight:650;color:var(--dim);position:relative;display:inline-flex;align-items:center;gap:7px}
-  .dp-onglets button[aria-selected="true"]{color:var(--ink);background:var(--surface)}
-  .dp-onglets button[aria-selected="true"]::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:2px;border-radius:2px;background:var(--pc,var(--accent))}
-  .dp-onglets .pastille{width:9px;height:9px;border-radius:50%;background:var(--pc,var(--accent))}
+  .clip.enreg{background:linear-gradient(180deg,#E5233A 0 15px,rgba(229,35,58,.22) 15px);box-shadow:inset 0 0 0 1px #E5233A;cursor:default}
+  .clip.enreg .clip-nom{color:#fff}
+  /* tete de lecture blanche, comme dans Logic */
+  .daw-curseur{position:absolute;top:0;bottom:0;width:1px;background:#F2F3F5;z-index:5;pointer-events:none;box-shadow:0 0 6px rgba(255,255,255,.35)}
+  .daw-curseur::before{content:"";position:absolute;top:0;left:-6px;border:6px solid transparent;border-top:8px solid #F2F3F5}
+  .daw.enregistre .daw-curseur{background:#FF3A50;box-shadow:0 0 8px rgba(250,35,59,.6)}
+  .daw.enregistre .daw-curseur::before{border-top-color:#FF3A50}
+
+  /* ── inspecteur du bas : piste et effets | region | projet ── */
+  .daw-pan{border-top:1px solid #0B0B0D;background:#232427;display:grid;grid-template-rows:auto auto;min-height:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+  .dp-onglets{display:flex;align-items:center;gap:4px;padding:5px 10px;background:var(--barre);border-bottom:1px solid #0B0B0D}
+  .dp-onglets button{height:24px;padding:0 12px;border-radius:5px;font-size:11.5px;font-weight:650;color:var(--dim);position:relative;display:inline-flex;align-items:center;gap:7px}
+  .dp-onglets button:hover{color:var(--ink)}
+  .dp-onglets button[aria-selected="true"]{color:#fff;background:#1C1D20;box-shadow:inset 0 1px 2px rgba(0,0,0,.6),0 1px 0 rgba(255,255,255,.06)}
+  .dp-onglets .pastille{width:8px;height:8px;border-radius:2px;background:var(--pc,var(--accent))}
   .dp-onglets .esp{flex:1}
-  .dp-onglets .replier{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--dim);padding:0}
+  .dp-onglets .replier{width:26px;height:24px;border-radius:5px;display:grid;place-items:center;color:var(--dim);padding:0}
   .dp-onglets .replier svg{transition:transform .2s}
   .daw-pan.ferme .replier svg{transform:rotate(180deg)}
   .daw-pan.ferme .dp-corps{display:none}
-  .dp-corps{display:flex;gap:12px;padding:12px 14px 14px;overflow-x:auto;background:var(--surface);max-height:300px;scrollbar-width:thin}
+  .dp-corps{display:flex;gap:10px;padding:10px 12px 12px;overflow-x:auto;background:#1F2023;max-height:300px;scrollbar-width:thin}
   .dp-corps::-webkit-scrollbar{height:8px}
-  .dp-corps::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
-  .dp-bloc{flex:0 0 auto;display:grid;align-content:start;gap:10px;padding:12px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line-soft)}
-  .dp-bloc h4{margin:0;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
-  .dp-bloc .champ{display:grid;gap:4px;font-size:11.5px;color:var(--dim);font-weight:600}
-  .dp-bloc input[type=text],.dp-bloc select{height:30px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:0 9px;font:inherit;font-size:12.5px;min-width:0}
+  .dp-corps::-webkit-scrollbar-thumb{background:#45464B;border-radius:4px}
+  .dp-bloc{flex:0 0 auto;display:grid;align-content:start;gap:9px;padding:10px;border-radius:7px;background:#28292D;border:1px solid #0E0F11;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+  .dp-bloc h4{margin:0;font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  .dp-bloc .champ{display:grid;gap:4px;font-size:10.5px;color:var(--dim);font-weight:650}
+  .dp-bloc input[type=text],.dp-bloc select{height:26px;border:1px solid #0E0F11;border-radius:5px;background:#18191C;color:var(--ink);padding:0 8px;font:inherit;font-size:12px;min-width:0;box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
   .dp-bloc .ligne{display:flex;gap:6px;flex-wrap:wrap}
-  .dp-act{height:30px;padding:0 11px;border-radius:8px;background:var(--hover);font-size:12px;font-weight:650;color:var(--ink-2)}
-  .dp-act:hover{background:var(--line)}
-  .dp-act.danger{color:var(--accent);background:var(--accent-soft)}
-  .dp-aide{font-size:12px;color:var(--dim);line-height:1.45;max-width:340px;margin:0}
-  /* onglet effets : piste | rack de 8 cases | reglages de l'effet ouvert — tout tient sans defiler */
-  .dp-corps.rack{display:grid;grid-template-columns:190px minmax(300px,1fr) minmax(320px,1.35fr);gap:12px;overflow:visible;max-height:none;align-items:start}
-  .rk{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-  .rk-case{display:flex;align-items:center;gap:8px;min-width:0;padding:8px 10px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line-soft);cursor:pointer;text-align:left;transition:border-color .12s,background .12s}
-  .rk-case:hover{border-color:var(--line)}
-  .rk-case.ouvert{border-color:var(--pc,var(--accent));background:color-mix(in srgb,var(--pc,var(--accent)) 8%,var(--surface-2))}
-  .rk-case .txt{display:grid;min-width:0;flex:1}
-  .rk-case b{font-size:12px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .rk-case small{font-size:10.5px;color:var(--dim);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .rk-case:not(.on) small{opacity:.55}
-  .rk-case.on .fx-on{background:var(--pc,var(--accent))}
-  .rk-case.on .fx-on::after{transform:translateX(12px)}
-  .fxc.detail{min-height:100%}
-  .fxc.detail .fx-boutons{flex-wrap:wrap;row-gap:10px}
-  .fxc.detail header{justify-content:space-between}
+  .dp-act{height:26px;padding:0 10px;border-radius:5px;font-size:11.5px;font-weight:650;color:var(--ink-2);
+    background:linear-gradient(180deg,#45464B,#393A3F);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 1px 1px rgba(0,0,0,.5)}
+  .dp-act:hover{color:#fff;background:linear-gradient(180deg,#4D4E54,#414247)}
+  .dp-act.danger{color:#FF8A96;background:linear-gradient(180deg,#4A2A2F,#3B2227)}
+  .dp-aide{font-size:11.5px;color:var(--dim);line-height:1.45;max-width:340px;margin:0}
+  /* onglet effets : tranche de console | slots d'effets | fenetre du plug-in ouvert */
+  .dp-corps.rack{display:grid;grid-template-columns:200px minmax(260px,.9fr) minmax(340px,1.4fr);gap:10px;overflow:visible;max-height:none;align-items:start}
+  .rk{display:grid;grid-template-columns:1fr;gap:3px;padding:6px;border-radius:7px;background:#18191C;border:1px solid #0E0F11;box-shadow:inset 0 1px 3px rgba(0,0,0,.5)}
+  .rk::before{content:"Audio FX";font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer);padding:2px 4px 4px}
+  .rk-case{display:flex;align-items:center;gap:9px;min-width:0;height:30px;padding:0 9px;border-radius:4px;cursor:pointer;text-align:left;
+    background:linear-gradient(180deg,#34353A,#2C2D31);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 1px 1px rgba(0,0,0,.45);transition:background .1s}
+  .rk-case:hover{background:linear-gradient(180deg,#3B3C41,#323337)}
+  .rk-case.ouvert{background:linear-gradient(180deg,color-mix(in srgb,var(--pc,var(--accent)) 30%,#34353A),color-mix(in srgb,var(--pc,var(--accent)) 22%,#2C2D31));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pc,var(--accent)) 65%,transparent)}
+  .rk-case .txt{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0;flex:1}
+  .rk-case b{font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rk-case small{font-size:10px;color:var(--dim);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+  .rk-case:not(.on) b{color:var(--dim)}
+  .rk-case:not(.on) small{opacity:.45}
+  /* voyant d'activation (remplace l'interrupteur) */
+  .fx-on{width:14px;height:14px;border-radius:50%;position:relative;flex:0 0 auto;background:#141517;box-shadow:inset 0 1px 2px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.07);transition:background .12s,box-shadow .12s}
+  .fx-on::after{content:"";position:absolute;inset:4px;border-radius:50%;background:#45474D;transition:background .12s,box-shadow .12s}
+  .rk-case.on .fx-on::after,.fxc.on .fx-on::after{background:var(--pc,var(--accent));box-shadow:0 0 6px var(--pc,var(--accent)),0 0 2px #fff inset}
+  .fxc.detail{min-height:100%;padding:0;overflow:hidden;border-radius:7px;background:#1A1B1E;border:1px solid #0E0F11;gap:0}
+  .fxc.detail header{justify-content:space-between;padding:7px 10px;background:var(--barre);border-bottom:1px solid #0B0B0D;box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
   .fxc.detail .fx-titre{display:flex;align-items:center;gap:8px}
-  .fxc .fx-aide{font-size:11.5px;color:var(--dim);margin:0;line-height:1.4}
+  .fxc.detail .fx-titre b{font-size:12px}
+  .fxc.detail .fx-aide{padding:9px 12px 0}
+  .fxc.detail .fx-boutons{flex-wrap:wrap;row-gap:10px;padding:10px 12px 14px;gap:10px}
+  .fxc .fx-aide{font-size:11px;color:var(--dim);margin:0;line-height:1.45}
   @media(max-width:1000px){ .dp-corps.rack{grid-template-columns:1fr 1fr} .dp-corps.rack .dp-bloc{grid-column:1/-1} }
   @media(max-width:640px){ .dp-corps.rack{grid-template-columns:1fr;max-height:300px;overflow-y:auto} }
   /* carte d'effet */
-  .fxc{flex:0 0 auto;display:grid;align-content:start;gap:10px;padding:10px 12px 12px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line-soft);transition:border-color .15s,opacity .15s}
+  .fxc{flex:0 0 auto;display:grid;align-content:start;gap:10px;padding:10px 12px 12px;border-radius:7px;background:#28292D;border:1px solid #0E0F11;transition:opacity .15s}
   .fxc header{display:flex;align-items:center;gap:8px;min-width:0}
-  .fxc header b{font-size:12.5px;font-weight:750;white-space:nowrap}
-  .fxc header select{height:24px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit;font-size:11px;padding:0 4px}
-  .fx-on{width:30px;height:18px;border-radius:9px;background:var(--line);position:relative;flex:0 0 auto;transition:background .15s}
-  .fx-on::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .15s}
-  .fxc.on{border-color:color-mix(in srgb,var(--pc,var(--accent)) 45%,transparent)}
-  .fxc.on .fx-on{background:var(--pc,var(--accent))}
-  .fxc.on .fx-on::after{transform:translateX(12px)}
-  .fxc:not(.on) .fx-boutons{opacity:.45}
+  .fxc header b{font-size:12px;font-weight:750;white-space:nowrap}
+  .fxc header select{height:22px;border:1px solid #0E0F11;border-radius:4px;background:#18191C;color:var(--ink);font:inherit;font-size:11px;padding:0 4px;box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
+  .fxc:not(.on) .fx-boutons{opacity:.4}
   .fx-boutons{display:flex;gap:6px;flex-wrap:nowrap}
   .fx-case{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:650;color:var(--dim);cursor:pointer}
   .fx-case input{accent-color:var(--pc,var(--accent))}
-  /* bouton rotatif */
-  .kn{width:58px;display:grid;justify-items:center;gap:1px;cursor:ns-resize;touch-action:none;user-select:none;outline:none;border-radius:10px;padding:2px 0}
-  .kn:focus-visible{box-shadow:0 0 0 2px var(--accent)}
-  .kn svg{width:42px;height:42px;overflow:visible}
-  .kn .kn-fond{fill:none;stroke:var(--line);stroke-width:4;stroke-linecap:round}
-  .kn .kn-val{fill:none;stroke:var(--pc,var(--accent));stroke-width:4;stroke-linecap:round}
-  .kn .kn-cap{fill:var(--surface);stroke:var(--line);stroke-width:1}
-  .kn .kn-ind{stroke:var(--ink);stroke-width:2.2;stroke-linecap:round}
-  .kn .kn-v{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--ink);white-space:nowrap}
-  .kn .kn-n{font-size:10px;color:var(--dim);white-space:nowrap;max-width:62px;overflow:hidden;text-overflow:ellipsis}
+  /* bouton rotatif : chapeau metal, arc de valeur a la couleur de la piste */
+  .kn{width:70px;display:grid;justify-items:center;gap:2px;cursor:ns-resize;touch-action:none;user-select:none;outline:none;border-radius:6px;padding:3px 0}
+  .kn:focus-visible{box-shadow:0 0 0 1px var(--accent)}
+  .kn svg{width:44px;height:44px;overflow:visible}
+  .kn .kn-fond{fill:none;stroke:#0F1012;stroke-width:4;stroke-linecap:round}
+  .kn .kn-val{fill:none;stroke:var(--pc,var(--accent));stroke-width:4;stroke-linecap:round;filter:drop-shadow(0 0 2px color-mix(in srgb,var(--pc,var(--accent)) 60%,transparent))}
+  .kn .kn-cap{fill:url(#daw-cap);stroke:#0D0E10;stroke-width:1}
+  .kn .kn-ind{stroke:#F5F6F7;stroke-width:2;stroke-linecap:round}
+  .kn .kn-v{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--lcd-ink);white-space:nowrap;background:#121315;border-radius:3px;padding:1px 5px;box-shadow:inset 0 1px 2px rgba(0,0,0,.7)}
+  .kn .kn-n{font-size:9.5px;font-weight:650;color:var(--dim);white-space:nowrap;max-width:72px;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.04em}
   .daw-decompte{position:absolute;inset:0;z-index:20;display:grid;place-items:center;pointer-events:none;
-    font-size:120px;font-weight:900;letter-spacing:-.05em;color:var(--accent);text-shadow:0 10px 40px rgba(250,35,59,.35)}
+    font-size:120px;font-weight:900;font-family:var(--mono);letter-spacing:-.05em;color:#FF3A50;text-shadow:0 10px 40px rgba(250,35,59,.35)}
   .daw-decompte[hidden]{display:none}
-  .daw-msg{position:absolute;left:50%;top:70px;transform:translateX(-50%);z-index:21;padding:8px 14px;border-radius:999px;
-    background:var(--ink);color:var(--on-ink);font-size:12.5px;font-weight:600;box-shadow:var(--sh-2);white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
+  .daw-msg{position:absolute;left:50%;top:64px;transform:translateX(-50%);z-index:21;padding:7px 13px;border-radius:6px;
+    background:#0E0F11;color:#E6E7EA;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 24px rgba(0,0,0,.5);white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
   .daw-msg[hidden]{display:none}
   body.daw-ouvert{overflow:hidden}
-  @media(max-width:1100px){
+  /* sous 1 600 px, les outils ne gardent que leur icone (le nom reste dans l'info-bulle) */
+  @media(max-width:1600px){ .daw-outils .daw-o:not(.pri):not(#dawBascule) .lib{display:none} .daw-outils .daw-o:not(.pri){padding:0 7px} }
+  @media(max-width:1180px){
     .daw-haut{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"id console" "outils outils"}
     .daw-id{grid-area:id} .daw-console{grid-area:console} .daw-outils{grid-area:outils;justify-content:flex-start}
   }
   @media(max-width:760px){
-    .daw{left:6px;right:6px;top:6px;--hw:112px;--rh:72px;border-radius:18px}
+    .daw{left:6px;right:6px;top:6px;--hw:118px;--rh:72px;border-radius:10px}
     .daw-haut{grid-template-columns:1fr;grid-template-areas:"id" "console" "outils";gap:8px;padding:8px 10px}
     .daw-console{justify-content:space-between}
-    .lcd-t{font-size:19px;min-width:84px}
+    .lcd-seg{padding:3px 8px;min-width:0}
+    .lcd-seg b{font-size:15px}
+    .lcd-seg.t b{min-width:64px}
+    .lcd-seg.k{display:none}
     .daw-zoom input{width:60px}
     .daw-tete{padding:6px 6px 6px 10px}
-    .daw-tete input[type=range],.daw-tete .vu{display:none}
+    .daw-tete input[type=range],.daw-tete .vu,.daw-tete .num{display:none}
     .daw-sep{display:none}
     .daw-o .lib{display:none}
     #dawFermer{position:absolute;top:8px;right:8px}
@@ -264,10 +322,17 @@ const STUDIO = (() => {
     <div class="daw-haut">
       <div class="daw-id"><span class="eyebrow">${I.micro}Studio</span><button class="daw-titre" id="dawTitreBtn" title="Renommer le projet" aria-label="Renommer le projet"><b id="dawTitre" translate="no"></b>${I.crayon}</button><span class="info" id="dawInfo"></span></div>
       <div class="daw-console">
-        <button class="daw-b" id="dawDebut" title="Revenir au début (Entrée)" aria-label="Revenir au début">${I.debut}</button>
-        <button class="daw-b lire" id="dawLire" title="Lecture / pause (Espace)" aria-label="Lecture ou pause">${I.lire}</button>
-        <button class="daw-b rec" id="dawRec" title="Enregistrer au curseur (R)" aria-label="Enregistrer">${I.rec}</button>
-        <div class="lcd" aria-live="off"><span class="lcd-t" id="dawTemps">0:00.0</span><span class="lcd-m">mes. <b id="dawMesure">1.1</b></span><span class="lcd-b" id="dawBpm">120 BPM</span></div>
+        <div class="daw-transport">
+          <button class="daw-b" id="dawDebut" title="Revenir au début (Entrée)" aria-label="Revenir au début">${I.debut}</button>
+          <button class="daw-b lire" id="dawLire" title="Lecture / pause (Espace)" aria-label="Lecture ou pause">${I.lire}</button>
+          <button class="daw-b rec" id="dawRec" title="Enregistrer au curseur (R)" aria-label="Enregistrer">${I.rec}</button>
+        </div>
+        <div class="lcd" aria-live="off">
+          <span class="lcd-seg"><b id="dawMesure">1.1</b><small>Mesure</small></span>
+          <span class="lcd-seg t"><b id="dawTemps">0:00.0</b><small>Temps</small></span>
+          <span class="lcd-seg"><b id="dawBpm">120</b><small>Tempo</small></span>
+          <span class="lcd-seg k"><b id="dawCle">—</b><small>4/4</small></span>
+        </div>
         <span class="daw-niv" aria-hidden="true" title="Niveau du micro"><i id="dawNiv"></i></span>
       </div>
       <div class="daw-outils">
@@ -299,6 +364,7 @@ const STUDIO = (() => {
       </div>
       <div class="dp-corps" id="dawCorps"></div>
     </div>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><radialGradient id="daw-cap" cx="50%" cy="30%" r="75%"><stop offset="0" stop-color="#5B5D63"/><stop offset=".55" stop-color="#36383D"/><stop offset="1" stop-color="#202125"/></radialGradient></defs></svg>
     <div class="daw-decompte" id="dawDecompte" hidden></div>
     <div class="daw-msg" id="dawMsg" hidden></div>
   </div>`);
@@ -1016,7 +1082,7 @@ const STUDIO = (() => {
     const lignePiste = (p, i) => `
       <div class="daw-ligne piste${pisteCible().id === p.id ? " sel-piste" : ""}" data-piste="${p.id}" style="--pc:${COULEURS[i % COULEURS.length]}">
         <div class="daw-tete" data-tete="${p.id}">
-          <div class="t1"><span class="nom">${esc(p.nom)}</span>${pisteCible().id === p.id ? '<em class="cible" title="Les prochaines prises vont sur cette piste">REC</em>' : ""}</div>
+          <div class="t1"><span class="num">${i + 1}</span><span class="nom">${esc(p.nom)}</span>${pisteCible().id === p.id ? '<em class="cible" title="Les prochaines prises vont sur cette piste">R</em>' : ""}</div>
           <div class="t2">
             <button class="daw-ms m" data-mute="${p.id}" aria-pressed="${p.mute}" title="Muet">M</button>
             <button class="daw-ms s" data-solo="${p.id}" aria-pressed="${p.solo}" title="Solo">S</button>
@@ -1055,7 +1121,10 @@ const STUDIO = (() => {
     $("dawMix").hidden = !fichier;
     $("dawMix").querySelectorAll("[data-mix]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mix === mixExport)));
     placerCurseur(tempsBeat());
+    remplirCurseurs(el);
   }
+  // la part « remplie » d'un curseur, en pourcentage, pour le degrade de sa piste
+  function remplirCurseurs(racine){ racine.querySelectorAll('input[type=range]').forEach(r => r.style.setProperty("--p", `${(r.value - (r.min || 0)) / ((r.max || 100) - (r.min || 0)) * 100}%`)); }
   const pisteCible = () => (sel && sel.type === "piste" && P.pistes.find(p => p.id === sel.id))
     || (sel && sel.type === "clip" && P.pistes.find(p => p.id === (P.clips.find(k => k.id === sel.id) || {}).piste)) || P.pistes[0];
   function regionHTML(k){
@@ -1067,13 +1136,17 @@ const STUDIO = (() => {
       <i class="fondu" data-fondu="fo" style="right:${Math.max(2, k.fadeOut * zoom - 6)}px"></i>
     </div>`;
   }
+  // une couleur #rrggbb melangee a du blanc (t = part de blanc)
+  const teinte = (hex, t) => { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ""); if (!m) return "rgba(255,255,255,.85)";
+    const v = parseInt(m[1], 16), c = [v >> 16, (v >> 8) & 255, v & 255].map(x => Math.round(x + (255 - x) * t)); return `rgb(${c.join(",")})`; };
   function ondeRegion(n){
     const k = P.clips.find(x => x.id === n.dataset.clip), pk = k && PIC.get(k.prise); if (!pk) return;
     const cv = n.querySelector("canvas"), w = Math.max(1, Math.round(k.dur * zoom)), W = Math.min(w, 4096);
     const H = Math.max(20, n.clientHeight - 20), dpr = Math.min(2, window.devicePixelRatio || 1), r = w / W;
     cv.width = W * dpr; cv.height = H * dpr; cv.style.width = w + "px"; cv.style.height = H + "px";
     const g = cv.getContext("2d"); g.scale(dpr, dpr);
-    g.fillStyle = "rgba(255,255,255,.88)";
+    // forme d'onde teintee de la couleur de la piste (eclaircie), sur le corps sombre de la region
+    g.fillStyle = teinte(getComputedStyle(n).getPropertyValue("--pc").trim(), .55);
     const mid = H / 2, gain = Math.min(1.6, k.gain);
     for (let x = 0; x < W; x++) {
       const a = Math.floor((k.offset + (x * r) / zoom) * RES), b = Math.ceil((k.offset + ((x + 1) * r) / zoom) * RES);
@@ -1113,6 +1186,7 @@ const STUDIO = (() => {
       vumetres();
       const joue = joueStudio();
       $("dawLire").innerHTML = joue ? I.pause : I.lire;
+      el.classList.toggle("joue", joue); el.classList.toggle("enregistre", !!rec);
       el.classList.toggle("yt-mode", !horlogeInterne());
       if (joue) {   // la page suit le curseur
         const hw = grilleEl.querySelector(".daw-tete")?.offsetWidth || 196, x = hw + t * zoom;
@@ -1291,7 +1365,7 @@ const STUDIO = (() => {
       if ($("dpBpm")) $("dpBpm").addEventListener("change", e => { const v = Math.round(+e.target.value); if (v >= 50 && v <= 220) { P.bpm = v; reglerTout(); sauver(); dessiner(); entete(); } else e.target.value = bpm(); });
     }
   }
-  const inspecteur = panneau;
+  const inspecteur = () => { panneau(); remplirCurseurs(pan); };
   pan.addEventListener("click", e => {
     const o = e.target.closest("[data-onglet]"); if (o) { onglet = o.dataset.onglet; pan.classList.remove("ferme"); panneau(); return; }
     if (e.target.closest("#dawReplier")) { pan.classList.toggle("ferme"); return; }
@@ -1349,7 +1423,8 @@ const STUDIO = (() => {
     fixer(kn, versVal(clamp(x, 0, 1), +kn.dataset.min, +kn.dataset.max, kn.dataset.u));
   });
   function entete(){
-    $("dawBpm").textContent = `${bpm()} BPM`;
+    $("dawBpm").textContent = `${bpm()}`;
+    $("dawCle").textContent = prod && prod.key && !estLibre() ? `${prod.keySur ? "" : "~"}${prod.key}` : "—";
   }
 
 
@@ -1509,6 +1584,8 @@ const STUDIO = (() => {
   // on peut aussi deposer le fichier directement sur le studio
   el.addEventListener("dragover", e => { if ([...(e.dataTransfer?.types || [])].includes("Files")) e.preventDefault(); });
   el.addEventListener("drop", e => { const f = e.dataTransfer?.files?.[0]; if (f) { e.preventDefault(); importer(f); } });
+  // chaque curseur du studio (volumes, zoom) garde sa partie remplie a jour
+  el.addEventListener("input", e => { if (e.target.matches('input[type=range]')) remplirCurseurs(e.target.parentElement); }, true);
   zone.addEventListener("input", e => {
     const v = e.target.closest("[data-vol]");
     if (v) { const p = P.pistes.find(x => x.id === v.dataset.vol); p.vol = v.value / 100; reglerTout(); sauver(); const kn = corps.querySelector('[data-cle="piste.vol"]'); if (kn && pisteCible() === p) peindreBouton(kn, p.vol); }
