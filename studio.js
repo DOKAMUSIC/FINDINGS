@@ -309,6 +309,14 @@ const STUDIO = (() => {
   /* autotune : moderne, ecran turquoise */
   .fxc.detail[data-fx="autotune"]{--face:linear-gradient(180deg,#2A2D31,#1D1F22);--vis:#5FE3D0}
   .fxc.detail[data-fx="hpf"]{--vis:#FFB547}
+  /* de-esser : gris acier, ecran bleu ciel */
+  .fxc.detail[data-fx="deesser"]{--face:linear-gradient(180deg,#3A3E44,#2A2D32);--vis:#7FD4FF}
+  .fxc.detail[data-fx="deesser"] .kn .kn-cap{fill:url(#cap-chrome)} .fxc.detail[data-fx="deesser"] .kn .kn-ind{stroke:#1A1B1D}
+  /* limiteur : noir et or */
+  .fxc.detail[data-fx="limit"]{--face:linear-gradient(180deg,#151515,#0B0B0B);--entete:linear-gradient(180deg,#E3C26E,#A9842F);--vis:#FFD25E}
+  .fxc.detail[data-fx="limit"] .fx-titre b{color:#1E1708;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+  .fxc.detail[data-fx="limit"] .plug-modele{color:#4A3A12}
+  .fxc.detail[data-fx="limit"] .kn .kn-cap{fill:url(#cap-or)} .fxc.detail[data-fx="limit"] .kn .kn-ind{stroke:#1E1708}
   /* facade du plug-in : nom de modele, ecran, clavier */
   .plug-modele{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--dimmer);text-transform:uppercase;margin-left:4px}
   .plug-vis{position:relative;margin:10px 12px 0;height:132px;border-radius:5px;background:linear-gradient(180deg,#0C0D0F,#121316);box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.05);overflow:hidden}
@@ -605,12 +613,16 @@ const STUDIO = (() => {
       ["haut", "Aigus", -15, 15, .5, "dB", 0], ["hautF", "F. aigus", 2000, 14000, 50, "Hz", 7000]], cases: [["analog", "Analog"]] },
     { k: "comp", modele: "VC-4 Compressor", nom: "Compresseur", p: [["seuil", "Seuil", -60, 0, 1, "dB", -20], ["ratio", "Ratio", 1, 20, .5, ":1", 4],
       ["attaque", "Attaque", 1, 100, 1, "ms", 6], ["relache", "Relâche", 20, 800, 5, "ms", 150], ["gain", "Gain", 0, 24, .5, "dB", 4]], cases: [["analog", "Analog"]] },
+    { k: "deesser", modele: "DS-1 De-Esser", nom: "De-esser", types: [["bande", "Bande (split)"], ["large", "Large"]],
+      p: [["freq", "Fréquence", 3000, 12000, 50, "Hz", 6500], ["seuil", "Seuil", -50, 0, 1, "dB", -28], ["portee", "Réduction max", 0, 20, .5, "dB", 10]],
+      cases: [["ecoute", "Écouter les sifflantes", false]] },
     { k: "sat", modele: "Tube Drive", nom: "Saturation", p: [["drive", "Chaleur", 0, 100, 1, "%", 25], ["mix", "Mélange", 0, 100, 1, "%", 35]] },
     { k: "filtre", modele: "Lo-Fi Filter", nom: "Filtre", types: [["tel", "Téléphone"], ["radio", "Radio"], ["pb", "Passe-bas"], ["ph", "Passe-haut"]],
       p: [["freq", "Fréquence", 100, 12000, 10, "Hz", 1700], ["q", "Résonance", .3, 12, .1, "", 1.2]] },
     { k: "chorus", modele: "Double Tracker", nom: "Doubleur", p: [["vitesse", "Vitesse", .1, 3, .05, "Hz", .4], ["profondeur", "Profondeur", 0, 100, 1, "%", 30], ["mix", "Mélange", 0, 100, 1, "%", 25]] },
     { k: "reverb", modele: "Plate Room", nom: "Réverb", p: [["taille", "Taille", .3, 6, .1, "s", 1.4], ["predelay", "Pré-délai", 0, 200, 1, "ms", 25],
       ["amorti", "Brillance", 1500, 14000, 100, "Hz", 6000], ["mix", "Niveau", 0, 100, 1, "%", 12]] },
+    { k: "limit", modele: "LX-2 Limiter", nom: "Limiteur", p: [["seuil", "Seuil", -24, 0, .5, "dB", -6], ["plafond", "Plafond", -6, 0, .1, "dB", -1], ["relache", "Relâche", 5, 500, 1, "ms", 60]] },
     { k: "delay", modele: "Tape Echo", nom: "Écho", divisions: [["1/4", "1/4"], ["1/8p", "1/8 pointée"], ["1/8", "1/8"], ["1/16", "1/16"], ["1/4t", "1/4 triolet"]],
       p: [["retour", "Répétitions", 0, 85, 1, "%", 22], ["filtre", "Brillance", 800, 10000, 100, "Hz", 3200], ["mix", "Niveau", 0, 100, 1, "%", 10]], cases: [["pingpong", "Ping-pong"]] }
   ];
@@ -619,6 +631,8 @@ const STUDIO = (() => {
     hpf: "Retire le grave inutile (souffle, pied de micro, plosives). À laisser sur presque toutes les voix.",
     eq: "Creuse ou renforce des zones : moins de « boue » vers 300–500 Hz, plus d'air dans les aigus.",
     comp: "Resserre les écarts de volume pour que la voix reste devant. Seuil bas = plus compressé.",
+    deesser: "Calme les « s » et les « ch » qui sifflent. Seuls les aigus au-dessus de la fréquence sont réduits quand ils dépassent le seuil ; le reste de la voix ne bouge pas. « Écouter les sifflantes » fait entendre ce qui est détecté, pour caler la fréquence.",
+    limit: "Monte le niveau sans jamais dépasser le plafond. Seuil bas = voix plus dense et plus forte ; le plafond garde une marge avant 0 dB.",
     sat: "Arrondit les crêtes et ajoute un peu de densité, comme un passage dans une console. À doser léger.",
     filtre: "Coupe une partie du spectre : effet téléphone ou radio pour les ad-libs et les intros.",
     chorus: "Ouvre la voix en stéréo comme une prise doublée, sans effet de vague : refrains et backs.",
@@ -626,6 +640,8 @@ const STUDIO = (() => {
     delay: "Répète la voix en rythme, calé sur le tempo. Chaque répétition s'assombrit, comme sur une bande."
   };
   const resume = (k, v) => ({
+    deesser: () => `${v.freq >= 1000 ? (v.freq / 1000).toFixed(1) + " kHz" : v.freq + " Hz"} · ${v.seuil} dB`,
+    limit: () => `${v.seuil} dB → ${v.plafond} dB`,
     autotune: () => [v.type === "libre" ? "sans correction" : v.type === "cle" ? `${NOTES_EN[+v.tonique || 0]}${(GAMMES[v.gamme] || GAMMES.mineur).suffixe}` : v.type === "chroma" ? "chromatique" : "",
       v.type === "libre" ? "" : `${Math.round(v.vitesse)} ms`, v.demitons ? `${v.demitons > 0 ? "+" : ""}${v.demitons} dt` : ""].filter(Boolean).join(" · "),
     hpf: () => `${Math.round(v.freq)} Hz`,
@@ -645,7 +661,7 @@ const STUDIO = (() => {
       if (f.types) o[f.k].type = f.types[0][0];
       if (f.divisions) o[f.k].division = "1/4";
       if (f.menus) { o[f.k].tonique = "9"; o[f.k].gamme = "mineur"; o[f.k].tessiture = "large"; o[f.k].clavier = ""; }
-      (f.cases || []).forEach(([c]) => o[f.k][c] = true);
+      (f.cases || []).forEach(([c, , def]) => o[f.k][c] = def !== false);
     }
     return o;
   };
@@ -655,11 +671,14 @@ const STUDIO = (() => {
   const PRESETS = {
     brut:     { nom: "Brut (aucun effet)", fx: {} },
     naturel:  { nom: "Voix naturelle", fx: {
+                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
                 hpf: { on: 1, freq: 80 },
                 eq: { on: 1, bas: 0, mid: -2, midF: 320, midQ: 1, haut: 2, hautF: 10000 },
                 comp: { on: 1, seuil: -18, ratio: 3, attaque: 10, relache: 120, gain: 3 },
                 reverb: { on: 1, taille: .9, predelay: 15, amorti: 6500, mix: 9 } } },
     lead:     { nom: "Lead rap / pop", fx: {
+                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
+                limit: { on: 1, seuil: -3, plafond: -1, relache: 60 },
                 autotune: { on: 1, type: "prod", vitesse: 40, transition: 60, humain: 40, tolerance: 8, demitons: 0, mix: 100, formant: true },
                 hpf: { on: 1, freq: 100 },
                 eq: { on: 1, bas: 0, mid: -2.5, midF: 350, midQ: 1.1, haut: 3, hautF: 9500 },
@@ -668,6 +687,7 @@ const STUDIO = (() => {
                 delay: { on: 1, division: "1/4", retour: 15, filtre: 2800, mix: 7, pingpong: false },
                 reverb: { on: 1, taille: 1.3, predelay: 30, amorti: 5500, mix: 9 } } },
     refrain:  { nom: "Refrain large", fx: {
+                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
                 hpf: { on: 1, freq: 110 },
                 eq: { on: 1, bas: 0, mid: -2, midF: 400, midQ: 1, haut: 2.5, hautF: 10000 },
                 comp: { on: 1, seuil: -22, ratio: 4, attaque: 6, relache: 110, gain: 5 },
@@ -675,6 +695,7 @@ const STUDIO = (() => {
                 delay: { on: 1, division: "1/8p", retour: 14, filtre: 3200, mix: 7, pingpong: true },
                 reverb: { on: 1, taille: 1.8, predelay: 25, amorti: 6000, mix: 13 } } },
     melo:     { nom: "Mélo / planant", fx: {
+                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
                 hpf: { on: 1, freq: 90 },
                 eq: { on: 1, bas: 0, mid: -1.5, midF: 300, midQ: 1, haut: 2, hautF: 11000 },
                 comp: { on: 1, seuil: -20, ratio: 3, attaque: 12, relache: 160, gain: 4 },
@@ -687,6 +708,7 @@ const STUDIO = (() => {
                 chorus: { on: 1, vitesse: .3, profondeur: 35, mix: 35 },
                 reverb: { on: 1, taille: 2.1, predelay: 10, amorti: 4500, mix: 20 } } },
     autotune: { nom: "Autotune marqué", fx: {
+                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
                 autotune: { on: 1, type: "prod", vitesse: 0, transition: 0, humain: 0, tolerance: 0, demitons: 0, mix: 100, formant: true },
                 hpf: { on: 1, freq: 100 },
                 eq: { on: 1, bas: 0, mid: -2, midF: 350, midQ: 1, haut: 3, hautF: 10000 },
@@ -854,7 +876,57 @@ const STUDIO = (() => {
       return true;
     }
   }
-  registerProcessor("findings-autotune", FindingsAutotune);`;
+  registerProcessor("findings-autotune", FindingsAutotune);
+  /* De-esser « egaliseur dynamique » : un passe-haut (biquad) ecoute les sifflantes ; quand leur
+     niveau depasse le seuil, un filtre en plateau sur les aigus baisse d'autant (borne par la
+     reduction max). A 0 dB ce plateau laisse passer la voix a l'identique : rien n'est colore
+     tant que rien ne siffle. Mode large : toute la voix baisse. Sans latence. */
+  class FindingsDeesser extends AudioWorkletProcessor {
+    constructor(){
+      super();
+      this.on = false; this.freq = 6500; this.seuil = -28; this.portee = 10; this.mode = "bande"; this.ecoute = false; this.telem = false;
+      this.z1 = 0; this.z2 = 0; this.s1 = 0; this.s2 = 0; this.e = 0; this.red = 0; this.max = 0; this.n = 0; this.cpt = 0;
+      this.port.onmessage = e => { Object.assign(this, e.data); this.coefs(); };
+      this.coefs(); this.plateau(0);
+    }
+    coefs(){
+      const w = 2 * Math.PI * Math.min(this.freq, sampleRate * .45) / sampleRate, c = Math.cos(w), al = Math.sin(w) / (2 * .7071), a0 = 1 + al;
+      this.b0 = (1 + c) / 2 / a0; this.b1 = -(1 + c) / a0; this.b2 = (1 + c) / 2 / a0; this.a1 = -2 * c / a0; this.a2 = (1 - al) / a0;
+      this.att = Math.exp(-1 / (.0008 * sampleRate)); this.rel = Math.exp(-1 / (.06 * sampleRate)); this.lis = Math.exp(-1 / (.0015 * sampleRate));
+    }
+    // plateau des aigus (RBJ, pente 1), centre un peu sous la frequence pour couvrir toute la sifflante
+    plateau(gdb){
+      const A = Math.pow(10, gdb / 40), w = 2 * Math.PI * Math.min(this.freq * .8, sampleRate * .45) / sampleRate, c = Math.cos(w), al = Math.sin(w) / Math.SQRT2, r = 2 * Math.sqrt(A) * al;
+      const a0 = (A + 1) - (A - 1) * c + r;
+      this.p0 = A * ((A + 1) + (A - 1) * c + r) / a0; this.p1 = -2 * A * ((A - 1) + (A + 1) * c) / a0; this.p2 = A * ((A + 1) + (A - 1) * c - r) / a0;
+      this.q1 = 2 * ((A - 1) - (A + 1) * c) / a0; this.q2 = ((A + 1) - (A - 1) * c - r) / a0;
+    }
+    process(inputs, outputs){
+      const ent = inputs[0], sor = outputs[0][0];
+      if (!sor) return true;
+      if (!ent || !ent.length) { sor.fill(0); return true; }
+      const a0 = ent[0], a1 = ent[1];
+      if (!this.on) { for (let i = 0; i < sor.length; i++) sor[i] = a1 ? (a0[i] + a1[i]) * .5 : a0[i]; return true; }
+      for (let i = 0; i < sor.length; i++) {
+        const v = a1 ? (a0[i] + a1[i]) * .5 : a0[i];
+        // detection : niveau des aigus
+        const h = this.b0 * v + this.z1; this.z1 = this.b1 * v - this.a1 * h + this.z2; this.z2 = this.b2 * v - this.a2 * h;
+        const l = Math.abs(h); this.e = l > this.e ? this.att * this.e + (1 - this.att) * l : this.rel * this.e + (1 - this.rel) * l;
+        const over = 20 * Math.log10(this.e + 1e-9) - this.seuil;
+        const cible = over > 0 ? Math.min(this.portee, over * .9) : 0;        // ratio 10:1
+        this.red = this.lis * this.red + (1 - this.lis) * cible;
+        if (this.red > this.max) this.max = this.red;
+        if (this.ecoute) { sor[i] = h; continue; }
+        if (this.mode === "large") { sor[i] = v * Math.pow(10, -this.red / 20); continue; }
+        if (++this.cpt >= 16) { this.cpt = 0; this.plateau(-this.red); }    // le plateau suit la reduction
+        const y = this.p0 * v + this.s1; this.s1 = this.p1 * v - this.q1 * y + this.s2; this.s2 = this.p2 * v - this.q2 * y;
+        sor[i] = y;
+      }
+      if (this.telem && ++this.n >= 4) { this.n = 0; this.port.postMessage({ gr: this.max }); this.max = 0; }
+      return true;
+    }
+  }
+  registerProcessor("findings-deesser", FindingsDeesser);`;
   const AT_PRET = new WeakSet(), AT_CHARGE = new WeakMap();
   function chargerAT(c){
     if (!c.audioWorklet) return Promise.resolve(false);
@@ -945,6 +1017,11 @@ const STUDIO = (() => {
     // etage « Analog » : transformateur (galbe du grave, aigu adouci) et un soupcon d'harmoniques paires
     n.anaLo = F("lowshelf"); n.anaLo.frequency.value = 90; n.anaHi = F("highshelf"); n.anaHi.frequency.value = 15000;
     n.ana = c.createWaveShaper(); n.ana.oversample = "4x";
+    n.de = AT_PRET.has(c) ? new AudioWorkletNode(c, "findings-deesser", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1] }) : G();
+    if (n.de.port) { n.deHist = []; n.de.port.onmessage = e => { n.deHist.push(e.data.gr); if (n.deHist.length > 240) n.deHist.shift(); }; }
+    // limiteur : gain d'entree (le seuil), compresseur rapide calé sous le plafond, puis ecretage net au plafond
+    n.limPre = G(); n.lim = c.createDynamicsCompressor(); n.limClip = c.createWaveShaper(); n.limClip.oversample = "4x";
+    n.limA = c.createAnalyser(); n.limB = c.createAnalyser(); n.limA.fftSize = n.limB.fftSize = 512;
     n.satSec = G(); n.ws = c.createWaveShaper(); n.ws.oversample = "4x"; n.satHum = G(); n.satSom = G();
     n.filtre = F("allpass");
     n.chSec = G(); n.chHum = G(); n.chSom = G();
@@ -967,12 +1044,13 @@ const STUDIO = (() => {
     // cablage
     n.entree.connect(n.at); n.at.connect(n.hpf); n.hpf.connect(n.eqB); n.eqB.connect(n.eqM); n.eqM.connect(n.eqH); n.eqH.connect(n.comp); n.comp.connect(n.compG);
     n.compG.connect(n.anaLo); n.anaLo.connect(n.anaHi); n.anaHi.connect(n.ana);
-    n.ana.connect(n.satSec); n.ana.connect(n.ws); n.ws.connect(n.satHum); n.satSec.connect(n.satSom); n.satHum.connect(n.satSom);
+    n.ana.connect(n.de); n.de.connect(n.satSec); n.de.connect(n.ws); n.ws.connect(n.satHum); n.satSec.connect(n.satSom); n.satHum.connect(n.satSom);
     n.satSom.connect(n.filtre);
     n.filtre.connect(n.chSec); n.filtre.connect(n.chD1); n.filtre.connect(n.chD2);
     n.chD1.connect(p1); n.chD2.connect(p2); p1.connect(n.chHum); p2.connect(n.chHum);
     n.chSec.connect(n.chSom); n.chHum.connect(n.chSom);
-    if (n.pan) { n.chSom.connect(n.pan); n.pan.connect(n.fader); } else n.chSom.connect(n.fader);
+    n.chSom.connect(n.limPre); n.limPre.connect(n.lim); n.limPre.connect(n.limA); n.lim.connect(n.limClip); n.limClip.connect(n.limB);
+    if (n.pan) { n.limClip.connect(n.pan); n.pan.connect(n.fader); } else n.limClip.connect(n.fader);
     n.fader.connect(b.master); if (n.mesure) n.fader.connect(n.mesure);
     n.fader.connect(n.revDep); n.revDep.connect(n.revPre); n.revPre.connect(n.conv); n.conv.connect(n.revLP); n.revLP.connect(n.revHP); n.revHP.connect(b.master);
     n.fader.connect(n.dlyDep); n.dlyDep.connect(n.dA);
@@ -1010,6 +1088,14 @@ const STUDIO = (() => {
     // Analog : actif si l'egaliseur ou le compresseur l'est, avec sa case cochee
     const ana = (on("eq") && f.eq.analog !== false) || (on("comp") && f.comp.analog !== false);
     n.ana.curve = ana ? COURBE_ANA : null; n.anaLo.gain.value = ana ? .7 : 0; n.anaHi.gain.value = ana ? -.8 : 0;
+    if (n.de.port && f.deesser) { const d = f.deesser;
+      n.de.port.postMessage({ on: !!d.on, freq: d.freq, seuil: d.seuil, portee: d.portee, mode: d.type || "bande", ecoute: d.ecoute === true, telem: fxOuvert === "deesser" && pisteCible() === p }); }
+    if (f.limit && f.limit.on) {
+      const l = f.limit, plaf = dB(l.plafond);
+      n.limPre.gain.value = dB(-l.seuil); n.lim.threshold.value = l.plafond - .5; n.lim.knee.value = 0; n.lim.ratio.value = 20;
+      n.lim.attack.value = .001; n.lim.release.value = l.relache / 1000;
+      if (n.plafond !== l.plafond) { const k = 2048, cc = new Float32Array(k); for (let i = 0; i < k; i++) { const x = i / (k - 1) * 2 - 1; cc[i] = Math.max(-plaf, Math.min(plaf, x)); } n.limClip.curve = cc; n.plafond = l.plafond; }
+    } else { n.limPre.gain.value = 1; n.lim.threshold.value = 0; n.lim.ratio.value = 1; n.lim.knee.value = 0; n.limClip.curve = null; n.plafond = null; }
     if (on("sat")) {
       if (n.drive !== f.sat.drive) { n.ws.curve = courbe(f.sat.drive); n.drive = f.sat.drive; }
       const m = f.sat.mix / 100; n.satSec.gain.value = 1 - m; n.satHum.gain.value = m * (1 + f.sat.drive / 100 * .6);
@@ -1047,7 +1133,7 @@ const STUDIO = (() => {
     if (n.panA.pan) { n.panA.pan.value = f.delay.pingpong ? -.85 : 0; n.panB.pan.value = f.delay.pingpong ? .85 : 0; }
     n.dlyDep.gain.value = on("delay") ? f.delay.mix / 100 * 1.1 : 0;
   }
-  function liberer(n){ try { n.osc.stop(); } catch (e) {} try { if (n.at.port) n.at.port.close(); } catch (e) {} try { n.fader.disconnect(); n.hpA.disconnect(); n.hpB.disconnect(); n.revHP.disconnect(); } catch (e) {} }
+  function liberer(n){ try { n.osc.stop(); } catch (e) {} try { if (n.at.port) n.at.port.close(); if (n.de.port) n.de.port.close(); } catch (e) {} try { n.fader.disconnect(); n.hpA.disconnect(); n.hpB.disconnect(); n.revHP.disconnect(); } catch (e) {} }
   function construireNoeuds(){
     const c = audio();
     noeuds.forEach(liberer);
@@ -1530,7 +1616,7 @@ const STUDIO = (() => {
           <div class="plug-vis${f.k === "autotune" ? " at" : ""}" data-vis="${f.k}"><canvas></canvas>${f.k === "autotune" ? `<div class="at-lecture"><b data-at-note>—</b><span class="at-cents"><i data-at-aig></i></span><small data-at-ct>Lance la lecture</small></div>` : ""}</div>
           ${f.k === "autotune" ? clavierHTML(v) : ""}
           <div class="fx-boutons">${f.p.map(([c, n, min, max, pas, u, d]) => bouton(`fx.${f.k}.${c}`, n, min, max, pas, u, v[c], d)).join("")}</div>
-          ${(f.cases || []).map(([c, n]) => `<label class="fx-case"><input type="checkbox" data-fxcase="${f.k}.${c}"${v[c] !== false ? " checked" : ""}>${n}</label>`).join("")}
+          ${(f.cases || []).map(([c, n, def]) => `<label class="fx-case"><input type="checkbox" data-fxcase="${f.k}.${c}"${(v[c] === undefined ? def !== false : !!v[c]) ? " checked" : ""}>${n}</label>`).join("")}
           <p class="fx-aide">${AIDE[f.k]}</p>
         </section>`; })()}`;
       $("dpNom").addEventListener("change", e => { memoriser(); p.nom = e.target.value.trim() || p.nom; dessiner(); panneau(); sauver(); });
@@ -1714,6 +1800,43 @@ const STUDIO = (() => {
         for (let r2 = 0; r2 < 3; r2++) { const a2 = r2 * Math.PI * 2 / 3; g.beginPath(); g.moveTo(Math.cos(a2) * 5, Math.sin(a2) * 5); g.lineTo(Math.cos(a2) * 13, Math.sin(a2) * 13); g.stroke(); } g.restore(); });
       g.strokeStyle = "rgba(255,230,190,.35)"; g.beginPath(); g.moveTo(W - 70, 41); g.lineTo(W - 28, 41); g.stroke();
       g.fillStyle = "rgba(255,255,255,.5)"; g.fillText(`${(t * 1000).toFixed(0)} ms (${(FX.find(z => z.k === "delay").divisions.find(d => d[0] === f.division) || [, ""])[1]} à ${bpm()} BPM)`, 18, 12);
+    } else if (k === "deesser") {
+      // a gauche la bande traitee, a droite la reduction en direct et son historique
+      const Wb = W - 70; grilleFreq(g, Wb, H, 24);
+      // la bande ecoutee (passe-haut), sur la meme echelle que la grille
+      const db = reponse([filtreAffiche("highpass", f.freq, .7071, 0)]);
+      g.save(); g.beginPath(); g.rect(0, 0, Wb, H); g.clip(); courbeFreq(g, Wb, H, db, 24, coul); g.restore();
+      const fx = xFreq(f.freq, Wb); g.strokeStyle = coul; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(fx, 8); g.lineTo(fx, H - 14); g.stroke(); g.setLineDash([]);
+      g.fillStyle = coul; g.font = "bold 9px ui-monospace,Menlo,monospace"; g.fillText((f.freq / 1000).toFixed(1) + " kHz", Math.min(fx + 4, Wb - 50), 14);
+      const hist = (n && n.deHist) || [], gr = hist.length ? hist[hist.length - 1] : 0;
+      n && (n.deVu = (n.deVu || 0) + (gr - (n.deVu || 0)) * .3);
+      // historique de la reduction, en bas de l'ecran
+      g.beginPath(); hist.forEach((v, i) => { const px = i / 240 * Wb, py = H - 14 - Math.min(20, v) / 20 * (H * .45); i ? g.lineTo(px, py) : g.moveTo(px, py); });
+      g.strokeStyle = "rgba(255,180,80,.75)"; g.lineWidth = 1.4; g.stroke();
+      const bx = W - 52, bh = H - 28; g.fillStyle = "#0B0C0E"; g.fillRect(bx, 10, 16, bh);
+      const hh = Math.min(1, (n ? n.deVu : 0) / Math.max(1, f.portee)) * bh; g.fillStyle = "#F5A524"; g.fillRect(bx, 10, 16, hh);
+      g.fillStyle = "rgba(255,255,255,.5)"; g.font = "9px ui-monospace,Menlo,monospace"; g.fillText("GR", bx, H - 6); g.fillText("-" + (n ? n.deVu : 0).toFixed(1), bx + 20, 10 + Math.max(9, hh));
+      g.fillText("seuil " + f.seuil + " dB · max " + f.portee + " dB", 8, H - 18 - H * .45);
+    } else if (k === "limit") {
+      // trois vumetres facon L2 : entree, attenuation, sortie, et l'attenuation dans le temps
+      const lire = a => { if (!a) return -90; const b = new Float32Array(a.fftSize); a.getFloatTimeDomainData(b); let m = 0; for (const v of b) m = Math.max(m, Math.abs(v)); return 20 * Math.log10(m + 1e-9); };
+      const ent = lire(n && n.limA), sor = lire(n && n.limB), att = n && n.lim ? Math.max(0, -n.lim.reduction) : 0;
+      n && (n.limH = n.limH || [], n.limH.push(att), n.limH.length > 220 && n.limH.shift());
+      const y = d => 10 + (1 - (Math.max(-30, Math.min(0, d)) + 30) / 30) * (H - 30), barre = (x, d, c2, lib) => {
+        g.fillStyle = "#0B0C0E"; g.fillRect(x, 10, 18, H - 30); g.fillStyle = c2; g.fillRect(x, y(d), 18, H - 20 - y(d));
+        g.fillStyle = "rgba(255,255,255,.55)"; g.font = "bold 8px system-ui"; g.fillText(lib, x - 1, H - 6); };
+      barre(14, ent, "#7FD48A", "IN");
+      g.fillStyle = "#0B0C0E"; g.fillRect(44, 10, 18, H - 30); const ha = Math.min(1, att / 12) * (H - 30); g.fillStyle = "#FFB547"; g.fillRect(44, 10, 18, ha);
+      g.fillStyle = "rgba(255,255,255,.55)"; g.fillText("ATT", 42, H - 6);
+      barre(74, sor, coul, "OUT");
+      g.strokeStyle = "#FF5A4E"; g.beginPath(); g.moveTo(72, y(f.plafond) + .5); g.lineTo(96, y(f.plafond) + .5); g.stroke();
+      g.fillStyle = "rgba(255,255,255,.4)"; g.font = "9px ui-monospace,Menlo,monospace";
+      [0, -6, -12, -18, -24, -30].forEach(d => g.fillText(d, 100, y(d) + 3));
+      const hx = 130, hw = W - hx - 10, hist = (n && n.limH) || [];
+      g.strokeStyle = "rgba(255,255,255,.07)"; g.strokeRect(hx + .5, 10.5, hw, H - 30);
+      g.beginPath(); hist.forEach((v, i) => { const px = hx + i / 220 * hw, py = 10 + Math.min(1, v / 12) * (H - 30); i ? g.lineTo(px, py) : g.moveTo(px, py); });
+      g.strokeStyle = "#FFB547"; g.lineWidth = 1.4; g.stroke();
+      g.fillStyle = "rgba(255,255,255,.5)"; g.fillText(`seuil ${f.seuil} dB · plafond ${f.plafond} dB · att. ${att.toFixed(1)} dB`, hx + 6, H - 6);
     } else if (k === "autotune") {
       const h = (n && n.atHist) || [], cl = clavierDe(f);
       const vus = h.filter(e => e.m > 0).map(e => e.m), centre = vus.length ? vus.slice(-60).sort((a, b) => a - b)[Math.floor(Math.min(60, vus.length) / 2)] : 57, plage = 7;
