@@ -350,6 +350,8 @@ const I18N = (() => {
     "Pitch": ["Pitch", "Pitch"],
     "Plein écran (F)": ["Full screen (F)", "Pantalla completa (F)"],
     "Plein écran": ["Full screen", "Pantalla completa"],
+    "Niveau d'entrée auto": ["Auto input level", "Nivel de entrada auto"],
+    "Amène le niveau des prises à la référence des préréglages (-20 dBFS), que tu aies chanté près ou loin du micro": ["Brings your takes to the presets' reference level (-20 dBFS), whether you sang close to or far from the mic", "Lleva el nivel de las tomas a la referencia de los presets (-20 dBFS), hayas cantado cerca o lejos del micro"],
     "De-esser": ["De-esser", "De-esser"],
     "Limiteur": ["Limiter", "Limitador"],
     "Bande (split)": ["Band (split)", "Banda (split)"],

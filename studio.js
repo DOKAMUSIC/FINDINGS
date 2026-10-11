@@ -524,6 +524,10 @@ const STUDIO = (() => {
   .at-grille .kn svg{width:40px!important;height:40px!important}
   .at-grille .kn .kn-n{font-size:8.5px!important}
   @media(max-width:640px){ .at-ligne{grid-template-columns:1fr} }
+  
+  .dp-auto{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--ink-2);cursor:pointer}
+  .dp-auto input{accent-color:var(--accent);margin:0}
+  .dp-auto b{margin-left:auto;font:600 11px var(--mono);color:var(--dim)}
   </style>`);
 
   /* ─────────────────────────── balisage ─────────────────────────── */
@@ -796,14 +800,14 @@ const STUDIO = (() => {
     naturel:  { nom: "Voix naturelle", fx: {
                 hpf: { on: 1, freq: 80 },
                 eq: { on: 1, bas: 0, basF: 200, mid: -2, midF: 300, midQ: 1, haut: 2, hautF: 10000, analog: true },
-                comp: { on: 1, seuil: -18, ratio: 2.5, attaque: 15, relache: 120, gain: 3, analog: true },
+                comp: { on: 1, seuil: -20, ratio: 2.5, attaque: 15, relache: 120, gain: 4, analog: true },
                 deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 6, ecoute: false },
                 reverb: { on: 1, taille: .8, predelay: 15, amorti: 6500, mix: 8 } } },
     // couplet rap : devant, sec, percutant
     lead:     { nom: "Lead rap", fx: {
                 hpf: { on: 1, freq: 100 },
                 eq: { on: 1, bas: -2, basF: 200, mid: 2, midF: 3000, midQ: .9, haut: 2.5, hautF: 10000, analog: true },
-                comp: { on: 1, seuil: -22, ratio: 4, attaque: 5, relache: 80, gain: 5, analog: true },
+                comp: { on: 1, seuil: -24, ratio: 4, attaque: 5, relache: 80, gain: 6, analog: true },
                 deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
                 sat: { on: 1, drive: 15, mix: 20 },
                 limit: { on: 1, seuil: -3, plafond: -1, relache: 60 },
@@ -814,7 +818,7 @@ const STUDIO = (() => {
                 autotune: { on: 1, type: "prod", vitesse: 35, transition: 0, humain: 35, tolerance: 10, demitons: 0, diapason: 440, mix: 100, formant: true, tessiture: "large" },
                 hpf: { on: 1, freq: 100 },
                 eq: { on: 1, bas: -1.5, basF: 200, mid: -2, midF: 400, midQ: 1, haut: 3, hautF: 10000, analog: true },
-                comp: { on: 1, seuil: -22, ratio: 4, attaque: 6, relache: 100, gain: 5, analog: true },
+                comp: { on: 1, seuil: -24, ratio: 3.5, attaque: 8, relache: 120, gain: 8, analog: true },
                 deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
                 delay: { on: 1, division: "1/4", retour: 20, filtre: 2800, mix: 8, pingpong: true },
                 reverb: { on: 1, taille: 1.8, predelay: 35, amorti: 5500, mix: 12 } } },
@@ -823,7 +827,7 @@ const STUDIO = (() => {
                 autotune: { on: 1, type: "prod", vitesse: 0, transition: 0, humain: 0, tolerance: 0, demitons: 0, diapason: 440, mix: 100, formant: true, tessiture: "large" },
                 hpf: { on: 1, freq: 110 },
                 eq: { on: 1, bas: -2, basF: 220, mid: 1.5, midF: 2500, midQ: .9, haut: 3, hautF: 10000, analog: true },
-                comp: { on: 1, seuil: -24, ratio: 4, attaque: 3, relache: 70, gain: 6, analog: true },
+                comp: { on: 1, seuil: -26, ratio: 4, attaque: 3, relache: 70, gain: 7, analog: true },
                 deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
                 sat: { on: 1, drive: 10, mix: 15 },
                 limit: { on: 1, seuil: -2, plafond: -1, relache: 60 },
@@ -832,7 +836,7 @@ const STUDIO = (() => {
     refrain:  { nom: "Refrain large", fx: {
                 hpf: { on: 1, freq: 110 },
                 eq: { on: 1, bas: -2, basF: 220, mid: -1.5, midF: 450, midQ: 1, haut: 3, hautF: 10000, analog: true },
-                comp: { on: 1, seuil: -22, ratio: 4, attaque: 6, relache: 110, gain: 5, analog: true },
+                comp: { on: 1, seuil: -24, ratio: 4, attaque: 6, relache: 110, gain: 9, analog: true },
                 deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
                 chorus: { on: 1, vitesse: .35, profondeur: 25, mix: 22 },
                 delay: { on: 1, division: "1/8p", retour: 14, filtre: 3200, mix: 7, pingpong: true },
@@ -841,21 +845,21 @@ const STUDIO = (() => {
                 autotune: { on: 1, type: "prod", vitesse: 25, transition: 0, humain: 50, tolerance: 15, demitons: 0, diapason: 440, mix: 100, formant: true, tessiture: "large" },
                 hpf: { on: 1, freq: 90 },
                 eq: { on: 1, bas: 0, basF: 200, mid: -1.5, midF: 300, midQ: 1, haut: 2, hautF: 11000, analog: true },
-                comp: { on: 1, seuil: -20, ratio: 3, attaque: 12, relache: 160, gain: 4, analog: true },
+                comp: { on: 1, seuil: -22, ratio: 3, attaque: 12, relache: 160, gain: 5, analog: true },
                 deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
                 delay: { on: 1, division: "1/4", retour: 32, filtre: 2200, mix: 12, pingpong: true },
                 reverb: { on: 1, taille: 3.2, predelay: 50, amorti: 4200, mix: 20 } } },
     backs:    { nom: "Backs / chœurs", fx: {
                 hpf: { on: 1, freq: 200 },
                 eq: { on: 1, bas: -4, basF: 250, mid: -2.5, midF: 2500, midQ: .9, haut: 1.5, hautF: 10000, analog: true },
-                comp: { on: 1, seuil: -26, ratio: 5, attaque: 8, relache: 140, gain: 4, analog: true },
+                comp: { on: 1, seuil: -28, ratio: 5, attaque: 8, relache: 140, gain: 6, analog: true },
                 deesser: { on: 1, type: "bande", freq: 6500, seuil: -32, portee: 10, ecoute: false },
                 chorus: { on: 1, vitesse: .3, profondeur: 40, mix: 40 },
                 reverb: { on: 1, taille: 2.2, predelay: 10, amorti: 4500, mix: 22 } } },
     adlibs:   { nom: "Ad-libs", fx: {
                 hpf: { on: 1, freq: 220 },
                 eq: { on: 1, bas: 0, basF: 200, mid: 2.5, midF: 2000, midQ: .8, haut: 1, hautF: 9000, analog: true },
-                comp: { on: 1, seuil: -24, ratio: 6, attaque: 3, relache: 80, gain: 5, analog: true },
+                comp: { on: 1, seuil: -26, ratio: 6, attaque: 3, relache: 80, gain: 7, analog: true },
                 deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
                 delay: { on: 1, division: "1/4", retour: 30, filtre: 2600, mix: 16, pingpong: true },
                 reverb: { on: 1, taille: 1.5, predelay: 20, amorti: 5000, mix: 12 } } },
@@ -863,14 +867,14 @@ const STUDIO = (() => {
                 autotune: { on: 1, type: "libre", vitesse: 15, transition: 0, humain: 0, tolerance: 0, demitons: -12, diapason: 440, mix: 100, formant: false, tessiture: "large" },
                 hpf: { on: 1, freq: 80 },
                 eq: { on: 1, bas: 0, basF: 200, mid: 0, midF: 1500, midQ: 1, haut: -2, hautF: 8000, analog: true },
-                comp: { on: 1, seuil: -22, ratio: 5, attaque: 4, relache: 90, gain: 4, analog: true },
+                comp: { on: 1, seuil: -24, ratio: 5, attaque: 4, relache: 90, gain: 5, analog: true },
                 delay: { on: 1, division: "1/4", retour: 20, filtre: 2400, mix: 10, pingpong: true },
                 reverb: { on: 1, taille: 1.4, predelay: 20, amorti: 4500, mix: 10 } } },
     aigu:     { nom: "Ad-libs pitchés (aigu)", fx: {
                 autotune: { on: 1, type: "libre", vitesse: 15, transition: 0, humain: 0, tolerance: 0, demitons: 12, diapason: 440, mix: 100, formant: false, tessiture: "large" },
                 hpf: { on: 1, freq: 250 },
                 eq: { on: 1, bas: -3, basF: 300, mid: 0, midF: 1500, midQ: 1, haut: 0, hautF: 9000, analog: true },
-                comp: { on: 1, seuil: -24, ratio: 5, attaque: 3, relache: 80, gain: 4, analog: true },
+                comp: { on: 1, seuil: -24, ratio: 5, attaque: 3, relache: 80, gain: 5, analog: true },
                 deesser: { on: 1, type: "bande", freq: 7500, seuil: -30, portee: 10, ecoute: false },
                 delay: { on: 1, division: "1/8", retour: 25, filtre: 3000, mix: 12, pingpong: true },
                 reverb: { on: 1, taille: 1.6, predelay: 20, amorti: 5000, mix: 12 } } },
@@ -879,7 +883,7 @@ const STUDIO = (() => {
                 filtre: { on: 1, type: "tel", freq: 1600, q: .8 },
                 comp: { on: 1, seuil: -20, ratio: 4, attaque: 5, relache: 100, gain: 12, analog: true },   // le filtre retire ~10 dB : on les rend
                 sat: { on: 1, drive: 20, mix: 30 },
-                limit: { on: 1, seuil: -8, plafond: -1, relache: 80 },
+                limit: { on: 1, seuil: -4, plafond: -1, relache: 80 },
                 reverb: { on: 1, taille: .8, predelay: 10, amorti: 4000, mix: 8 } } }
   };
   // preregles retires (Téléphone, Grand espace, Chaud et saturé) : la piste garde ses
@@ -1149,7 +1153,7 @@ const STUDIO = (() => {
   /* sortie commune : volume general + limiteur (voix + prod saturaient a l'export) */
   function bus(c){
     const lim = c.createDynamicsCompressor();
-    lim.threshold.value = -2; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = .002; lim.release.value = .12;
+    lim.threshold.value = seuilLimiteur(-1.6); lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = .002; lim.release.value = .12;   // plafond -1 dBFS
     lim.connect(c.destination);
     const master = c.createGain(); master.connect(lim);
     master.gain.value = P && P.master != null ? P.master : 1;
@@ -1215,8 +1219,16 @@ const STUDIO = (() => {
   const soloActif = () => P.pistes.some(p => p.solo);
   const offline = c => typeof OfflineAudioContext !== "undefined" && c instanceof OfflineAudioContext;
   const dB = v => Math.pow(10, v / 20);
+  /* Le DynamicsCompressorNode ajoute tout seul un gain de rattrapage (norme Web Audio :
+     (1 / gain a 0 dBFS)^0,6). On le retire, pour que « Gain » soit le vrai rattrapage et que les
+     plafonds des limiteurs tombent juste. Sortie a 0 dBFS : coude qui commence au seuil. */
+  const rattrapageAuto = (seuil, ratio, coude = 0) => { const fin = seuil + coude, s0 = 0 <= seuil ? 0 : 0 >= fin ? (seuil + coude / 2) + (0 - fin) / ratio : 0;
+    return Math.max(0, -.6 * s0); };
+  // seuil d'un limiteur (ratio 20, sans coude) qui, rattrapage compris, plafonne exactement a « plafond »
+  const seuilLimiteur = plafond => plafond / (1 - .6 * (1 - 1 / 20));
   function regler(n, p, solo){
     const f = p.fx, c = n.c, on = k => f[k] && f[k].on;
+    n.entree.gain.value = dB(trimAuto(p));
     if (n.at.port && f.autotune) {
       const a = f.autotune;
       // la gamme de la prod seulement si sa tonalite est lue dans le titre : une tonalite
@@ -1234,7 +1246,7 @@ const STUDIO = (() => {
     n.eqM.frequency.value = f.eq.midF; n.eqM.Q.value = f.eq.midQ; n.eqM.gain.value = on("eq") ? f.eq.mid : 0;
     n.eqH.frequency.value = f.eq.hautF; n.eqH.gain.value = on("eq") ? f.eq.haut : 0;
     if (on("comp")) { n.comp.threshold.value = f.comp.seuil; n.comp.ratio.value = f.comp.ratio; n.comp.knee.value = 6;
-      n.comp.attack.value = f.comp.attaque / 1000; n.comp.release.value = f.comp.relache / 1000; n.compG.gain.value = dB(f.comp.gain); }
+      n.comp.attack.value = f.comp.attaque / 1000; n.comp.release.value = f.comp.relache / 1000; n.compG.gain.value = dB(f.comp.gain - rattrapageAuto(f.comp.seuil, f.comp.ratio, 6)); }
     else { n.comp.threshold.value = 0; n.comp.ratio.value = 1; n.comp.knee.value = 0; n.compG.gain.value = 1; }
     // Analog : actif si l'egaliseur ou le compresseur l'est, avec sa case cochee
     const ana = (on("eq") && f.eq.analog !== false) || (on("comp") && f.comp.analog !== false);
@@ -1243,7 +1255,7 @@ const STUDIO = (() => {
       n.de.port.postMessage({ on: !!d.on, freq: d.freq, seuil: d.seuil, portee: d.portee, mode: d.type || "bande", ecoute: d.ecoute === true, telem: fxOuvert === "deesser" && pisteCible() === p }); }
     if (f.limit && f.limit.on) {
       const l = f.limit, plaf = dB(l.plafond);
-      n.limPre.gain.value = dB(-l.seuil); n.lim.threshold.value = l.plafond - .5; n.lim.knee.value = 0; n.lim.ratio.value = 20;
+      n.limPre.gain.value = dB(-l.seuil); n.lim.threshold.value = seuilLimiteur(l.plafond - .3); n.lim.knee.value = 0; n.lim.ratio.value = 20;
       n.lim.attack.value = .001; n.lim.release.value = l.relache / 1000;
       if (n.plafond !== l.plafond) { const k = 2048, cc = new Float32Array(k); for (let i = 0; i < k; i++) { const x = i / (k - 1) * 2 - 1; cc[i] = Math.max(-plaf, Math.min(plaf, x)); } n.limClip.curve = cc; n.plafond = l.plafond; }
     } else { n.limPre.gain.value = 1; n.lim.threshold.value = 0; n.lim.ratio.value = 1; n.lim.knee.value = 0; n.limClip.curve = null; n.plafond = null; }
@@ -1369,6 +1381,23 @@ const STUDIO = (() => {
     if (max > 0) for (let i = 0; i < n; i++) out[i] /= max;
     return out;
   }
+  /* Niveau d'une prise : RMS des passages chantes (au-dessus de -50 dBFS), en dB. */
+  const NIV = new Map();
+  function niveauPrise(id){
+    if (NIV.has(id)) return NIV.get(id);
+    const b = BUF.get(id); if (!b) return null;
+    const d = b.getChannelData(0), seuil = .00316; let s2 = 0, n2 = 0;
+    for (let i = 0; i < d.length; i += 4) { const v = d[i]; if (v > seuil || v < -seuil) { s2 += v * v; n2++; } }
+    const db = n2 ? 10 * Math.log10(s2 / n2) : null; NIV.set(id, db); return db;
+  }
+  /* Gain d'entree d'une piste pour amener ses prises a -20 dBFS RMS, la reference des
+     preregles (seuils du compresseur, du de-esser, du limiteur). Borne a -12 / +18 dB. */
+  function trimAuto(p){
+    if (p.gainAuto === false) return 0;
+    const v = P.clips.filter(k => k.piste === p.id).map(k => { const d = niveauPrise(k.prise); return d == null ? null : d + 20 * Math.log10(Math.max(.01, k.gain)); }).filter(x => x != null);
+    if (!v.length) return 0;
+    return Math.round(clamp(-20 - v.reduce((a, b) => a + b, 0) / v.length, -12, 18) * 2) / 2;
+  }
   async function decoder(p){
     if (BUF.has(p.id)) return true;
     try {
@@ -1473,7 +1502,8 @@ const STUDIO = (() => {
   }
   function annuler(){ if (!histo.length) return; refaire.push(instantane()); restaurer(histo.pop()); message("Annulé"); }
   function retablir(){ if (!refaire.length) return; histo.push(instantane()); restaurer(refaire.pop()); message("Rétabli"); }
-  const modifie = () => { sale = true; sauver(); outils(); };
+  // une region ajoutee, deplacee ou rognee change le niveau moyen de sa piste : on recale le gain d'entree
+  const modifie = () => { sale = true; reglerTout(); sauver(); outils(); };
   /* Importer sa prod : un fichier audio que le visiteur a sur son appareil (mp3, wav…).
      Il reste dans son navigateur, comme ses prises. */
   async function importer(file){
@@ -1756,6 +1786,7 @@ const STUDIO = (() => {
           <label class="champ">Nom<input type="text" id="dpNom" value="${esc(p.nom)}" maxlength="24"></label>
           <label class="champ">Préréglage<select id="dpPreset">${presets}</select></label>
           <div class="ligne">${bouton("piste.vol", "Volume", 0, 1.5, .01, "x", p.vol, 1)}${bouton("piste.pan", "Panoramique", -1, 1, .01, "pan", p.pan, 0)}</div>
+          <label class="dp-auto" title="Amène le niveau des prises à la référence des préréglages (-20 dBFS), que tu aies chanté près ou loin du micro"><input type="checkbox" id="dpAuto"${p.gainAuto !== false ? " checked" : ""}>Niveau d'entrée auto<b>${p.gainAuto === false ? "—" : (trimAuto(p) > 0 ? "+" : "") + trimAuto(p) + " dB"}</b></label>
           ${P.pistes.length > 1 ? '<button class="dp-act danger" id="dpSupprPiste">Supprimer la piste</button>' : ""}
         </div>
         <div class="rk" role="list">${FX.map(f => { const v = p.fx[f.k]; return `
@@ -1786,6 +1817,7 @@ const STUDIO = (() => {
           ${(f.cases || []).length ? `<div class="plug-tgs">${f.cases.map(([c, n, def]) => { const coche = v[c] === undefined ? def !== false : !!v[c];
             return `<button class="plug-tg" data-tg aria-pressed="${coche}"><i></i>${esc(n)}<input type="checkbox" hidden data-fxcase="${f.k}.${c}"${coche ? " checked" : ""}></button>`; }).join("")}</div>` : ""}`}
         </section>`; })()}`;
+      $("dpAuto").addEventListener("change", e => { memoriser(); p.gainAuto = e.target.checked; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); panneau(); sauver(); });
       $("dpNom").addEventListener("change", e => { memoriser(); p.nom = e.target.value.trim() || p.nom; dessiner(); panneau(); sauver(); });
       $("dpPreset").addEventListener("change", e => { if (e.target.value === "perso") return; memoriser(); appliquerPreset(p, e.target.value); const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); dessiner(); panneau(); sauver(); message(`Préréglage « ${PRESETS[e.target.value].nom} »`); });
       if ($("dpSupprPiste")) $("dpSupprPiste").onclick = () => {
