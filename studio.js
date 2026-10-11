@@ -39,8 +39,15 @@ const STUDIO = (() => {
     opacity:0;transform:translateY(12px) scale(.985);transition:opacity .2s,transform .24s cubic-bezier(.2,.9,.25,1.1);
   }
   .daw.on{opacity:1;transform:none}
-  .daw.inline{position:relative;left:auto;right:auto;top:auto;bottom:auto;z-index:1;
-    height:max(680px,calc(100vh - var(--hh,64px) - var(--bar-h) - 48px))}
+  .daw.inline{position:relative;left:auto;right:auto;top:auto;bottom:auto;z-index:1;border-radius:8px;
+    height:max(560px,calc(100vh - var(--hh,64px) - var(--bar-h) - 44px))}
+  /* l'inspecteur defile chez lui : il ne prend jamais plus de la moitie, les pistes gardent leur place */
+  .daw .dp-corps{max-height:min(48vh,560px);overflow-y:auto}
+  .daw .dp-corps.rack{max-height:min(48vh,560px);overflow-y:auto}
+  .daw-zone{min-height:150px}
+  /* vrai plein ecran (bouton ou touche F) */
+  .daw:fullscreen{height:100vh;width:100vw;border-radius:0;border:0}
+  .daw:fullscreen .dp-corps,.daw:fullscreen .dp-corps.rack{max-height:50vh}
   .daw.inline #dawFermer{display:none}
   .daw[hidden]{display:none}
   .daw button{color:inherit}
@@ -243,8 +250,90 @@ const STUDIO = (() => {
   .fxc.detail .fx-titre{display:flex;align-items:center;gap:8px}
   .fxc.detail .fx-titre b{font-size:12px}
   .fxc.detail .fx-aide{padding:9px 12px 0}
-  .fxc.detail .fx-boutons{flex-wrap:wrap;row-gap:10px;padding:10px 12px 14px;gap:10px}
+  .fxc.detail .fx-boutons{flex-wrap:wrap;row-gap:8px;padding:10px 10px 10px;gap:2px}
   .fxc .fx-aide{font-size:11px;color:var(--dim);margin:0;line-height:1.45}
+  /* ── facades « materiel » : chaque plug-in a sa face avant, comme un appareil ──
+     --vis : couleur de l'ecran ; vis aux quatre coins ; serigraphie gravee. */
+  .fxc.detail{--vis:#FFB547;--face:linear-gradient(180deg,#34353A,#26272B);--grav:#D9DBDF;--grav-dim:#8D9097;
+    background:radial-gradient(circle at 9px calc(100% - 9px),#D8DADD 0 1.5px,#5D6066 2px 3.6px,transparent 4px),
+      radial-gradient(circle at calc(100% - 9px) calc(100% - 9px),#D8DADD 0 1.5px,#5D6066 2px 3.6px,transparent 4px),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px),var(--face);
+    border:1px solid #070708;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 18px rgba(0,0,0,.45)}
+  .fxc.detail header{background:radial-gradient(circle at 9px 50%,#D8DADD 0 1.5px,#5D6066 2px 3.6px,transparent 4px),
+      radial-gradient(circle at calc(100% - 9px) 50%,#D8DADD 0 1.5px,#5D6066 2px 3.6px,transparent 4px),var(--entete,var(--barre));padding:7px 20px}
+  .fxc.detail .fx-titre b{color:var(--grav);text-shadow:0 1px 0 rgba(0,0,0,.6);letter-spacing:.02em}
+  .fxc.detail .plug-modele{color:var(--vis);opacity:.85}
+  .fxc.detail .kn-n,.fxc.detail .fx-case,.fxc.detail .fx-menus label,.fxc.detail .at-legende{color:var(--grav-dim)}
+  .fxc.detail .fx-aide{color:var(--grav-dim)}
+  .fxc.detail .kn .kn-val{stroke:var(--vis);filter:drop-shadow(0 0 2px color-mix(in srgb,var(--vis) 60%,transparent))}
+  .fxc.detail .kn .kn-cap{fill:url(#cap-noir)}
+  .fxc.detail .plug-vis{background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--vis) 9%,#0D0B09),#0A0908 70%);box-shadow:inset 0 2px 6px rgba(0,0,0,.95),0 1px 0 rgba(255,255,255,.07)}
+  /* compresseur : face noire, bandeau metal brosse, boutons chrome */
+  .fxc.detail[data-fx="comp"]{--face:linear-gradient(180deg,#19191A,#0F0F10);--entete:repeating-linear-gradient(90deg,rgba(255,255,255,.25) 0 1px,rgba(0,0,0,.03) 1px 2px),linear-gradient(180deg,#D5D8DC,#9CA0A6);--vis:#FFB547}
+  .fxc.detail[data-fx="comp"] .fx-titre b{color:#17181A;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+  .fxc.detail[data-fx="comp"] .plug-modele{color:#4A4D52}
+  .fxc.detail[data-fx="comp"] .kn .kn-cap{fill:url(#cap-chrome)}
+  .fxc.detail[data-fx="comp"] .kn .kn-ind{stroke:#1A1B1D}
+  /* saturation : face creme, boutons bakelite, lampe */
+  .fxc.detail[data-fx="sat"]{--face:linear-gradient(180deg,#EADFC6,#D6C7A6);--entete:linear-gradient(180deg,#5A3E24,#3E2A17);--grav:#F3E6C8;--grav-dim:#6B573C;--vis:#FF9A3C}
+  .fxc.detail[data-fx="sat"] .kn-v{background:#2A1E12;color:#FFD9A0}
+  .fxc.detail[data-fx="sat"] .kn .kn-fond{stroke:#B9A57E}
+  /* echo a bande : face vert d'atelier, boutons creme */
+  .fxc.detail[data-fx="delay"]{--face:linear-gradient(180deg,#3B4A40,#2A362E);--entete:linear-gradient(180deg,#E7DCC0,#CDBF9C);--vis:#FFC46B;--grav-dim:#B9C4BA}
+  .fxc.detail[data-fx="delay"] .fx-titre b{color:#2A362E;text-shadow:0 1px 0 rgba(255,255,255,.5)}
+  .fxc.detail[data-fx="delay"] .plug-modele{color:#6A5F45}
+  .fxc.detail[data-fx="delay"] .kn .kn-cap{fill:url(#cap-creme)}
+  .fxc.detail[data-fx="delay"] .kn .kn-ind{stroke:#2A2318}
+  /* egaliseur : console, un capuchon de couleur par bande */
+  .fxc.detail[data-fx="eq"]{--face:linear-gradient(180deg,#3E4146,#2E3034);--vis:#FFB547}
+  .fxc.detail[data-fx="eq"] .kn:nth-child(1) .kn-cap,.fxc.detail[data-fx="eq"] .kn:nth-child(2) .kn-cap{fill:url(#cap-rouge)}
+  .fxc.detail[data-fx="eq"] .kn:nth-child(3) .kn-cap,.fxc.detail[data-fx="eq"] .kn:nth-child(4) .kn-cap,.fxc.detail[data-fx="eq"] .kn:nth-child(5) .kn-cap{fill:url(#cap-vert)}
+  .fxc.detail[data-fx="eq"] .kn:nth-child(6) .kn-cap,.fxc.detail[data-fx="eq"] .kn:nth-child(7) .kn-cap{fill:url(#cap-bleu)}
+  /* reverb : bandeau bronze */
+  .fxc.detail[data-fx="reverb"]{--face:linear-gradient(180deg,#2C2824,#1E1B18);--entete:linear-gradient(180deg,#C9A468,#8F6E3D);--vis:#FFC46B}
+  .fxc.detail[data-fx="reverb"] .fx-titre b{color:#2A1F10;text-shadow:0 1px 0 rgba(255,255,255,.35)}
+  .fxc.detail[data-fx="reverb"] .plug-modele{color:#4A3820}
+  .fxc.detail[data-fx="reverb"] .kn .kn-cap{fill:url(#cap-or)}
+  .fxc.detail[data-fx="reverb"] .kn .kn-ind{stroke:#2A1F10}
+  /* filtre : bakelite brune */
+  .fxc.detail[data-fx="filtre"]{--face:linear-gradient(180deg,#4A3326,#2F2018);--vis:#FFB060;--grav-dim:#C4A88E}
+  .fxc.detail[data-fx="filtre"] .kn .kn-cap{fill:url(#cap-creme)} .fxc.detail[data-fx="filtre"] .kn .kn-ind{stroke:#3A2618}
+  /* doubleur : bleu nuit */
+  .fxc.detail[data-fx="chorus"]{--face:linear-gradient(180deg,#252B3A,#1A1F2A);--vis:#8FB8FF}
+  /* autotune : moderne, ecran turquoise */
+  .fxc.detail[data-fx="autotune"]{--face:linear-gradient(180deg,#2A2D31,#1D1F22);--vis:#5FE3D0}
+  .fxc.detail[data-fx="hpf"]{--vis:#FFB547}
+  /* facade du plug-in : nom de modele, ecran, clavier */
+  .plug-modele{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--dimmer);text-transform:uppercase;margin-left:4px}
+  .plug-vis{position:relative;margin:10px 12px 0;height:132px;border-radius:5px;background:linear-gradient(180deg,#0C0D0F,#121316);box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.05);overflow:hidden}
+  .plug-vis canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .plug-vis[data-vis="eq"] canvas{cursor:crosshair}
+  .plug-vis.at{height:150px;display:grid;grid-template-columns:minmax(0,1fr) 128px}
+  .plug-vis.at canvas{position:relative;grid-column:1;width:100%;height:150px}
+  .at-lecture{grid-column:2;display:grid;align-content:center;justify-items:center;gap:8px;border-left:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.25)}
+  .at-lecture b{font-family:var(--mono);font-size:34px;font-weight:700;color:var(--lcd-ink);line-height:1}
+  .at-lecture small{font-family:var(--mono);font-size:10px;color:var(--lcd-dim);text-align:center;padding:0 6px}
+  .at-cents{position:relative;width:96px;height:10px;border-radius:2px;background:linear-gradient(90deg,#FF453A,#E5D84C 35%,#3DDC84 45% 55%,#E5D84C 65%,#FF453A);opacity:.85}
+  .at-cents::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:rgba(255,255,255,.7)}
+  .at-cents i{position:absolute;top:-5px;left:50%;width:3px;height:20px;margin-left:-1.5px;border-radius:1px;background:#fff;box-shadow:0 0 6px rgba(0,0,0,.8);transition:left .08s linear}
+  .at-cents i.juste{background:#3DDC84}
+  .at-clavier{position:relative;display:grid;grid-template-columns:repeat(7,1fr);gap:2px;height:62px;margin:10px 12px 0;padding:3px;border-radius:5px;background:#0C0D0F;box-shadow:inset 0 1px 3px rgba(0,0,0,.8)}
+  .at-clavier .tb{position:relative;border-radius:0 0 4px 4px;background:linear-gradient(180deg,#E9EAEC,#C9CBD0);box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
+  .at-clavier .tb span{font-size:9px;font-weight:800;color:#3A3B40}
+  .at-clavier .tn{position:absolute;top:3px;width:6.8%;height:58%;border-radius:0 0 3px 3px;background:linear-gradient(180deg,#2B2C30,#141517);box-shadow:0 2px 3px rgba(0,0,0,.6);z-index:2}
+  .at-clavier .tb.visee{background:linear-gradient(180deg,color-mix(in srgb,var(--vis,var(--accent)) 30%,#F2F3F5),color-mix(in srgb,var(--vis,var(--accent)) 55%,#C9CBD0))}
+  .at-clavier .tn.visee{background:linear-gradient(180deg,color-mix(in srgb,var(--vis,var(--accent)) 75%,#2B2C30),color-mix(in srgb,var(--vis,var(--accent)) 50%,#141517))}
+  .at-clavier .tb.retiree{background:linear-gradient(180deg,#8E9096,#6E7076)}
+  .at-clavier .tb.retiree span{color:#2A2B2F;text-decoration:line-through}
+  .at-clavier .tn.retiree{background:linear-gradient(180deg,#4A4B50,#3A3B40)}
+  .at-clavier .tb.libre{background:repeating-linear-gradient(135deg,#F5C86A 0 5px,#E8B04A 5px 10px)}
+  .at-clavier .tn.libre{background:repeating-linear-gradient(135deg,#B9852A 0 4px,#8E6418 4px 8px)}
+  .at-legende{margin:5px 12px 0;font-size:10px;color:var(--dim);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .at-legende i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-left:6px}
+  .at-legende i:first-child{margin-left:0}
+  .at-legende i.visee{background:var(--vis,var(--accent))} .at-legende i.libre{background:#F5C86A} .at-legende i.retiree{background:#6E7076}
+  .fxc.detail .fx-case{padding:0 12px 6px}
+  .fxc.detail .fx-aide{padding:4px 12px 12px;opacity:.85}
   .fx-menus{display:flex;gap:10px;flex-wrap:wrap;padding:9px 12px 0}
   .fx-menus label{display:grid;gap:3px;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
   .fx-menus select{height:26px;min-width:120px;border:1px solid #0E0F11;border-radius:4px;background:#18191C;color:var(--lcd-ink);font:600 12px var(--sans);letter-spacing:0;text-transform:none;padding:0 6px;box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
@@ -315,6 +404,7 @@ const STUDIO = (() => {
     refaire:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>',
     grille:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4v16M10 4v16M16 4v16M22 4v16"/></svg>',
     export:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg>',
+    plein:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
     fermer:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
     micro:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>',
     loupe:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4M8.5 11h5"/></svg>',
@@ -352,6 +442,7 @@ const STUDIO = (() => {
         <span class="daw-mix" id="dawMix" hidden role="group" aria-label="Contenu de l'export">
           <button data-mix="voix" aria-pressed="false">Voix seule</button><button data-mix="tout" aria-pressed="true">Voix + prod</button>
         </span>
+        <button class="daw-o" id="dawPlein" title="Plein écran (F)" aria-label="Plein écran">${I.plein}</button>
         <button class="daw-o pri" id="dawExport" title="Exporter en WAV">${I.export}<span class="lib">Exporter</span></button>
         <button class="daw-o" id="dawFermer" title="Fermer le studio (Échap)" aria-label="Fermer">${I.fermer}</button>
       </div>
@@ -367,7 +458,14 @@ const STUDIO = (() => {
       </div>
       <div class="dp-corps" id="dawCorps"></div>
     </div>
-    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><radialGradient id="daw-cap" cx="50%" cy="30%" r="75%"><stop offset="0" stop-color="#5B5D63"/><stop offset=".55" stop-color="#36383D"/><stop offset="1" stop-color="#202125"/></radialGradient></defs></svg>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><radialGradient id="daw-cap" cx="50%" cy="30%" r="75%"><stop offset="0" stop-color="#5B5D63"/><stop offset=".55" stop-color="#36383D"/><stop offset="1" stop-color="#202125"/></radialGradient>
+      <radialGradient id="cap-noir" cx="45%" cy="28%" r="80%"><stop offset="0" stop-color="#4A4644"/><stop offset=".5" stop-color="#1E1C1B"/><stop offset="1" stop-color="#0A0909"/></radialGradient>
+      <linearGradient id="cap-chrome" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F4F5F6"/><stop offset=".35" stop-color="#A9ADB3"/><stop offset=".55" stop-color="#E2E4E7"/><stop offset="1" stop-color="#6D7177"/></linearGradient>
+      <radialGradient id="cap-creme" cx="45%" cy="28%" r="80%"><stop offset="0" stop-color="#FFF8E6"/><stop offset=".6" stop-color="#E6D7B5"/><stop offset="1" stop-color="#B9A57E"/></radialGradient>
+      <radialGradient id="cap-rouge" cx="45%" cy="28%" r="80%"><stop offset="0" stop-color="#FF7B6B"/><stop offset=".6" stop-color="#C0302A"/><stop offset="1" stop-color="#6E1512"/></radialGradient>
+      <radialGradient id="cap-vert" cx="45%" cy="28%" r="80%"><stop offset="0" stop-color="#8FE3A2"/><stop offset=".6" stop-color="#2E8F4E"/><stop offset="1" stop-color="#14502A"/></radialGradient>
+      <radialGradient id="cap-bleu" cx="45%" cy="28%" r="80%"><stop offset="0" stop-color="#8CC0FF"/><stop offset=".6" stop-color="#2F68C4"/><stop offset="1" stop-color="#173A73"/></radialGradient>
+      <radialGradient id="cap-or" cx="45%" cy="28%" r="80%"><stop offset="0" stop-color="#FFE7A8"/><stop offset=".55" stop-color="#C79A45"/><stop offset="1" stop-color="#6E521F"/></radialGradient></defs></svg>
     <div class="daw-decompte" id="dawDecompte" hidden></div>
     <div class="daw-msg" id="dawMsg" hidden></div>
   </div>`);
@@ -474,30 +572,39 @@ const STUDIO = (() => {
     pentaM:  { nom: "Pentatonique majeure", int: [0, 2, 4, 7, 9], suffixe: " penta" },
     pentam:  { nom: "Pentatonique mineure", int: [0, 3, 5, 7, 10], suffixe: "m penta" }
   };
+  // tessitures : la plage ou chercher la note chantee
+  const TESSITURES = {
+    large:   { nom: "Large (auto)", min: 60, max: 1100 }, basse: { nom: "Basse", min: 60, max: 350 }, baryton: { nom: "Baryton", min: 80, max: 420 },
+    tenor:   { nom: "Ténor", min: 105, max: 560 }, alto: { nom: "Alto", min: 140, max: 760 }, mezzo: { nom: "Mezzo", min: 160, max: 900 },
+    soprano: { nom: "Soprano", min: 190, max: 1100 }
+  };
   const masqueDe = (tonique, gamme) => (GAMMES[gamme] || GAMMES.mineur).int.reduce((s, i) => s | (1 << ((+tonique + i) % 12)), 0);
   // « Gm » -> { tonique: 7, gamme: "mineur" } ; null si illisible
   const lireCle = cle => { const m = /^~?([A-G])([#b]?)(m?)/.exec(cle || ""); if (!m) return null;
     const t = ({ C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0) + 12) % 12;
     return { tonique: t, gamme: m[3] ? "mineur" : "majeur" }; };
   const FX = [
-    { k: "autotune", nom: "Autotune / pitch", types: [["prod", "Tonalité de la prod"], ["cle", "Choisir la tonalité"], ["chroma", "Chromatique"], ["libre", "Sans correction"]],
-      // menus montres seulement en mode « Choisir la tonalite »
-      menus: { si: "cle", liste: [["tonique", "Note", NOTES.map((n, i) => [String(i), n])], ["gamme", "Gamme", Object.entries(GAMMES).map(([c, g]) => [c, g.nom])]] },
-      p: [["vitesse", "Vitesse", 0, 200, 1, "ms", 15], ["humain", "Humanize", 0, 100, 1, "%", 0], ["tolerance", "Tolérance", 0, 50, 1, "ct", 0],
-          ["demitons", "Pitch", -12, 12, 1, "dt", 0], ["diapason", "Diapason", 430, 450, .5, "Hz", 440], ["mix", "Mélange", 0, 100, 1, "%", 100]] },
-    { k: "hpf", nom: "Coupe-bas", p: [["freq", "Fréquence", 20, 400, 1, "Hz", 80]] },
-    { k: "eq", nom: "Égaliseur", p: [["bas", "Graves", -15, 15, .5, "dB", 0], ["basF", "F. graves", 60, 500, 1, "Hz", 200],
+    { k: "autotune", nom: "Autotune / pitch", modele: "FDG Tune RT", types: [["prod", "Tonalité de la prod"], ["cle", "Choisir la tonalité"], ["chroma", "Chromatique"], ["libre", "Sans correction"]],
+      // [cle, libelle, options, mode ou le menu apparait (absent = toujours)]
+      menus: [["tonique", "Note", NOTES.map((n, i) => [String(i), n]), "cle"], ["gamme", "Gamme", Object.entries(GAMMES).map(([c, g]) => [c, g.nom]), "cle"],
+              ["tessiture", "Range", Object.entries(TESSITURES).map(([c, t]) => [c, t.nom])]],
+      p: [["vitesse", "Vitesse", 0, 200, 1, "ms", 15], ["transition", "Transition", 0, 300, 1, "ms", 0], ["humain", "Humanize", 0, 100, 1, "%", 0],
+          ["tolerance", "Tolérance", 0, 50, 1, "ct", 0], ["demitons", "Pitch", -12, 12, 1, "dt", 0], ["diapason", "Diapason", 430, 450, .5, "Hz", 440],
+          ["mix", "Mélange", 0, 100, 1, "%", 100]],
+      cases: [["formant", "Formants préservés"]] },
+    { k: "hpf", modele: "HP-80 Low Cut", nom: "Coupe-bas", p: [["freq", "Fréquence", 20, 400, 1, "Hz", 80]] },
+    { k: "eq", modele: "Q3 Vocal EQ", nom: "Égaliseur", p: [["bas", "Graves", -15, 15, .5, "dB", 0], ["basF", "F. graves", 60, 500, 1, "Hz", 200],
       ["mid", "Médiums", -15, 15, .5, "dB", 0], ["midF", "F. médiums", 300, 5000, 10, "Hz", 1500], ["midQ", "Largeur", .3, 5, .1, "", 1],
-      ["haut", "Aigus", -15, 15, .5, "dB", 0], ["hautF", "F. aigus", 2000, 14000, 50, "Hz", 7000]] },
-    { k: "comp", nom: "Compresseur", p: [["seuil", "Seuil", -60, 0, 1, "dB", -20], ["ratio", "Ratio", 1, 20, .5, ":1", 4],
-      ["attaque", "Attaque", 1, 100, 1, "ms", 6], ["relache", "Relâche", 20, 800, 5, "ms", 150], ["gain", "Gain", 0, 24, .5, "dB", 4]] },
-    { k: "sat", nom: "Saturation", p: [["drive", "Chaleur", 0, 100, 1, "%", 25], ["mix", "Mélange", 0, 100, 1, "%", 35]] },
-    { k: "filtre", nom: "Filtre", types: [["tel", "Téléphone"], ["radio", "Radio"], ["pb", "Passe-bas"], ["ph", "Passe-haut"]],
+      ["haut", "Aigus", -15, 15, .5, "dB", 0], ["hautF", "F. aigus", 2000, 14000, 50, "Hz", 7000]], cases: [["analog", "Analog"]] },
+    { k: "comp", modele: "VC-4 Compressor", nom: "Compresseur", p: [["seuil", "Seuil", -60, 0, 1, "dB", -20], ["ratio", "Ratio", 1, 20, .5, ":1", 4],
+      ["attaque", "Attaque", 1, 100, 1, "ms", 6], ["relache", "Relâche", 20, 800, 5, "ms", 150], ["gain", "Gain", 0, 24, .5, "dB", 4]], cases: [["analog", "Analog"]] },
+    { k: "sat", modele: "Tube Drive", nom: "Saturation", p: [["drive", "Chaleur", 0, 100, 1, "%", 25], ["mix", "Mélange", 0, 100, 1, "%", 35]] },
+    { k: "filtre", modele: "Lo-Fi Filter", nom: "Filtre", types: [["tel", "Téléphone"], ["radio", "Radio"], ["pb", "Passe-bas"], ["ph", "Passe-haut"]],
       p: [["freq", "Fréquence", 100, 12000, 10, "Hz", 1700], ["q", "Résonance", .3, 12, .1, "", 1.2]] },
-    { k: "chorus", nom: "Doubleur", p: [["vitesse", "Vitesse", .1, 3, .05, "Hz", .4], ["profondeur", "Profondeur", 0, 100, 1, "%", 30], ["mix", "Mélange", 0, 100, 1, "%", 25]] },
-    { k: "reverb", nom: "Réverb", p: [["taille", "Taille", .3, 6, .1, "s", 1.4], ["predelay", "Pré-délai", 0, 200, 1, "ms", 25],
+    { k: "chorus", modele: "Double Tracker", nom: "Doubleur", p: [["vitesse", "Vitesse", .1, 3, .05, "Hz", .4], ["profondeur", "Profondeur", 0, 100, 1, "%", 30], ["mix", "Mélange", 0, 100, 1, "%", 25]] },
+    { k: "reverb", modele: "Plate Room", nom: "Réverb", p: [["taille", "Taille", .3, 6, .1, "s", 1.4], ["predelay", "Pré-délai", 0, 200, 1, "ms", 25],
       ["amorti", "Brillance", 1500, 14000, 100, "Hz", 6000], ["mix", "Niveau", 0, 100, 1, "%", 12]] },
-    { k: "delay", nom: "Écho", divisions: [["1/4", "1/4"], ["1/8p", "1/8 pointée"], ["1/8", "1/8"], ["1/16", "1/16"], ["1/4t", "1/4 triolet"]],
+    { k: "delay", modele: "Tape Echo", nom: "Écho", divisions: [["1/4", "1/4"], ["1/8p", "1/8 pointée"], ["1/8", "1/8"], ["1/16", "1/16"], ["1/4t", "1/4 triolet"]],
       p: [["retour", "Répétitions", 0, 85, 1, "%", 22], ["filtre", "Brillance", 800, 10000, 100, "Hz", 3200], ["mix", "Niveau", 0, 100, 1, "%", 10]], cases: [["pingpong", "Ping-pong"]] }
   ];
   const AIDE = {
@@ -530,7 +637,7 @@ const STUDIO = (() => {
       f.p.forEach(([c, , , , , , d]) => o[f.k][c] = d);
       if (f.types) o[f.k].type = f.types[0][0];
       if (f.divisions) o[f.k].division = "1/4";
-      if (f.menus) { o[f.k].tonique = "9"; o[f.k].gamme = "mineur"; }
+      if (f.menus) { o[f.k].tonique = "9"; o[f.k].gamme = "mineur"; o[f.k].tessiture = "large"; o[f.k].clavier = ""; }
       (f.cases || []).forEach(([c]) => o[f.k][c] = true);
     }
     return o;
@@ -546,7 +653,7 @@ const STUDIO = (() => {
                 comp: { on: 1, seuil: -18, ratio: 3, attaque: 10, relache: 120, gain: 3 },
                 reverb: { on: 1, taille: .9, predelay: 15, amorti: 6500, mix: 9 } } },
     lead:     { nom: "Lead rap / pop", fx: {
-                autotune: { on: 1, type: "prod", vitesse: 40, humain: 40, tolerance: 8, demitons: 0, mix: 100 },
+                autotune: { on: 1, type: "prod", vitesse: 40, transition: 60, humain: 40, tolerance: 8, demitons: 0, mix: 100, formant: true },
                 hpf: { on: 1, freq: 100 },
                 eq: { on: 1, bas: 0, mid: -2.5, midF: 350, midQ: 1.1, haut: 3, hautF: 9500 },
                 comp: { on: 1, seuil: -22, ratio: 4, attaque: 4, relache: 90, gain: 5 },
@@ -573,7 +680,7 @@ const STUDIO = (() => {
                 chorus: { on: 1, vitesse: .3, profondeur: 35, mix: 35 },
                 reverb: { on: 1, taille: 2.1, predelay: 10, amorti: 4500, mix: 20 } } },
     autotune: { nom: "Autotune marqué", fx: {
-                autotune: { on: 1, type: "prod", vitesse: 0, demitons: 0, mix: 100 },
+                autotune: { on: 1, type: "prod", vitesse: 0, transition: 0, humain: 0, tolerance: 0, demitons: 0, mix: 100, formant: true },
                 hpf: { on: 1, freq: 100 },
                 eq: { on: 1, bas: 0, mid: -2, midF: 350, midQ: 1, haut: 3, hautF: 10000 },
                 comp: { on: 1, seuil: -22, ratio: 4, attaque: 4, relache: 90, gain: 5 },
@@ -586,7 +693,7 @@ const STUDIO = (() => {
                 delay: { on: 1, division: "1/4", retour: 28, filtre: 2600, mix: 15, pingpong: true },
                 reverb: { on: 1, taille: 1.5, predelay: 20, amorti: 5000, mix: 11 } } },
     grave:    { nom: "Ad-libs pitchés (grave)", fx: {
-                autotune: { on: 1, type: "libre", vitesse: 15, demitons: -12, mix: 100 },
+                autotune: { on: 1, type: "libre", vitesse: 15, demitons: -12, mix: 100, formant: false },
                 hpf: { on: 1, freq: 90 },
                 comp: { on: 1, seuil: -22, ratio: 5, attaque: 4, relache: 90, gain: 4 },
                 delay: { on: 1, division: "1/4", retour: 20, filtre: 2400, mix: 10, pingpong: true },
@@ -627,92 +734,115 @@ const STUDIO = (() => {
      proche dans la gamme, puis decale la hauteur avec deux tetes de lecture croisees sur
      une ligne a retard (fenetre de 28 ms). La vitesse lisse le passage vers la note cible :
      0 = saut instantane, l'effet robot. Eteint, il laisse passer la voix telle quelle. ── */
+  const LAT_AT = .040;   // latence fixe du processeur (s), compensee a la lecture et a l'export
   const CODE_AT = `
   class FindingsAutotune extends AudioWorkletProcessor {
     constructor(){
       super();
-      this.on = false; this.mode = "gamme"; this.vitesse = 15; this.humain = 0; this.tolerance = 0; this.diapason = 440; this.demitons = 0; this.mix = 1; this.masque = 4095;
-      this.note = null; this.tenue = 0; this.k = 1;
+      this.on = false; this.mode = "gamme"; this.vitesse = 15; this.transition = 0; this.humain = 0; this.tolerance = 0; this.diapason = 440;
+      this.demitons = 0; this.mix = 1; this.masque = 4095; this.libres = 0; this.formant = true; this.fmin = 60; this.fmax = 1100; this.telem = false;
       this.port.onmessage = e => Object.assign(this, e.data);
       const sr = sampleRate;
-      this.R = 2048; this.ds = new Float32Array(this.R); this.dp = 0; this.impair = false; this.acc = 0; this.pas = 0;
-      this.W = 512; this.tmax = Math.min(400, Math.floor(sr / 2 / 65)); this.tmin = Math.floor(sr / 2 / 1100);
-      this.lin = new Float32Array(this.W + this.tmax + 1); this.d = new Float32Array(this.tmax + 1);
-      this.corr = 1; this.cible = 1;
-      this.L = 16384; this.buf = new Float32Array(this.L); this.w = 0;
-      this.fen = Math.round(.028 * sr); this.phase = 0;
+      // detection (YIN, sous-echantillonnee par 2)
+      this.R = 4096; this.ds = new Float32Array(this.R); this.dp = 0; this.impair = false; this.acc = 0; this.pas = 0; this.envoi = 0;
+      this.W = 512; this.TMAX = Math.floor(sr / 2 / 55);
+      this.lin = new Float32Array(this.W + this.TMAX + 2); this.d = new Float32Array(this.TMAX + 2);
+      // etat de la correction
+      this.corr = 1; this.cible = 1; this.noteG = 0; this.note = null; this.tenue = 0; this.k = 1; this.f0 = 0; this.m = 0;
+      // lignes a retard (indices absolus, masque N-1)
+      this.N = 65536; this.buf = new Float32Array(this.N); this.t = 0;
+      this.L = Math.round(${LAT_AT} * sr);
+      this.fen = Math.round(.028 * sr); this.phase = 0;                    // moteur « formants decales »
+      this.out = new Float32Array(this.N); this.som = new Float32Array(this.N);
+      this.ts = this.L; this.ta = 0; this.T = Math.round(sr * .006);        // moteur PSOLA (formants preserves)
     }
     detecter(){
-      const R = this.R, n = this.W + this.tmax; let i0 = (this.dp - n + R) % R, e = 0;
+      const R = this.R, tmin = Math.max(2, Math.floor(sampleRate / 2 / this.fmax)), tmax = Math.min(this.TMAX, Math.ceil(sampleRate / 2 / this.fmin));
+      const n = this.W + tmax; let i0 = (this.dp - n + R) % R, e = 0;
       for (let i = 0; i < n; i++) { const v = this.ds[(i0 + i) % R]; this.lin[i] = v; e += v * v; }
-      if (e / n < 4e-5) return 0;                       // silence ou souffle : pas de note
+      if (e / n < 4e-5) return 0;
       const x = this.lin, W = this.W, d = this.d; let somme = 0, best = -1;
       d[0] = 1;
-      for (let t = 1; t <= this.tmax; t++) {
+      for (let t = 1; t <= tmax; t++) {
         let s = 0; for (let j = 0; j < W; j++) { const u = x[j] - x[j + t]; s += u * u; }
         somme += s; d[t] = somme > 0 ? s * t / somme : 1;
       }
-      for (let t = this.tmin; t <= this.tmax; t++) if (d[t] < .15) { while (t + 1 <= this.tmax && d[t + 1] < d[t]) t++; best = t; break; }
+      for (let t = tmin; t <= tmax; t++) if (d[t] < .15) { while (t + 1 <= tmax && d[t + 1] < d[t]) t++; best = t; break; }
       if (best < 0) return 0;
       const a = d[best - 1] || d[best], b = d[best], c = d[best + 1] || d[best], den = a - 2 * b + c;
-      const tau = best + (den ? .5 * (a - c) / den : 0);
-      return sampleRate / 2 / tau;
+      return sampleRate / 2 / (best + (den ? .5 * (a - c) / den : 0));
     }
-    noteCible(f0){
-      const m = 69 + 12 * Math.log2(f0 / this.diapason), r = Math.round(m);
-      if (this.mode === "chroma" || this.masque === 4095) return r;
+    // la note visee parmi les touches autorisees ou libres ; -1 si aucune
+    noteCible(m){
+      const r = Math.round(m), toutes = this.mode === "chroma" ? 4095 : (this.masque | this.libres);
+      if (!toutes) return r;
       let mieux = r, ecart = 99;
-      for (let k = r - 6; k <= r + 6; k++) if (this.masque & (1 << (((k % 12) + 12) % 12))) { const e = Math.abs(k - m); if (e < ecart) { ecart = e; mieux = k; } }
+      for (let k = r - 6; k <= r + 6; k++) if (toutes & (1 << (((k % 12) + 12) % 12))) { const e = Math.abs(k - m); if (e < ecart) { ecart = e; mieux = k; } }
       return mieux;
     }
+    analyser(){
+      const sr = sampleRate, pasS = 512 / sr;
+      const f0 = this.mode === "libre" ? this.detecterLibre() : this.detecter();
+      this.f0 = f0;
+      if (f0 > 0) {
+        this.T = Math.max(16, Math.min(Math.round(this.L / 2.6), Math.round(sr / f0)));
+        const m = 69 + 12 * Math.log2(f0 / this.diapason); this.m = m;
+        if (this.mode === "libre") { this.cible = 1; this.noteG = m; this.note = null; }
+        else {
+          const n = this.noteCible(m), libre = this.mode !== "chroma" && (this.libres & (1 << (((n % 12) + 12) % 12)));
+          this.tenue = n === this.note ? this.tenue + pasS : 0;
+          // transition : la note visee glisse de l'ancienne a la nouvelle
+          if (this.note === null || this.transition <= 0) this.noteG = n;
+          else this.noteG += (n - this.noteG) * (1 - Math.exp(-pasS / (this.transition / 1000)));
+          this.note = n;
+          this.cible = libre || Math.abs(n - m) * 100 < this.tolerance ? 1 : Math.pow(2, (this.noteG - m) / 12);
+        }
+      } else { this.cible += (1 - this.cible) * .3; this.note = null; this.tenue = 0; this.T = Math.round(sr * .006); this.m = 0; }
+      const v = this.vitesse + this.humain * 400 * Math.min(1, this.tenue / .35);
+      this.k = v > 0 ? 1 - Math.exp(-1 / (v / 1000 * sr)) : 1;
+      if (this.telem && ++this.envoi >= 2) { this.envoi = 0; this.port.postMessage({ f: f0, m: this.m, c: f0 > 0 && this.mode !== "libre" ? this.noteG : 0, r: this.corr }); }
+    }
+    detecterLibre(){ return this.formant || this.telem ? this.detecter() : 0; }   // sans correction : la periode sert encore au PSOLA
     process(inputs, outputs){
       const ent = inputs[0], sor = outputs[0][0];
       if (!sor) return true;
       if (!ent || !ent.length) { sor.fill(0); return true; }
       const a0 = ent[0], a1 = ent[1];
       if (!this.on) { for (let i = 0; i < sor.length; i++) sor[i] = a1 ? (a0[i] + a1[i]) * .5 : a0[i]; return true; }
-      const sr = sampleRate;
-      const trans = Math.pow(2, this.demitons / 12), L = this.L, fen = this.fen;
+      const N1 = this.N - 1, trans = Math.pow(2, this.demitons / 12), L = this.L, fen = this.fen, base = L - fen / 2 - 1;
       for (let i = 0; i < sor.length; i++) {
-        const x = a1 ? (a0[i] + a1[i]) * .5 : a0[i];
-        // detection : sous-echantillonnage par 2, une analyse tous les 256 points
+        const x = a1 ? (a0[i] + a1[i]) * .5 : a0[i], t = this.t;
+        this.buf[t & N1] = x;
         this.acc += x; this.impair = !this.impair;
-        if (!this.impair) {
-          this.ds[this.dp] = this.acc * .5; this.acc = 0; this.dp = (this.dp + 1) % this.R;
-          if (++this.pas >= 256) {
-            this.pas = 0;
-            const pasS = 512 / sr;
-            if (this.mode === "libre") { this.cible = 1; this.note = null; }
-            else {
-              const f0 = this.detecter();
-              if (f0 > 0) {
-                const m = 69 + 12 * Math.log2(f0 / this.diapason), n = this.noteCible(f0);
-                // tenue : depuis combien de temps on chante la meme note
-                this.tenue = n === this.note ? this.tenue + pasS : 0; this.note = n;
-                // tolerance : un ecart plus petit que le seuil (en cents) n'est pas corrige
-                this.cible = Math.abs(n - m) * 100 < this.tolerance ? 1 : Math.pow(2, (n - m) / 12);
-              } else { this.cible += (1 - this.cible) * .3; this.note = null; this.tenue = 0; }
-            }
-            // humanize : sur une note tenue, la correction ralentit (jusqu'a +400 ms) ; les
-            // attaques et les changements de note restent corriges a la vitesse choisie
-            const v = this.vitesse + this.humain * 400 * Math.min(1, this.tenue / .35);
-            this.k = v > 0 ? 1 - Math.exp(-1 / (v / 1000 * sr)) : 1;
-          }
-        }
+        if (!this.impair) { this.ds[this.dp] = this.acc * .5; this.acc = 0; this.dp = (this.dp + 1) % this.R; if (++this.pas >= 256) { this.pas = 0; this.analyser(); } }
         this.corr += (this.cible - this.corr) * this.k;
         const ratio = this.corr * trans;
-        // decalage de hauteur : deux tetes a une demi-fenetre l'une de l'autre, fondu en cloche
-        this.buf[this.w] = x;
-        this.phase += (1 - ratio) / fen; this.phase -= Math.floor(this.phase);
         let y = 0;
-        for (let h = 0; h < 2; h++) {
-          const ph = (this.phase + h * .5) % 1, del = ph * fen + 1;
-          let pos = this.w - del; if (pos < 0) pos += L;
-          const i0 = Math.floor(pos), fr = pos - i0, s0 = this.buf[i0], s1 = this.buf[(i0 + 1) % L];
-          y += (s0 + (s1 - s0) * fr) * (.5 - .5 * Math.cos(2 * Math.PI * ph));
+        if (this.formant) {
+          // PSOLA : des grains de deux periodes, pris tous les T dans l'entree, reposes tous les T/ratio
+          const T = this.T, voise = this.f0 > 0, r = voise ? ratio : 1;
+          while (this.ts - T <= t) {
+            const cible = this.ts - L;
+            while (this.ta + T / 2 < cible) this.ta += T;
+            while (this.ta - T / 2 > cible) this.ta -= T;
+            const ca = Math.round(this.ta), cs = Math.round(this.ts);
+            for (let j = -T; j < T; j++) { const w = .5 + .5 * Math.cos(Math.PI * j / T); const o = (cs + j) & N1; this.out[o] += this.buf[(ca + j) & N1] * w; this.som[o] += w; }
+            this.ts += Math.max(1, T / r);
+          }
+          const o = t & N1, s = this.som[o];
+          y = s > .05 ? this.out[o] / Math.max(1, s) : 0; this.out[o] = 0; this.som[o] = 0;
+        } else {
+          // formants decales : deux tetes croisees sur la ligne a retard (le timbre suit la hauteur)
+          this.phase += (1 - ratio) / fen; this.phase -= Math.floor(this.phase);
+          for (let h = 0; h < 2; h++) {
+            const ph = (this.phase + h * .5) % 1, pos = t - (base + ph * fen);
+            const i0 = Math.floor(pos), fr = pos - i0, s0 = this.buf[i0 & N1], s1 = this.buf[(i0 + 1) & N1];
+            y += (s0 + (s1 - s0) * fr) * (.5 - .5 * Math.cos(2 * Math.PI * ph));
+          }
         }
-        this.w = (this.w + 1) % L;
-        sor[i] = x * (1 - this.mix) + y * this.mix;
+        const sec = this.buf[(t - L) & N1];      // la voix d'origine, retardee d'autant pour le melange
+        sor[i] = sec * (1 - this.mix) + y * this.mix;
+        this.t = t + 1;
       }
       return true;
     }
@@ -727,6 +857,18 @@ const STUDIO = (() => {
     }
     return AT_CHARGE.get(c);
   }
+  /* Le clavier de l'autotune : 12 touches, « 1 » visee, « 0 » retiree (renvoyee vers la plus
+     proche), « b » libre (chantee telle quelle). Sans clavier edite, il suit la gamme choisie. */
+  function clavierDe(a){
+    let base = 4095;
+    if (a.type === "cle") base = masqueDe(a.tonique || 0, a.gamme);
+    else if (a.type === "prod") base = prod && prod.keySur ? masqueGamme(prod.key) : 4095;
+    const touches = a.clavier && a.clavier.length === 12 ? a.clavier : [...Array(12)].map((_, i) => base & (1 << i) ? "1" : "0").join("");
+    let masque = 0, libres = 0;
+    [...touches].forEach((c, i) => { if (c === "1") masque |= 1 << i; else if (c === "b") libres |= 1 << i; });
+    return { touches, masque: masque || (libres ? 0 : 4095), libres };
+  }
+  const avanceAT = p => p.fx && p.fx.autotune && p.fx.autotune.on ? LAT_AT : 0;
   // gamme de la prod (« Am », « F#m », « Eb ») en masque de 12 notes ; chromatique sans tonalite connue
   function masqueGamme(cle){
     const m = /^~?([A-G])([#b]?)(m?)/.exec(cle || "");
@@ -767,6 +909,10 @@ const STUDIO = (() => {
   /* Saturation douce : tangente hyperbolique legerement decentree (harmoniques paires,
      le grain « lampe »), divisee par son gain pour rester a l'unite sur les passages calmes.
      Seules les crêtes s'arrondissent ; l'ancienne courbe faisait une fuzz des 35 %. */
+  /* courbe de l'etage Analog : quasi lineaire a niveau normal, les crêtes s'arrondissent et
+     gagnent un peu d'harmonique 2 (comme une console ou un transformateur pousses legerement) */
+  const COURBE_ANA = (() => { const n = 4096, c = new Float32Array(n), g = 1.6, b = .08, z = Math.tanh(g * b);
+    for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; c[i] = (Math.tanh(g * (x + b)) - z) / (g * (1 - z * z)); } return c; })();
   const courbe = drive => {
     const g = 1 + drive / 100 * 7, b = .12, n = 4096, c = new Float32Array(n), z = Math.tanh(g * b);
     for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; c[i] = (Math.tanh(g * (x + b)) - z) / g; }
@@ -786,8 +932,12 @@ const STUDIO = (() => {
     const G = () => c.createGain(), F = t => { const f = c.createBiquadFilter(); f.type = t; return f; };
     const n = { c, entree: G() };
     n.at = AT_PRET.has(c) ? new AudioWorkletNode(c, "findings-autotune", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1] }) : G();
+    if (n.at.port) { n.atHist = []; n.at.port.onmessage = e => { n.atHist.push(e.data); if (n.atHist.length > 260) n.atHist.shift(); }; }
     n.hpf = F("highpass"); n.eqB = F("lowshelf"); n.eqM = F("peaking"); n.eqH = F("highshelf");
     n.comp = c.createDynamicsCompressor(); n.compG = G();
+    // etage « Analog » : transformateur (galbe du grave, aigu adouci) et un soupcon d'harmoniques paires
+    n.anaLo = F("lowshelf"); n.anaLo.frequency.value = 90; n.anaHi = F("highshelf"); n.anaHi.frequency.value = 15000;
+    n.ana = c.createWaveShaper(); n.ana.oversample = "4x";
     n.satSec = G(); n.ws = c.createWaveShaper(); n.ws.oversample = "4x"; n.satHum = G(); n.satSom = G();
     n.filtre = F("allpass");
     n.chSec = G(); n.chHum = G(); n.chSom = G();
@@ -809,7 +959,8 @@ const STUDIO = (() => {
     n.panA = c.createStereoPanner ? c.createStereoPanner() : G(); n.panB = c.createStereoPanner ? c.createStereoPanner() : G();
     // cablage
     n.entree.connect(n.at); n.at.connect(n.hpf); n.hpf.connect(n.eqB); n.eqB.connect(n.eqM); n.eqM.connect(n.eqH); n.eqH.connect(n.comp); n.comp.connect(n.compG);
-    n.compG.connect(n.satSec); n.compG.connect(n.ws); n.ws.connect(n.satHum); n.satSec.connect(n.satSom); n.satHum.connect(n.satSom);
+    n.compG.connect(n.anaLo); n.anaLo.connect(n.anaHi); n.anaHi.connect(n.ana);
+    n.ana.connect(n.satSec); n.ana.connect(n.ws); n.ws.connect(n.satHum); n.satSec.connect(n.satSom); n.satHum.connect(n.satSom);
     n.satSom.connect(n.filtre);
     n.filtre.connect(n.chSec); n.filtre.connect(n.chD1); n.filtre.connect(n.chD2);
     n.chD1.connect(p1); n.chD2.connect(p2); p1.connect(n.chHum); p2.connect(n.chHum);
@@ -834,10 +985,13 @@ const STUDIO = (() => {
       const a = f.autotune;
       // la gamme de la prod seulement si sa tonalite est lue dans le titre : une tonalite
       // estimee (« ~ ») peut etre fausse et tirerait la voix vers les mauvaises notes
-      const gamme = a.type === "cle" ? masqueDe(a.tonique || 0, a.gamme) : a.type === "prod" && prod && prod.keySur ? masqueGamme(prod.key) : 0;
-      n.at.port.postMessage({ on: !!a.on, mode: (a.type === "prod" || a.type === "cle") ? (gamme ? "gamme" : "chroma") : a.type,
-        vitesse: a.vitesse, humain: (a.humain || 0) / 100, tolerance: a.tolerance || 0, diapason: a.diapason || 440,
-        demitons: a.demitons, mix: a.mix / 100, masque: gamme || 4095 });
+      const cl = clavierDe(a), t = TESSITURES[a.tessiture] || TESSITURES.large;
+      n.at.port.postMessage({ on: !!a.on, mode: a.type === "libre" ? "libre" : cl.masque === 4095 && !cl.libres ? "chroma" : "gamme",
+        vitesse: a.vitesse, transition: a.transition || 0, humain: (a.humain || 0) / 100, tolerance: a.tolerance || 0, diapason: a.diapason || 440,
+        demitons: a.demitons, mix: a.mix / 100, masque: cl.masque, libres: cl.libres, formant: a.formant !== false, fmin: t.min, fmax: t.max,
+        telem: fxOuvert === "autotune" && pisteCible() === p });
+      // la latence du processeur se compense en lisant la piste plus tot : on reprogramme si elle change
+      if (n.atOn !== !!a.on) { n.atOn = !!a.on; sale = true; }
     }
     n.hpf.frequency.value = on("hpf") ? f.hpf.freq : 10;
     n.eqB.frequency.value = f.eq.basF; n.eqB.gain.value = on("eq") ? f.eq.bas : 0;
@@ -846,6 +1000,9 @@ const STUDIO = (() => {
     if (on("comp")) { n.comp.threshold.value = f.comp.seuil; n.comp.ratio.value = f.comp.ratio; n.comp.knee.value = 6;
       n.comp.attack.value = f.comp.attaque / 1000; n.comp.release.value = f.comp.relache / 1000; n.compG.gain.value = dB(f.comp.gain); }
     else { n.comp.threshold.value = 0; n.comp.ratio.value = 1; n.comp.knee.value = 0; n.compG.gain.value = 1; }
+    // Analog : actif si l'egaliseur ou le compresseur l'est, avec sa case cochee
+    const ana = (on("eq") && f.eq.analog !== false) || (on("comp") && f.comp.analog !== false);
+    n.ana.curve = ana ? COURBE_ANA : null; n.anaLo.gain.value = ana ? .7 : 0; n.anaHi.gain.value = ana ? -.8 : 0;
     if (on("sat")) {
       if (n.drive !== f.sat.drive) { n.ws.curve = courbe(f.sat.drive); n.drive = f.sat.drive; }
       const m = f.sat.mix / 100; n.satSec.gain.value = 1 - m; n.satHum.gain.value = m * (1 + f.sat.drive / 100 * .6);
@@ -927,9 +1084,10 @@ const STUDIO = (() => {
     }
     for (const k of P.clips) {
       if (rec && k.piste === rec.piste && k.start + k.dur > rec.debut) continue;   // ce qu'on remplace se tait
-      const n = noeuds.get(k.piste), buf = BUF.get(k.prise);
-      if (!n || !buf || k.start + k.dur <= Bv) continue;
-      const dans = Math.max(0, Bv - k.start), when = T + Math.max(0, k.start - Bv);
+      const n = noeuds.get(k.piste), buf = BUF.get(k.prise), pi = P.pistes.find(x => x.id === k.piste);
+      const st = k.start - (pi ? avanceAT(pi) : 0);   // l'autotune retarde la voix : elle part d'autant plus tot
+      if (!n || !buf || st + k.dur <= Bv) continue;
+      const dans = Math.max(0, Bv - st), when = T + Math.max(0, st - Bv);
       const s = c.createBufferSource(); s.buffer = buf;
       const g = c.createGain(); s.connect(g); g.connect(n.entree);
       enveloppe(g.gain, k, when, dans);
@@ -1332,7 +1490,7 @@ const STUDIO = (() => {
       if (cle === "piste.vol") { const r = grilleEl.querySelector(`[data-vol="${p.id}"]`); if (r) r.value = Math.round(val * 100); } }
     sauver();
   }
-  function panneau(){
+  function panneauBrut(){
     if (!P) return;
     const p = pisteCible(), k = regionSel(), i = P.pistes.indexOf(p);
     pan.style.setProperty("--pc", COULEURS[i % COULEURS.length]);
@@ -1357,14 +1515,16 @@ const STUDIO = (() => {
           </div>`; }).join("")}</div>
         ${(() => { const f = FX.find(x => x.k === fxOuvert), v = p.fx[f.k]; return `
         <section class="fxc detail${v.on ? " on" : ""}" data-fx="${f.k}">
-          <header><span class="fx-titre"><button class="fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}"></button><b>${esc(f.nom)}</b></span>
+          <header><span class="fx-titre"><button class="fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}"></button><b>${esc(f.nom)}</b><span class="plug-modele" translate="no">${esc(f.modele || "")}</span></span>
             ${f.types ? `<select data-fxtype="${f.k}">${f.types.map(([c, n]) => `<option value="${c}"${v.type === c ? " selected" : ""}>${n}</option>`).join("")}</select>` : ""}
             ${f.divisions ? `<select data-fxdiv="${f.k}" title="Durée de l'écho, calée sur le tempo">${f.divisions.map(([c, n]) => `<option value="${c}"${v.division === c ? " selected" : ""}>${n}</option>`).join("")}</select>` : ""}
           </header>
-          ${f.menus && v.type === f.menus.si ? `<div class="fx-menus">${f.menus.liste.map(([c, n, opts]) => `<label>${esc(n)}<select data-fxmenu="${f.k}.${c}"${c === "tonique" ? ' translate="no"' : ""}>${opts.map(([o, l]) => `<option value="${o}"${String(v[c]) === o ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label>`).join("")}</div>` : ""}
-          <p class="fx-aide">${AIDE[f.k]}</p>
+          ${f.menus ? `<div class="fx-menus">${f.menus.filter(([, , , si]) => !si || v.type === si).map(([c, n, opts]) => `<label>${esc(n)}<select data-fxmenu="${f.k}.${c}"${c === "tonique" ? ' translate="no"' : ""}>${opts.map(([o, l]) => `<option value="${o}"${String(v[c]) === o ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label>`).join("")}</div>` : ""}
+          <div class="plug-vis${f.k === "autotune" ? " at" : ""}" data-vis="${f.k}"><canvas></canvas>${f.k === "autotune" ? `<div class="at-lecture"><b data-at-note>—</b><span class="at-cents"><i data-at-aig></i></span><small data-at-ct>Lance la lecture</small></div>` : ""}</div>
+          ${f.k === "autotune" ? clavierHTML(v) : ""}
           <div class="fx-boutons">${f.p.map(([c, n, min, max, pas, u, d]) => bouton(`fx.${f.k}.${c}`, n, min, max, pas, u, v[c], d)).join("")}</div>
-          ${(f.cases || []).map(([c, n]) => `<label class="fx-case"><input type="checkbox" data-fxcase="${f.k}.${c}"${v[c] ? " checked" : ""}>${n}</label>`).join("")}
+          ${(f.cases || []).map(([c, n]) => `<label class="fx-case"><input type="checkbox" data-fxcase="${f.k}.${c}"${v[c] !== false ? " checked" : ""}>${n}</label>`).join("")}
+          <p class="fx-aide">${AIDE[f.k]}</p>
         </section>`; })()}`;
       $("dpNom").addEventListener("change", e => { memoriser(); p.nom = e.target.value.trim() || p.nom; dessiner(); panneau(); sauver(); });
       $("dpPreset").addEventListener("change", e => { if (e.target.value === "perso") return; memoriser(); appliquerPreset(p, e.target.value); const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); dessiner(); panneau(); sauver(); message(`Préréglage « ${PRESETS[e.target.value].nom} »`); });
@@ -1410,12 +1570,196 @@ const STUDIO = (() => {
       if ($("dpBpm")) $("dpBpm").addEventListener("change", e => { const v = Math.round(+e.target.value); if (v >= 50 && v <= 220) { P.bpm = v; reglerTout(); sauver(); dessiner(); entete(); } else e.target.value = bpm(); });
     }
   }
-  const inspecteur = () => { panneau(); remplirCurseurs(pan); };
+  // chaque rendu du panneau remet a jour les curseurs et relance l'ecran du plug-in ouvert
+  const panneau = () => { panneauBrut(); remplirCurseurs(pan); setTimeout(visualiser, 0); };
+  const inspecteur = panneau;
+
+  /* ─────────── facades des plug-ins : un ecran par effet ─────────── */
+  // clavier d'une octave : touches blanches puis noires posees par-dessus
+  function clavierHTML(a){
+    const cl = clavierDe(a), noires = { 1: 0, 3: 1, 6: 3, 8: 4, 10: 5 }, blanches = [0, 2, 4, 5, 7, 9, 11];
+    const etat = c => c === "1" ? "visee" : c === "b" ? "libre" : "retiree";
+    return `<div class="at-clavier" translate="no">
+      ${blanches.map(i => `<button class="tb ${etat(cl.touches[i])}" data-touche="${i}" title="${NOTES[i]}"><span>${NOTES[i]}</span></button>`).join("")}
+      ${Object.entries(noires).map(([i, apres]) => `<button class="tn ${etat(cl.touches[+i])}" data-touche="${i}" style="left:calc(${(+apres + 1) * (100 / 7)}% - 3.4%)" title="${NOTES[+i]}"></button>`).join("")}
+    </div><p class="at-legende"><i class="visee"></i>Visée <i class="libre"></i>Libre (non corrigée) <i class="retiree"></i>Retirée · clic pour changer</p>`;
+  }
+  // reponse en frequence de filtres de la Web Audio API, sur 20 Hz - 20 kHz
+  const FREQS = new Float32Array(240).map((_, i) => 20 * Math.pow(1000, i / 239));
+  const filtreAffiche = (type, f, q, g) => { const c = audio(), b = c.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = q; b.gain.value = g; return b; };
+  function reponse(filtres){
+    const db = new Float32Array(FREQS.length), mag = new Float32Array(FREQS.length), ph = new Float32Array(FREQS.length);
+    filtres.forEach(b => { b.getFrequencyResponse(FREQS, mag, ph); for (let i = 0; i < db.length; i++) db[i] += 20 * Math.log10(Math.max(1e-6, mag[i])); });
+    return db;
+  }
+  const xFreq = (f, W) => Math.log(f / 20) / Math.log(1000) * W;
+  function grilleFreq(g, W, H, dbMax){
+    g.strokeStyle = "rgba(255,255,255,.06)"; g.lineWidth = 1; g.fillStyle = "rgba(255,255,255,.32)"; g.font = "9px ui-monospace,Menlo,monospace";
+    [50, 100, 200, 500, 1000, 2000, 5000, 10000].forEach(f => { const x = Math.round(xFreq(f, W)) + .5; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); g.fillText(f >= 1000 ? f / 1000 + "k" : f, x + 3, H - 4); });
+    for (let d = -dbMax; d <= dbMax; d += dbMax / 2) { const y = Math.round(H / 2 - d / dbMax * (H / 2 - 8)) + .5; g.strokeStyle = d ? "rgba(255,255,255,.06)" : "rgba(255,255,255,.16)"; g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); if (d) g.fillText((d > 0 ? "+" : "") + d, 3, y - 3); }
+  }
+  function courbeFreq(g, W, H, db, dbMax, coul){
+    const y = d => H / 2 - Math.max(-dbMax * 1.1, Math.min(dbMax * 1.1, d)) / dbMax * (H / 2 - 8);
+    g.beginPath(); db.forEach((d, i) => { const x = i / (db.length - 1) * W; i ? g.lineTo(x, y(d)) : g.moveTo(x, y(d)); });
+    g.strokeStyle = coul; g.lineWidth = 2; g.stroke();
+    g.lineTo(W, H / 2); g.lineTo(0, H / 2); g.closePath(); g.fillStyle = coul.replace("rgb(", "rgba(").replace(")", ",.14)"); g.fill();
+  }
+  let visuRAF = 0, eqPoints = [], eqDrag = null;
+  function visualiser(){
+    cancelAnimationFrame(visuRAF);
+    const boite = pan.querySelector(".plug-vis"); if (!boite || !ouvert || pan.classList.contains("ferme")) return;
+    const cv = boite.querySelector("canvas"), k = boite.dataset.vis, p = pisteCible(), f = p.fx[k], n = noeuds.get(p.id);
+    const dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
+    if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    const facade = boite.closest(".fxc"), coul = teinte(getComputedStyle(facade).getPropertyValue("--vis").trim() || getComputedStyle(pan).getPropertyValue("--pc").trim(), 0), on = f.on;
+    g.globalAlpha = on ? 1 : .45;
+    if (k === "eq" || k === "hpf" || k === "filtre") {
+      const dbMax = k === "eq" ? 15 : 24; grilleFreq(g, W, H, dbMax);
+      let filtres;
+      if (k === "eq") filtres = [filtreAffiche("lowshelf", f.basF, 1, f.bas), filtreAffiche("peaking", f.midF, f.midQ, f.mid), filtreAffiche("highshelf", f.hautF, 1, f.haut)];
+      else if (k === "hpf") filtres = [filtreAffiche("highpass", f.freq, .707, 0)];
+      else { const t = f.type; filtres = [filtreAffiche(t === "pb" ? "lowpass" : t === "ph" ? "highpass" : "bandpass", t === "radio" ? Math.min(f.freq, 2500) : f.freq, t === "radio" ? Math.max(.5, f.q * .6) : f.q, 0)]; }
+      const db = reponse(filtres); courbeFreq(g, W, H, db, dbMax, coul);
+      if (k === "eq") {   // les trois points a faire glisser
+        eqPoints = [["bas", "basF", f.basF], ["mid", "midF", f.midF], ["haut", "hautF", f.hautF]].map(([gk, fk, fr], i) => {
+          const x = xFreq(fr, W), d = reponse([filtres[i]])[Math.round(Math.log(fr / 20) / Math.log(1000) * 239)] || 0, y = H / 2 - d / dbMax * (H / 2 - 8);
+          g.beginPath(); g.arc(x, y, eqDrag && eqDrag.i === i ? 8 : 6, 0, Math.PI * 2); g.fillStyle = "#fff"; g.fill(); g.lineWidth = 2; g.strokeStyle = coul; g.stroke();
+          g.fillStyle = "#111"; g.font = "bold 8px system-ui"; g.fillText(i + 1, x - 2.5, y + 3);
+          return { i, gk, fk, x, y };
+        });
+      }
+    } else if (k === "comp") {
+      const m = 10, Wg = H - 2 * m, x0 = m, y0 = m;
+      const sortie = e => { const s = f.seuil, r = f.ratio, kn = 6; let o; if (e < s - kn / 2) o = e; else if (e > s + kn / 2) o = s + (e - s) / r; else { const z = e - s + kn / 2; o = e + (1 / r - 1) * z * z / (2 * kn); } return o + f.gain; };
+      g.strokeStyle = "rgba(255,255,255,.07)"; for (let d = -60; d <= 0; d += 12) { const p1 = x0 + (d + 60) / 60 * Wg, p2 = y0 + (1 - (d + 60) / 60) * Wg; g.beginPath(); g.moveTo(p1, y0); g.lineTo(p1, y0 + Wg); g.moveTo(x0, p2); g.lineTo(x0 + Wg, p2); g.stroke(); }
+      g.strokeStyle = "rgba(255,255,255,.18)"; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(x0, y0 + Wg); g.lineTo(x0 + Wg, y0); g.stroke(); g.setLineDash([]);
+      g.beginPath(); for (let e = -60; e <= 0; e += .5) { const o = Math.max(-60, Math.min(6, sortie(e))), px = x0 + (e + 60) / 60 * Wg, py = y0 + (1 - (o + 60) / 60) * Wg; e > -60 ? g.lineTo(px, py) : g.moveTo(px, py); } g.strokeStyle = coul; g.lineWidth = 2; g.stroke();
+      const sx = x0 + (f.seuil + 60) / 60 * Wg; g.fillStyle = "rgba(255,255,255,.4)"; g.font = "9px ui-monospace,Menlo,monospace"; g.fillText("seuil " + f.seuil + " dB", Math.min(sx + 4, x0 + Wg - 70), y0 + Wg - 6);
+      // VU-metre analogique : la reduction de gain, aiguille avec son inertie
+      const gr = n && n.comp ? Math.max(0, -n.comp.reduction) : 0;
+      n && (n.vu = (n.vu || 0) + (gr - (n.vu || 0)) * .25);
+      const vh = H - 2 * m, vw = Math.min(W - H - 32, vh * 2.1), vx = W - vw - 10, R = vh * .95, cx = vx + vw / 2, cy = m + vh * 1.06;
+      const face = g.createLinearGradient(0, m, 0, m + vh); face.addColorStop(0, "#FFF4D6"); face.addColorStop(1, "#E9D8AE");
+      g.fillStyle = face; g.beginPath(); g.roundRect ? g.roundRect(vx, m, vw, vh, 4) : g.rect(vx, m, vw, vh); g.fill();
+      const lueur = g.createRadialGradient(cx, m + vh * .45, 4, cx, m + vh * .45, vw * .6); lueur.addColorStop(0, "rgba(255,190,90,.35)"); lueur.addColorStop(1, "rgba(255,190,90,0)"); g.fillStyle = lueur; g.fillRect(vx, m, vw, vh);
+      // echelle de VU : 20 dB a gauche, 0 a droite, les petites valeurs etalees
+      const ang = d => Math.PI * 1.5 - .87 + (1 - Math.log10(1 + Math.min(20, d)) / Math.log10(21)) * 1.74;
+      g.strokeStyle = "#2A2017"; g.lineWidth = 1.2; g.beginPath(); g.arc(cx, cy, R, ang(20), ang(0)); g.stroke();
+      g.fillStyle = "#2A2017"; g.font = "bold 8px system-ui"; g.textAlign = "center";
+      [20, 10, 7, 5, 3, 2, 1, 0].forEach(d => { const a2 = ang(d), x1 = cx + Math.cos(a2) * R, y1 = cy + Math.sin(a2) * R, x2 = cx + Math.cos(a2) * (R - 7), y2 = cy + Math.sin(a2) * (R - 7);
+        g.strokeStyle = d <= 3 && d > 0 ? "#B8352A" : "#2A2017"; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); g.fillText(d, cx + Math.cos(a2) * (R - 15), cy + Math.sin(a2) * (R - 15) + 3); });
+      g.font = "bold 7px system-ui"; g.fillText("GAIN REDUCTION", cx, m + vh - 8); g.textAlign = "left";
+      const an = ang(n ? n.vu : 0); g.strokeStyle = "#1A1410"; g.lineWidth = 1.6; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(an) * (R + 2), cy + Math.sin(an) * (R + 2)); g.stroke();
+      g.fillStyle = "rgba(255,255,255,.45)"; g.font = "9px ui-monospace,Menlo,monospace"; g.fillText(`${f.ratio}:1`, m + 4, m + 12);
+    } else if (k === "sat") {
+      const c = courbe(f.drive), mix = f.mix / 100, gain = 1 + f.drive / 100 * .6, m = 10, L = H - 2 * m;
+      g.strokeStyle = "rgba(255,255,255,.07)"; g.strokeRect(m + .5, m + .5, L, L);
+      g.strokeStyle = "rgba(255,255,255,.18)"; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(m, m + L); g.lineTo(m + L, m); g.stroke(); g.setLineDash([]);
+      g.beginPath(); for (let i = 0; i <= 200; i++) { const x = i / 200 * 2 - 1, y = (1 - mix) * x + mix * gain * c[Math.round((x + 1) / 2 * (c.length - 1))]; const px = m + (x + 1) / 2 * L, py = m + (1 - (Math.max(-1.2, Math.min(1.2, y)) + 1) / 2) * L; i ? g.lineTo(px, py) : g.moveTo(px, py); }
+      g.strokeStyle = coul; g.lineWidth = 2; g.stroke();
+      // harmoniques generees : une sinusoide passee dans la courbe, son spectre grossier
+      const N2 = 256, sig = new Float32Array(N2); for (let i = 0; i < N2; i++) { const x = .8 * Math.sin(2 * Math.PI * 4 * i / N2); sig[i] = (1 - mix) * x + mix * gain * c[Math.round((x + 1) / 2 * (c.length - 1))]; }
+      const bx = L + 3 * m, bw = (W - bx - m - 50) / 8;
+      for (let h = 1; h <= 8; h++) { let re = 0, im = 0; for (let i = 0; i < N2; i++) { re += sig[i] * Math.cos(2 * Math.PI * 4 * h * i / N2); im += sig[i] * Math.sin(2 * Math.PI * 4 * h * i / N2); }
+        const a = Math.sqrt(re * re + im * im) / (N2 / 2), d = Math.max(0, 1 + 20 * Math.log10(Math.max(1e-5, a)) / 60), hh = d * (H - 2 * m - 12);
+        g.fillStyle = h === 1 ? "rgba(255,255,255,.35)" : coul; g.fillRect(bx + (h - 1) * bw + 3, H - m - 12 - hh, bw - 6, hh);
+        g.fillStyle = "rgba(255,255,255,.4)"; g.font = "9px ui-monospace,Menlo,monospace"; g.fillText("H" + h, bx + (h - 1) * bw + 4, H - 4); }
+      // la lampe : son filament rougeoie avec la chaleur, et vacille a peine
+      const tx = W - 34, ty = 14, tw = 24, th = H - 34, ch = (.25 + f.drive / 100 * .75) * (f.on ? 1 : .3) * (.94 + .06 * Math.sin(performance.now() / 90));
+      const verre = g.createLinearGradient(tx, 0, tx + tw, 0); verre.addColorStop(0, "rgba(255,255,255,.16)"); verre.addColorStop(.5, "rgba(255,255,255,.03)"); verre.addColorStop(1, "rgba(255,255,255,.12)");
+      const halo = g.createRadialGradient(tx + tw / 2, ty + th * .55, 2, tx + tw / 2, ty + th * .55, 34); halo.addColorStop(0, `rgba(255,140,40,${.75 * ch})`); halo.addColorStop(1, "rgba(255,120,30,0)");
+      g.fillStyle = halo; g.fillRect(tx - 30, ty - 10, tw + 60, th + 20);
+      g.fillStyle = verre; g.beginPath(); g.moveTo(tx, ty + 10); g.quadraticCurveTo(tx, ty, tx + tw / 2, ty); g.quadraticCurveTo(tx + tw, ty, tx + tw, ty + 10); g.lineTo(tx + tw, ty + th); g.lineTo(tx, ty + th); g.closePath(); g.fill();
+      g.strokeStyle = `rgba(255,${150 + 60 * ch},80,${.5 + .5 * ch})`; g.lineWidth = 1.5; g.beginPath(); g.moveTo(tx + 8, ty + th * .75); g.lineTo(tx + 8, ty + th * .35); g.lineTo(tx + 16, ty + th * .35); g.lineTo(tx + 16, ty + th * .75); g.stroke();
+      g.fillStyle = "#3A3A3A"; g.fillRect(tx - 2, ty + th, tw + 4, 8);
+    } else if (k === "chorus") {
+      const t = performance.now() / 1000, cx = W / 2, cy = H - 14, R = H - 30;
+      g.strokeStyle = "rgba(255,255,255,.08)"; [1, .66, .33].forEach(r => { g.beginPath(); g.arc(cx, cy, R * r, Math.PI, 2 * Math.PI); g.stroke(); });
+      g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - R); g.stroke();
+      g.fillStyle = "rgba(255,255,255,.4)"; g.font = "9px ui-monospace,Menlo,monospace"; g.fillText("L", cx - R - 10, cy); g.fillText("R", cx + R + 4, cy);
+      const larg = .35 + .55 * f.mix / 100, mod = f.profondeur / 100 * .12;
+      [[-1, 0], [1, Math.PI / 2]].forEach(([cote, ph]) => { const a = Math.PI / 2 - cote * (larg + mod * Math.sin(2 * Math.PI * f.vitesse * t + ph)) * Math.PI / 2;
+        const x = cx + Math.cos(a) * R * .8, y = cy - Math.sin(a) * R * .8; g.beginPath(); g.arc(x, y, 8, 0, Math.PI * 2); g.fillStyle = coul; g.fill(); });
+      g.beginPath(); g.arc(cx, cy - R * .8, 9, 0, Math.PI * 2); g.fillStyle = "#fff"; g.fill();
+      g.fillStyle = "rgba(255,255,255,.4)"; g.fillText("voix", cx - 10, cy - R * .8 - 14);
+    } else if (k === "reverb") {
+      const total = f.predelay / 1000 + f.taille * 1.1, x = s => 10 + s / total * (W - 20), m = 10, Hh = H - 2 * m - 10;
+      g.strokeStyle = "rgba(255,255,255,.06)"; g.fillStyle = "rgba(255,255,255,.35)"; g.font = "9px ui-monospace,Menlo,monospace";
+      for (let s = 0; s <= total; s += total > 3 ? 1 : .5) { const px = Math.round(x(s)) + .5; g.beginPath(); g.moveTo(px, m); g.lineTo(px, H - m); g.stroke(); g.fillText(s.toFixed(1) + " s", px + 3, H - 3); }
+      g.fillStyle = "#fff"; g.fillRect(x(0) - 1, m, 2, Hh);   // le son direct
+      const pd = f.predelay / 1000; [7, 13, 21, 30, 39, 51].forEach((ms, j) => { const hh = Hh * .55 * Math.pow(.78, j); g.fillStyle = coul; g.fillRect(x(pd + ms / 1000) - 1, m + Hh - hh, 2, hh); });
+      const grad = g.createLinearGradient(x(pd), 0, x(pd + f.taille), 0); grad.addColorStop(0, coul.replace("rgb(", "rgba(").replace(")", ",.55)")); grad.addColorStop(1, coul.replace("rgb(", "rgba(").replace(")", "," + (.1 + f.amorti / 14000 * .3) + ")"));
+      g.beginPath(); g.moveTo(x(pd), m + Hh); for (let s = 0; s <= f.taille * 1.1; s += f.taille / 80) { const db = -60 * s / f.taille, hh = Math.max(0, (1 + db / 60)) * Hh * .7; g.lineTo(x(pd + s), m + Hh - hh); } g.lineTo(x(pd + f.taille * 1.1), m + Hh); g.closePath(); g.fillStyle = grad; g.fill();
+      g.fillStyle = "rgba(255,255,255,.5)"; g.fillText(`pré-délai ${f.predelay} ms · RT60 ${(+f.taille).toFixed(1)} s · niveau ${f.mix} %`, 12, 16);
+    } else if (k === "delay") {
+      const t = Math.min(2.4, DIVISION[f.delay ? f.delay.division : f.division] * 60 / bpm()), nb = 10, total = t * nb, x = s => 12 + s / total * (W - 24), mid = H / 2;
+      g.strokeStyle = "rgba(255,255,255,.12)"; g.beginPath(); g.moveTo(0, mid + .5); g.lineTo(W, mid + .5); g.stroke();
+      g.fillStyle = "rgba(255,255,255,.35)"; g.font = "9px ui-monospace,Menlo,monospace"; g.fillText("L", 2, 12); g.fillText("R", 2, H - 4);
+      g.fillStyle = "#fff"; g.fillRect(x(0) - 1.5, mid - (H / 2 - 12), 3, (H - 24));
+      for (let i = 1; i <= nb; i++) { const a = Math.pow(f.retour / 100, i - 1) * (.35 + f.mix / 100 * .65), hh = a * (H / 2 - 14), haut = !f.pingpong || i % 2 === 1;
+        const sombre = Math.pow(f.filtre / 10000, i * .35); g.fillStyle = coul.replace("rgb(", "rgba(").replace(")", "," + (.25 + .75 * sombre) + ")");
+        const px = x(i * t) - 2; if (f.pingpong) g.fillRect(px, haut ? mid - hh : mid, 4, hh); else g.fillRect(px, mid - hh, 4, hh * 2); }
+      // les deux bobines de la bande, en haut a droite, tournent au tempo
+      const rot = performance.now() / 1000 * bpm() / 60 * Math.PI * .5;
+      [[W - 70, 26], [W - 28, 26]].forEach(([rx, ry], j) => { g.save(); g.translate(rx, ry); g.rotate(rot * (j ? 1.15 : 1)); g.strokeStyle = "rgba(255,230,190,.55)"; g.lineWidth = 1.5;
+        g.beginPath(); g.arc(0, 0, 15, 0, Math.PI * 2); g.stroke(); g.beginPath(); g.arc(0, 0, 4, 0, Math.PI * 2); g.stroke();
+        for (let r2 = 0; r2 < 3; r2++) { const a2 = r2 * Math.PI * 2 / 3; g.beginPath(); g.moveTo(Math.cos(a2) * 5, Math.sin(a2) * 5); g.lineTo(Math.cos(a2) * 13, Math.sin(a2) * 13); g.stroke(); } g.restore(); });
+      g.strokeStyle = "rgba(255,230,190,.35)"; g.beginPath(); g.moveTo(W - 70, 41); g.lineTo(W - 28, 41); g.stroke();
+      g.fillStyle = "rgba(255,255,255,.5)"; g.fillText(`${(t * 1000).toFixed(0)} ms (${(FX.find(z => z.k === "delay").divisions.find(d => d[0] === f.division) || [, ""])[1]} à ${bpm()} BPM)`, 18, 12);
+    } else if (k === "autotune") {
+      const h = (n && n.atHist) || [], cl = clavierDe(f);
+      const vus = h.filter(e => e.m > 0).map(e => e.m), centre = vus.length ? vus.slice(-60).sort((a, b) => a - b)[Math.floor(Math.min(60, vus.length) / 2)] : 57, plage = 7;
+      const y = m => H / 2 - (m - centre) / plage * (H / 2 - 6), Wg = W;
+      g.font = "9px ui-monospace,Menlo,monospace";
+      for (let m = Math.floor(centre - plage); m <= Math.ceil(centre + plage); m++) { const nn = ((m % 12) + 12) % 12, yy = Math.round(y(m)) + .5;
+        const vise = cl.touches[nn] === "1", libre = cl.touches[nn] === "b";
+        g.strokeStyle = vise ? "rgba(255,255,255,.14)" : libre ? "rgba(245,165,36,.25)" : "rgba(255,255,255,.035)"; g.setLineDash(libre ? [4, 4] : []);
+        g.beginPath(); g.moveTo(26, yy); g.lineTo(Wg, yy); g.stroke(); g.setLineDash([]);
+        if (vise || libre) { g.fillStyle = vise ? "rgba(255,255,255,.4)" : "rgba(245,165,36,.6)"; g.fillText(NOTES_EN[nn] + (Math.floor(m / 12) - 1), 2, yy + 3); } }
+      const pas = (Wg - 26) / 260, trace = (cle, couleur, larg) => { g.beginPath(); let en = false; h.forEach((e, i) => { const v = cle(e); const px = 26 + (260 - h.length + i) * pas; if (v > 0) { en ? g.lineTo(px, y(v)) : g.moveTo(px, y(v)); en = true; } else en = false; }); g.strokeStyle = couleur; g.lineWidth = larg; g.stroke(); };
+      trace(e => e.m, "rgba(255,255,255,.75)", 1.5);                                    // ce qui est chante
+      trace(e => e.m > 0 ? e.m + 12 * Math.log2(e.r || 1) : 0, coul, 2.2);               // ce qui sort
+      const d = h[h.length - 1], note = boite.querySelector("[data-at-note]"), aig = boite.querySelector("[data-at-aig]"), ct = boite.querySelector("[data-at-ct]");
+      if (d && d.m > 0 && d.c) { const nn = ((Math.round(d.c) % 12) + 12) % 12, ec = Math.round((d.m - d.c) * 100);
+        note.textContent = NOTES_EN[nn] + (Math.floor(Math.round(d.c) / 12) - 1); aig.style.left = `${50 + Math.max(-50, Math.min(50, ec))}%`; aig.classList.toggle("juste", Math.abs(ec) < 10); ct.textContent = `${ec > 0 ? "+" : ""}${ec} ct`; }
+      else if (!h.length) { note.textContent = "—"; ct.textContent = joueStudio() ? "en attente de voix" : "Lance la lecture"; }
+    }
+    g.globalAlpha = 1;
+    visuRAF = requestAnimationFrame(() => setTimeout(visualiser, 33));
+  }
+  // egaliseur : glisser un point regle sa frequence (horizontal) et son gain (vertical)
+  pan.addEventListener("pointerdown", e => {
+    const cv = e.target.closest('.plug-vis[data-vis="eq"] canvas'); if (!cv) return;
+    const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    const pt = eqPoints.find(q => Math.hypot(q.x - x, q.y - y) < 14); if (!pt) return;
+    e.preventDefault(); cv.setPointerCapture(e.pointerId); memoriser(); eqDrag = { i: pt.i, gk: pt.gk, fk: pt.fk, cv };
+  });
+  pan.addEventListener("pointermove", e => {
+    if (!eqDrag) return;
+    const p = pisteCible(), f = p.fx.eq, r = eqDrag.cv.getBoundingClientRect(), W = r.width, H = r.height;
+    const x = clamp(e.clientX - r.left, 0, W), y = clamp(e.clientY - r.top, 0, H);
+    const lim = { basF: [60, 500], midF: [300, 5000], hautF: [2000, 14000] }[eqDrag.fk];
+    f[eqDrag.fk] = Math.round(clamp(20 * Math.pow(1000, x / W), lim[0], lim[1]));
+    f[eqDrag.gk] = Math.round(clamp((H / 2 - y) / (H / 2 - 8) * 15, -15, 15) * 2) / 2;
+    if (!f.on) f.on = true;
+    p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif());
+    // les boutons rotatifs suivent
+    [eqDrag.fk, eqDrag.gk].forEach(c => { const kn = pan.querySelector(`.kn[data-cle="fx.eq.${c}"]`); if (kn) { peindreBouton(kn, f[c]); kn.querySelector(".kn-v").textContent = afficher(f[c], kn.dataset.u); } });
+    const rs = corps.querySelector('[data-resume="eq"]'); if (rs) rs.textContent = resume("eq", f);
+  });
+  pan.addEventListener("pointerup", () => { if (eqDrag) { eqDrag = null; sauver(); } });
   pan.addEventListener("click", e => {
     const o = e.target.closest("[data-onglet]"); if (o) { onglet = o.dataset.onglet; pan.classList.remove("ferme"); panneau(); return; }
     if (e.target.closest("#dawReplier")) { pan.classList.toggle("ferme"); return; }
     const ouv = e.target.closest("[data-ouvrir]");
-    if (ouv && !e.target.closest("[data-fxon]")) { fxOuvert = ouv.dataset.ouvrir; panneau(); return; }
+    if (ouv && !e.target.closest("[data-fxon]")) { fxOuvert = ouv.dataset.ouvrir; panneau(); reglerTout(); return; }
+    const tch = e.target.closest("[data-touche]");
+    if (tch) { const p = pisteCible(), a = p.fx.autotune, cl = clavierDe(a), i = +tch.dataset.touche;
+      // visee -> libre -> retiree -> visee
+      const suiv = { "1": "b", "b": "0", "0": "1" }[cl.touches[i]];
+      memoriser(); a.clavier = cl.touches.slice(0, i) + suiv + cl.touches.slice(i + 1); if (a.type === "prod" || a.type === "chroma") a.type = a.type;
+      p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; }
     const on = e.target.closest("[data-fxon]");
     if (on) { const p = pisteCible(), f = p.fx[on.dataset.fxon]; memoriser(); f.on = !f.on; p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); panneau(); dessiner(); sauver(); return; }
     const a = e.target.closest("[data-act]")?.dataset.act;
@@ -1432,7 +1776,8 @@ const STUDIO = (() => {
       if (k === "autotune" && t.value === "cle" && !p.fx.autotune.cleChoisie) { const c = lireCle(prod && prod.key); if (c) Object.assign(p.fx.autotune, { tonique: String(c.tonique), gamme: c.gamme }); }
       if (FX.find(f => f.k === k).menus) { p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; }
     }
-    else if (t.dataset.fxmenu) { const [k, c] = t.dataset.fxmenu.split("."); memoriser(); p.fx[k][c] = t.value; p.fx[k].cleChoisie = true; }
+    else if (t.dataset.fxmenu) { const [k, c] = t.dataset.fxmenu.split("."); memoriser(); p.fx[k][c] = t.value;
+      if (c === "tonique" || c === "gamme") { p.fx[k].cleChoisie = true; p.fx[k].clavier = ""; p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; } }
     else if (t.dataset.fxcase) { const [k, c] = t.dataset.fxcase.split("."); memoriser(); p.fx[k][c] = t.checked; }
     else if (t.dataset.act === "import") { importer(t.files[0]); return; }
     else return;
@@ -1756,8 +2101,8 @@ const STUDIO = (() => {
       }
       const ns = new Map(P.pistes.map(p => { const n = chaine(oc, b); regler(n, p, solo); return [p.id, n]; }));
       for (const k of P.clips) {
-        const n = ns.get(k.piste), buf = BUF.get(k.prise); if (!n || !buf) continue;
-        const debut = k.start - dec, dans = Math.max(0, -debut), when = Math.max(0, debut);
+        const n = ns.get(k.piste), buf = BUF.get(k.prise), pi = P.pistes.find(x => x.id === k.piste); if (!n || !buf) continue;
+        const debut = k.start - dec - (pi ? avanceAT(pi) : 0), dans = Math.max(0, -debut), when = Math.max(0, debut);
         if (dans >= k.dur) continue;
         const s = oc.createBufferSource(); s.buffer = buf;
         const g = oc.createGain(); s.connect(g); g.connect(n.entree);
@@ -1819,6 +2164,10 @@ const STUDIO = (() => {
   $("dawRec").onclick = enregistrer;
   $("dawCouper").onclick = couper;
   $("dawSuppr").onclick = supprimer;
+  // plein ecran : le studio seul, sur tout l'ecran (la prod YouTube continue de jouer derriere)
+  const pleinEcran = () => { if (document.fullscreenElement) document.exitFullscreen?.(); else el.requestFullscreen?.().catch(() => message("Plein écran indisponible ici")); };
+  $("dawPlein").onclick = pleinEcran;
+  document.addEventListener("fullscreenchange", () => { $("dawPlein").setAttribute("aria-pressed", String(document.fullscreenElement === el)); setTimeout(() => { dessiner(); visualiser(); }, 120); });
   $("dawTitreBtn").onclick = renommer;
   $("dawDupliquer").onclick = dupliquer;
   $("dawAnnuler").onclick = annuler;
@@ -1867,6 +2216,7 @@ const STUDIO = (() => {
     else if (k === "s") couper();
     else if (k === "d") dupliquer();
     else if (k === "r") enregistrer();
+    else if (k === "f") pleinEcran();
     else if (k === "backspace" || k === "delete") supprimer();
     else if (k === "enter" || k === "home") positionner(0);
     else if (k === "escape") { if (rec) arreterRec("bouton"); else if (sel) { sel = null; dessiner(); inspecteur(); outils(); } else if (!el.classList.contains("inline")) fermer(); }
