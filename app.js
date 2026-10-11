@@ -1584,16 +1584,33 @@ function majHits(){
   const n = {}; BEATS.forEach(b => { if (PROD_SLUG.has(b.prod)) n[b.prod] = (n[b.prod] || 0) + 1; });
   const bms = Object.keys(n).map(p => [p, colle(p)]).filter(x => x[1]).sort((x, y) => y[1] - x[1] || n[y[0]] - n[x[0]]).slice(0, 4);
   if (!arts.length && !bms.length) { elHits.hidden = true; elHits.innerHTML = ""; return; }
+  /* Une meme forme pour les deux : photo carree entiere (Deezer et YouTube la donnent
+     carree, un rond en coupait les coins), nom, nature et nombre de prods. */
+  const fiches = arts.map(([a, sc]) => ({ sc, href: lienArtiste(a.id), nom: a.name, img: photoArtiste(a.id).replace("1000x1000", "500x500"),
+      c: `var(--s-${ARTIST_STYLE[a.id]})`, nature: "Artiste", style: STYLE_NAME[ARTIST_STYLE[a.id]] || "", n: ARTIST_N[a.id], unite: "type beat" }))
+    .concat(bms.map(([p, sc]) => { const b = BEATS.find(x => x.prod === p); return { sc, href: lienProd(p), nom: p, img: avatarDe(p),
+      c: b ? `var(--s-${b.style})` : "var(--thumb)", nature: "Beatmaker", style: b ? STYLE_NAME[b.style] || "" : "", n: n[p], unite: "prod" }; }));
+  // le meilleur resultat : le nom le plus proche de la saisie ; a egalite, un artiste
+  const top = fiches.reduce((m, f) => f.sc > m.sc ? f : m, fiches[0]);
+  const autres = fiches.filter(f => f !== top);
+  const nb = f => `${f.n} ${f.unite}${f.n > 1 ? "s" : ""}`;
   const fleche = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg>';
-  const rond = (img, nom, c) => `<span class="qh-rond" style="--c:${c}">${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : esc((nom.replace(/^prod\.?\s*/i, "")[0] || "?").toUpperCase())}</span>`;
-  elHits.innerHTML = arts.map(([a, sc]) => `<a class="qh${sc === 3 ? " exact" : ""}" href="${lienArtiste(a.id)}" data-vue="prods">
-      ${rond(photoArtiste(a.id).replace("1000x1000", "250x250"), a.name, `var(--s-${ARTIST_STYLE[a.id]})`)}
-      <span class="qh-txt"><b>${esc(a.name)}</b><small>Artiste · ${ARTIST_N[a.id]} type beat${ARTIST_N[a.id] > 1 ? "s" : ""}</small></span>
-      <span class="qh-go">${fleche}</span></a>`).join("")
-    + bms.map(([p, sc]) => { const b = BEATS.find(x => x.prod === p); return `<a class="qh${sc === 3 ? " exact" : ""}" href="${lienProd(p)}" data-vue="prods">
-      ${rond(avatarDe(p), p, b ? `var(--s-${b.style})` : "var(--thumb)")}
-      <span class="qh-txt"><b>${esc(p)}</b><small>Beatmaker · ${n[p]} prod${n[p] > 1 ? "s" : ""}</small></span>
-      <span class="qh-go">${fleche}</span></a>`; }).join("");
+  const photo = (f, cls) => `<span class="${cls}" style="--c:${f.c}">${f.img ? `<img src="${esc(f.img)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<i>${esc((f.nom.replace(/^prod\.?\s*/i, "")[0] || "?").toUpperCase())}</i>`}</span>`;
+  elHits.innerHTML = `<a class="qh-top" href="${top.href}" data-vue="prods" style="--c:${top.c}">
+      ${top.img ? `<span class="qh-fond" style="background-image:url('${esc(top.img)}')"></span>` : ""}
+      ${photo(top, "qh-photo")}
+      <span class="qh-in">
+        <span class="qh-sur">${top.nature}${top.style ? ` · ${esc(top.style)}` : ""}</span>
+        <b class="qh-nom">${esc(top.nom)}</b>
+        <span class="qh-nb">${nb(top)}</span>
+        <span class="qh-voir">Voir la page${fleche}</span>
+      </span>
+    </a>`
+    + autres.map(f => `<a class="qh-tuile" href="${f.href}" data-vue="prods">
+      ${photo(f, "qh-carre")}
+      <b>${esc(f.nom)}</b>
+      <small>${f.nature} · ${nb(f)}</small>
+    </a>`).join("");
   elHits.hidden = false;
 }
 
