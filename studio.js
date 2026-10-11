@@ -245,6 +245,9 @@ const STUDIO = (() => {
   .fxc.detail .fx-aide{padding:9px 12px 0}
   .fxc.detail .fx-boutons{flex-wrap:wrap;row-gap:10px;padding:10px 12px 14px;gap:10px}
   .fxc .fx-aide{font-size:11px;color:var(--dim);margin:0;line-height:1.45}
+  .fx-menus{display:flex;gap:10px;flex-wrap:wrap;padding:9px 12px 0}
+  .fx-menus label{display:grid;gap:3px;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+  .fx-menus select{height:26px;min-width:120px;border:1px solid #0E0F11;border-radius:4px;background:#18191C;color:var(--lcd-ink);font:600 12px var(--sans);letter-spacing:0;text-transform:none;padding:0 6px;box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
   @media(max-width:1000px){ .dp-corps.rack{grid-template-columns:1fr 1fr} .dp-corps.rack .dp-bloc{grid-column:1/-1} }
   @media(max-width:640px){ .dp-corps.rack{grid-template-columns:1fr;max-height:300px;overflow-y:auto} }
   /* carte d'effet */
@@ -459,9 +462,29 @@ const STUDIO = (() => {
      compresseur → saturation → filtre → chorus/doubleur → panoramique → volume, puis deux
      departs paralleles : reverb (pre-delai, taille, brillance) et echo (cale sur le tempo,
      ping-pong). Un effet eteint est laisse a l'etat neutre, la chaine ne se reconstruit pas. */
+  /* gammes de l'autotune : intervalles depuis la tonique */
+  // noms des notes dans la langue du site (pas par le dictionnaire : « La » ou « Sol » sont aussi des noms d'artistes)
+  const NOTES = { en: ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"], es: ["Do", "Do♯", "Re", "Mi♭", "Mi", "Fa", "Fa♯", "Sol", "La♭", "La", "Si♭", "Si"] }[typeof LANG !== "undefined" ? LANG : "fr"]
+    || ["Do", "Do♯", "Ré", "Mi♭", "Mi", "Fa", "Fa♯", "Sol", "La♭", "La", "Si♭", "Si"];
+  const NOTES_EN = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+  const GAMMES = {
+    majeur:  { nom: "Majeure", int: [0, 2, 4, 5, 7, 9, 11], suffixe: "" },
+    mineur:  { nom: "Mineure", int: [0, 2, 3, 5, 7, 8, 10], suffixe: "m" },
+    harmo:   { nom: "Mineure harmonique", int: [0, 2, 3, 5, 7, 8, 11], suffixe: "m harm." },
+    pentaM:  { nom: "Pentatonique majeure", int: [0, 2, 4, 7, 9], suffixe: " penta" },
+    pentam:  { nom: "Pentatonique mineure", int: [0, 3, 5, 7, 10], suffixe: "m penta" }
+  };
+  const masqueDe = (tonique, gamme) => (GAMMES[gamme] || GAMMES.mineur).int.reduce((s, i) => s | (1 << ((+tonique + i) % 12)), 0);
+  // « Gm » -> { tonique: 7, gamme: "mineur" } ; null si illisible
+  const lireCle = cle => { const m = /^~?([A-G])([#b]?)(m?)/.exec(cle || ""); if (!m) return null;
+    const t = ({ C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0) + 12) % 12;
+    return { tonique: t, gamme: m[3] ? "mineur" : "majeur" }; };
   const FX = [
-    { k: "autotune", nom: "Autotune / pitch", types: [["prod", "Tonalité de la prod"], ["chroma", "Chromatique"], ["libre", "Sans correction"]],
-      p: [["vitesse", "Vitesse", 0, 200, 1, "ms", 15], ["demitons", "Transposition", -12, 12, 1, "dt", 0], ["mix", "Mélange", 0, 100, 1, "%", 100]] },
+    { k: "autotune", nom: "Autotune / pitch", types: [["prod", "Tonalité de la prod"], ["cle", "Choisir la tonalité"], ["chroma", "Chromatique"], ["libre", "Sans correction"]],
+      // menus montres seulement en mode « Choisir la tonalite »
+      menus: { si: "cle", liste: [["tonique", "Note", NOTES.map((n, i) => [String(i), n])], ["gamme", "Gamme", Object.entries(GAMMES).map(([c, g]) => [c, g.nom])]] },
+      p: [["vitesse", "Vitesse", 0, 200, 1, "ms", 15], ["humain", "Humanize", 0, 100, 1, "%", 0], ["tolerance", "Tolérance", 0, 50, 1, "ct", 0],
+          ["demitons", "Pitch", -12, 12, 1, "dt", 0], ["diapason", "Diapason", 430, 450, .5, "Hz", 440], ["mix", "Mélange", 0, 100, 1, "%", 100]] },
     { k: "hpf", nom: "Coupe-bas", p: [["freq", "Fréquence", 20, 400, 1, "Hz", 80]] },
     { k: "eq", nom: "Égaliseur", p: [["bas", "Graves", -15, 15, .5, "dB", 0], ["basF", "F. graves", 60, 500, 1, "Hz", 200],
       ["mid", "Médiums", -15, 15, .5, "dB", 0], ["midF", "F. médiums", 300, 5000, 10, "Hz", 1500], ["midQ", "Largeur", .3, 5, .1, "", 1],
@@ -478,7 +501,7 @@ const STUDIO = (() => {
       p: [["retour", "Répétitions", 0, 85, 1, "%", 22], ["filtre", "Brillance", 800, 10000, 100, "Hz", 3200], ["mix", "Niveau", 0, 100, 1, "%", 10]], cases: [["pingpong", "Ping-pong"]] }
   ];
   const AIDE = {
-    autotune: "Cale la voix sur les notes de la tonalité. Vitesse 0 = effet robot assumé, 30 ms et plus = correction discrète. Transposition : pitche la voix (ad-libs une octave en dessous…).",
+    autotune: "Cale la voix sur les notes de la gamme. Vitesse 0 = effet robot, 30 ms et plus = correction discrète. Humanize adoucit la correction sur les notes tenues. Tolérance : en dessous de cet écart (centièmes de demi-ton), la voix n'est pas touchée. Diapason : le La de référence, si la prod n'est pas accordée à 440 Hz.",
     hpf: "Retire le grave inutile (souffle, pied de micro, plosives). À laisser sur presque toutes les voix.",
     eq: "Creuse ou renforce des zones : moins de « boue » vers 300–500 Hz, plus d'air dans les aigus.",
     comp: "Resserre les écarts de volume pour que la voix reste devant. Seuil bas = plus compressé.",
@@ -489,7 +512,8 @@ const STUDIO = (() => {
     delay: "Répète la voix en rythme, calé sur le tempo. Chaque répétition s'assombrit, comme sur une bande."
   };
   const resume = (k, v) => ({
-    autotune: () => [v.type === "libre" ? "sans correction" : `${Math.round(v.vitesse)} ms`, v.demitons ? `${v.demitons > 0 ? "+" : ""}${v.demitons} dt` : ""].filter(Boolean).join(" · "),
+    autotune: () => [v.type === "libre" ? "sans correction" : v.type === "cle" ? `${NOTES_EN[+v.tonique || 0]}${(GAMMES[v.gamme] || GAMMES.mineur).suffixe}` : v.type === "chroma" ? "chromatique" : "",
+      v.type === "libre" ? "" : `${Math.round(v.vitesse)} ms`, v.demitons ? `${v.demitons > 0 ? "+" : ""}${v.demitons} dt` : ""].filter(Boolean).join(" · "),
     hpf: () => `${Math.round(v.freq)} Hz`,
     eq: () => [v.bas && `${v.bas > 0 ? "+" : ""}${v.bas} graves`, v.mid && `${v.mid > 0 ? "+" : ""}${v.mid} méd.`, v.haut && `${v.haut > 0 ? "+" : ""}${v.haut} aigus`].filter(Boolean).join(" · ") || "à plat",
     comp: () => `${v.seuil} dB · ${v.ratio}:1`,
@@ -506,6 +530,7 @@ const STUDIO = (() => {
       f.p.forEach(([c, , , , , , d]) => o[f.k][c] = d);
       if (f.types) o[f.k].type = f.types[0][0];
       if (f.divisions) o[f.k].division = "1/4";
+      if (f.menus) { o[f.k].tonique = "9"; o[f.k].gamme = "mineur"; }
       (f.cases || []).forEach(([c]) => o[f.k][c] = true);
     }
     return o;
@@ -521,7 +546,7 @@ const STUDIO = (() => {
                 comp: { on: 1, seuil: -18, ratio: 3, attaque: 10, relache: 120, gain: 3 },
                 reverb: { on: 1, taille: .9, predelay: 15, amorti: 6500, mix: 9 } } },
     lead:     { nom: "Lead rap / pop", fx: {
-                autotune: { on: 1, type: "prod", vitesse: 45, demitons: 0, mix: 100 },
+                autotune: { on: 1, type: "prod", vitesse: 40, humain: 40, tolerance: 8, demitons: 0, mix: 100 },
                 hpf: { on: 1, freq: 100 },
                 eq: { on: 1, bas: 0, mid: -2.5, midF: 350, midQ: 1.1, haut: 3, hautF: 9500 },
                 comp: { on: 1, seuil: -22, ratio: 4, attaque: 4, relache: 90, gain: 5 },
@@ -606,7 +631,8 @@ const STUDIO = (() => {
   class FindingsAutotune extends AudioWorkletProcessor {
     constructor(){
       super();
-      this.on = false; this.mode = "prod"; this.vitesse = 15; this.demitons = 0; this.mix = 1; this.masque = 4095;
+      this.on = false; this.mode = "gamme"; this.vitesse = 15; this.humain = 0; this.tolerance = 0; this.diapason = 440; this.demitons = 0; this.mix = 1; this.masque = 4095;
+      this.note = null; this.tenue = 0; this.k = 1;
       this.port.onmessage = e => Object.assign(this, e.data);
       const sr = sampleRate;
       this.R = 2048; this.ds = new Float32Array(this.R); this.dp = 0; this.impair = false; this.acc = 0; this.pas = 0;
@@ -633,8 +659,8 @@ const STUDIO = (() => {
       return sampleRate / 2 / tau;
     }
     noteCible(f0){
-      const m = 69 + 12 * Math.log2(f0 / 440), r = Math.round(m);
-      if (this.mode === "chroma") return r;
+      const m = 69 + 12 * Math.log2(f0 / this.diapason), r = Math.round(m);
+      if (this.mode === "chroma" || this.masque === 4095) return r;
       let mieux = r, ecart = 99;
       for (let k = r - 6; k <= r + 6; k++) if (this.masque & (1 << (((k % 12) + 12) % 12))) { const e = Math.abs(k - m); if (e < ecart) { ecart = e; mieux = k; } }
       return mieux;
@@ -645,7 +671,7 @@ const STUDIO = (() => {
       if (!ent || !ent.length) { sor.fill(0); return true; }
       const a0 = ent[0], a1 = ent[1];
       if (!this.on) { for (let i = 0; i < sor.length; i++) sor[i] = a1 ? (a0[i] + a1[i]) * .5 : a0[i]; return true; }
-      const sr = sampleRate, k = this.vitesse > 0 ? 1 - Math.exp(-1 / (this.vitesse / 1000 * sr)) : 1;
+      const sr = sampleRate;
       const trans = Math.pow(2, this.demitons / 12), L = this.L, fen = this.fen;
       for (let i = 0; i < sor.length; i++) {
         const x = a1 ? (a0[i] + a1[i]) * .5 : a0[i];
@@ -655,11 +681,25 @@ const STUDIO = (() => {
           this.ds[this.dp] = this.acc * .5; this.acc = 0; this.dp = (this.dp + 1) % this.R;
           if (++this.pas >= 256) {
             this.pas = 0;
-            if (this.mode === "libre") this.cible = 1;
-            else { const f0 = this.detecter(); if (f0 > 0) { const m = 69 + 12 * Math.log2(f0 / 440); this.cible = Math.pow(2, (this.noteCible(f0) - m) / 12); } else this.cible += (1 - this.cible) * .3; }
+            const pasS = 512 / sr;
+            if (this.mode === "libre") { this.cible = 1; this.note = null; }
+            else {
+              const f0 = this.detecter();
+              if (f0 > 0) {
+                const m = 69 + 12 * Math.log2(f0 / this.diapason), n = this.noteCible(f0);
+                // tenue : depuis combien de temps on chante la meme note
+                this.tenue = n === this.note ? this.tenue + pasS : 0; this.note = n;
+                // tolerance : un ecart plus petit que le seuil (en cents) n'est pas corrige
+                this.cible = Math.abs(n - m) * 100 < this.tolerance ? 1 : Math.pow(2, (n - m) / 12);
+              } else { this.cible += (1 - this.cible) * .3; this.note = null; this.tenue = 0; }
+            }
+            // humanize : sur une note tenue, la correction ralentit (jusqu'a +400 ms) ; les
+            // attaques et les changements de note restent corriges a la vitesse choisie
+            const v = this.vitesse + this.humain * 400 * Math.min(1, this.tenue / .35);
+            this.k = v > 0 ? 1 - Math.exp(-1 / (v / 1000 * sr)) : 1;
           }
         }
-        this.corr += (this.cible - this.corr) * k;
+        this.corr += (this.cible - this.corr) * this.k;
         const ratio = this.corr * trans;
         // decalage de hauteur : deux tetes a une demi-fenetre l'une de l'autre, fondu en cloche
         this.buf[this.w] = x;
@@ -794,8 +834,10 @@ const STUDIO = (() => {
       const a = f.autotune;
       // la gamme de la prod seulement si sa tonalite est lue dans le titre : une tonalite
       // estimee (« ~ ») peut etre fausse et tirerait la voix vers les mauvaises notes
-      const gamme = a.type === "prod" && prod && prod.keySur ? masqueGamme(prod.key) : 0;
-      n.at.port.postMessage({ on: !!a.on, mode: a.type === "prod" && !gamme ? "chroma" : a.type, vitesse: a.vitesse, demitons: a.demitons, mix: a.mix / 100, masque: gamme || 4095 });
+      const gamme = a.type === "cle" ? masqueDe(a.tonique || 0, a.gamme) : a.type === "prod" && prod && prod.keySur ? masqueGamme(prod.key) : 0;
+      n.at.port.postMessage({ on: !!a.on, mode: (a.type === "prod" || a.type === "cle") ? (gamme ? "gamme" : "chroma") : a.type,
+        vitesse: a.vitesse, humain: (a.humain || 0) / 100, tolerance: a.tolerance || 0, diapason: a.diapason || 440,
+        demitons: a.demitons, mix: a.mix / 100, masque: gamme || 4095 });
     }
     n.hpf.frequency.value = on("hpf") ? f.hpf.freq : 10;
     n.eqB.frequency.value = f.eq.basF; n.eqB.gain.value = on("eq") ? f.eq.bas : 0;
@@ -1237,11 +1279,13 @@ const STUDIO = (() => {
   const versPos = (v, min, max, u) => LOG(u) ? Math.log(v / min) / Math.log(max / min) : (v - min) / (max - min);
   const versVal = (x, min, max, u) => LOG(u) ? min * Math.pow(max / min, x) : min + x * (max - min);
   const afficher = (v, u) => {
+    if (u === "Hz" && v < 1000 && v % 1) return `${(+v).toFixed(1)} Hz`;
     if (u === "Hz") return v >= 1000 ? `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)} kHz` : `${Math.round(v)} Hz`;
     if (u === "dB") return `${v > 0 ? "+" : ""}${(+v).toFixed(Math.abs(v) < 10 && v % 1 ? 1 : 0)} dB`;
     if (u === "%") return `${Math.round(v)} %`;
     if (u === "ms") return `${Math.round(v)} ms`;
     if (u === "dt") return `${v > 0 ? "+" : ""}${Math.round(v)} dt`;
+    if (u === "ct") return `${Math.round(v)} ct`;
     if (u === "s") return `${(+v).toFixed(1)} s`;
     if (u === ":1") return `${(+v).toFixed(v % 1 ? 1 : 0)}:1`;
     if (u === "pan") return Math.abs(v) < .02 ? "C" : (v < 0 ? "G" : "D") + Math.round(Math.abs(v) * 100);
@@ -1317,6 +1361,7 @@ const STUDIO = (() => {
             ${f.types ? `<select data-fxtype="${f.k}">${f.types.map(([c, n]) => `<option value="${c}"${v.type === c ? " selected" : ""}>${n}</option>`).join("")}</select>` : ""}
             ${f.divisions ? `<select data-fxdiv="${f.k}" title="Durée de l'écho, calée sur le tempo">${f.divisions.map(([c, n]) => `<option value="${c}"${v.division === c ? " selected" : ""}>${n}</option>`).join("")}</select>` : ""}
           </header>
+          ${f.menus && v.type === f.menus.si ? `<div class="fx-menus">${f.menus.liste.map(([c, n, opts]) => `<label>${esc(n)}<select data-fxmenu="${f.k}.${c}"${c === "tonique" ? ' translate="no"' : ""}>${opts.map(([o, l]) => `<option value="${o}"${String(v[c]) === o ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label>`).join("")}</div>` : ""}
           <p class="fx-aide">${AIDE[f.k]}</p>
           <div class="fx-boutons">${f.p.map(([c, n, min, max, pas, u, d]) => bouton(`fx.${f.k}.${c}`, n, min, max, pas, u, v[c], d)).join("")}</div>
           ${(f.cases || []).map(([c, n]) => `<label class="fx-case"><input type="checkbox" data-fxcase="${f.k}.${c}"${v[c] ? " checked" : ""}>${n}</label>`).join("")}
@@ -1381,12 +1426,18 @@ const STUDIO = (() => {
   });
   pan.addEventListener("change", e => {
     const p = pisteCible(), t = e.target;
-    if (t.dataset.fxtype || t.dataset.fxdiv) { memoriser(); p.fx[t.dataset.fxtype || t.dataset.fxdiv][t.dataset.fxtype ? "type" : "division"] = t.value; }
+    if (t.dataset.fxtype || t.dataset.fxdiv) {
+      memoriser(); const k = t.dataset.fxtype || t.dataset.fxdiv; p.fx[k][t.dataset.fxtype ? "type" : "division"] = t.value;
+      // passer en « Choisir la tonalite » part de celle de la prod quand on la connait
+      if (k === "autotune" && t.value === "cle" && !p.fx.autotune.cleChoisie) { const c = lireCle(prod && prod.key); if (c) Object.assign(p.fx.autotune, { tonique: String(c.tonique), gamme: c.gamme }); }
+      if (FX.find(f => f.k === k).menus) { p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; }
+    }
+    else if (t.dataset.fxmenu) { const [k, c] = t.dataset.fxmenu.split("."); memoriser(); p.fx[k][c] = t.value; p.fx[k].cleChoisie = true; }
     else if (t.dataset.fxcase) { const [k, c] = t.dataset.fxcase.split("."); memoriser(); p.fx[k][c] = t.checked; }
     else if (t.dataset.act === "import") { importer(t.files[0]); return; }
     else return;
     p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver();
-    const k = (t.dataset.fxtype || t.dataset.fxdiv || (t.dataset.fxcase || "").split(".")[0]), r = corps.querySelector(`[data-resume="${k}"]`); if (r) r.textContent = resume(k, p.fx[k]);
+    const k = (t.dataset.fxtype || t.dataset.fxdiv || (t.dataset.fxcase || t.dataset.fxmenu || "").split(".")[0]), r = corps.querySelector(`[data-resume="${k}"]`); if (r) r.textContent = resume(k, p.fx[k]);
   });
   /* tourner un bouton */
   let tour = null;
