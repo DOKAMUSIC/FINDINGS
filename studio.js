@@ -332,7 +332,10 @@ const STUDIO = (() => {
   const estLibre = () => !!prod && prod.id === "libre";
   const horlogeInterne = () => modeFichier() || estLibre();
 
-  const audio = () => { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); return ctx; };
+  const audio = () => {
+    if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); chargerAT(ctx).then(ok => { if (ok && P) construireNoeuds(); }); }
+    return ctx;
+  };
   const bpm = () => (P && P.bpm) || (prod && prod.bpm) || 120;
   const tps = () => 60 / bpm();              // un temps
   const mes = () => tps() * 4;               // une mesure (4 temps)
@@ -391,32 +394,36 @@ const STUDIO = (() => {
      departs paralleles : reverb (pre-delai, taille, brillance) et echo (cale sur le tempo,
      ping-pong). Un effet eteint est laisse a l'etat neutre, la chaine ne se reconstruit pas. */
   const FX = [
+    { k: "autotune", nom: "Autotune / pitch", types: [["prod", "Tonalité de la prod"], ["chroma", "Chromatique"], ["libre", "Sans correction"]],
+      p: [["vitesse", "Vitesse", 0, 200, 1, "ms", 15], ["demitons", "Transposition", -12, 12, 1, "dt", 0], ["mix", "Mélange", 0, 100, 1, "%", 100]] },
     { k: "hpf", nom: "Coupe-bas", p: [["freq", "Fréquence", 20, 400, 1, "Hz", 80]] },
     { k: "eq", nom: "Égaliseur", p: [["bas", "Graves", -15, 15, .5, "dB", 0], ["basF", "F. graves", 60, 500, 1, "Hz", 200],
       ["mid", "Médiums", -15, 15, .5, "dB", 0], ["midF", "F. médiums", 300, 5000, 10, "Hz", 1500], ["midQ", "Largeur", .3, 5, .1, "", 1],
       ["haut", "Aigus", -15, 15, .5, "dB", 0], ["hautF", "F. aigus", 2000, 14000, 50, "Hz", 7000]] },
     { k: "comp", nom: "Compresseur", p: [["seuil", "Seuil", -60, 0, 1, "dB", -20], ["ratio", "Ratio", 1, 20, .5, ":1", 4],
       ["attaque", "Attaque", 1, 100, 1, "ms", 6], ["relache", "Relâche", 20, 800, 5, "ms", 150], ["gain", "Gain", 0, 24, .5, "dB", 4]] },
-    { k: "sat", nom: "Saturation", p: [["drive", "Chaleur", 0, 100, 1, "%", 35], ["mix", "Mélange", 0, 100, 1, "%", 50]] },
+    { k: "sat", nom: "Saturation", p: [["drive", "Chaleur", 0, 100, 1, "%", 25], ["mix", "Mélange", 0, 100, 1, "%", 35]] },
     { k: "filtre", nom: "Filtre", types: [["tel", "Téléphone"], ["radio", "Radio"], ["pb", "Passe-bas"], ["ph", "Passe-haut"]],
       p: [["freq", "Fréquence", 100, 12000, 10, "Hz", 1700], ["q", "Résonance", .3, 12, .1, "", 1.2]] },
-    { k: "chorus", nom: "Chorus / doubleur", p: [["vitesse", "Vitesse", .1, 6, .05, "Hz", 1.1], ["profondeur", "Profondeur", 0, 100, 1, "%", 40], ["mix", "Mélange", 0, 100, 1, "%", 35]] },
-    { k: "reverb", nom: "Réverb", p: [["taille", "Taille", .3, 8, .1, "s", 2.2], ["predelay", "Pré-délai", 0, 200, 1, "ms", 20],
-      ["amorti", "Brillance", 800, 16000, 100, "Hz", 7000], ["mix", "Niveau", 0, 100, 1, "%", 25]] },
+    { k: "chorus", nom: "Doubleur", p: [["vitesse", "Vitesse", .1, 3, .05, "Hz", .4], ["profondeur", "Profondeur", 0, 100, 1, "%", 30], ["mix", "Mélange", 0, 100, 1, "%", 25]] },
+    { k: "reverb", nom: "Réverb", p: [["taille", "Taille", .3, 6, .1, "s", 1.4], ["predelay", "Pré-délai", 0, 200, 1, "ms", 25],
+      ["amorti", "Brillance", 1500, 14000, 100, "Hz", 6000], ["mix", "Niveau", 0, 100, 1, "%", 12]] },
     { k: "delay", nom: "Écho", divisions: [["1/4", "1/4"], ["1/8p", "1/8 pointée"], ["1/8", "1/8"], ["1/16", "1/16"], ["1/4t", "1/4 triolet"]],
-      p: [["retour", "Répétitions", 0, 90, 1, "%", 35], ["filtre", "Brillance", 500, 12000, 100, "Hz", 4000], ["mix", "Niveau", 0, 100, 1, "%", 20]], cases: [["pingpong", "Ping-pong"]] }
+      p: [["retour", "Répétitions", 0, 85, 1, "%", 22], ["filtre", "Brillance", 800, 10000, 100, "Hz", 3200], ["mix", "Niveau", 0, 100, 1, "%", 10]], cases: [["pingpong", "Ping-pong"]] }
   ];
   const AIDE = {
+    autotune: "Cale la voix sur les notes de la tonalité. Vitesse 0 = effet robot assumé, 30 ms et plus = correction discrète. Transposition : pitche la voix (ad-libs une octave en dessous…).",
     hpf: "Retire le grave inutile (souffle, pied de micro, plosives). À laisser sur presque toutes les voix.",
     eq: "Creuse ou renforce des zones : moins de « boue » vers 300–500 Hz, plus d'air dans les aigus.",
     comp: "Resserre les écarts de volume pour que la voix reste devant. Seuil bas = plus compressé.",
-    sat: "Ajoute de la chaleur et du grain, comme un passage dans une console ou une bande.",
+    sat: "Arrondit les crêtes et ajoute un peu de densité, comme un passage dans une console. À doser léger.",
     filtre: "Coupe une partie du spectre : effet téléphone ou radio pour les ad-libs et les intros.",
-    chorus: "Double et élargit la voix en stéréo : idéal pour les backs et les refrains.",
-    reverb: "Place la voix dans une pièce. Taille = longueur de la queue, pré-délai = détache la voix.",
-    delay: "Répète la voix en rythme, calé sur le tempo de la prod. Ping-pong = gauche puis droite."
+    chorus: "Ouvre la voix en stéréo comme une prise doublée, sans effet de vague : refrains et backs.",
+    reverb: "Place la voix dans une pièce. Taille = durée de la queue, pré-délai = détache la voix de sa réverb.",
+    delay: "Répète la voix en rythme, calé sur le tempo. Chaque répétition s'assombrit, comme sur une bande."
   };
   const resume = (k, v) => ({
+    autotune: () => [v.type === "libre" ? "sans correction" : `${Math.round(v.vitesse)} ms`, v.demitons ? `${v.demitons > 0 ? "+" : ""}${v.demitons} dt` : ""].filter(Boolean).join(" · "),
     hpf: () => `${Math.round(v.freq)} Hz`,
     eq: () => [v.bas && `${v.bas > 0 ? "+" : ""}${v.bas} graves`, v.mid && `${v.mid > 0 ? "+" : ""}${v.mid} méd.`, v.haut && `${v.haut > 0 ? "+" : ""}${v.haut} aigus`].filter(Boolean).join(" · ") || "à plat",
     comp: () => `${v.seuil} dB · ${v.ratio}:1`,
@@ -432,23 +439,77 @@ const STUDIO = (() => {
       o[f.k] = { on: f.k === "hpf" };
       f.p.forEach(([c, , , , , , d]) => o[f.k][c] = d);
       if (f.types) o[f.k].type = f.types[0][0];
-      if (f.divisions) o[f.k].division = "1/8p";
+      if (f.divisions) o[f.k].division = "1/4";
       (f.cases || []).forEach(([c]) => o[f.k][c] = true);
     }
     return o;
   };
-  /* Des reglages de depart, comme les presets d'un vrai studio. */
+  /* Des reglages de depart, comme les presets d'un vrai studio. Doses volontairement
+     legeres : une voix de rap ou de pop actuelle est seche et proche, la reverb et l'echo
+     s'entendent a peine seuls mais tiennent la voix dans la prod. */
   const PRESETS = {
-    brut:    { nom: "Brut (aucun effet)", fx: {} },
-    lead:    { nom: "Voix lead", fx: { hpf: { on: 1, freq: 90 }, eq: { on: 1, bas: -1.5, mid: -2, midF: 450, haut: 3 }, comp: { on: 1, seuil: -22, ratio: 4, gain: 5 },
-               reverb: { on: 1, taille: 1.8, mix: 18 }, delay: { on: 1, division: "1/8p", retour: 25, mix: 10 } } },
-    backs:   { nom: "Backs / chœurs", fx: { hpf: { on: 1, freq: 150 }, eq: { on: 1, bas: -4, haut: 2 }, comp: { on: 1, seuil: -24, ratio: 5, gain: 4 },
-               chorus: { on: 1, profondeur: 55, mix: 45 }, reverb: { on: 1, taille: 2.8, mix: 32 } } },
-    adlibs:  { nom: "Ad-libs", fx: { hpf: { on: 1, freq: 200 }, comp: { on: 1, seuil: -20, ratio: 6, gain: 5 }, delay: { on: 1, division: "1/8", retour: 45, mix: 28 }, reverb: { on: 1, taille: 2, mix: 22 } } },
-    tel:     { nom: "Téléphone", fx: { hpf: { on: 1, freq: 300 }, filtre: { on: 1, type: "tel", freq: 1700, q: 1.4 }, sat: { on: 1, drive: 45, mix: 60 }, comp: { on: 1, seuil: -18, ratio: 6, gain: 6 } } },
-    espace:  { nom: "Grand espace", fx: { hpf: { on: 1, freq: 120 }, reverb: { on: 1, taille: 5.5, predelay: 45, amorti: 5000, mix: 45 }, delay: { on: 1, division: "1/4", retour: 40, mix: 22 } } },
-    chaud:   { nom: "Chaud et saturé", fx: { hpf: { on: 1, freq: 80 }, eq: { on: 1, bas: 2, haut: -1.5 }, sat: { on: 1, drive: 60, mix: 55 }, comp: { on: 1, seuil: -24, ratio: 3, gain: 4 } } }
+    brut:     { nom: "Brut (aucun effet)", fx: {} },
+    naturel:  { nom: "Voix naturelle", fx: {
+                hpf: { on: 1, freq: 80 },
+                eq: { on: 1, bas: 0, mid: -2, midF: 320, midQ: 1, haut: 2, hautF: 10000 },
+                comp: { on: 1, seuil: -18, ratio: 3, attaque: 10, relache: 120, gain: 3 },
+                reverb: { on: 1, taille: .9, predelay: 15, amorti: 6500, mix: 9 } } },
+    lead:     { nom: "Lead rap / pop", fx: {
+                autotune: { on: 1, type: "prod", vitesse: 45, demitons: 0, mix: 100 },
+                hpf: { on: 1, freq: 100 },
+                eq: { on: 1, bas: 0, mid: -2.5, midF: 350, midQ: 1.1, haut: 3, hautF: 9500 },
+                comp: { on: 1, seuil: -22, ratio: 4, attaque: 4, relache: 90, gain: 5 },
+                sat: { on: 1, drive: 15, mix: 22 },
+                delay: { on: 1, division: "1/4", retour: 15, filtre: 2800, mix: 7, pingpong: false },
+                reverb: { on: 1, taille: 1.3, predelay: 30, amorti: 5500, mix: 9 } } },
+    refrain:  { nom: "Refrain large", fx: {
+                hpf: { on: 1, freq: 110 },
+                eq: { on: 1, bas: 0, mid: -2, midF: 400, midQ: 1, haut: 2.5, hautF: 10000 },
+                comp: { on: 1, seuil: -22, ratio: 4, attaque: 6, relache: 110, gain: 5 },
+                chorus: { on: 1, vitesse: .35, profondeur: 25, mix: 22 },
+                delay: { on: 1, division: "1/8p", retour: 14, filtre: 3200, mix: 7, pingpong: true },
+                reverb: { on: 1, taille: 1.8, predelay: 25, amorti: 6000, mix: 13 } } },
+    melo:     { nom: "Mélo / planant", fx: {
+                hpf: { on: 1, freq: 90 },
+                eq: { on: 1, bas: 0, mid: -1.5, midF: 300, midQ: 1, haut: 2, hautF: 11000 },
+                comp: { on: 1, seuil: -20, ratio: 3, attaque: 12, relache: 160, gain: 4 },
+                delay: { on: 1, division: "1/4", retour: 26, filtre: 2400, mix: 10, pingpong: true },
+                reverb: { on: 1, taille: 2.6, predelay: 45, amorti: 4200, mix: 17 } } },
+    backs:    { nom: "Backs / chœurs", fx: {
+                hpf: { on: 1, freq: 180 },
+                eq: { on: 1, bas: -3, basF: 250, mid: -2, midF: 2500, midQ: .9, haut: 1.5, hautF: 10000 },
+                comp: { on: 1, seuil: -26, ratio: 5, attaque: 8, relache: 140, gain: 4 },
+                chorus: { on: 1, vitesse: .3, profondeur: 35, mix: 35 },
+                reverb: { on: 1, taille: 2.1, predelay: 10, amorti: 4500, mix: 20 } } },
+    autotune: { nom: "Autotune marqué", fx: {
+                autotune: { on: 1, type: "prod", vitesse: 0, demitons: 0, mix: 100 },
+                hpf: { on: 1, freq: 100 },
+                eq: { on: 1, bas: 0, mid: -2, midF: 350, midQ: 1, haut: 3, hautF: 10000 },
+                comp: { on: 1, seuil: -22, ratio: 4, attaque: 4, relache: 90, gain: 5 },
+                delay: { on: 1, division: "1/4", retour: 18, filtre: 2800, mix: 8, pingpong: true },
+                reverb: { on: 1, taille: 1.6, predelay: 30, amorti: 5500, mix: 11 } } },
+    adlibs:   { nom: "Ad-libs", fx: {
+                hpf: { on: 1, freq: 220 },
+                eq: { on: 1, bas: 0, mid: 2, midF: 2000, midQ: .8, haut: 1, hautF: 9000 },
+                comp: { on: 1, seuil: -24, ratio: 6, attaque: 3, relache: 80, gain: 5 },
+                delay: { on: 1, division: "1/4", retour: 28, filtre: 2600, mix: 15, pingpong: true },
+                reverb: { on: 1, taille: 1.5, predelay: 20, amorti: 5000, mix: 11 } } },
+    grave:    { nom: "Ad-libs pitchés (grave)", fx: {
+                autotune: { on: 1, type: "libre", vitesse: 15, demitons: -12, mix: 100 },
+                hpf: { on: 1, freq: 90 },
+                comp: { on: 1, seuil: -22, ratio: 5, attaque: 4, relache: 90, gain: 4 },
+                delay: { on: 1, division: "1/4", retour: 20, filtre: 2400, mix: 10, pingpong: true },
+                reverb: { on: 1, taille: 1.4, predelay: 20, amorti: 4500, mix: 10 } } },
+    intro:    { nom: "Intro filtrée", fx: {
+                hpf: { on: 1, freq: 250 },
+                filtre: { on: 1, type: "tel", freq: 1600, q: .8 },
+                comp: { on: 1, seuil: -20, ratio: 4, attaque: 5, relache: 100, gain: 12 },   // le filtre retire ~10 dB : on les rend
+                sat: { on: 1, drive: 20, mix: 30 },
+                reverb: { on: 1, taille: .8, predelay: 10, amorti: 4000, mix: 8 } } }
   };
+  // preregles retires (Téléphone, Grand espace, Chaud et saturé) : la piste garde ses
+  // reglages, affiches comme « Réglages perso »
+  const presetValide = cle => cle === "perso" || !!PRESETS[cle];
   const appliquerPreset = (p, cle) => {
     const def = FX_DEF();
     for (const f of FX) def[f.k].on = false;
@@ -457,6 +518,7 @@ const STUDIO = (() => {
   };
   /* Les projets d'avant (reverb, echo, graves, aigus, compresseur en simple bouton) gardent leur son. */
   function migrer(p){
+    if (p.preset && !presetValide(p.preset)) p.preset = "perso";
     const f = p.fx || {};
     if (f.hpf) { const d = FX_DEF(); for (const k of Object.keys(d)) p.fx[k] = Object.assign(d[k], f[k] || {}); return; }
     const d = FX_DEF(); d.hpf.on = false;
@@ -468,17 +530,140 @@ const STUDIO = (() => {
   }
   const actifs = p => FX.filter(f => p.fx[f.k] && p.fx[f.k].on).length;
 
-  function impulsion(c, taille = 2.2){
-    const sr = c.sampleRate, n = Math.max(1, Math.floor(sr * taille)), b = c.createBuffer(2, n, sr);
+  /* ── Autotune / pitch : un processeur audio dedie (AudioWorklet), charge une fois par
+     contexte (celui du studio, et celui de chaque export). Il detecte la note chantee
+     (algorithme YIN, sur le signal sous-echantillonne de moitie), choisit la note la plus
+     proche dans la gamme, puis decale la hauteur avec deux tetes de lecture croisees sur
+     une ligne a retard (fenetre de 28 ms). La vitesse lisse le passage vers la note cible :
+     0 = saut instantane, l'effet robot. Eteint, il laisse passer la voix telle quelle. ── */
+  const CODE_AT = `
+  class FindingsAutotune extends AudioWorkletProcessor {
+    constructor(){
+      super();
+      this.on = false; this.mode = "prod"; this.vitesse = 15; this.demitons = 0; this.mix = 1; this.masque = 4095;
+      this.port.onmessage = e => Object.assign(this, e.data);
+      const sr = sampleRate;
+      this.R = 2048; this.ds = new Float32Array(this.R); this.dp = 0; this.impair = false; this.acc = 0; this.pas = 0;
+      this.W = 512; this.tmax = Math.min(400, Math.floor(sr / 2 / 65)); this.tmin = Math.floor(sr / 2 / 1100);
+      this.lin = new Float32Array(this.W + this.tmax + 1); this.d = new Float32Array(this.tmax + 1);
+      this.corr = 1; this.cible = 1;
+      this.L = 16384; this.buf = new Float32Array(this.L); this.w = 0;
+      this.fen = Math.round(.028 * sr); this.phase = 0;
+    }
+    detecter(){
+      const R = this.R, n = this.W + this.tmax; let i0 = (this.dp - n + R) % R, e = 0;
+      for (let i = 0; i < n; i++) { const v = this.ds[(i0 + i) % R]; this.lin[i] = v; e += v * v; }
+      if (e / n < 4e-5) return 0;                       // silence ou souffle : pas de note
+      const x = this.lin, W = this.W, d = this.d; let somme = 0, best = -1;
+      d[0] = 1;
+      for (let t = 1; t <= this.tmax; t++) {
+        let s = 0; for (let j = 0; j < W; j++) { const u = x[j] - x[j + t]; s += u * u; }
+        somme += s; d[t] = somme > 0 ? s * t / somme : 1;
+      }
+      for (let t = this.tmin; t <= this.tmax; t++) if (d[t] < .15) { while (t + 1 <= this.tmax && d[t + 1] < d[t]) t++; best = t; break; }
+      if (best < 0) return 0;
+      const a = d[best - 1] || d[best], b = d[best], c = d[best + 1] || d[best], den = a - 2 * b + c;
+      const tau = best + (den ? .5 * (a - c) / den : 0);
+      return sampleRate / 2 / tau;
+    }
+    noteCible(f0){
+      const m = 69 + 12 * Math.log2(f0 / 440), r = Math.round(m);
+      if (this.mode === "chroma") return r;
+      let mieux = r, ecart = 99;
+      for (let k = r - 6; k <= r + 6; k++) if (this.masque & (1 << (((k % 12) + 12) % 12))) { const e = Math.abs(k - m); if (e < ecart) { ecart = e; mieux = k; } }
+      return mieux;
+    }
+    process(inputs, outputs){
+      const ent = inputs[0], sor = outputs[0][0];
+      if (!sor) return true;
+      if (!ent || !ent.length) { sor.fill(0); return true; }
+      const a0 = ent[0], a1 = ent[1];
+      if (!this.on) { for (let i = 0; i < sor.length; i++) sor[i] = a1 ? (a0[i] + a1[i]) * .5 : a0[i]; return true; }
+      const sr = sampleRate, k = this.vitesse > 0 ? 1 - Math.exp(-1 / (this.vitesse / 1000 * sr)) : 1;
+      const trans = Math.pow(2, this.demitons / 12), L = this.L, fen = this.fen;
+      for (let i = 0; i < sor.length; i++) {
+        const x = a1 ? (a0[i] + a1[i]) * .5 : a0[i];
+        // detection : sous-echantillonnage par 2, une analyse tous les 256 points
+        this.acc += x; this.impair = !this.impair;
+        if (!this.impair) {
+          this.ds[this.dp] = this.acc * .5; this.acc = 0; this.dp = (this.dp + 1) % this.R;
+          if (++this.pas >= 256) {
+            this.pas = 0;
+            if (this.mode === "libre") this.cible = 1;
+            else { const f0 = this.detecter(); if (f0 > 0) { const m = 69 + 12 * Math.log2(f0 / 440); this.cible = Math.pow(2, (this.noteCible(f0) - m) / 12); } else this.cible += (1 - this.cible) * .3; }
+          }
+        }
+        this.corr += (this.cible - this.corr) * k;
+        const ratio = this.corr * trans;
+        // decalage de hauteur : deux tetes a une demi-fenetre l'une de l'autre, fondu en cloche
+        this.buf[this.w] = x;
+        this.phase += (1 - ratio) / fen; this.phase -= Math.floor(this.phase);
+        let y = 0;
+        for (let h = 0; h < 2; h++) {
+          const ph = (this.phase + h * .5) % 1, del = ph * fen + 1;
+          let pos = this.w - del; if (pos < 0) pos += L;
+          const i0 = Math.floor(pos), fr = pos - i0, s0 = this.buf[i0], s1 = this.buf[(i0 + 1) % L];
+          y += (s0 + (s1 - s0) * fr) * (.5 - .5 * Math.cos(2 * Math.PI * ph));
+        }
+        this.w = (this.w + 1) % L;
+        sor[i] = x * (1 - this.mix) + y * this.mix;
+      }
+      return true;
+    }
+  }
+  registerProcessor("findings-autotune", FindingsAutotune);`;
+  const AT_PRET = new WeakSet(), AT_CHARGE = new WeakMap();
+  function chargerAT(c){
+    if (!c.audioWorklet) return Promise.resolve(false);
+    if (!AT_CHARGE.has(c)) {
+      const url = URL.createObjectURL(new Blob([CODE_AT], { type: "application/javascript" }));
+      AT_CHARGE.set(c, c.audioWorklet.addModule(url).then(() => { AT_PRET.add(c); return true; }).catch(() => false));
+    }
+    return AT_CHARGE.get(c);
+  }
+  // gamme de la prod (« Am », « F#m », « Eb ») en masque de 12 notes ; chromatique sans tonalite connue
+  function masqueGamme(cle){
+    const m = /^~?([A-G])([#b]?)(m?)/.exec(cle || "");
+    if (!m) return 4095;
+    const base = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0);
+    const int = m[3] ? [0, 2, 3, 5, 7, 8, 10] : [0, 2, 4, 5, 7, 9, 11];
+    return int.reduce((s, i) => s | (1 << ((base + i + 12) % 12)), 0);
+  }
+
+  /* Reponse de salle : quelques reflexions precoces espacees, puis une queue de bruit qui
+     decroit en exponentielle (-60 dB a « taille » secondes) et s'assombrit en vieillissant,
+     comme l'air et les murs qui absorbent d'abord les aigus. Les deux canaux sont tires
+     separement : la queue est large sans effet de phase. L'ancienne version (bruit blanc
+     decroissant, aussi brillant a la fin qu'au debut) sonnait metallique. */
+  function impulsion(c, taille = 1.4){
+    const sr = c.sampleRate, n = Math.max(1, Math.floor(sr * taille * 1.15)), b = c.createBuffer(2, n, sr);
+    const k = Math.log(1000) / (taille * sr);            // -60 dB a « taille »
     for (let ch = 0; ch < 2; ch++) {
       const d = b.getChannelData(ch);
-      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3.2) * (i < sr * .012 ? i / (sr * .012) : 1);
+      let lp = 0, alea = ch ? 0x9e3779b9 : 0x7f4a7c15;
+      const hasard = () => { alea ^= alea << 13; alea ^= alea >>> 17; alea ^= alea << 5; return ((alea >>> 0) / 4294967296) * 2 - 1; };
+      const debut = Math.floor(sr * .018);               // la queue se leve sur 18 ms
+      for (let i = 0; i < n; i++) {
+        const t = i / n;
+        // filtre passe-bas d'un pole dont la coupure descend de ~11 kHz a ~2 kHz
+        const fc = 11000 * Math.pow(2000 / 11000, Math.min(1, t * 1.4));
+        const a1 = Math.exp(-2 * Math.PI * fc / sr);
+        lp = (1 - a1) * hasard() + a1 * lp;
+        const env = Math.exp(-k * i) * (i < debut ? i / debut : 1);
+        d[i] = lp * env;
+      }
+      // reflexions precoces : 6 echos francs entre 7 et 55 ms, differents a gauche et a droite
+      const temps = ch ? [9, 17, 26, 33, 44, 55] : [7, 13, 21, 30, 39, 51];
+      temps.forEach((ms, j) => { const i = Math.floor(sr * ms / 1000); if (i < n) d[i] += (j % 2 ? -1 : 1) * .5 * Math.pow(.78, j); });
     }
     return b;
   }
+  /* Saturation douce : tangente hyperbolique legerement decentree (harmoniques paires,
+     le grain « lampe »), divisee par son gain pour rester a l'unite sur les passages calmes.
+     Seules les crêtes s'arrondissent ; l'ancienne courbe faisait une fuzz des 35 %. */
   const courbe = drive => {
-    const k = drive / 100 * 40, n = 2048, c = new Float32Array(n);
-    for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; c[i] = (1 + k) * x / (1 + k * Math.abs(x)); }
+    const g = 1 + drive / 100 * 7, b = .12, n = 4096, c = new Float32Array(n), z = Math.tanh(g * b);
+    for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; c[i] = (Math.tanh(g * (x + b)) - z) / g; }
     return c;
   };
   const DIVISION = { "1/4": 1, "1/8p": .75, "1/8": .5, "1/16": .25, "1/4t": 2 / 3 };
@@ -494,12 +679,13 @@ const STUDIO = (() => {
   function chaine(c, b){
     const G = () => c.createGain(), F = t => { const f = c.createBiquadFilter(); f.type = t; return f; };
     const n = { c, entree: G() };
+    n.at = AT_PRET.has(c) ? new AudioWorkletNode(c, "findings-autotune", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1] }) : G();
     n.hpf = F("highpass"); n.eqB = F("lowshelf"); n.eqM = F("peaking"); n.eqH = F("highshelf");
     n.comp = c.createDynamicsCompressor(); n.compG = G();
-    n.satSec = G(); n.ws = c.createWaveShaper(); n.ws.oversample = "2x"; n.satHum = G(); n.satSom = G();
+    n.satSec = G(); n.ws = c.createWaveShaper(); n.ws.oversample = "4x"; n.satHum = G(); n.satSom = G();
     n.filtre = F("allpass");
     n.chSec = G(); n.chHum = G(); n.chSom = G();
-    n.chD1 = c.createDelay(.1); n.chD2 = c.createDelay(.1); n.chD1.delayTime.value = .012; n.chD2.delayTime.value = .017;
+    n.chD1 = c.createDelay(.1); n.chD2 = c.createDelay(.1); n.chD1.delayTime.value = .014; n.chD2.delayTime.value = .023;
     n.osc = c.createOscillator(); n.oscG1 = G(); n.oscG2 = G(); n.osc.connect(n.oscG1); n.osc.connect(n.oscG2);
     n.oscG1.connect(n.chD1.delayTime); n.oscG2.connect(n.chD2.delayTime); n.osc.start();
     const p1 = c.createStereoPanner ? c.createStereoPanner() : G(), p2 = c.createStereoPanner ? c.createStereoPanner() : G();
@@ -508,13 +694,15 @@ const STUDIO = (() => {
     n.fader = G();
     n.mesure = c.createAnalyser ? c.createAnalyser() : null; if (n.mesure) n.mesure.fftSize = 512;
     // reverb : depart → pre-delai → convolution → brillance → retour
-    n.revDep = G(); n.revPre = c.createDelay(.5); n.conv = c.createConvolver(); n.revLP = F("lowpass");
+    n.revDep = G(); n.revPre = c.createDelay(.5); n.conv = c.createConvolver(); n.revLP = F("lowpass"); n.revHP = F("highpass");
+    n.revHP.frequency.value = 220;   // une reverb sans grave : la voix reste nette, la prod ne s'embourbe pas
     // echo : deux lignes croisees pour le ping-pong
     n.dlyDep = G(); n.dA = c.createDelay(2.5); n.dB = c.createDelay(2.5); n.fbA = G(); n.fbB = G();
-    n.lpA = F("lowpass"); n.lpB = F("lowpass");
+    n.lpA = F("lowpass"); n.lpB = F("lowpass"); n.hpA = F("highpass"); n.hpB = F("highpass");
+    n.hpA.frequency.value = 250; n.hpB.frequency.value = 250;
     n.panA = c.createStereoPanner ? c.createStereoPanner() : G(); n.panB = c.createStereoPanner ? c.createStereoPanner() : G();
     // cablage
-    n.entree.connect(n.hpf); n.hpf.connect(n.eqB); n.eqB.connect(n.eqM); n.eqM.connect(n.eqH); n.eqH.connect(n.comp); n.comp.connect(n.compG);
+    n.entree.connect(n.at); n.at.connect(n.hpf); n.hpf.connect(n.eqB); n.eqB.connect(n.eqM); n.eqM.connect(n.eqH); n.eqH.connect(n.comp); n.comp.connect(n.compG);
     n.compG.connect(n.satSec); n.compG.connect(n.ws); n.ws.connect(n.satHum); n.satSec.connect(n.satSom); n.satHum.connect(n.satSom);
     n.satSom.connect(n.filtre);
     n.filtre.connect(n.chSec); n.filtre.connect(n.chD1); n.filtre.connect(n.chD2);
@@ -522,11 +710,13 @@ const STUDIO = (() => {
     n.chSec.connect(n.chSom); n.chHum.connect(n.chSom);
     if (n.pan) { n.chSom.connect(n.pan); n.pan.connect(n.fader); } else n.chSom.connect(n.fader);
     n.fader.connect(b.master); if (n.mesure) n.fader.connect(n.mesure);
-    n.fader.connect(n.revDep); n.revDep.connect(n.revPre); n.revPre.connect(n.conv); n.conv.connect(n.revLP); n.revLP.connect(b.master);
+    n.fader.connect(n.revDep); n.revDep.connect(n.revPre); n.revPre.connect(n.conv); n.conv.connect(n.revLP); n.revLP.connect(n.revHP); n.revHP.connect(b.master);
     n.fader.connect(n.dlyDep); n.dlyDep.connect(n.dA);
-    n.dA.connect(n.fbA); n.fbA.connect(n.dB); n.dB.connect(n.fbB); n.fbB.connect(n.dA);
-    n.dA.connect(n.lpA); n.lpA.connect(n.panA); n.panA.connect(b.master);
-    n.dB.connect(n.lpB); n.lpB.connect(n.panB); n.panB.connect(b.master);
+    // les filtres sont dans la boucle : chaque tour repasse dedans et perd encore des aigus et du grave
+    n.dA.connect(n.lpA); n.lpA.connect(n.hpA); n.hpA.connect(n.fbA); n.fbA.connect(n.dB);
+    n.dB.connect(n.lpB); n.lpB.connect(n.hpB); n.hpB.connect(n.fbB); n.fbB.connect(n.dA);
+    n.hpA.connect(n.panA); n.panA.connect(b.master);
+    n.hpB.connect(n.panB); n.panB.connect(b.master);
     return n;
   }
   const soloActif = () => P.pistes.some(p => p.solo);
@@ -534,6 +724,13 @@ const STUDIO = (() => {
   const dB = v => Math.pow(10, v / 20);
   function regler(n, p, solo){
     const f = p.fx, c = n.c, on = k => f[k] && f[k].on;
+    if (n.at.port && f.autotune) {
+      const a = f.autotune;
+      // la gamme de la prod seulement si sa tonalite est lue dans le titre : une tonalite
+      // estimee (« ~ ») peut etre fausse et tirerait la voix vers les mauvaises notes
+      const gamme = a.type === "prod" && prod && prod.keySur ? masqueGamme(prod.key) : 0;
+      n.at.port.postMessage({ on: !!a.on, mode: a.type === "prod" && !gamme ? "chroma" : a.type, vitesse: a.vitesse, demitons: a.demitons, mix: a.mix / 100, masque: gamme || 4095 });
+    }
     n.hpf.frequency.value = on("hpf") ? f.hpf.freq : 10;
     n.eqB.frequency.value = f.eq.basF; n.eqB.gain.value = on("eq") ? f.eq.bas : 0;
     n.eqM.frequency.value = f.eq.midF; n.eqM.Q.value = f.eq.midQ; n.eqM.gain.value = on("eq") ? f.eq.mid : 0;
@@ -543,7 +740,7 @@ const STUDIO = (() => {
     else { n.comp.threshold.value = 0; n.comp.ratio.value = 1; n.comp.knee.value = 0; n.compG.gain.value = 1; }
     if (on("sat")) {
       if (n.drive !== f.sat.drive) { n.ws.curve = courbe(f.sat.drive); n.drive = f.sat.drive; }
-      const m = f.sat.mix / 100; n.satSec.gain.value = 1 - m; n.satHum.gain.value = m * (1 - f.sat.drive / 250);
+      const m = f.sat.mix / 100; n.satSec.gain.value = 1 - m; n.satHum.gain.value = m * (1 + f.sat.drive / 100 * .6);
     } else { n.satSec.gain.value = 1; n.satHum.gain.value = 0; }
     if (on("filtre")) {
       const t = f.filtre.type;
@@ -553,8 +750,9 @@ const STUDIO = (() => {
     } else n.filtre.type = "allpass";
     if (on("chorus")) {
       n.osc.frequency.value = f.chorus.vitesse;
-      const d = f.chorus.profondeur / 100 * .006; n.oscG1.gain.value = d; n.oscG2.gain.value = -d;
-      const m = f.chorus.mix / 100; n.chSec.gain.value = 1 - m * .5; n.chHum.gain.value = m;
+      // ±2 ms au plus : la voix s'elargit sans onduler (l'ancien ±6 ms faisait chanter faux)
+      const d = f.chorus.profondeur / 100 * .002; n.oscG1.gain.value = d; n.oscG2.gain.value = -d;
+      const m = f.chorus.mix / 100; n.chSec.gain.value = 1 - m * .3; n.chHum.gain.value = m * .8;
     } else { n.chSec.gain.value = 1; n.chHum.gain.value = 0; n.oscG1.gain.value = 0; n.oscG2.gain.value = 0; }
     if (n.pan) n.pan.pan.value = p.pan;
     n.fader.gain.value = (!p.mute && (!solo || p.solo)) ? p.vol : 0;
@@ -577,7 +775,7 @@ const STUDIO = (() => {
     if (n.panA.pan) { n.panA.pan.value = f.delay.pingpong ? -.85 : 0; n.panB.pan.value = f.delay.pingpong ? .85 : 0; }
     n.dlyDep.gain.value = on("delay") ? f.delay.mix / 100 * 1.1 : 0;
   }
-  function liberer(n){ try { n.osc.stop(); } catch (e) {} try { n.fader.disconnect(); n.lpA.disconnect(); n.lpB.disconnect(); n.revLP.disconnect(); } catch (e) {} }
+  function liberer(n){ try { n.osc.stop(); } catch (e) {} try { if (n.at.port) n.at.port.close(); } catch (e) {} try { n.fader.disconnect(); n.hpA.disconnect(); n.hpB.disconnect(); n.revHP.disconnect(); } catch (e) {} }
   function construireNoeuds(){
     const c = audio();
     noeuds.forEach(liberer);
@@ -969,6 +1167,7 @@ const STUDIO = (() => {
     if (u === "dB") return `${v > 0 ? "+" : ""}${(+v).toFixed(Math.abs(v) < 10 && v % 1 ? 1 : 0)} dB`;
     if (u === "%") return `${Math.round(v)} %`;
     if (u === "ms") return `${Math.round(v)} ms`;
+    if (u === "dt") return `${v > 0 ? "+" : ""}${Math.round(v)} dt`;
     if (u === "s") return `${(+v).toFixed(1)} s`;
     if (u === ":1") return `${(+v).toFixed(v % 1 ? 1 : 0)}:1`;
     if (u === "pan") return Math.abs(v) < .02 ? "C" : (v < 0 ? "G" : "D") + Math.round(Math.abs(v) * 100);
@@ -1420,6 +1619,7 @@ const STUDIO = (() => {
       const avecProd = !!fichier && mixExport === "tout";
       const fin = Math.max(...P.clips.map(k => k.start + k.dur - dec), avecProd ? (P.beatStart || 0) + fichier.buf.duration : 0) + 2.6;
       const oc = new OfflineAudioContext(2, Math.ceil(sr * fin), sr), b = bus(oc), solo = soloActif();
+      if (P.pistes.some(p => p.fx.autotune && p.fx.autotune.on)) await chargerAT(oc);
       b.master.gain.value = P.master != null ? P.master : 1;
       if (avecProd) {
         const gp = oc.createGain(); gp.gain.value = volBeat() / 100; gp.connect(b.master);
