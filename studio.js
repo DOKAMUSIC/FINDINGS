@@ -502,6 +502,67 @@ const STUDIO = (() => {
   .fxc.detail.plug .kn.grand .kn-v{font-size:13px;min-width:72px}
   .at-pied{display:flex;justify-content:center;align-items:center;gap:22px;padding-bottom:4px}
   @media(max-width:640px){ .at-centre{grid-template-columns:1fr} .fxc.detail.plug .plug-vis.at-metre{width:100%} }
+  
+  /* ═══════════ studio en theme clair ═══════════
+     L'interface suit le site ; les plug-ins, eux, gardent leur facade d'appareil. */
+  :root:not([data-theme="dark"]) .daw{--bg:#FFFFFF;--surface:#F4F4F6;--surface-2:#ECECEF;--ink:#1D1D1F;--ink-2:#3A3A3C;--dim:#6E6E73;--dimmer:#98989D;
+    --line:rgba(0,0,0,.14);--line-soft:rgba(0,0,0,.06);--hover:rgba(0,0,0,.05);--thumb:#E5E5EA;--accent-soft:rgba(250,35,59,.1);
+    --barre:linear-gradient(180deg,#FCFCFD,#ECEDF0);--creux:#E2E3E7;--lcd:#E6ECF0;--lcd-ink:#14181C;--lcd-dim:#6A737C;
+    color-scheme:light;border-color:#C7C9CE;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7),0 18px 50px rgba(0,0,0,.12)}
+  :root:not([data-theme="dark"]) .daw-haut{border-bottom-color:#CFD1D6;box-shadow:inset 0 1px 0 #fff}
+  :root:not([data-theme="dark"]) .daw-transport,:root:not([data-theme="dark"]) .daw-mix,:root:not([data-theme="dark"]) .daw-niv,:root:not([data-theme="dark"]) .vu{box-shadow:inset 0 1px 2px rgba(0,0,0,.18),0 1px 0 #fff}
+  :root:not([data-theme="dark"]) .daw-b{color:#3A3B40} :root:not([data-theme="dark"]) .daw-b:hover{background:rgba(0,0,0,.06);color:#111}
+  :root:not([data-theme="dark"]) .daw.joue .daw-b.lire{color:#1E9E57;background:rgba(30,158,87,.12)}
+  :root:not([data-theme="dark"]) .lcd{box-shadow:inset 0 1px 3px rgba(0,0,0,.22),0 1px 0 #fff}
+  :root:not([data-theme="dark"]) .lcd-seg{border-left-color:rgba(0,0,0,.08)}
+  :root:not([data-theme="dark"]) .daw-o,:root:not([data-theme="dark"]) .daw-ms,:root:not([data-theme="dark"]) .daw-fxb,:root:not([data-theme="dark"]) .daw-importer,:root:not([data-theme="dark"]) .ajout-piste button,:root:not([data-theme="dark"]) .dp-act{color:#3A3B40;background:linear-gradient(180deg,#FFFFFF,#E9EAED);box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(0,0,0,.12),0 1px 1px rgba(0,0,0,.08)}
+  :root:not([data-theme="dark"]) .daw-o:hover,:root:not([data-theme="dark"]) .daw-ms:hover,:root:not([data-theme="dark"]) .daw-importer:hover,:root:not([data-theme="dark"]) .ajout-piste button:hover,:root:not([data-theme="dark"]) .dp-act:hover{color:#111;background:linear-gradient(180deg,#FFFFFF,#F1F2F4)}
+  :root:not([data-theme="dark"]) .daw-o:active{background:#E2E3E7;box-shadow:inset 0 1px 2px rgba(0,0,0,.2)}
+  :root:not([data-theme="dark"]) .daw-o[aria-pressed="true"]{color:#D61F35;background:linear-gradient(180deg,#FFF1F3,#FFE0E5);box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(214,31,53,.3)}
+  :root:not([data-theme="dark"]) .daw-o.pri{color:#fff;background:linear-gradient(180deg,#FF3A50,#E01E36);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 1px 2px rgba(0,0,0,.2)}
+  :root:not([data-theme="dark"]) .daw-sep{background:rgba(0,0,0,.14);box-shadow:1px 0 0 #fff}
+  :root:not([data-theme="dark"]) .daw-ms.m[aria-pressed="true"]{background:linear-gradient(180deg,#5DA2FF,#2F7CF0);color:#fff}
+  :root:not([data-theme="dark"]) .daw-ms.s[aria-pressed="true"]{background:linear-gradient(180deg,#FFD866,#E9B52C);color:#1A1405}
+  :root:not([data-theme="dark"]) .daw-fxb.actif{color:#fff;background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 85%,#fff),var(--pc));box-shadow:0 0 0 1px color-mix(in srgb,var(--pc) 70%,#000),0 1px 1px rgba(0,0,0,.1)}
+  :root:not([data-theme="dark"]) .daw input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--pc,var(--accent)) var(--p,50%),#D3D5DA var(--p,50%));box-shadow:inset 0 1px 1px rgba(0,0,0,.15)}
+  :root:not([data-theme="dark"]) .daw input[type=range]::-moz-range-track{background:#D3D5DA}
+  :root:not([data-theme="dark"]) .daw input[type=range]::-webkit-slider-thumb{background:linear-gradient(180deg,#FFFFFF,#D9DBDF);box-shadow:0 0 0 1px rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.25)}
+  :root:not([data-theme="dark"]) .daw-zone{scrollbar-color:#C4C6CB var(--bg)}
+  :root:not([data-theme="dark"]) .daw-ligne{border-bottom-color:rgba(0,0,0,.08)}
+  :root:not([data-theme="dark"]) .daw-ligne.regle{border-bottom-color:#CFD1D6}
+  :root:not([data-theme="dark"]) .daw-coin,:root:not([data-theme="dark"]) .daw-tete{border-right-color:#D5D7DB;box-shadow:1px 0 0 #fff}
+  :root:not([data-theme="dark"]) .daw-regle{background-image:linear-gradient(to right,rgba(0,0,0,.18) 1px,transparent 1px),var(--barre)}
+  :root:not([data-theme="dark"]) .daw-regle span{color:#5E6168;border-left-color:rgba(0,0,0,.28)}
+  :root:not([data-theme="dark"]) .daw-voie{background-image:linear-gradient(to right,rgba(0,0,0,.09) 1px,transparent 1px),linear-gradient(to right,rgba(0,0,0,.035) 1px,transparent 1px)}
+  :root:not([data-theme="dark"]) .daw-ligne.sel-piste .daw-voie{background-color:rgba(0,0,0,.022)}
+  :root:not([data-theme="dark"]) .daw-ligne.sel-piste .daw-tete{background:#E7E8EC}
+  :root:not([data-theme="dark"]) .vu{background:#DCDEE2}
+  :root:not([data-theme="dark"]) .bloc-prod{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--sc) 14%,transparent) 0 6px,transparent 6px 12px),color-mix(in srgb,var(--sc) 10%,#fff);
+    border-color:color-mix(in srgb,var(--sc) 45%,#fff);color:color-mix(in srgb,var(--sc) 70%,#000);box-shadow:inset 0 14px 0 color-mix(in srgb,var(--sc) 24%,#fff)}
+  :root:not([data-theme="dark"]) .bloc-fichier{background:linear-gradient(180deg,color-mix(in srgb,var(--sc) 85%,#fff) 0 15px,color-mix(in srgb,var(--sc) 20%,#fff) 15px);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--sc) 45%,#fff)}
+  :root:not([data-theme="dark"]) .clip{background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 92%,#fff) 0 15px,color-mix(in srgb,var(--pc) 16%,#fff) 15px);
+    box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pc) 55%,#fff),0 1px 2px rgba(0,0,0,.12)}
+  :root:not([data-theme="dark"]) .clip.sel{box-shadow:inset 0 0 0 1px #1D1D1F,0 0 0 1px #1D1D1F,0 4px 14px rgba(0,0,0,.18)}
+  :root:not([data-theme="dark"]) .daw-curseur{background:#1D1D1F;box-shadow:none}
+  :root:not([data-theme="dark"]) .daw-curseur::before{border-top-color:#1D1D1F}
+  :root:not([data-theme="dark"]) .daw-pan{background:#F4F4F6;border-top-color:#CFD1D6;box-shadow:inset 0 1px 0 #fff}
+  :root:not([data-theme="dark"]) .dp-onglets{border-bottom-color:#D5D7DB}
+  :root:not([data-theme="dark"]) .dp-onglets button[aria-selected="true"]{color:#1D1D1F;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06)}
+  :root:not([data-theme="dark"]) .dp-corps{background:#EEEFF2}
+  :root:not([data-theme="dark"]) .dp-bloc{background:#FFFFFF;border-color:#DDDFE3;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  :root:not([data-theme="dark"]) .dp-bloc input[type=text],:root:not([data-theme="dark"]) .dp-bloc select{background:#fff;border-color:#CFD1D6;color:#1D1D1F;box-shadow:none}
+  :root:not([data-theme="dark"]) .dp-act.danger{color:#D61F35;background:linear-gradient(180deg,#FFF5F6,#FFE6EA)}
+  :root:not([data-theme="dark"]) .dp-bloc .kn .kn-v{background:#F1F2F4;color:#1D1D1F;box-shadow:inset 0 1px 1px rgba(0,0,0,.12)}
+  :root:not([data-theme="dark"]) .dp-bloc .kn .kn-fond{stroke:#D3D5DA}
+  :root:not([data-theme="dark"]) .rk{background:#E6E7EA;border-color:#D5D7DB;box-shadow:inset 0 1px 2px rgba(0,0,0,.08)}
+  :root:not([data-theme="dark"]) .rk-case{background:linear-gradient(180deg,#FFFFFF,#F2F3F5);box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(0,0,0,.08),0 1px 1px rgba(0,0,0,.05)}
+  :root:not([data-theme="dark"]) .rk-case:hover{background:#fff}
+  :root:not([data-theme="dark"]) .rk-case.ouvert{background:linear-gradient(180deg,color-mix(in srgb,var(--pc,var(--accent)) 12%,#fff),color-mix(in srgb,var(--pc,var(--accent)) 8%,#F7F7F9));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pc,var(--accent)) 55%,transparent)}
+  :root:not([data-theme="dark"]) .rk-case .fx-on{background:#DCDEE2;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)}
+  :root:not([data-theme="dark"]) .rk-case .fx-on::after{background:#B9BCC2}
+  :root:not([data-theme="dark"]) .rk-case.on .fx-on::after{background:var(--pc,var(--accent));box-shadow:0 0 6px var(--pc,var(--accent)),0 0 2px #fff inset}
+  :root:not([data-theme="dark"]) .daw-poignee i{background:#C4C6CB;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+  :root:not([data-theme="dark"]) .daw-poignee:hover i,:root:not([data-theme="dark"]) .daw-poignee.tire i{background:#8E9198}
   </style>`);
 
   /* ─────────────────────────── balisage ─────────────────────────── */
@@ -1558,6 +1619,9 @@ const STUDIO = (() => {
   // une couleur #rrggbb melangee a du blanc (t = part de blanc)
   const teinte = (hex, t) => { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ""); if (!m) return "rgba(255,255,255,.85)";
     const v = parseInt(m[1], 16), c = [v >> 16, (v >> 8) & 255, v & 255].map(x => Math.round(x + (255 - x) * t)); return `rgb(${c.join(",")})`; };
+  // une couleur #rrggbb melangee a du noir (t = part de noir)
+  const foncer = (hex, t) => { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ""); if (!m) return "rgba(0,0,0,.6)";
+    const v = parseInt(m[1], 16), c = [v >> 16, (v >> 8) & 255, v & 255].map(x => Math.round(x * (1 - t))); return `rgb(${c.join(",")})`; };
   function ondeRegion(n){
     const k = P.clips.find(x => x.id === n.dataset.clip), pk = k && PIC.get(k.prise); if (!pk) return;
     const cv = n.querySelector("canvas"), w = Math.max(1, Math.round(k.dur * zoom)), W = Math.min(w, 4096);
@@ -1565,7 +1629,7 @@ const STUDIO = (() => {
     cv.width = W * dpr; cv.height = H * dpr; cv.style.width = w + "px"; cv.style.height = H + "px";
     const g = cv.getContext("2d"); g.scale(dpr, dpr);
     // forme d'onde teintee de la couleur de la piste (eclaircie), sur le corps sombre de la region
-    g.fillStyle = teinte(getComputedStyle(n).getPropertyValue("--pc").trim(), .55);
+    g.fillStyle = document.documentElement.getAttribute("data-theme") === "dark" ? teinte(getComputedStyle(n).getPropertyValue("--pc").trim(), .55) : foncer(getComputedStyle(n).getPropertyValue("--pc").trim(), .3);
     const mid = H / 2, gain = Math.min(1.6, k.gain);
     for (let x = 0; x < W; x++) {
       const a = Math.floor((k.offset + (x * r) / zoom) * RES), b = Math.ceil((k.offset + ((x + 1) * r) / zoom) * RES);
@@ -2519,6 +2583,8 @@ const STUDIO = (() => {
   // plein ecran : le studio seul, sur tout l'ecran (la prod YouTube continue de jouer derriere)
   const pleinEcran = () => { if (document.fullscreenElement) document.exitFullscreen?.(); else el.requestFullscreen?.().catch(() => message("Plein écran indisponible ici")); };
   $("dawPlein").onclick = pleinEcran;
+  // changement de theme : les formes d'onde (dessinees une fois) suivent
+  new MutationObserver(() => { if (ouvert && P) dessiner(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   document.addEventListener("fullscreenchange", () => { $("dawPlein").setAttribute("aria-pressed", String(document.fullscreenElement === el)); setTimeout(() => { dessiner(); visualiser(); }, 120); });
   $("dawTitreBtn").onclick = renommer;
   $("dawDupliquer").onclick = dupliquer;
