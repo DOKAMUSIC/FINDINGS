@@ -204,6 +204,12 @@ const STUDIO = (() => {
   .daw.enregistre .daw-curseur::before{border-top-color:#FF3A50}
 
   /* ── inspecteur du bas : piste et effets | region | projet ── */
+  /* poignee entre les pistes et l'inspecteur : on la tire pour partager la hauteur */
+  .daw-poignee{height:9px;margin:-5px 0 -4px;position:relative;z-index:8;cursor:ns-resize;display:grid;place-items:center;touch-action:none}
+  .daw-poignee i{width:46px;height:4px;border-radius:2px;background:#4A4B50;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 1px 1px rgba(0,0,0,.6);transition:background .12s,width .12s}
+  .daw-poignee:hover i,.daw-poignee.tire i{background:#8D9097;width:64px}
+  .daw.redim{cursor:ns-resize;user-select:none}
+  .daw.redim *{cursor:ns-resize!important}
   .daw-pan{border-top:1px solid #0B0B0D;background:#232427;display:grid;grid-template-rows:auto auto;min-height:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
   .dp-onglets{display:flex;align-items:center;gap:4px;padding:5px 10px;background:var(--barre);border-bottom:1px solid #0B0B0D}
   .dp-onglets button{height:24px;padding:0 12px;border-radius:5px;font-size:11.5px;font-weight:650;color:var(--dim);position:relative;display:inline-flex;align-items:center;gap:7px}
@@ -449,6 +455,7 @@ const STUDIO = (() => {
     </div>
     <div class="daw-zone" id="dawZone"><div class="daw-grille" id="dawGrilleEl"></div></div>
     <div class="daw-pan" id="dawPan">
+      <div class="daw-poignee" id="dawPoignee" role="separator" aria-orientation="horizontal" aria-label="Hauteur du panneau des effets" title="Glisser pour agrandir ou réduire le panneau · double-clic pour le replier"><i></i></div>
       <div class="dp-onglets" role="tablist">
         <button role="tab" data-onglet="piste" aria-selected="true"><span class="pastille"></span><span id="dawOngletPiste">Piste et effets</span></button>
         <button role="tab" data-onglet="region" aria-selected="false">Région</button>
@@ -1751,7 +1758,7 @@ const STUDIO = (() => {
   pan.addEventListener("pointerup", () => { if (eqDrag) { eqDrag = null; sauver(); } });
   pan.addEventListener("click", e => {
     const o = e.target.closest("[data-onglet]"); if (o) { onglet = o.dataset.onglet; pan.classList.remove("ferme"); panneau(); return; }
-    if (e.target.closest("#dawReplier")) { pan.classList.toggle("ferme"); return; }
+    if (e.target.closest("#dawReplier")) { pan.classList.toggle("ferme"); setTimeout(() => { dessiner(); visualiser(); }, 50); return; }
     const ouv = e.target.closest("[data-ouvrir]");
     if (ouv && !e.target.closest("[data-fxon]")) { fxOuvert = ouv.dataset.ouvrir; panneau(); reglerTout(); return; }
     const tch = e.target.closest("[data-touche]");
@@ -1784,6 +1791,31 @@ const STUDIO = (() => {
     p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver();
     const k = (t.dataset.fxtype || t.dataset.fxdiv || (t.dataset.fxcase || t.dataset.fxmenu || "").split(".")[0]), r = corps.querySelector(`[data-resume="${k}"]`); if (r) r.textContent = resume(k, p.fx[k]);
   });
+  /* hauteur du panneau : la poignee se tire, la hauteur est retenue d'une visite a l'autre */
+  const poignee = $("dawPoignee");
+  let hautPan = (() => { try { return +localStorage.getItem("findings.studio.panneau") || 0; } catch (e) { return 0; } })();
+  const appliquerHaut = () => { if (hautPan) { corps.style.height = hautPan + "px"; corps.style.maxHeight = "none"; } else { corps.style.height = ""; corps.style.maxHeight = ""; } };
+  const limiteHaut = () => Math.max(140, el.clientHeight - (el.querySelector(".daw-haut")?.offsetHeight || 60) - 26 - 120 - 40);
+  appliquerHaut();
+  poignee.addEventListener("pointerdown", e => {
+    e.preventDefault(); try { poignee.setPointerCapture(e.pointerId); } catch (er) {}
+    const y0 = e.clientY, h0 = pan.classList.contains("ferme") ? 0 : corps.offsetHeight;
+    poignee.classList.add("tire"); el.classList.add("redim");
+    const bouge = ev => {
+      const h = h0 + (y0 - ev.clientY);
+      if (h < 60) { pan.classList.add("ferme"); return; }     // tire tout en bas : le panneau se replie
+      pan.classList.remove("ferme");
+      hautPan = Math.round(clamp(h, 120, limiteHaut())); appliquerHaut();
+    };
+    const fin = () => {
+      poignee.classList.remove("tire"); el.classList.remove("redim");
+      poignee.removeEventListener("pointermove", bouge); poignee.removeEventListener("pointerup", fin); poignee.removeEventListener("pointercancel", fin);
+      try { localStorage.setItem("findings.studio.panneau", String(hautPan)); } catch (e) {}
+      dessiner(); visualiser();
+    };
+    poignee.addEventListener("pointermove", bouge); poignee.addEventListener("pointerup", fin); poignee.addEventListener("pointercancel", fin);
+  });
+  poignee.addEventListener("dblclick", () => { pan.classList.toggle("ferme"); setTimeout(() => { dessiner(); visualiser(); }, 50); });
   /* tourner un bouton */
   let tour = null;
   pan.addEventListener("pointerdown", e => {

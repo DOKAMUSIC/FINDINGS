@@ -342,6 +342,8 @@ const I18N = (() => {
     "Pitch": ["Pitch", "Pitch"],
     "Plein écran (F)": ["Full screen (F)", "Pantalla completa (F)"],
     "Plein écran": ["Full screen", "Pantalla completa"],
+    "Glisser pour agrandir ou réduire le panneau · double-clic pour le replier": ["Drag to resize the panel · double-click to collapse it", "Arrastra para cambiar el tamaño del panel · doble clic para plegarlo"],
+    "Hauteur du panneau des effets": ["Effects panel height", "Altura del panel de efectos"],
     "Plein écran indisponible ici": ["Full screen unavailable here", "Pantalla completa no disponible aquí"],
     "Analog": ["Analog", "Analógico"],
     "Formants préservés": ["Preserve formants", "Conservar formantes"],
