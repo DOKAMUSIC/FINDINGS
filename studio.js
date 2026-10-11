@@ -258,65 +258,6 @@ const STUDIO = (() => {
   .fxc.detail .fx-aide{padding:9px 12px 0}
   .fxc.detail .fx-boutons{flex-wrap:wrap;row-gap:8px;padding:10px 10px 10px;gap:2px}
   .fxc .fx-aide{font-size:11px;color:var(--dim);margin:0;line-height:1.45}
-  /* ── facades « materiel » : chaque plug-in a sa face avant, comme un appareil ──
-     --vis : couleur de l'ecran ; vis aux quatre coins ; serigraphie gravee. */
-  .fxc.detail{--vis:#FFB547;--face:linear-gradient(180deg,#34353A,#26272B);--grav:#D9DBDF;--grav-dim:#8D9097;
-    background:radial-gradient(circle at 9px calc(100% - 9px),#D8DADD 0 1.5px,#5D6066 2px 3.6px,transparent 4px),
-      radial-gradient(circle at calc(100% - 9px) calc(100% - 9px),#D8DADD 0 1.5px,#5D6066 2px 3.6px,transparent 4px),
-      repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px),var(--face);
-    border:1px solid #070708;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 18px rgba(0,0,0,.45)}
-  .fxc.detail header{background:radial-gradient(circle at 9px 50%,#D8DADD 0 1.5px,#5D6066 2px 3.6px,transparent 4px),
-      radial-gradient(circle at calc(100% - 9px) 50%,#D8DADD 0 1.5px,#5D6066 2px 3.6px,transparent 4px),var(--entete,var(--barre));padding:7px 20px}
-  .fxc.detail .fx-titre b{color:var(--grav);text-shadow:0 1px 0 rgba(0,0,0,.6);letter-spacing:.02em}
-  .fxc.detail .plug-modele{color:var(--vis);opacity:.85}
-  .fxc.detail .kn-n,.fxc.detail .fx-case,.fxc.detail .fx-menus label,.fxc.detail .at-legende{color:var(--grav-dim)}
-  .fxc.detail .fx-aide{color:var(--grav-dim)}
-  .fxc.detail .kn .kn-val{stroke:var(--vis);filter:drop-shadow(0 0 2px color-mix(in srgb,var(--vis) 60%,transparent))}
-  .fxc.detail .kn .kn-cap{fill:url(#cap-noir)}
-  .fxc.detail .plug-vis{background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--vis) 9%,#0D0B09),#0A0908 70%);box-shadow:inset 0 2px 6px rgba(0,0,0,.95),0 1px 0 rgba(255,255,255,.07)}
-  /* compresseur : face noire, bandeau metal brosse, boutons chrome */
-  .fxc.detail[data-fx="comp"]{--face:linear-gradient(180deg,#19191A,#0F0F10);--entete:repeating-linear-gradient(90deg,rgba(255,255,255,.25) 0 1px,rgba(0,0,0,.03) 1px 2px),linear-gradient(180deg,#D5D8DC,#9CA0A6);--vis:#FFB547}
-  .fxc.detail[data-fx="comp"] .fx-titre b{color:#17181A;text-shadow:0 1px 0 rgba(255,255,255,.55)}
-  .fxc.detail[data-fx="comp"] .plug-modele{color:#4A4D52}
-  .fxc.detail[data-fx="comp"] .kn .kn-cap{fill:url(#cap-chrome)}
-  .fxc.detail[data-fx="comp"] .kn .kn-ind{stroke:#1A1B1D}
-  /* saturation : face creme, boutons bakelite, lampe */
-  .fxc.detail[data-fx="sat"]{--face:linear-gradient(180deg,#EADFC6,#D6C7A6);--entete:linear-gradient(180deg,#5A3E24,#3E2A17);--grav:#F3E6C8;--grav-dim:#6B573C;--vis:#FF9A3C}
-  .fxc.detail[data-fx="sat"] .kn-v{background:#2A1E12;color:#FFD9A0}
-  .fxc.detail[data-fx="sat"] .kn .kn-fond{stroke:#B9A57E}
-  /* echo a bande : face vert d'atelier, boutons creme */
-  .fxc.detail[data-fx="delay"]{--face:linear-gradient(180deg,#3B4A40,#2A362E);--entete:linear-gradient(180deg,#E7DCC0,#CDBF9C);--vis:#FFC46B;--grav-dim:#B9C4BA}
-  .fxc.detail[data-fx="delay"] .fx-titre b{color:#2A362E;text-shadow:0 1px 0 rgba(255,255,255,.5)}
-  .fxc.detail[data-fx="delay"] .plug-modele{color:#6A5F45}
-  .fxc.detail[data-fx="delay"] .kn .kn-cap{fill:url(#cap-creme)}
-  .fxc.detail[data-fx="delay"] .kn .kn-ind{stroke:#2A2318}
-  /* egaliseur : console, un capuchon de couleur par bande */
-  .fxc.detail[data-fx="eq"]{--face:linear-gradient(180deg,#3E4146,#2E3034);--vis:#FFB547}
-  .fxc.detail[data-fx="eq"] .kn:nth-child(1) .kn-cap,.fxc.detail[data-fx="eq"] .kn:nth-child(2) .kn-cap{fill:url(#cap-rouge)}
-  .fxc.detail[data-fx="eq"] .kn:nth-child(3) .kn-cap,.fxc.detail[data-fx="eq"] .kn:nth-child(4) .kn-cap,.fxc.detail[data-fx="eq"] .kn:nth-child(5) .kn-cap{fill:url(#cap-vert)}
-  .fxc.detail[data-fx="eq"] .kn:nth-child(6) .kn-cap,.fxc.detail[data-fx="eq"] .kn:nth-child(7) .kn-cap{fill:url(#cap-bleu)}
-  /* reverb : bandeau bronze */
-  .fxc.detail[data-fx="reverb"]{--face:linear-gradient(180deg,#2C2824,#1E1B18);--entete:linear-gradient(180deg,#C9A468,#8F6E3D);--vis:#FFC46B}
-  .fxc.detail[data-fx="reverb"] .fx-titre b{color:#2A1F10;text-shadow:0 1px 0 rgba(255,255,255,.35)}
-  .fxc.detail[data-fx="reverb"] .plug-modele{color:#4A3820}
-  .fxc.detail[data-fx="reverb"] .kn .kn-cap{fill:url(#cap-or)}
-  .fxc.detail[data-fx="reverb"] .kn .kn-ind{stroke:#2A1F10}
-  /* filtre : bakelite brune */
-  .fxc.detail[data-fx="filtre"]{--face:linear-gradient(180deg,#4A3326,#2F2018);--vis:#FFB060;--grav-dim:#C4A88E}
-  .fxc.detail[data-fx="filtre"] .kn .kn-cap{fill:url(#cap-creme)} .fxc.detail[data-fx="filtre"] .kn .kn-ind{stroke:#3A2618}
-  /* doubleur : bleu nuit */
-  .fxc.detail[data-fx="chorus"]{--face:linear-gradient(180deg,#252B3A,#1A1F2A);--vis:#8FB8FF}
-  /* autotune : moderne, ecran turquoise */
-  .fxc.detail[data-fx="autotune"]{--face:linear-gradient(180deg,#2A2D31,#1D1F22);--vis:#5FE3D0}
-  .fxc.detail[data-fx="hpf"]{--vis:#FFB547}
-  /* de-esser : gris acier, ecran bleu ciel */
-  .fxc.detail[data-fx="deesser"]{--face:linear-gradient(180deg,#3A3E44,#2A2D32);--vis:#7FD4FF}
-  .fxc.detail[data-fx="deesser"] .kn .kn-cap{fill:url(#cap-chrome)} .fxc.detail[data-fx="deesser"] .kn .kn-ind{stroke:#1A1B1D}
-  /* limiteur : noir et or */
-  .fxc.detail[data-fx="limit"]{--face:linear-gradient(180deg,#151515,#0B0B0B);--entete:linear-gradient(180deg,#E3C26E,#A9842F);--vis:#FFD25E}
-  .fxc.detail[data-fx="limit"] .fx-titre b{color:#1E1708;text-shadow:0 1px 0 rgba(255,255,255,.4)}
-  .fxc.detail[data-fx="limit"] .plug-modele{color:#4A3A12}
-  .fxc.detail[data-fx="limit"] .kn .kn-cap{fill:url(#cap-or)} .fxc.detail[data-fx="limit"] .kn .kn-ind{stroke:#1E1708}
   /* facade du plug-in : nom de modele, ecran, clavier */
   .plug-modele{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--dimmer);text-transform:uppercase;margin-left:4px}
   .plug-vis{position:relative;margin:10px 12px 0;height:132px;border-radius:5px;background:linear-gradient(180deg,#0C0D0F,#121316);box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.05);overflow:hidden}
@@ -403,106 +344,98 @@ const STUDIO = (() => {
     .dp-corps{max-height:210px}
   }
   
-  /* ═══════════ facades des plug-ins FINDINGS ═══════════
-     Une face avant d'appareil : texture brossee, lumiere par le haut, vignettage, vis aux
-     coins ; en-tete avec la marque et le nom du produit ; ecran sous vitre ; boutons a
-     graduations ; commutateurs lumineux. Les couleurs viennent de chaque plug-in (--face,
-     --entete, --vis, --grav, --grav-dim, plus haut). */
-  .fxc.detail.plug{position:relative;padding:0 0 22px;gap:0;border-radius:10px;overflow:hidden;
-    background:radial-gradient(ellipse 130% 70% at 50% -12%,rgba(255,255,255,.09),transparent 62%),
-      radial-gradient(ellipse 120% 60% at 50% 115%,rgba(0,0,0,.42),transparent 60%),
-      repeating-linear-gradient(90deg,rgba(255,255,255,.024) 0 1px,rgba(0,0,0,.025) 1px 2px,transparent 2px 4px),var(--face);
-    border:1px solid #000;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(0,0,0,.6),0 12px 32px rgba(0,0,0,.55)}
-  .fxc.detail.plug::before,.fxc.detail.plug::after{content:"";position:absolute;bottom:6px;width:10px;height:10px;border-radius:50%;
-    background:linear-gradient(35deg,transparent 44%,rgba(0,0,0,.55) 44% 56%,transparent 56%),radial-gradient(circle at 38% 32%,#F4F5F6,#A3A6AB 55%,#55585D);
-    box-shadow:0 1px 1px rgba(0,0,0,.6),inset 0 -1px 1px rgba(0,0,0,.3)}
-  .fxc.detail.plug::before{left:7px} .fxc.detail.plug::after{right:7px}
-  .fxc.detail.plug .plug-tete{display:flex;align-items:center;gap:11px;padding:9px 34px 9px 30px;position:relative;
-    background:var(--entete,linear-gradient(180deg,rgba(255,255,255,.07),rgba(0,0,0,.12)));border-bottom:1px solid rgba(0,0,0,.65);box-shadow:inset 0 -1px 0 rgba(255,255,255,.05)}
-  .fxc.detail.plug .plug-tete::before,.fxc.detail.plug .plug-tete::after{content:"";position:absolute;top:50%;margin-top:-5px;width:10px;height:10px;border-radius:50%;
-    background:linear-gradient(-35deg,transparent 44%,rgba(0,0,0,.55) 44% 56%,transparent 56%),radial-gradient(circle at 38% 32%,#F4F5F6,#A3A6AB 55%,#55585D);box-shadow:0 1px 1px rgba(0,0,0,.6)}
-  .fxc.detail.plug .plug-tete::before{left:9px} .fxc.detail.plug .plug-tete::after{right:9px}
-  /* interrupteur d'alimentation : bague metal, voyant au centre */
-  .fxc.detail.plug .plug-pwr{width:24px;height:24px;border-radius:50%;flex:0 0 auto;background:radial-gradient(circle at 50% 35%,#4A4B50,#1B1C1F 70%);
-    box-shadow:0 0 0 2px #0A0A0B,0 0 0 3px rgba(255,255,255,.1),inset 0 1px 1px rgba(255,255,255,.2)}
-  .fxc.detail.plug .plug-pwr::after{inset:7px;background:#3A2A26}
-  .fxc.detail.plug.on .plug-pwr::after{background:var(--vis);box-shadow:0 0 8px var(--vis),0 0 2px #fff inset}
-  .plug-nom{display:grid;line-height:1;gap:2px}
-  .plug-marque{font:800 8.5px/1 var(--sans);letter-spacing:.34em;color:var(--vis);opacity:.9}
-  .plug-nom b{font:900 italic 19px/1 var(--sans);letter-spacing:-.025em;color:var(--grav);text-shadow:0 1px 0 rgba(0,0,0,.6)}
-  .fxc.detail[data-fx="comp"] .plug-nom b,.fxc.detail[data-fx="delay"] .plug-nom b,.fxc.detail[data-fx="reverb"] .plug-nom b,.fxc.detail[data-fx="limit"] .plug-nom b{color:#16130E;text-shadow:0 1px 0 rgba(255,255,255,.45)}
-  .fxc.detail[data-fx="comp"] .plug-marque,.fxc.detail[data-fx="delay"] .plug-marque,.fxc.detail[data-fx="reverb"] .plug-marque,.fxc.detail[data-fx="limit"] .plug-marque{color:rgba(0,0,0,.6)}
-  .plug-fn{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--grav-dim);padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.28);white-space:nowrap}
-  .fxc.detail[data-fx="comp"] .plug-fn,.fxc.detail[data-fx="delay"] .plug-fn,.fxc.detail[data-fx="reverb"] .plug-fn,.fxc.detail[data-fx="limit"] .plug-fn{color:rgba(0,0,0,.62);background:rgba(0,0,0,.08)}
+  /* ═══════════ FINDINGS Suite : les plug-ins ═══════════
+     Un seul chassis pour toute la gamme (facon FabFilter / iZotope) : graphite sobre, grand
+     ecran avec spectre en direct, vumetres entree / sortie, boutons plats, commutateurs en
+     pastille. Chaque plug-in n'a qu'une couleur d'accent (--vis). Reste sombre dans les deux
+     themes, comme un plug-in. */
+  .fxc.detail.plug{--vis:#7AA2FF;--p-fond:#16181C;--p-tete:#1C1F24;--p-ligne:rgba(255,255,255,.07);--p-txt:#E8EAED;--p-dim:#8B9099;--p-ecran:#0D0F12;
+    position:relative;display:block;padding:0 0 14px;border-radius:12px;overflow:hidden;color:var(--p-txt);
+    background:linear-gradient(180deg,#1A1D22,var(--p-fond));border:1px solid var(--p-ligne);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 14px 34px rgba(0,0,0,.4)}
+  .fxc.detail.plug[data-fx="autotune"]{--vis:#3DDCC8} .fxc.detail.plug[data-fx="hpf"]{--vis:#7AA2FF} .fxc.detail.plug[data-fx="eq"]{--vis:#FFB547}
+  .fxc.detail.plug[data-fx="comp"]{--vis:#FF8A4C} .fxc.detail.plug[data-fx="deesser"]{--vis:#6FD3FF} .fxc.detail.plug[data-fx="sat"]{--vis:#FF6B5E}
+  .fxc.detail.plug[data-fx="filtre"]{--vis:#C792EA} .fxc.detail.plug[data-fx="chorus"]{--vis:#8FB8FF} .fxc.detail.plug[data-fx="reverb"]{--vis:#A78BFA}
+  .fxc.detail.plug[data-fx="limit"]{--vis:#FFD25E} .fxc.detail.plug[data-fx="delay"]{--vis:#5EE6A8}
+  /* en-tete : interrupteur, marque, nom, fonction, aide */
+  .fxc.detail.plug .plug-tete{display:flex;align-items:center;gap:12px;height:44px;padding:0 14px;background:var(--p-tete);border-bottom:1px solid var(--p-ligne);box-shadow:none}
+  .fxc.detail.plug .plug-tete::before,.fxc.detail.plug .plug-tete::after{content:none}
+  .fxc.detail.plug .plug-pwr{position:relative;width:30px;height:17px;border-radius:999px;flex:0 0 auto;background:#2C3037;box-shadow:inset 0 1px 2px rgba(0,0,0,.5);transition:background .15s}
+  .fxc.detail.plug .plug-pwr::after{content:"";position:absolute;inset:auto;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#8B9099;box-shadow:0 1px 2px rgba(0,0,0,.4);transition:transform .15s,background .15s}
+  .fxc.detail.plug.on .plug-pwr{background:color-mix(in srgb,var(--vis) 85%,#000)}
+  .fxc.detail.plug.on .plug-pwr::after{transform:translateX(13px);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+  .plug-nom{display:flex;align-items:baseline;gap:8px;line-height:1}
+  .plug-marque{font:700 9px/1 var(--sans);letter-spacing:.24em;color:var(--p-dim)}
+  .plug-nom b{font:700 15px/1 var(--sans);letter-spacing:-.01em;color:var(--p-txt);text-shadow:none;font-style:normal}
+  .plug-marque{color:var(--vis)}
+  .fxc.detail.plug .plug-fn{font:500 11px/1 var(--sans);letter-spacing:0;text-transform:none;color:var(--p-dim);padding:0;background:none}
   .plug-esp{flex:1}
-  .plug-i{width:20px;height:20px;border-radius:50%;flex:0 0 auto;font:italic 800 11px/1 Georgia,serif;color:var(--grav-dim);border:1px solid currentColor;opacity:.75}
-  .plug-i:hover,.plug.aide-on .plug-i{opacity:1;color:var(--vis)}
-  .plug-aide{display:none;margin:10px 14px 0;padding:10px 12px;border-radius:6px;background:rgba(0,0,0,.6);color:#D9DBDF;font-size:11.5px;line-height:1.5;box-shadow:inset 0 1px 3px rgba(0,0,0,.6)}
+  .fxc.detail.plug .plug-i{width:22px;height:22px;border-radius:50%;flex:0 0 auto;font:600 12px/1 var(--sans);font-style:normal;color:var(--p-dim);border:1px solid var(--p-ligne);opacity:1}
+  .fxc.detail.plug .plug-i:hover,.fxc.detail.plug.aide-on .plug-i{color:var(--vis);border-color:color-mix(in srgb,var(--vis) 50%,transparent)}
+  .plug-aide{display:none;margin:12px 14px 0;padding:10px 12px;border-radius:8px;background:#0F1114;border:1px solid var(--p-ligne);color:#C9CCD2;font-size:11.5px;line-height:1.55}
   .plug.aide-on .plug-aide{display:block}
-  /* bandeau de commandes : selecteurs a touches et menus LCD */
-  .plug-barre{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:11px 14px 0}
-  .plug-seg{display:inline-flex;padding:2px;gap:2px;border-radius:6px;background:#0B0B0C;box-shadow:inset 0 1px 3px rgba(0,0,0,.85),0 1px 0 rgba(255,255,255,.07)}
-  .plug-seg button{position:relative;height:24px;padding:0 11px 0 19px;border-radius:4px;font:800 10px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#8A8D93}
-  .plug-seg button::before{content:"";position:absolute;left:8px;top:50%;margin-top:-2.5px;width:5px;height:5px;border-radius:50%;background:#2F3034}
-  .plug-seg button:hover{color:#E6E7EA}
-  .plug-seg button[aria-pressed="true"]{color:#fff;background:linear-gradient(180deg,#4C4D52,#36373B);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 1px 2px rgba(0,0,0,.7)}
-  .plug-seg button[aria-pressed="true"]::before{background:var(--vis);box-shadow:0 0 6px var(--vis)}
-  .plug-menu{display:grid;gap:4px;font:800 8.5px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--grav-dim)}
-  .plug-menu select{-webkit-appearance:none;appearance:none;height:26px;min-width:118px;padding:0 26px 0 10px;border-radius:5px;border:1px solid #000;
-    background:linear-gradient(45deg,transparent 50%,var(--vis) 50%) calc(100% - 13px) 11px/5px 5px no-repeat,linear-gradient(135deg,var(--vis) 50%,transparent 50%) calc(100% - 8px) 11px/5px 5px no-repeat,#0A0B0C;
-    color:var(--vis);font:600 12px var(--mono);letter-spacing:0;text-transform:none;box-shadow:inset 0 1px 3px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.07);cursor:pointer}
-  /* ecran sous vitre */
-  .fxc.detail.plug .plug-vis{margin:12px 14px 0;height:148px;border-radius:8px;border:1px solid #000;
-    box-shadow:inset 0 3px 12px rgba(0,0,0,.95),inset 0 0 0 1px rgba(255,255,255,.035),0 1px 0 rgba(255,255,255,.09),0 0 0 4px rgba(0,0,0,.18)}
-  .fxc.detail.plug .plug-vis::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:8px;background:linear-gradient(168deg,rgba(255,255,255,.075),rgba(255,255,255,0) 38%)}
-  .fxc.detail.plug .plug-vis.at{height:160px}
-  .fxc.detail.plug .plug-vis.at canvas{height:160px}
-  .fxc.detail.plug .at-clavier,.fxc.detail.plug .at-legende{margin-left:14px;margin-right:14px}
-  /* boutons rotatifs : libelle grave au-dessus, afficheur LCD dessous */
-  .fxc.detail.plug .plug-boutons{display:flex;justify-content:center;align-items:flex-start;flex-wrap:wrap;gap:8px 12px;padding:16px 14px 6px;opacity:1}
-  .fxc.detail.plug .kn{width:78px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:2px 0}
-  .fxc.detail.plug .kn svg{width:62px;height:62px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.5))}
-  .fxc.detail.plug .kn .kn-n{order:-1;font:800 8.5px/1.45 var(--sans);overflow:visible;letter-spacing:.16em;color:var(--grav-dim);text-shadow:0 1px 0 rgba(0,0,0,.55);max-width:80px;margin-bottom:2px}
-  .fxc.detail.plug .kn .kn-v{min-width:56px;text-align:center;padding:3px 7px;border-radius:3px;background:#090A0B;color:var(--vis);font:600 10.5px var(--mono);
-    box-shadow:inset 0 1px 3px rgba(0,0,0,.95),0 1px 0 rgba(255,255,255,.07);text-shadow:0 0 6px color-mix(in srgb,var(--vis) 45%,transparent)}
-  .kn .kn-grads{stroke:rgba(255,255,255,.32);stroke-width:1;stroke-linecap:round}
-  .kn .kn-jupe{fill:#0C0C0D;stroke:rgba(255,255,255,.08);stroke-width:.8}
-  .kn .kn-reflet{fill:rgba(255,255,255,.1);pointer-events:none}
-  .fxc.detail.plug .kn .kn-fond{stroke:rgba(0,0,0,.75);stroke-width:3.4}
-  .fxc.detail.plug .kn .kn-val{stroke-width:3.4}
-  .fxc.detail[data-fx="sat"] .kn .kn-grads{stroke:rgba(70,48,24,.7)}
-  .fxc.detail[data-fx="sat"] .kn .kn-n{text-shadow:0 1px 0 rgba(255,255,255,.55)}
-  .fxc.detail[data-fx="sat"] .kn .kn-fond{stroke:rgba(90,62,36,.45)}
-  /* commutateurs lumineux */
-  .plug-tgs{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px 14px 0}
-  .plug-tg{display:inline-flex;align-items:center;gap:8px;height:26px;padding:0 12px;border-radius:5px;font:800 9.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:#9A9DA3;
-    background:linear-gradient(180deg,#414247,#2B2C30);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 1px 2px rgba(0,0,0,.75),0 0 0 1px #000}
-  .plug-tg i{width:7px;height:7px;border-radius:50%;background:#2E2420;box-shadow:inset 0 1px 1px rgba(0,0,0,.6)}
-  .plug-tg:hover{color:#E6E7EA}
-  .plug-tg[aria-pressed="true"]{color:#fff}
-  .plug-tg[aria-pressed="true"] i{background:var(--vis);box-shadow:0 0 7px var(--vis),0 0 1px #fff inset}
-  /* eteint : l'appareil s'assombrit */
-  .fxc.detail.plug:not(.on) .plug-vis,.fxc.detail.plug:not(.on) .plug-boutons,.fxc.detail.plug:not(.on) .at-clavier{opacity:.5;filter:saturate(.35)}
-  /* liste des effets : le nom de produit devant la fonction */
-  .rk-modele{font-style:normal;font-weight:900;color:var(--ink);margin-right:6px;letter-spacing:-.01em}
+  /* corps : ecran + vumetres, puis commandes */
+  .plug-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:12px 14px 0}
+  .plug-gauche{display:grid;gap:10px;min-width:0}
+  .plug-barre{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;padding:0}
+  .plug-seg{display:inline-flex;padding:2px;gap:2px;border-radius:8px;background:#0F1114;border:1px solid var(--p-ligne)}
+  .plug-seg button{height:24px;padding:0 10px;border-radius:6px;font:600 11px/1 var(--sans);letter-spacing:0;text-transform:none;color:var(--p-dim)}
+  .plug-seg button::before{content:none}
+  .plug-seg button:hover{color:var(--p-txt)}
+  .plug-seg button[aria-pressed="true"]{color:var(--vis);background:color-mix(in srgb,var(--vis) 16%,#1C1F24);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--vis) 40%,transparent)}
+  .plug-menu{display:grid;gap:5px;font:600 9.5px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--p-dim)}
+  .plug-menu select{-webkit-appearance:none;appearance:none;height:28px;min-width:124px;padding:0 26px 0 10px;border-radius:7px;border:1px solid var(--p-ligne);
+    background:linear-gradient(45deg,transparent 50%,var(--p-dim) 50%) calc(100% - 13px) 12px/4px 4px no-repeat,linear-gradient(135deg,var(--p-dim) 50%,transparent 50%) calc(100% - 9px) 12px/4px 4px no-repeat,#0F1114;
+    color:var(--p-txt);font:500 12px var(--sans);letter-spacing:0;text-transform:none;box-shadow:none;cursor:pointer}
+  .plug-menu select:hover{border-color:color-mix(in srgb,var(--vis) 45%,transparent)}
+  .fxc.detail.plug .plug-vis{margin:0;height:168px;border-radius:8px;border:1px solid var(--p-ligne);background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--vis) 6%,var(--p-ecran)),var(--p-ecran) 70%);box-shadow:inset 0 1px 6px rgba(0,0,0,.6)}
+  .fxc.detail.plug .plug-vis::after{content:none}
+  /* vumetres entree / sortie */
+  .plug-io{display:flex;gap:6px;align-items:stretch;padding:2px 0}
+  .plug-io .io{display:grid;grid-template-rows:1fr auto;justify-items:center;gap:5px;width:16px}
+  .plug-io .io span{position:relative;width:6px;border-radius:3px;background:#0F1114;border:1px solid var(--p-ligne);overflow:hidden}
+  .plug-io .io i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,#3DDC84,#E5D84C 75%,#FF5A4E)}
+  .plug-io .io b{font:600 8.5px/1 var(--sans);letter-spacing:.06em;color:var(--p-dim)}
+  /* boutons rotatifs plats */
+  .fxc.detail.plug .plug-boutons{display:flex;justify-content:center;align-items:flex-start;flex-wrap:wrap;gap:6px 18px;padding:16px 14px 4px;opacity:1}
+  .fxc.detail.plug .kn{width:72px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:2px 0}
+  .fxc.detail.plug .kn svg{width:54px;height:54px;filter:none}
+  .fxc.detail.plug .kn .kn-grads,.fxc.detail.plug .kn .kn-jupe,.fxc.detail.plug .kn .kn-reflet{display:none}
+  .fxc.detail.plug .kn .kn-fond{stroke:#2A2E35;stroke-width:3.2}
+  .fxc.detail.plug .kn .kn-val{stroke:var(--vis);stroke-width:3.2;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--vis) 45%,transparent))}
+  .fxc.detail.plug .kn .kn-cap{fill:#23272D;stroke:rgba(255,255,255,.09);stroke-width:1}
+  .fxc.detail.plug .kn .kn-ind{stroke:#F2F3F5;stroke-width:2}
+  .fxc.detail.plug .kn .kn-v{order:0;min-width:0;padding:0;border-radius:0;background:none;box-shadow:none;color:var(--p-txt);font:600 11.5px var(--sans);font-variant-numeric:tabular-nums;text-shadow:none}
+  .fxc.detail.plug .kn .kn-n{order:1;margin:0;font:600 9.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--p-dim);text-shadow:none;max-width:84px;overflow:visible}
+  .fxc.detail.plug .kn:hover .kn-cap{fill:#2A2F36}
+  .fxc.detail.plug .kn:focus-visible{box-shadow:0 0 0 1px var(--vis)}
+  /* commutateurs en pastille */
+  .plug-tgs{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:10px 14px 0}
+  .plug-tg{display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 12px;border-radius:999px;font:600 11px/1 var(--sans);letter-spacing:0;text-transform:none;color:var(--p-dim);
+    background:#0F1114;border:1px solid var(--p-ligne);box-shadow:none}
+  .plug-tg i{width:6px;height:6px;border-radius:50%;background:#3A3E46;box-shadow:none}
+  .plug-tg:hover{color:var(--p-txt)}
+  .plug-tg[aria-pressed="true"]{color:var(--vis);border-color:color-mix(in srgb,var(--vis) 45%,transparent);background:color-mix(in srgb,var(--vis) 12%,#0F1114)}
+  .plug-tg[aria-pressed="true"] i{background:var(--vis);box-shadow:0 0 6px var(--vis)}
+  .fxc.detail.plug:not(.on) .plug-vis,.fxc.detail.plug:not(.on) .plug-boutons{opacity:.45;filter:saturate(.3)}
+  /* liste des effets */
+  .rk-modele{font-style:normal;font-weight:700;color:var(--ink);margin-right:6px;letter-spacing:-.01em}
   .rk-case:not(.on) .rk-modele{color:var(--dim)}
   .rk-case b{font-weight:500;color:var(--ink-2)}
-  
-  /* autotune, vue simple */
+  /* autotune, vue simple (Auto-Tune Artist) */
   .at-art{display:grid;gap:12px;padding:12px 14px 0}
   .at-menus{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-  .at-menus .plug-menu select{min-width:132px}
-  .at-centre{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px}
-  .at-cote{display:grid;justify-items:center;gap:8px}
-  .at-coeur{display:grid;justify-items:center;gap:2px}
-  .fxc.detail.plug .plug-vis.at-metre{margin:0;width:300px;height:132px}
-  .fxc.detail.plug .kn.grand{width:132px}
-  .fxc.detail.plug .kn.grand svg{width:112px;height:112px}
-  .fxc.detail.plug .kn.grand .kn-n{font-size:10px;letter-spacing:.22em;color:var(--grav)}
-  .fxc.detail.plug .kn.grand .kn-v{font-size:13px;min-width:72px}
-  .at-pied{display:flex;justify-content:center;align-items:center;gap:22px;padding-bottom:4px}
-  @media(max-width:640px){ .at-centre{grid-template-columns:1fr} .fxc.detail.plug .plug-vis.at-metre{width:100%} }
-  
+  .at-menus .plug-menu select{min-width:140px}
+  .at-centre{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+  .at-cote{display:grid;justify-items:center;gap:10px}
+  .at-coeur{display:grid;justify-items:center;gap:4px}
+  .fxc.detail.plug .plug-vis.at-metre{width:320px;height:140px}
+  .fxc.detail.plug .kn.grand{width:130px}
+  .fxc.detail.plug .kn.grand svg{width:104px;height:104px}
+  .fxc.detail.plug .kn.grand .kn-v{font-size:15px}
+  .fxc.detail.plug .kn.grand .kn-n{font-size:10.5px;color:var(--p-txt)}
+  .at-pied{display:flex;justify-content:center;align-items:center;gap:22px;padding-bottom:2px}
+  @media(max-width:640px){ .at-centre{grid-template-columns:1fr} .fxc.detail.plug .plug-vis.at-metre{width:100%} .plug-main{grid-template-columns:1fr} .plug-io{display:none} }
   /* ═══════════ studio en theme clair ═══════════
      L'interface suit le site ; les plug-ins, eux, gardent leur facade d'appareil. */
   :root:not([data-theme="dark"]) .daw{--bg:#FFFFFF;--surface:#F4F4F6;--surface-2:#ECECEF;--ink:#1D1D1F;--ink-2:#3A3A3C;--dim:#6E6E73;--dimmer:#98989D;
@@ -1220,6 +1153,9 @@ const STUDIO = (() => {
     n.pan = c.createStereoPanner ? c.createStereoPanner() : null;
     n.fader = G();
     n.mesure = c.createAnalyser ? c.createAnalyser() : null; if (n.mesure) n.mesure.fftSize = 512;
+    // pour les ecrans des plug-ins : niveau a l'entree de la piste, spectre a la sortie
+    n.entreeA = c.createAnalyser(); n.entreeA.fftSize = 512;
+    n.spec = c.createAnalyser(); n.spec.fftSize = 4096; n.spec.smoothingTimeConstant = .82;
     // reverb : depart → pre-delai → convolution → brillance → retour
     n.revDep = G(); n.revPre = c.createDelay(.5); n.conv = c.createConvolver(); n.revLP = F("lowpass"); n.revHP = F("highpass");
     n.revHP.frequency.value = 220;   // une reverb sans grave : la voix reste nette, la prod ne s'embourbe pas
@@ -1238,7 +1174,7 @@ const STUDIO = (() => {
     n.chSec.connect(n.chSom); n.chHum.connect(n.chSom);
     n.chSom.connect(n.limPre); n.limPre.connect(n.lim); n.limPre.connect(n.limA); n.lim.connect(n.limClip); n.limClip.connect(n.limB);
     if (n.pan) { n.limClip.connect(n.pan); n.pan.connect(n.fader); } else n.limClip.connect(n.fader);
-    n.fader.connect(b.master); if (n.mesure) n.fader.connect(n.mesure);
+    n.fader.connect(b.master); if (n.mesure) n.fader.connect(n.mesure); n.fader.connect(n.spec); n.entree.connect(n.entreeA);
     n.fader.connect(n.revDep); n.revDep.connect(n.revPre); n.revPre.connect(n.conv); n.conv.connect(n.revLP); n.revLP.connect(n.revHP); n.revHP.connect(b.master);
     n.fader.connect(n.dlyDep); n.dlyDep.connect(n.dA);
     // les filtres sont dans la boucle : chaque tour repasse dedans et perd encore des aigus et du grave
@@ -1810,13 +1746,14 @@ const STUDIO = (() => {
           </header>
           <div class="plug-aide">${AIDE[f.k]}</div>
           ${f.k === "autotune" ? corpsAutotune(f, v) : `
+          <div class="plug-main"><div class="plug-gauche">
           ${f.types || f.divisions || f.menus ? `<div class="plug-barre">
             ${f.types ? selecteur("fxtype", f.k, f.types, v.type) : ""}
             ${f.divisions ? selecteur("fxdiv", f.k, f.divisions, v.division) : ""}
             ${f.menus ? f.menus.filter(([, , , si]) => !si || v.type === si).map(([c, n, opts]) => `<label class="plug-menu">${esc(n)}<select data-fxmenu="${f.k}.${c}"${c === "tonique" ? ' translate="no"' : ""}>${opts.map(([o, l]) => `<option value="${o}"${String(v[c]) === o ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label>`).join("") : ""}
           </div>` : ""}
-          <div class="plug-vis${f.k === "autotune" ? " at" : ""}" data-vis="${f.k}"><canvas></canvas>${f.k === "autotune" ? `<div class="at-lecture"><b data-at-note>—</b><span class="at-cents"><i data-at-aig></i></span><small data-at-ct>Lance la lecture</small></div>` : ""}</div>
-          ${f.k === "autotune" ? clavierHTML(v) : ""}
+          <div class="plug-vis" data-vis="${f.k}"><canvas></canvas></div></div>
+          <div class="plug-io" aria-hidden="true"><div class="io"><span><i data-io="in"></i></span><b>IN</b></div><div class="io"><span><i data-io="out"></i></span><b>OUT</b></div></div></div>
           <div class="plug-boutons fx-boutons">${f.p.map(([c, n, min, max, pas, u, d]) => bouton(`fx.${f.k}.${c}`, n, min, max, pas, u, v[c], d)).join("")}</div>
           ${(f.cases || []).length ? `<div class="plug-tgs">${f.cases.map(([c, n, def]) => { const coche = v[c] === undefined ? def !== false : !!v[c];
             return `<button class="plug-tg" data-tg aria-pressed="${coche}"><i></i>${esc(n)}<input type="checkbox" hidden data-fxcase="${f.k}.${c}"${coche ? " checked" : ""}></button>`; }).join("")}</div>` : ""}`}
@@ -1939,7 +1876,17 @@ const STUDIO = (() => {
     if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     const facade = boite.closest(".fxc"), coul = teinte(getComputedStyle(facade).getPropertyValue("--vis").trim() || getComputedStyle(pan).getPropertyValue("--pc").trim(), 0), on = f.on;
+    // vumetres entree / sortie de la facade
+    const crete = a => { if (!a) return -90; const b = new Float32Array(a.fftSize); a.getFloatTimeDomainData(b); let m = 0; for (let i = 0; i < b.length; i++) { const v = Math.abs(b[i]); if (v > m) m = v; } return 20 * Math.log10(m + 1e-9); };
+    [["in", n && n.entreeA], ["out", n && n.mesure]].forEach(([c, a]) => { const el2 = facade.querySelector(`[data-io="${c}"]`); if (!el2) return;
+      const d = crete(a), cle2 = "io" + c; n && (n[cle2] = Math.max(d, (n[cle2] || -90) - 1.5)); el2.style.height = `${Math.max(0, Math.min(100, ((n ? n[cle2] : -90) + 60) / 60 * 100))}%`; });
+    // spectre de la voix (sortie de la piste), en fond des ecrans de frequence
+    const spectre = (Wb) => { if (!n || !n.spec) return; const a = n.spec, fd = new Float32Array(a.frequencyBinCount); a.getFloatFrequencyData(fd);
+      const sr = a.context.sampleRate, hz = sr / a.fftSize; g.beginPath(); g.moveTo(0, H);
+      for (let x = 0; x <= Wb; x += 2) { const f0 = 20 * Math.pow(1000, x / Wb), i = Math.min(fd.length - 1, Math.round(f0 / hz)); const d = Math.max(-100, Math.min(-10, fd[i])); g.lineTo(x, H - (d + 100) / 90 * (H - 6)); }
+      g.lineTo(Wb, H); g.closePath(); const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, "rgba(255,255,255,.16)"); gr.addColorStop(1, "rgba(255,255,255,.02)"); g.fillStyle = gr; g.fill(); };
     g.globalAlpha = on ? 1 : .45;
+    if (k === "eq" || k === "hpf" || k === "filtre") spectre(W);
     if (k === "eq" || k === "hpf" || k === "filtre") {
       const dbMax = k === "eq" ? 15 : 24; grilleFreq(g, W, H, dbMax);
       let filtres;
@@ -1962,24 +1909,20 @@ const STUDIO = (() => {
       g.strokeStyle = "rgba(255,255,255,.18)"; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(x0, y0 + Wg); g.lineTo(x0 + Wg, y0); g.stroke(); g.setLineDash([]);
       g.beginPath(); for (let e = -60; e <= 0; e += .5) { const o = Math.max(-60, Math.min(6, sortie(e))), px = x0 + (e + 60) / 60 * Wg, py = y0 + (1 - (o + 60) / 60) * Wg; e > -60 ? g.lineTo(px, py) : g.moveTo(px, py); } g.strokeStyle = coul; g.lineWidth = 2; g.stroke();
       const sx = x0 + (f.seuil + 60) / 60 * Wg; g.fillStyle = "rgba(255,255,255,.4)"; g.font = "9px ui-monospace,Menlo,monospace"; g.fillText("seuil " + f.seuil + " dB", Math.min(sx + 4, x0 + Wg - 70), y0 + Wg - 6);
-      // VU-metre analogique : la reduction de gain, aiguille avec son inertie
-      const gr = n && n.comp ? Math.max(0, -n.comp.reduction) : 0;
-      n && (n.vu = (n.vu || 0) + (gr - (n.vu || 0)) * .25);
-      const vh = H - 2 * m, vw = Math.min(W - H - 32, vh * 2.1), vx = W - vw - 10, R = vh * .95, cx = vx + vw / 2, cy = m + vh * 1.06;
-      const face = g.createLinearGradient(0, m, 0, m + vh); face.addColorStop(0, "#FFF4D6"); face.addColorStop(1, "#E9D8AE");
-      g.fillStyle = face; g.beginPath(); g.roundRect ? g.roundRect(vx, m, vw, vh, 4) : g.rect(vx, m, vw, vh); g.fill();
-      const lueur = g.createRadialGradient(cx, m + vh * .45, 4, cx, m + vh * .45, vw * .6); lueur.addColorStop(0, "rgba(255,190,90,.35)"); lueur.addColorStop(1, "rgba(255,190,90,0)"); g.fillStyle = lueur; g.fillRect(vx, m, vw, vh);
-      // echelle de VU : 20 dB a gauche, 0 a droite, les petites valeurs etalees
-      const ang = d => Math.PI * 1.5 - .87 + (1 - Math.log10(1 + Math.min(20, d)) / Math.log10(21)) * 1.74;
-      g.strokeStyle = "#2A2017"; g.lineWidth = 1.2; g.beginPath(); g.arc(cx, cy, R, ang(20), ang(0)); g.stroke();
-      g.fillStyle = "#2A2017"; g.font = "bold 8px system-ui"; g.textAlign = "center";
-      [20, 10, 7, 5, 3, 2, 1, 0].forEach(d => { const a2 = ang(d), x1 = cx + Math.cos(a2) * R, y1 = cy + Math.sin(a2) * R, x2 = cx + Math.cos(a2) * (R - 7), y2 = cy + Math.sin(a2) * (R - 7);
-        g.strokeStyle = d <= 3 && d > 0 ? "#B8352A" : "#2A2017"; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); g.fillText(d, cx + Math.cos(a2) * (R - 15), cy + Math.sin(a2) * (R - 15) + 3); });
-      g.font = "bold 7px system-ui"; g.fillText("GAIN REDUCTION", cx, m + vh - 8); g.textAlign = "left";
-      const an = ang(n ? n.vu : 0); g.save(); g.beginPath(); g.rect(vx, m, vw, vh); g.clip();
-      g.strokeStyle = "#1A1410"; g.lineWidth = 1.6; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(an) * (R + 2), cy + Math.sin(an) * (R + 2)); g.stroke();
-      g.fillStyle = "#1A1410"; g.fillRect(vx, m + vh - 5, vw, 5); g.restore();   // le cache du pivot, en bas du cadran
-      g.fillStyle = "rgba(255,255,255,.45)"; g.font = "9px ui-monospace,Menlo,monospace"; g.fillText(`${f.ratio}:1`, m + 4, m + 12);
+      // historique facon Pro-C : niveau d'entree (gris) et reduction de gain (accent), qui defilent
+      const gr = n && n.comp ? Math.max(0, -n.comp.reduction) : 0, lvl = crete(n && n.entreeA);
+      if (n) { n.cpH = n.cpH || []; n.cpH.push([lvl, gr]); if (n.cpH.length > 300) n.cpH.shift(); }
+      const hx = H + 14, hw = W - hx - 34, hist = (n && n.cpH) || [];
+      g.strokeStyle = "rgba(255,255,255,.05)"; g.strokeRect(hx + .5, m + .5, hw, H - 2 * m);
+      g.beginPath(); g.moveTo(hx, H - m); hist.forEach(([l], i) => { const px = hx + i / 300 * hw, py = H - m - Math.max(0, (l + 60) / 60) * (H - 2 * m); g.lineTo(px, py); }); g.lineTo(hx + hist.length / 300 * hw, H - m); g.closePath();
+      g.fillStyle = "rgba(255,255,255,.12)"; g.fill();
+      g.beginPath(); hist.forEach(([, r], i) => { const px = hx + i / 300 * hw, py = m + Math.min(1, r / 20) * (H - 2 * m); i ? g.lineTo(px, py) : g.moveTo(px, py); });
+      g.strokeStyle = coul; g.lineWidth = 2; g.stroke();
+      const sy = H - m - (f.seuil + 60) / 60 * (H - 2 * m); g.strokeStyle = "rgba(255,255,255,.25)"; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(hx, sy); g.lineTo(hx + hw, sy); g.stroke(); g.setLineDash([]);
+      // jauge de reduction
+      const bx = W - 22, bh = H - 2 * m; g.fillStyle = "#0F1114"; g.fillRect(bx, m, 8, bh); g.fillStyle = coul; g.fillRect(bx, m, 8, Math.min(1, gr / 20) * bh);
+      g.fillStyle = "rgba(255,255,255,.5)"; g.font = "9px ui-monospace,Menlo,monospace"; g.fillText("GR " + gr.toFixed(1) + " dB", hx + 6, m + 12);
+      g.fillText(`${f.ratio}:1`, m + 4, m + 12);
     } else if (k === "sat") {
       const c = courbe(f.drive), mix = f.mix / 100, gain = 1 + f.drive / 100 * .6, m = 10, L = H - 2 * m;
       g.strokeStyle = "rgba(255,255,255,.07)"; g.strokeRect(m + .5, m + .5, L, L);
@@ -1988,19 +1931,12 @@ const STUDIO = (() => {
       g.strokeStyle = coul; g.lineWidth = 2; g.stroke();
       // harmoniques generees : une sinusoide passee dans la courbe, son spectre grossier
       const N2 = 256, sig = new Float32Array(N2); for (let i = 0; i < N2; i++) { const x = .8 * Math.sin(2 * Math.PI * 4 * i / N2); sig[i] = (1 - mix) * x + mix * gain * c[Math.round((x + 1) / 2 * (c.length - 1))]; }
-      const bx = L + 3 * m, bw = (W - bx - m - 50) / 8;
+      const bx = L + 3 * m, bw = (W - bx - m) / 8;
       for (let h = 1; h <= 8; h++) { let re = 0, im = 0; for (let i = 0; i < N2; i++) { re += sig[i] * Math.cos(2 * Math.PI * 4 * h * i / N2); im += sig[i] * Math.sin(2 * Math.PI * 4 * h * i / N2); }
         const a = Math.sqrt(re * re + im * im) / (N2 / 2), d = Math.max(0, 1 + 20 * Math.log10(Math.max(1e-5, a)) / 60), hh = d * (H - 2 * m - 12);
         g.fillStyle = h === 1 ? "rgba(255,255,255,.35)" : coul; g.fillRect(bx + (h - 1) * bw + 3, H - m - 12 - hh, bw - 6, hh);
         g.fillStyle = "rgba(255,255,255,.4)"; g.font = "9px ui-monospace,Menlo,monospace"; g.fillText("H" + h, bx + (h - 1) * bw + 4, H - 4); }
-      // la lampe : son filament rougeoie avec la chaleur, et vacille a peine
-      const tx = W - 34, ty = 14, tw = 24, th = H - 34, ch = (.25 + f.drive / 100 * .75) * (f.on ? 1 : .3) * (.94 + .06 * Math.sin(performance.now() / 90));
-      const verre = g.createLinearGradient(tx, 0, tx + tw, 0); verre.addColorStop(0, "rgba(255,255,255,.16)"); verre.addColorStop(.5, "rgba(255,255,255,.03)"); verre.addColorStop(1, "rgba(255,255,255,.12)");
-      const halo = g.createRadialGradient(tx + tw / 2, ty + th * .55, 2, tx + tw / 2, ty + th * .55, 34); halo.addColorStop(0, `rgba(255,140,40,${.75 * ch})`); halo.addColorStop(1, "rgba(255,120,30,0)");
-      g.fillStyle = halo; g.fillRect(tx - 30, ty - 10, tw + 60, th + 20);
-      g.fillStyle = verre; g.beginPath(); g.moveTo(tx, ty + 10); g.quadraticCurveTo(tx, ty, tx + tw / 2, ty); g.quadraticCurveTo(tx + tw, ty, tx + tw, ty + 10); g.lineTo(tx + tw, ty + th); g.lineTo(tx, ty + th); g.closePath(); g.fill();
-      g.strokeStyle = `rgba(255,${150 + 60 * ch},80,${.5 + .5 * ch})`; g.lineWidth = 1.5; g.beginPath(); g.moveTo(tx + 8, ty + th * .75); g.lineTo(tx + 8, ty + th * .35); g.lineTo(tx + 16, ty + th * .35); g.lineTo(tx + 16, ty + th * .75); g.stroke();
-      g.fillStyle = "#3A3A3A"; g.fillRect(tx - 2, ty + th, tw + 4, 8);
+
     } else if (k === "chorus") {
       const t = performance.now() / 1000, cx = W / 2, cy = H - 14, R = H - 30;
       g.strokeStyle = "rgba(255,255,255,.08)"; [1, .66, .33].forEach(r => { g.beginPath(); g.arc(cx, cy, R * r, Math.PI, 2 * Math.PI); g.stroke(); });
@@ -2028,16 +1964,10 @@ const STUDIO = (() => {
       for (let i = 1; i <= nb; i++) { const a = Math.pow(f.retour / 100, i - 1) * (.35 + f.mix / 100 * .65), hh = a * (H / 2 - 14), haut = !f.pingpong || i % 2 === 1;
         const sombre = Math.pow(f.filtre / 10000, i * .35); g.fillStyle = coul.replace("rgb(", "rgba(").replace(")", "," + (.25 + .75 * sombre) + ")");
         const px = x(i * t) - 2; if (f.pingpong) g.fillRect(px, haut ? mid - hh : mid, 4, hh); else g.fillRect(px, mid - hh, 4, hh * 2); }
-      // les deux bobines de la bande, en haut a droite, tournent au tempo
-      const rot = performance.now() / 1000 * bpm() / 60 * Math.PI * .5;
-      [[W - 70, 26], [W - 28, 26]].forEach(([rx, ry], j) => { g.save(); g.translate(rx, ry); g.rotate(rot * (j ? 1.15 : 1)); g.strokeStyle = "rgba(255,230,190,.55)"; g.lineWidth = 1.5;
-        g.beginPath(); g.arc(0, 0, 15, 0, Math.PI * 2); g.stroke(); g.beginPath(); g.arc(0, 0, 4, 0, Math.PI * 2); g.stroke();
-        for (let r2 = 0; r2 < 3; r2++) { const a2 = r2 * Math.PI * 2 / 3; g.beginPath(); g.moveTo(Math.cos(a2) * 5, Math.sin(a2) * 5); g.lineTo(Math.cos(a2) * 13, Math.sin(a2) * 13); g.stroke(); } g.restore(); });
-      g.strokeStyle = "rgba(255,230,190,.35)"; g.beginPath(); g.moveTo(W - 70, 41); g.lineTo(W - 28, 41); g.stroke();
       g.fillStyle = "rgba(255,255,255,.5)"; g.fillText(`${(t * 1000).toFixed(0)} ms (${(FX.find(z => z.k === "delay").divisions.find(d => d[0] === f.division) || [, ""])[1]} à ${bpm()} BPM)`, 18, 12);
     } else if (k === "deesser") {
       // a gauche la bande traitee, a droite la reduction en direct et son historique
-      const Wb = W - 70; grilleFreq(g, Wb, H, 24);
+      const Wb = W - 70; spectre(Wb); grilleFreq(g, Wb, H, 24);
       // la bande ecoutee (passe-haut), sur la meme echelle que la grille
       const db = reponse([filtreAffiche("highpass", f.freq, .7071, 0)]);
       g.save(); g.beginPath(); g.rect(0, 0, Wb, H); g.clip(); courbeFreq(g, Wb, H, db, 24, coul, true); g.restore();
