@@ -402,6 +402,91 @@ const STUDIO = (() => {
     .daw-id{padding-right:40px}
     .dp-corps{max-height:210px}
   }
+  
+  /* ═══════════ facades des plug-ins FINDINGS ═══════════
+     Une face avant d'appareil : texture brossee, lumiere par le haut, vignettage, vis aux
+     coins ; en-tete avec la marque et le nom du produit ; ecran sous vitre ; boutons a
+     graduations ; commutateurs lumineux. Les couleurs viennent de chaque plug-in (--face,
+     --entete, --vis, --grav, --grav-dim, plus haut). */
+  .fxc.detail.plug{position:relative;padding:0 0 22px;gap:0;border-radius:10px;overflow:hidden;
+    background:radial-gradient(ellipse 130% 70% at 50% -12%,rgba(255,255,255,.09),transparent 62%),
+      radial-gradient(ellipse 120% 60% at 50% 115%,rgba(0,0,0,.42),transparent 60%),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.024) 0 1px,rgba(0,0,0,.025) 1px 2px,transparent 2px 4px),var(--face);
+    border:1px solid #000;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(0,0,0,.6),0 12px 32px rgba(0,0,0,.55)}
+  .fxc.detail.plug::before,.fxc.detail.plug::after{content:"";position:absolute;bottom:6px;width:10px;height:10px;border-radius:50%;
+    background:linear-gradient(35deg,transparent 44%,rgba(0,0,0,.55) 44% 56%,transparent 56%),radial-gradient(circle at 38% 32%,#F4F5F6,#A3A6AB 55%,#55585D);
+    box-shadow:0 1px 1px rgba(0,0,0,.6),inset 0 -1px 1px rgba(0,0,0,.3)}
+  .fxc.detail.plug::before{left:7px} .fxc.detail.plug::after{right:7px}
+  .fxc.detail.plug .plug-tete{display:flex;align-items:center;gap:11px;padding:9px 34px 9px 30px;position:relative;
+    background:var(--entete,linear-gradient(180deg,rgba(255,255,255,.07),rgba(0,0,0,.12)));border-bottom:1px solid rgba(0,0,0,.65);box-shadow:inset 0 -1px 0 rgba(255,255,255,.05)}
+  .fxc.detail.plug .plug-tete::before,.fxc.detail.plug .plug-tete::after{content:"";position:absolute;top:50%;margin-top:-5px;width:10px;height:10px;border-radius:50%;
+    background:linear-gradient(-35deg,transparent 44%,rgba(0,0,0,.55) 44% 56%,transparent 56%),radial-gradient(circle at 38% 32%,#F4F5F6,#A3A6AB 55%,#55585D);box-shadow:0 1px 1px rgba(0,0,0,.6)}
+  .fxc.detail.plug .plug-tete::before{left:9px} .fxc.detail.plug .plug-tete::after{right:9px}
+  /* interrupteur d'alimentation : bague metal, voyant au centre */
+  .fxc.detail.plug .plug-pwr{width:24px;height:24px;border-radius:50%;flex:0 0 auto;background:radial-gradient(circle at 50% 35%,#4A4B50,#1B1C1F 70%);
+    box-shadow:0 0 0 2px #0A0A0B,0 0 0 3px rgba(255,255,255,.1),inset 0 1px 1px rgba(255,255,255,.2)}
+  .fxc.detail.plug .plug-pwr::after{inset:7px;background:#3A2A26}
+  .fxc.detail.plug.on .plug-pwr::after{background:var(--vis);box-shadow:0 0 8px var(--vis),0 0 2px #fff inset}
+  .plug-nom{display:grid;line-height:1;gap:2px}
+  .plug-marque{font:800 8.5px/1 var(--sans);letter-spacing:.34em;color:var(--vis);opacity:.9}
+  .plug-nom b{font:900 italic 19px/1 var(--sans);letter-spacing:-.025em;color:var(--grav);text-shadow:0 1px 0 rgba(0,0,0,.6)}
+  .fxc.detail[data-fx="comp"] .plug-nom b,.fxc.detail[data-fx="delay"] .plug-nom b,.fxc.detail[data-fx="reverb"] .plug-nom b,.fxc.detail[data-fx="limit"] .plug-nom b{color:#16130E;text-shadow:0 1px 0 rgba(255,255,255,.45)}
+  .fxc.detail[data-fx="comp"] .plug-marque,.fxc.detail[data-fx="delay"] .plug-marque,.fxc.detail[data-fx="reverb"] .plug-marque,.fxc.detail[data-fx="limit"] .plug-marque{color:rgba(0,0,0,.6)}
+  .plug-fn{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--grav-dim);padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.28);white-space:nowrap}
+  .fxc.detail[data-fx="comp"] .plug-fn,.fxc.detail[data-fx="delay"] .plug-fn,.fxc.detail[data-fx="reverb"] .plug-fn,.fxc.detail[data-fx="limit"] .plug-fn{color:rgba(0,0,0,.62);background:rgba(0,0,0,.08)}
+  .plug-esp{flex:1}
+  .plug-i{width:20px;height:20px;border-radius:50%;flex:0 0 auto;font:italic 800 11px/1 Georgia,serif;color:var(--grav-dim);border:1px solid currentColor;opacity:.75}
+  .plug-i:hover,.plug.aide-on .plug-i{opacity:1;color:var(--vis)}
+  .plug-aide{display:none;margin:10px 14px 0;padding:10px 12px;border-radius:6px;background:rgba(0,0,0,.6);color:#D9DBDF;font-size:11.5px;line-height:1.5;box-shadow:inset 0 1px 3px rgba(0,0,0,.6)}
+  .plug.aide-on .plug-aide{display:block}
+  /* bandeau de commandes : selecteurs a touches et menus LCD */
+  .plug-barre{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:11px 14px 0}
+  .plug-seg{display:inline-flex;padding:2px;gap:2px;border-radius:6px;background:#0B0B0C;box-shadow:inset 0 1px 3px rgba(0,0,0,.85),0 1px 0 rgba(255,255,255,.07)}
+  .plug-seg button{position:relative;height:24px;padding:0 11px 0 19px;border-radius:4px;font:800 10px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#8A8D93}
+  .plug-seg button::before{content:"";position:absolute;left:8px;top:50%;margin-top:-2.5px;width:5px;height:5px;border-radius:50%;background:#2F3034}
+  .plug-seg button:hover{color:#E6E7EA}
+  .plug-seg button[aria-pressed="true"]{color:#fff;background:linear-gradient(180deg,#4C4D52,#36373B);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 1px 2px rgba(0,0,0,.7)}
+  .plug-seg button[aria-pressed="true"]::before{background:var(--vis);box-shadow:0 0 6px var(--vis)}
+  .plug-menu{display:grid;gap:4px;font:800 8.5px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--grav-dim)}
+  .plug-menu select{-webkit-appearance:none;appearance:none;height:26px;min-width:118px;padding:0 26px 0 10px;border-radius:5px;border:1px solid #000;
+    background:linear-gradient(45deg,transparent 50%,var(--vis) 50%) calc(100% - 13px) 11px/5px 5px no-repeat,linear-gradient(135deg,var(--vis) 50%,transparent 50%) calc(100% - 8px) 11px/5px 5px no-repeat,#0A0B0C;
+    color:var(--vis);font:600 12px var(--mono);letter-spacing:0;text-transform:none;box-shadow:inset 0 1px 3px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.07);cursor:pointer}
+  /* ecran sous vitre */
+  .fxc.detail.plug .plug-vis{margin:12px 14px 0;height:148px;border-radius:8px;border:1px solid #000;
+    box-shadow:inset 0 3px 12px rgba(0,0,0,.95),inset 0 0 0 1px rgba(255,255,255,.035),0 1px 0 rgba(255,255,255,.09),0 0 0 4px rgba(0,0,0,.18)}
+  .fxc.detail.plug .plug-vis::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:8px;background:linear-gradient(168deg,rgba(255,255,255,.075),rgba(255,255,255,0) 38%)}
+  .fxc.detail.plug .plug-vis.at{height:160px}
+  .fxc.detail.plug .plug-vis.at canvas{height:160px}
+  .fxc.detail.plug .at-clavier,.fxc.detail.plug .at-legende{margin-left:14px;margin-right:14px}
+  /* boutons rotatifs : libelle grave au-dessus, afficheur LCD dessous */
+  .fxc.detail.plug .plug-boutons{display:flex;justify-content:center;align-items:flex-start;flex-wrap:wrap;gap:8px 12px;padding:16px 14px 6px;opacity:1}
+  .fxc.detail.plug .kn{width:78px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:2px 0}
+  .fxc.detail.plug .kn svg{width:62px;height:62px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.5))}
+  .fxc.detail.plug .kn .kn-n{order:-1;font:800 8.5px/1.45 var(--sans);overflow:visible;letter-spacing:.16em;color:var(--grav-dim);text-shadow:0 1px 0 rgba(0,0,0,.55);max-width:80px;margin-bottom:2px}
+  .fxc.detail.plug .kn .kn-v{min-width:56px;text-align:center;padding:3px 7px;border-radius:3px;background:#090A0B;color:var(--vis);font:600 10.5px var(--mono);
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.95),0 1px 0 rgba(255,255,255,.07);text-shadow:0 0 6px color-mix(in srgb,var(--vis) 45%,transparent)}
+  .kn .kn-grads{stroke:rgba(255,255,255,.32);stroke-width:1;stroke-linecap:round}
+  .kn .kn-jupe{fill:#0C0C0D;stroke:rgba(255,255,255,.08);stroke-width:.8}
+  .kn .kn-reflet{fill:rgba(255,255,255,.1);pointer-events:none}
+  .fxc.detail.plug .kn .kn-fond{stroke:rgba(0,0,0,.75);stroke-width:3.4}
+  .fxc.detail.plug .kn .kn-val{stroke-width:3.4}
+  .fxc.detail[data-fx="sat"] .kn .kn-grads{stroke:rgba(70,48,24,.7)}
+  .fxc.detail[data-fx="sat"] .kn .kn-n{text-shadow:0 1px 0 rgba(255,255,255,.55)}
+  .fxc.detail[data-fx="sat"] .kn .kn-fond{stroke:rgba(90,62,36,.45)}
+  /* commutateurs lumineux */
+  .plug-tgs{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px 14px 0}
+  .plug-tg{display:inline-flex;align-items:center;gap:8px;height:26px;padding:0 12px;border-radius:5px;font:800 9.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:#9A9DA3;
+    background:linear-gradient(180deg,#414247,#2B2C30);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 1px 2px rgba(0,0,0,.75),0 0 0 1px #000}
+  .plug-tg i{width:7px;height:7px;border-radius:50%;background:#2E2420;box-shadow:inset 0 1px 1px rgba(0,0,0,.6)}
+  .plug-tg:hover{color:#E6E7EA}
+  .plug-tg[aria-pressed="true"]{color:#fff}
+  .plug-tg[aria-pressed="true"] i{background:var(--vis);box-shadow:0 0 7px var(--vis),0 0 1px #fff inset}
+  /* eteint : l'appareil s'assombrit */
+  .fxc.detail.plug:not(.on) .plug-vis,.fxc.detail.plug:not(.on) .plug-boutons,.fxc.detail.plug:not(.on) .at-clavier{opacity:.5;filter:saturate(.35)}
+  /* liste des effets : le nom de produit devant la fonction */
+  .rk-modele{font-style:normal;font-weight:900;color:var(--ink);margin-right:6px;letter-spacing:-.01em}
+  .rk-case:not(.on) .rk-modele{color:var(--dim)}
+  .rk-case b{font-weight:500;color:var(--ink-2)}
   </style>`);
 
   /* ─────────────────────────── balisage ─────────────────────────── */
@@ -599,7 +684,7 @@ const STUDIO = (() => {
     const t = ({ C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0) + 12) % 12;
     return { tonique: t, gamme: m[3] ? "mineur" : "majeur" }; };
   const FX = [
-    { k: "autotune", nom: "Autotune / pitch", modele: "FDG Tune RT", types: [["prod", "Tonalité de la prod"], ["cle", "Choisir la tonalité"], ["chroma", "Chromatique"], ["libre", "Sans correction"]],
+    { k: "autotune", modele: "Tune RT", nom: "Autotune / pitch", types: [["prod", "Tonalité de la prod", "Prod"], ["cle", "Choisir la tonalité", "Choisir"], ["chroma", "Chromatique", "Chroma"], ["libre", "Sans correction", "Libre"]],
       // [cle, libelle, options, mode ou le menu apparait (absent = toujours)]
       menus: [["tonique", "Note", NOTES.map((n, i) => [String(i), n]), "cle"], ["gamme", "Gamme", Object.entries(GAMMES).map(([c, g]) => [c, g.nom]), "cle"],
               ["tessiture", "Range", Object.entries(TESSITURES).map(([c, t]) => [c, t.nom])]],
@@ -607,23 +692,23 @@ const STUDIO = (() => {
           ["tolerance", "Tolérance", 0, 50, 1, "ct", 0], ["demitons", "Pitch", -12, 12, 1, "dt", 0], ["diapason", "Diapason", 430, 450, .5, "Hz", 440],
           ["mix", "Mélange", 0, 100, 1, "%", 100]],
       cases: [["formant", "Formants préservés"]] },
-    { k: "hpf", modele: "HP-80 Low Cut", nom: "Coupe-bas", p: [["freq", "Fréquence", 20, 400, 1, "Hz", 80]] },
-    { k: "eq", modele: "Q3 Vocal EQ", nom: "Égaliseur", p: [["bas", "Graves", -15, 15, .5, "dB", 0], ["basF", "F. graves", 60, 500, 1, "Hz", 200],
+    { k: "hpf", modele: "LowCut", nom: "Coupe-bas", p: [["freq", "Fréquence", 20, 400, 1, "Hz", 80]] },
+    { k: "eq", modele: "VoxEQ", nom: "Égaliseur", p: [["bas", "Graves", -15, 15, .5, "dB", 0], ["basF", "F. graves", 60, 500, 1, "Hz", 200],
       ["mid", "Médiums", -15, 15, .5, "dB", 0], ["midF", "F. médiums", 300, 5000, 10, "Hz", 1500], ["midQ", "Largeur", .3, 5, .1, "", 1],
       ["haut", "Aigus", -15, 15, .5, "dB", 0], ["hautF", "F. aigus", 2000, 14000, 50, "Hz", 7000]], cases: [["analog", "Analog"]] },
-    { k: "comp", modele: "VC-4 Compressor", nom: "Compresseur", p: [["seuil", "Seuil", -60, 0, 1, "dB", -20], ["ratio", "Ratio", 1, 20, .5, ":1", 4],
+    { k: "comp", modele: "Comp-76", nom: "Compresseur", p: [["seuil", "Seuil", -60, 0, 1, "dB", -20], ["ratio", "Ratio", 1, 20, .5, ":1", 4],
       ["attaque", "Attaque", 1, 100, 1, "ms", 6], ["relache", "Relâche", 20, 800, 5, "ms", 150], ["gain", "Gain", 0, 24, .5, "dB", 4]], cases: [["analog", "Analog"]] },
-    { k: "deesser", modele: "DS-1 De-Esser", nom: "De-esser", types: [["bande", "Bande (split)"], ["large", "Large"]],
-      p: [["freq", "Fréquence", 3000, 12000, 50, "Hz", 6500], ["seuil", "Seuil", -50, 0, 1, "dB", -28], ["portee", "Réduction max", 0, 20, .5, "dB", 10]],
+    { k: "deesser", modele: "DeEss", nom: "De-esser", types: [["bande", "Bande (split)", "Bande"], ["large", "Large"]],
+      p: [["freq", "Fréquence", 3000, 12000, 50, "Hz", 6500], ["seuil", "Seuil", -50, 0, 1, "dB", -28], ["portee", "Réduction", 0, 20, .5, "dB", 10]],
       cases: [["ecoute", "Écouter les sifflantes", false]] },
-    { k: "sat", modele: "Tube Drive", nom: "Saturation", p: [["drive", "Chaleur", 0, 100, 1, "%", 25], ["mix", "Mélange", 0, 100, 1, "%", 35]] },
-    { k: "filtre", modele: "Lo-Fi Filter", nom: "Filtre", types: [["tel", "Téléphone"], ["radio", "Radio"], ["pb", "Passe-bas"], ["ph", "Passe-haut"]],
+    { k: "sat", modele: "Tube", nom: "Saturation", p: [["drive", "Chaleur", 0, 100, 1, "%", 25], ["mix", "Mélange", 0, 100, 1, "%", 35]] },
+    { k: "filtre", modele: "LoFi", nom: "Filtre", types: [["tel", "Téléphone"], ["radio", "Radio"], ["pb", "Passe-bas"], ["ph", "Passe-haut"]],
       p: [["freq", "Fréquence", 100, 12000, 10, "Hz", 1700], ["q", "Résonance", .3, 12, .1, "", 1.2]] },
-    { k: "chorus", modele: "Double Tracker", nom: "Doubleur", p: [["vitesse", "Vitesse", .1, 3, .05, "Hz", .4], ["profondeur", "Profondeur", 0, 100, 1, "%", 30], ["mix", "Mélange", 0, 100, 1, "%", 25]] },
-    { k: "reverb", modele: "Plate Room", nom: "Réverb", p: [["taille", "Taille", .3, 6, .1, "s", 1.4], ["predelay", "Pré-délai", 0, 200, 1, "ms", 25],
+    { k: "chorus", modele: "Double", nom: "Doubleur", p: [["vitesse", "Vitesse", .1, 3, .05, "Hz", .4], ["profondeur", "Profondeur", 0, 100, 1, "%", 30], ["mix", "Mélange", 0, 100, 1, "%", 25]] },
+    { k: "reverb", modele: "Plate", nom: "Réverb", p: [["taille", "Taille", .3, 6, .1, "s", 1.4], ["predelay", "Pré-délai", 0, 200, 1, "ms", 25],
       ["amorti", "Brillance", 1500, 14000, 100, "Hz", 6000], ["mix", "Niveau", 0, 100, 1, "%", 12]] },
-    { k: "limit", modele: "LX-2 Limiter", nom: "Limiteur", p: [["seuil", "Seuil", -24, 0, .5, "dB", -6], ["plafond", "Plafond", -6, 0, .1, "dB", -1], ["relache", "Relâche", 5, 500, 1, "ms", 60]] },
-    { k: "delay", modele: "Tape Echo", nom: "Écho", divisions: [["1/4", "1/4"], ["1/8p", "1/8 pointée"], ["1/8", "1/8"], ["1/16", "1/16"], ["1/4t", "1/4 triolet"]],
+    { k: "limit", modele: "MaxLimit", nom: "Limiteur", p: [["seuil", "Seuil", -24, 0, .5, "dB", -6], ["plafond", "Plafond", -6, 0, .1, "dB", -1], ["relache", "Relâche", 5, 500, 1, "ms", 60]] },
+    { k: "delay", modele: "Tape Echo", nom: "Écho", divisions: [["1/4", "1/4"], ["1/8p", "1/8 pointée", "1/8 p."], ["1/8", "1/8"], ["1/16", "1/16"], ["1/4t", "1/4 triolet", "1/4 t"]],
       p: [["retour", "Répétitions", 0, 85, 1, "%", 22], ["filtre", "Brillance", 800, 10000, 100, "Hz", 3200], ["mix", "Niveau", 0, 100, 1, "%", 10]], cases: [["pingpong", "Ping-pong"]] }
   ];
   const AIDE = {
@@ -1527,6 +1612,9 @@ const STUDIO = (() => {
     const pt = a => [cx + r * Math.cos(a * Math.PI / 180), cy + r * Math.sin(a * Math.PI / 180)];
     const [x0, y0] = pt(a0), [x1, y1] = pt(a1); return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${270 * v01 > 180 ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`; };
   const LOG = u => u === "Hz";
+  // onze graduations autour des boutons rotatifs, de -225 a +45 degres
+  const GRADS = [...Array(11)].map((_, i) => { const a = (-225 + 27 * i) * Math.PI / 180, r1 = 20.2, r2 = i % 5 === 0 ? 23.6 : 22.4;
+    return `<line x1="${(21 + r1 * Math.cos(a)).toFixed(2)}" y1="${(21 + r1 * Math.sin(a)).toFixed(2)}" x2="${(21 + r2 * Math.cos(a)).toFixed(2)}" y2="${(21 + r2 * Math.sin(a)).toFixed(2)}"/>`; }).join("");
   const versPos = (v, min, max, u) => LOG(u) ? Math.log(v / min) / Math.log(max / min) : (v - min) / (max - min);
   const versVal = (x, min, max, u) => LOG(u) ? min * Math.pow(max / min, x) : min + x * (max - min);
   const afficher = (v, u) => {
@@ -1547,8 +1635,8 @@ const STUDIO = (() => {
     const x = clamp(versPos(val, min, max, u), 0, 1);
     return `<div class="kn" tabindex="0" role="slider" aria-label="${esc(nom)}" aria-valuemin="${min}" aria-valuemax="${max}" aria-valuenow="${val}"
       data-cle="${cle}" data-min="${min}" data-max="${max}" data-pas="${pas}" data-u="${u}" data-def="${def}" data-val="${val}">
-      <svg viewBox="0 0 42 42"><path class="kn-fond" d="${ARC(1)}"/><path class="kn-val" d="${ARC(Math.max(.001, x))}"/>
-      <circle class="kn-cap" cx="21" cy="21" r="11"/><line class="kn-ind" x1="21" y1="21" x2="${(21 + 8 * Math.cos((-225 + 270 * x) * Math.PI / 180)).toFixed(2)}" y2="${(21 + 8 * Math.sin((-225 + 270 * x) * Math.PI / 180)).toFixed(2)}"/></svg>
+      <svg viewBox="-5 -5 52 52"><g class="kn-grads">${GRADS}</g><path class="kn-fond" d="${ARC(1)}"/><path class="kn-val" d="${ARC(Math.max(.001, x))}"/>
+      <circle class="kn-jupe" cx="21" cy="21" r="13.6"/><circle class="kn-cap" cx="21" cy="21" r="11.4"/><ellipse class="kn-reflet" cx="21" cy="16.5" rx="7" ry="4.2"/><line class="kn-ind" x1="21" y1="21" x2="${(21 + 8 * Math.cos((-225 + 270 * x) * Math.PI / 180)).toFixed(2)}" y2="${(21 + 8 * Math.sin((-225 + 270 * x) * Math.PI / 180)).toFixed(2)}"/></svg>
       <span class="kn-v">${afficher(val, u)}</span><span class="kn-n">${esc(nom)}</span></div>`;
   };
   function peindreBouton(kn, val){
@@ -1604,20 +1692,28 @@ const STUDIO = (() => {
         <div class="rk" role="list">${FX.map(f => { const v = p.fx[f.k]; return `
           <div class="rk-case${v.on ? " on" : ""}${fxOuvert === f.k ? " ouvert" : ""}" role="listitem" data-ouvrir="${f.k}">
             <button class="fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}"></button>
-            <span class="txt"><b>${esc(f.nom)}</b><small data-resume="${f.k}">${esc(resume(f.k, v))}</small></span>
+            <span class="txt"><b><em class="rk-modele" translate="no">${esc(f.modele || "")}</em>${esc(f.nom)}</b><small data-resume="${f.k}">${esc(resume(f.k, v))}</small></span>
           </div>`; }).join("")}</div>
         ${(() => { const f = FX.find(x => x.k === fxOuvert), v = p.fx[f.k]; return `
-        <section class="fxc detail${v.on ? " on" : ""}" data-fx="${f.k}">
-          <header><span class="fx-titre"><button class="fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}"></button><b>${esc(f.nom)}</b><span class="plug-modele" translate="no">${esc(f.modele || "")}</span></span>
-            ${f.types ? `<select data-fxtype="${f.k}">${f.types.map(([c, n]) => `<option value="${c}"${v.type === c ? " selected" : ""}>${n}</option>`).join("")}</select>` : ""}
-            ${f.divisions ? `<select data-fxdiv="${f.k}" title="Durée de l'écho, calée sur le tempo">${f.divisions.map(([c, n]) => `<option value="${c}"${v.division === c ? " selected" : ""}>${n}</option>`).join("")}</select>` : ""}
+        <section class="fxc detail plug${v.on ? " on" : ""}" data-fx="${f.k}">
+          <header class="plug-tete">
+            <button class="plug-pwr fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}" title="Activer / couper"></button>
+            <div class="plug-nom" translate="no"><span class="plug-marque">FINDINGS</span><b>${esc(f.modele || f.nom)}</b></div>
+            <span class="plug-fn">${esc(f.nom)}</span>
+            <span class="plug-esp"></span>
+            <button class="plug-i" data-aide aria-label="Aide" title="Aide">i</button>
           </header>
-          ${f.menus ? `<div class="fx-menus">${f.menus.filter(([, , , si]) => !si || v.type === si).map(([c, n, opts]) => `<label>${esc(n)}<select data-fxmenu="${f.k}.${c}"${c === "tonique" ? ' translate="no"' : ""}>${opts.map(([o, l]) => `<option value="${o}"${String(v[c]) === o ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label>`).join("")}</div>` : ""}
+          <div class="plug-aide">${AIDE[f.k]}</div>
+          ${f.types || f.divisions || f.menus ? `<div class="plug-barre">
+            ${f.types ? selecteur("fxtype", f.k, f.types, v.type) : ""}
+            ${f.divisions ? selecteur("fxdiv", f.k, f.divisions, v.division) : ""}
+            ${f.menus ? f.menus.filter(([, , , si]) => !si || v.type === si).map(([c, n, opts]) => `<label class="plug-menu">${esc(n)}<select data-fxmenu="${f.k}.${c}"${c === "tonique" ? ' translate="no"' : ""}>${opts.map(([o, l]) => `<option value="${o}"${String(v[c]) === o ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label>`).join("") : ""}
+          </div>` : ""}
           <div class="plug-vis${f.k === "autotune" ? " at" : ""}" data-vis="${f.k}"><canvas></canvas>${f.k === "autotune" ? `<div class="at-lecture"><b data-at-note>—</b><span class="at-cents"><i data-at-aig></i></span><small data-at-ct>Lance la lecture</small></div>` : ""}</div>
           ${f.k === "autotune" ? clavierHTML(v) : ""}
-          <div class="fx-boutons">${f.p.map(([c, n, min, max, pas, u, d]) => bouton(`fx.${f.k}.${c}`, n, min, max, pas, u, v[c], d)).join("")}</div>
-          ${(f.cases || []).map(([c, n, def]) => `<label class="fx-case"><input type="checkbox" data-fxcase="${f.k}.${c}"${(v[c] === undefined ? def !== false : !!v[c]) ? " checked" : ""}>${n}</label>`).join("")}
-          <p class="fx-aide">${AIDE[f.k]}</p>
+          <div class="plug-boutons fx-boutons">${f.p.map(([c, n, min, max, pas, u, d]) => bouton(`fx.${f.k}.${c}`, n, min, max, pas, u, v[c], d)).join("")}</div>
+          ${(f.cases || []).length ? `<div class="plug-tgs">${f.cases.map(([c, n, def]) => { const coche = v[c] === undefined ? def !== false : !!v[c];
+            return `<button class="plug-tg" data-tg aria-pressed="${coche}"><i></i>${esc(n)}<input type="checkbox" hidden data-fxcase="${f.k}.${c}"${coche ? " checked" : ""}></button>`; }).join("")}</div>` : ""}
         </section>`; })()}`;
       $("dpNom").addEventListener("change", e => { memoriser(); p.nom = e.target.value.trim() || p.nom; dessiner(); panneau(); sauver(); });
       $("dpPreset").addEventListener("change", e => { if (e.target.value === "perso") return; memoriser(); appliquerPreset(p, e.target.value); const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); dessiner(); panneau(); sauver(); message(`Préréglage « ${PRESETS[e.target.value].nom} »`); });
@@ -1668,6 +1764,7 @@ const STUDIO = (() => {
   const inspecteur = panneau;
 
   /* ─────────── facades des plug-ins : un ecran par effet ─────────── */
+  const selecteur = (genre, k, opts, val) => `<div class="plug-seg" role="group"><select hidden data-${genre}="${k}">${opts.map(([c, n]) => `<option value="${c}"${val === c ? " selected" : ""}>${esc(n)}</option>`).join("")}</select>${opts.map(([c, n, court]) => `<button data-seg="${c}" aria-pressed="${val === c}" title="${esc(n)}">${esc(court || n)}</button>`).join("")}</div>`;
   // clavier d'une octave : touches blanches puis noires posees par-dessus
   function clavierHTML(a){
     const cl = clavierDe(a), noires = { 1: 0, 3: 1, 6: 3, 8: 4, 10: 5 }, blanches = [0, 2, 4, 5, 7, 9, 11];
@@ -1691,11 +1788,11 @@ const STUDIO = (() => {
     [50, 100, 200, 500, 1000, 2000, 5000, 10000].forEach(f => { const x = Math.round(xFreq(f, W)) + .5; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); g.fillText(f >= 1000 ? f / 1000 + "k" : f, x + 3, H - 4); });
     for (let d = -dbMax; d <= dbMax; d += dbMax / 2) { const y = Math.round(H / 2 - d / dbMax * (H / 2 - 8)) + .5; g.strokeStyle = d ? "rgba(255,255,255,.06)" : "rgba(255,255,255,.16)"; g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); if (d) g.fillText((d > 0 ? "+" : "") + d, 3, y - 3); }
   }
-  function courbeFreq(g, W, H, db, dbMax, coul){
+  function courbeFreq(g, W, H, db, dbMax, coul, versBas){
     const y = d => H / 2 - Math.max(-dbMax * 1.1, Math.min(dbMax * 1.1, d)) / dbMax * (H / 2 - 8);
     g.beginPath(); db.forEach((d, i) => { const x = i / (db.length - 1) * W; i ? g.lineTo(x, y(d)) : g.moveTo(x, y(d)); });
     g.strokeStyle = coul; g.lineWidth = 2; g.stroke();
-    g.lineTo(W, H / 2); g.lineTo(0, H / 2); g.closePath(); g.fillStyle = coul.replace("rgb(", "rgba(").replace(")", ",.14)"); g.fill();
+    const base = versBas ? H : H / 2; g.lineTo(W, base); g.lineTo(0, base); g.closePath(); g.fillStyle = coul.replace("rgb(", "rgba(").replace(")", versBas ? ",.10)" : ",.14)"); g.fill();
   }
   let visuRAF = 0, eqPoints = [], eqDrag = null;
   function visualiser(){
@@ -1713,7 +1810,7 @@ const STUDIO = (() => {
       if (k === "eq") filtres = [filtreAffiche("lowshelf", f.basF, 1, f.bas), filtreAffiche("peaking", f.midF, f.midQ, f.mid), filtreAffiche("highshelf", f.hautF, 1, f.haut)];
       else if (k === "hpf") filtres = [filtreAffiche("highpass", f.freq, .707, 0)];
       else { const t = f.type; filtres = [filtreAffiche(t === "pb" ? "lowpass" : t === "ph" ? "highpass" : "bandpass", t === "radio" ? Math.min(f.freq, 2500) : f.freq, t === "radio" ? Math.max(.5, f.q * .6) : f.q, 0)]; }
-      const db = reponse(filtres); courbeFreq(g, W, H, db, dbMax, coul);
+      const db = reponse(filtres); courbeFreq(g, W, H, db, dbMax, coul, k !== "eq");
       if (k === "eq") {   // les trois points a faire glisser
         eqPoints = [["bas", "basF", f.basF], ["mid", "midF", f.midF], ["haut", "hautF", f.hautF]].map(([gk, fk, fr], i) => {
           const x = xFreq(fr, W), d = reponse([filtres[i]])[Math.round(Math.log(fr / 20) / Math.log(1000) * 239)] || 0, y = H / 2 - d / dbMax * (H / 2 - 8);
@@ -1743,7 +1840,9 @@ const STUDIO = (() => {
       [20, 10, 7, 5, 3, 2, 1, 0].forEach(d => { const a2 = ang(d), x1 = cx + Math.cos(a2) * R, y1 = cy + Math.sin(a2) * R, x2 = cx + Math.cos(a2) * (R - 7), y2 = cy + Math.sin(a2) * (R - 7);
         g.strokeStyle = d <= 3 && d > 0 ? "#B8352A" : "#2A2017"; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); g.fillText(d, cx + Math.cos(a2) * (R - 15), cy + Math.sin(a2) * (R - 15) + 3); });
       g.font = "bold 7px system-ui"; g.fillText("GAIN REDUCTION", cx, m + vh - 8); g.textAlign = "left";
-      const an = ang(n ? n.vu : 0); g.strokeStyle = "#1A1410"; g.lineWidth = 1.6; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(an) * (R + 2), cy + Math.sin(an) * (R + 2)); g.stroke();
+      const an = ang(n ? n.vu : 0); g.save(); g.beginPath(); g.rect(vx, m, vw, vh); g.clip();
+      g.strokeStyle = "#1A1410"; g.lineWidth = 1.6; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(an) * (R + 2), cy + Math.sin(an) * (R + 2)); g.stroke();
+      g.fillStyle = "#1A1410"; g.fillRect(vx, m + vh - 5, vw, 5); g.restore();   // le cache du pivot, en bas du cadran
       g.fillStyle = "rgba(255,255,255,.45)"; g.font = "9px ui-monospace,Menlo,monospace"; g.fillText(`${f.ratio}:1`, m + 4, m + 12);
     } else if (k === "sat") {
       const c = courbe(f.drive), mix = f.mix / 100, gain = 1 + f.drive / 100 * .6, m = 10, L = H - 2 * m;
@@ -1805,18 +1904,18 @@ const STUDIO = (() => {
       const Wb = W - 70; grilleFreq(g, Wb, H, 24);
       // la bande ecoutee (passe-haut), sur la meme echelle que la grille
       const db = reponse([filtreAffiche("highpass", f.freq, .7071, 0)]);
-      g.save(); g.beginPath(); g.rect(0, 0, Wb, H); g.clip(); courbeFreq(g, Wb, H, db, 24, coul); g.restore();
+      g.save(); g.beginPath(); g.rect(0, 0, Wb, H); g.clip(); courbeFreq(g, Wb, H, db, 24, coul, true); g.restore();
       const fx = xFreq(f.freq, Wb); g.strokeStyle = coul; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(fx, 8); g.lineTo(fx, H - 14); g.stroke(); g.setLineDash([]);
       g.fillStyle = coul; g.font = "bold 9px ui-monospace,Menlo,monospace"; g.fillText((f.freq / 1000).toFixed(1) + " kHz", Math.min(fx + 4, Wb - 50), 14);
       const hist = (n && n.deHist) || [], gr = hist.length ? hist[hist.length - 1] : 0;
       n && (n.deVu = (n.deVu || 0) + (gr - (n.deVu || 0)) * .3);
       // historique de la reduction, en bas de l'ecran
-      g.beginPath(); hist.forEach((v, i) => { const px = i / 240 * Wb, py = H - 14 - Math.min(20, v) / 20 * (H * .45); i ? g.lineTo(px, py) : g.moveTo(px, py); });
-      g.strokeStyle = "rgba(255,180,80,.75)"; g.lineWidth = 1.4; g.stroke();
+      if (hist.some(v => v > .2)) { g.beginPath(); hist.forEach((v, i) => { const px = i / 240 * Wb, py = H - 14 - Math.min(20, v) / 20 * (H * .45); i ? g.lineTo(px, py) : g.moveTo(px, py); });
+        g.strokeStyle = "rgba(255,180,80,.75)"; g.lineWidth = 1.4; g.stroke(); }
       const bx = W - 52, bh = H - 28; g.fillStyle = "#0B0C0E"; g.fillRect(bx, 10, 16, bh);
       const hh = Math.min(1, (n ? n.deVu : 0) / Math.max(1, f.portee)) * bh; g.fillStyle = "#F5A524"; g.fillRect(bx, 10, 16, hh);
       g.fillStyle = "rgba(255,255,255,.5)"; g.font = "9px ui-monospace,Menlo,monospace"; g.fillText("GR", bx, H - 6); g.fillText("-" + (n ? n.deVu : 0).toFixed(1), bx + 20, 10 + Math.max(9, hh));
-      g.fillText("seuil " + f.seuil + " dB · max " + f.portee + " dB", 8, H - 18 - H * .45);
+      g.fillText("seuil " + f.seuil + " dB · réduction max " + f.portee + " dB", 30, 14);
     } else if (k === "limit") {
       // trois vumetres facon L2 : entree, attenuation, sortie, et l'attenuation dans le temps
       const lire = a => { if (!a) return -90; const b = new Float32Array(a.fftSize); a.getFloatTimeDomainData(b); let m = 0; for (const v of b) m = Math.max(m, Math.abs(v)); return 20 * Math.log10(m + 1e-9); };
@@ -1884,6 +1983,12 @@ const STUDIO = (() => {
     if (e.target.closest("#dawReplier")) { pan.classList.toggle("ferme"); setTimeout(() => { dessiner(); visualiser(); }, 50); return; }
     const ouv = e.target.closest("[data-ouvrir]");
     if (ouv && !e.target.closest("[data-fxon]")) { fxOuvert = ouv.dataset.ouvrir; panneau(); reglerTout(); return; }
+    const sg = e.target.closest("[data-seg]");
+    if (sg) { const sel = sg.parentElement.querySelector("select"); sel.value = sg.dataset.seg;
+      sg.parentElement.querySelectorAll("[data-seg]").forEach(b => b.setAttribute("aria-pressed", String(b === sg))); sel.dispatchEvent(new Event("change", { bubbles: true })); return; }
+    const tg = e.target.closest("[data-tg]");
+    if (tg) { const c = tg.querySelector("input"); c.checked = !c.checked; tg.setAttribute("aria-pressed", String(c.checked)); c.dispatchEvent(new Event("change", { bubbles: true })); return; }
+    if (e.target.closest("[data-aide]")) { e.target.closest(".plug").classList.toggle("aide-on"); return; }
     const tch = e.target.closest("[data-touche]");
     if (tch) { const p = pisteCible(), a = p.fx.autotune, cl = clavierDe(a), i = +tch.dataset.touche;
       // visee -> libre -> retiree -> visee

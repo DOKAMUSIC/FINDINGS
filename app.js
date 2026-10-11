@@ -347,6 +347,7 @@ const I18N = (() => {
     "Bande (split)": ["Band (split)", "Banda (split)"],
     "Large": ["Wide", "Amplio"],
     "Réduction max": ["Max reduction", "Reducción máx."],
+    "Réduction": ["Reduction", "Reducción"],
     "Plafond": ["Ceiling", "Techo"],
     "Écouter les sifflantes": ["Listen to sibilance", "Escuchar las sibilantes"],
     "Calme les « s » et les « ch » qui sifflent. Seuls les aigus au-dessus de la fréquence sont réduits quand ils dépassent le seuil ; le reste de la voix ne bouge pas. « Écouter les sifflantes » fait entendre ce qui est détecté, pour caler la fréquence.": ["Tames harsh “s” and “sh” sounds. Only the highs above the frequency are reduced when they exceed the threshold; the rest of the vocal is untouched. “Listen to sibilance” lets you hear what's detected, to dial in the frequency.", "Suaviza las «s» y «ch» que silban. Solo los agudos por encima de la frecuencia se reducen cuando superan el umbral; el resto de la voz no cambia. «Escuchar las sibilantes» deja oír lo detectado, para ajustar la frecuencia."],
