@@ -2179,7 +2179,7 @@ const STUDIO = (() => {
   const poignee = $("dawPoignee");
   let hautPan = (() => { try { return +localStorage.getItem("findings.studio.panneau") || 0; } catch (e) { return 0; } })();
   const appliquerHaut = () => { if (hautPan) { corps.style.height = hautPan + "px"; corps.style.maxHeight = "none"; } else { corps.style.height = ""; corps.style.maxHeight = ""; } };
-  const limiteHaut = () => Math.max(140, el.clientHeight - (el.querySelector(".daw-haut")?.offsetHeight || 60) - 26 - 120 - 40);
+  const limiteHaut = () => Math.max(120, el.clientHeight - (el.querySelector(".daw-haut")?.offsetHeight || 60) - (el.querySelector(".dp-onglets")?.offsetHeight || 36) - 10 - 150);
   appliquerHaut();
   poignee.addEventListener("pointerdown", e => {
     e.preventDefault(); try { poignee.setPointerCapture(e.pointerId); } catch (er) {}
@@ -2199,6 +2199,22 @@ const STUDIO = (() => {
     };
     poignee.addEventListener("pointermove", bouge); poignee.addEventListener("pointerup", fin); poignee.addEventListener("pointercancel", fin);
   });
+  /* Hauteur du studio integre a la page : toute la fenetre sous l'en-tete, moins le lecteur du
+     bas seulement quand il est affiche. Le panneau des effets reste borne a la place restante
+     (les pistes gardent leur minimum) : rien n'est jamais coupe. */
+  function ajusterHauteur(){
+    if (!ouvert || !el.classList.contains("inline") || document.fullscreenElement === el) return;
+    const hh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hh")) || 96;
+    const bar = document.getElementById("bar"), bv = bar && bar.classList.contains("up") ? bar.getBoundingClientRect() : null;
+    const bas = bv && bv.height ? Math.max(0, window.innerHeight - bv.top) + 10 : 8;
+    const h = Math.max(460, Math.round(window.innerHeight - hh - 8 - bas));
+    if (el.style.height !== h + "px") el.style.height = h + "px";
+    const lim = limiteHaut();
+    if (hautPan > lim) { hautPan = lim; appliquerHaut(); }
+    corps.style.maxHeight = hautPan ? "none" : lim + "px";
+  }
+  window.addEventListener("resize", ajusterHauteur);
+  setInterval(ajusterHauteur, 400);   // le lecteur du bas apparait / disparait avec la lecture
   poignee.addEventListener("dblclick", () => { pan.classList.toggle("ferme"); setTimeout(() => { dessiner(); visualiser(); }, 50); });
   /* tourner un bouton */
   let tour = null;
