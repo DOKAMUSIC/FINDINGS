@@ -487,6 +487,21 @@ const STUDIO = (() => {
   .rk-modele{font-style:normal;font-weight:900;color:var(--ink);margin-right:6px;letter-spacing:-.01em}
   .rk-case:not(.on) .rk-modele{color:var(--dim)}
   .rk-case b{font-weight:500;color:var(--ink-2)}
+  
+  /* autotune, vue simple */
+  .at-art{display:grid;gap:12px;padding:12px 14px 0}
+  .at-menus{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .at-menus .plug-menu select{min-width:132px}
+  .at-centre{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px}
+  .at-cote{display:grid;justify-items:center;gap:8px}
+  .at-coeur{display:grid;justify-items:center;gap:2px}
+  .fxc.detail.plug .plug-vis.at-metre{margin:0;width:300px;height:132px}
+  .fxc.detail.plug .kn.grand{width:132px}
+  .fxc.detail.plug .kn.grand svg{width:112px;height:112px}
+  .fxc.detail.plug .kn.grand .kn-n{font-size:10px;letter-spacing:.22em;color:var(--grav)}
+  .fxc.detail.plug .kn.grand .kn-v{font-size:13px;min-width:72px}
+  .at-pied{display:flex;justify-content:center;align-items:center;gap:22px;padding-bottom:4px}
+  @media(max-width:640px){ .at-centre{grid-template-columns:1fr} .fxc.detail.plug .plug-vis.at-metre{width:100%} }
   </style>`);
 
   /* ─────────────────────────── balisage ─────────────────────────── */
@@ -755,68 +770,94 @@ const STUDIO = (() => {
      s'entendent a peine seuls mais tiennent la voix dans la prod. */
   const PRESETS = {
     brut:     { nom: "Brut (aucun effet)", fx: {} },
+    // nettoyage transparent : la voix telle qu'elle est, en mieux
     naturel:  { nom: "Voix naturelle", fx: {
-                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
                 hpf: { on: 1, freq: 80 },
-                eq: { on: 1, bas: 0, mid: -2, midF: 320, midQ: 1, haut: 2, hautF: 10000 },
-                comp: { on: 1, seuil: -18, ratio: 3, attaque: 10, relache: 120, gain: 3 },
-                reverb: { on: 1, taille: .9, predelay: 15, amorti: 6500, mix: 9 } } },
-    lead:     { nom: "Lead rap / pop", fx: {
-                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
-                limit: { on: 1, seuil: -3, plafond: -1, relache: 60 },
-                autotune: { on: 1, type: "prod", vitesse: 40, transition: 60, humain: 40, tolerance: 8, demitons: 0, mix: 100, formant: true },
+                eq: { on: 1, bas: 0, basF: 200, mid: -2, midF: 300, midQ: 1, haut: 2, hautF: 10000, analog: true },
+                comp: { on: 1, seuil: -18, ratio: 2.5, attaque: 15, relache: 120, gain: 3, analog: true },
+                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 6, ecoute: false },
+                reverb: { on: 1, taille: .8, predelay: 15, amorti: 6500, mix: 8 } } },
+    // couplet rap : devant, sec, percutant
+    lead:     { nom: "Lead rap", fx: {
                 hpf: { on: 1, freq: 100 },
-                eq: { on: 1, bas: 0, mid: -2.5, midF: 350, midQ: 1.1, haut: 3, hautF: 9500 },
-                comp: { on: 1, seuil: -22, ratio: 4, attaque: 4, relache: 90, gain: 5 },
-                sat: { on: 1, drive: 15, mix: 22 },
-                delay: { on: 1, division: "1/4", retour: 15, filtre: 2800, mix: 7, pingpong: false },
-                reverb: { on: 1, taille: 1.3, predelay: 30, amorti: 5500, mix: 9 } } },
-    refrain:  { nom: "Refrain large", fx: {
+                eq: { on: 1, bas: -2, basF: 200, mid: 2, midF: 3000, midQ: .9, haut: 2.5, hautF: 10000, analog: true },
+                comp: { on: 1, seuil: -22, ratio: 4, attaque: 5, relache: 80, gain: 5, analog: true },
                 deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
+                sat: { on: 1, drive: 15, mix: 20 },
+                limit: { on: 1, seuil: -3, plafond: -1, relache: 60 },
+                delay: { on: 1, division: "1/8", retour: 10, filtre: 2800, mix: 5, pingpong: false },
+                reverb: { on: 1, taille: 1, predelay: 25, amorti: 5500, mix: 6 } } },
+    // voix chantee avec un autotune leger, qui garde le naturel
+    melodique:{ nom: "Lead mélodique", fx: {
+                autotune: { on: 1, type: "prod", vitesse: 35, transition: 0, humain: 35, tolerance: 10, demitons: 0, diapason: 440, mix: 100, formant: true, tessiture: "large" },
+                hpf: { on: 1, freq: 100 },
+                eq: { on: 1, bas: -1.5, basF: 200, mid: -2, midF: 400, midQ: 1, haut: 3, hautF: 10000, analog: true },
+                comp: { on: 1, seuil: -22, ratio: 4, attaque: 6, relache: 100, gain: 5, analog: true },
+                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
+                delay: { on: 1, division: "1/4", retour: 20, filtre: 2800, mix: 8, pingpong: true },
+                reverb: { on: 1, taille: 1.8, predelay: 35, amorti: 5500, mix: 12 } } },
+    // l'effet robot assume, facon trap
+    autotune: { nom: "Autotune marqué", fx: {
+                autotune: { on: 1, type: "prod", vitesse: 0, transition: 0, humain: 0, tolerance: 0, demitons: 0, diapason: 440, mix: 100, formant: true, tessiture: "large" },
                 hpf: { on: 1, freq: 110 },
-                eq: { on: 1, bas: 0, mid: -2, midF: 400, midQ: 1, haut: 2.5, hautF: 10000 },
-                comp: { on: 1, seuil: -22, ratio: 4, attaque: 6, relache: 110, gain: 5 },
+                eq: { on: 1, bas: -2, basF: 220, mid: 1.5, midF: 2500, midQ: .9, haut: 3, hautF: 10000, analog: true },
+                comp: { on: 1, seuil: -24, ratio: 4, attaque: 3, relache: 70, gain: 6, analog: true },
+                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
+                sat: { on: 1, drive: 10, mix: 15 },
+                limit: { on: 1, seuil: -2, plafond: -1, relache: 60 },
+                delay: { on: 1, division: "1/4", retour: 22, filtre: 2800, mix: 9, pingpong: true },
+                reverb: { on: 1, taille: 1.6, predelay: 30, amorti: 5500, mix: 11 } } },
+    refrain:  { nom: "Refrain large", fx: {
+                hpf: { on: 1, freq: 110 },
+                eq: { on: 1, bas: -2, basF: 220, mid: -1.5, midF: 450, midQ: 1, haut: 3, hautF: 10000, analog: true },
+                comp: { on: 1, seuil: -22, ratio: 4, attaque: 6, relache: 110, gain: 5, analog: true },
+                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
                 chorus: { on: 1, vitesse: .35, profondeur: 25, mix: 22 },
                 delay: { on: 1, division: "1/8p", retour: 14, filtre: 3200, mix: 7, pingpong: true },
-                reverb: { on: 1, taille: 1.8, predelay: 25, amorti: 6000, mix: 13 } } },
+                reverb: { on: 1, taille: 2, predelay: 25, amorti: 6000, mix: 14 } } },
     melo:     { nom: "Mélo / planant", fx: {
-                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
+                autotune: { on: 1, type: "prod", vitesse: 25, transition: 0, humain: 50, tolerance: 15, demitons: 0, diapason: 440, mix: 100, formant: true, tessiture: "large" },
                 hpf: { on: 1, freq: 90 },
-                eq: { on: 1, bas: 0, mid: -1.5, midF: 300, midQ: 1, haut: 2, hautF: 11000 },
-                comp: { on: 1, seuil: -20, ratio: 3, attaque: 12, relache: 160, gain: 4 },
-                delay: { on: 1, division: "1/4", retour: 26, filtre: 2400, mix: 10, pingpong: true },
-                reverb: { on: 1, taille: 2.6, predelay: 45, amorti: 4200, mix: 17 } } },
-    backs:    { nom: "Backs / chœurs", fx: {
-                hpf: { on: 1, freq: 180 },
-                eq: { on: 1, bas: -3, basF: 250, mid: -2, midF: 2500, midQ: .9, haut: 1.5, hautF: 10000 },
-                comp: { on: 1, seuil: -26, ratio: 5, attaque: 8, relache: 140, gain: 4 },
-                chorus: { on: 1, vitesse: .3, profondeur: 35, mix: 35 },
-                reverb: { on: 1, taille: 2.1, predelay: 10, amorti: 4500, mix: 20 } } },
-    autotune: { nom: "Autotune marqué", fx: {
+                eq: { on: 1, bas: 0, basF: 200, mid: -1.5, midF: 300, midQ: 1, haut: 2, hautF: 11000, analog: true },
+                comp: { on: 1, seuil: -20, ratio: 3, attaque: 12, relache: 160, gain: 4, analog: true },
                 deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
-                autotune: { on: 1, type: "prod", vitesse: 0, transition: 0, humain: 0, tolerance: 0, demitons: 0, mix: 100, formant: true },
-                hpf: { on: 1, freq: 100 },
-                eq: { on: 1, bas: 0, mid: -2, midF: 350, midQ: 1, haut: 3, hautF: 10000 },
-                comp: { on: 1, seuil: -22, ratio: 4, attaque: 4, relache: 90, gain: 5 },
-                delay: { on: 1, division: "1/4", retour: 18, filtre: 2800, mix: 8, pingpong: true },
-                reverb: { on: 1, taille: 1.6, predelay: 30, amorti: 5500, mix: 11 } } },
+                delay: { on: 1, division: "1/4", retour: 32, filtre: 2200, mix: 12, pingpong: true },
+                reverb: { on: 1, taille: 3.2, predelay: 50, amorti: 4200, mix: 20 } } },
+    backs:    { nom: "Backs / chœurs", fx: {
+                hpf: { on: 1, freq: 200 },
+                eq: { on: 1, bas: -4, basF: 250, mid: -2.5, midF: 2500, midQ: .9, haut: 1.5, hautF: 10000, analog: true },
+                comp: { on: 1, seuil: -26, ratio: 5, attaque: 8, relache: 140, gain: 4, analog: true },
+                deesser: { on: 1, type: "bande", freq: 6500, seuil: -32, portee: 10, ecoute: false },
+                chorus: { on: 1, vitesse: .3, profondeur: 40, mix: 40 },
+                reverb: { on: 1, taille: 2.2, predelay: 10, amorti: 4500, mix: 22 } } },
     adlibs:   { nom: "Ad-libs", fx: {
                 hpf: { on: 1, freq: 220 },
-                eq: { on: 1, bas: 0, mid: 2, midF: 2000, midQ: .8, haut: 1, hautF: 9000 },
-                comp: { on: 1, seuil: -24, ratio: 6, attaque: 3, relache: 80, gain: 5 },
-                delay: { on: 1, division: "1/4", retour: 28, filtre: 2600, mix: 15, pingpong: true },
-                reverb: { on: 1, taille: 1.5, predelay: 20, amorti: 5000, mix: 11 } } },
+                eq: { on: 1, bas: 0, basF: 200, mid: 2.5, midF: 2000, midQ: .8, haut: 1, hautF: 9000, analog: true },
+                comp: { on: 1, seuil: -24, ratio: 6, attaque: 3, relache: 80, gain: 5, analog: true },
+                deesser: { on: 1, type: "bande", freq: 6500, seuil: -30, portee: 8, ecoute: false },
+                delay: { on: 1, division: "1/4", retour: 30, filtre: 2600, mix: 16, pingpong: true },
+                reverb: { on: 1, taille: 1.5, predelay: 20, amorti: 5000, mix: 12 } } },
     grave:    { nom: "Ad-libs pitchés (grave)", fx: {
-                autotune: { on: 1, type: "libre", vitesse: 15, demitons: -12, mix: 100, formant: false },
-                hpf: { on: 1, freq: 90 },
-                comp: { on: 1, seuil: -22, ratio: 5, attaque: 4, relache: 90, gain: 4 },
+                autotune: { on: 1, type: "libre", vitesse: 15, transition: 0, humain: 0, tolerance: 0, demitons: -12, diapason: 440, mix: 100, formant: false, tessiture: "large" },
+                hpf: { on: 1, freq: 80 },
+                eq: { on: 1, bas: 0, basF: 200, mid: 0, midF: 1500, midQ: 1, haut: -2, hautF: 8000, analog: true },
+                comp: { on: 1, seuil: -22, ratio: 5, attaque: 4, relache: 90, gain: 4, analog: true },
                 delay: { on: 1, division: "1/4", retour: 20, filtre: 2400, mix: 10, pingpong: true },
                 reverb: { on: 1, taille: 1.4, predelay: 20, amorti: 4500, mix: 10 } } },
+    aigu:     { nom: "Ad-libs pitchés (aigu)", fx: {
+                autotune: { on: 1, type: "libre", vitesse: 15, transition: 0, humain: 0, tolerance: 0, demitons: 12, diapason: 440, mix: 100, formant: false, tessiture: "large" },
+                hpf: { on: 1, freq: 250 },
+                eq: { on: 1, bas: -3, basF: 300, mid: 0, midF: 1500, midQ: 1, haut: 0, hautF: 9000, analog: true },
+                comp: { on: 1, seuil: -24, ratio: 5, attaque: 3, relache: 80, gain: 4, analog: true },
+                deesser: { on: 1, type: "bande", freq: 7500, seuil: -30, portee: 10, ecoute: false },
+                delay: { on: 1, division: "1/8", retour: 25, filtre: 3000, mix: 12, pingpong: true },
+                reverb: { on: 1, taille: 1.6, predelay: 20, amorti: 5000, mix: 12 } } },
     intro:    { nom: "Intro filtrée", fx: {
                 hpf: { on: 1, freq: 250 },
                 filtre: { on: 1, type: "tel", freq: 1600, q: .8 },
-                comp: { on: 1, seuil: -20, ratio: 4, attaque: 5, relache: 100, gain: 12 },   // le filtre retire ~10 dB : on les rend
+                comp: { on: 1, seuil: -20, ratio: 4, attaque: 5, relache: 100, gain: 12, analog: true },   // le filtre retire ~10 dB : on les rend
                 sat: { on: 1, drive: 20, mix: 30 },
+                limit: { on: 1, seuil: -8, plafond: -1, relache: 80 },
                 reverb: { on: 1, taille: .8, predelay: 10, amorti: 4000, mix: 8 } } }
   };
   // preregles retires (Téléphone, Grand espace, Chaud et saturé) : la piste garde ses
@@ -1704,6 +1745,7 @@ const STUDIO = (() => {
             <button class="plug-i" data-aide aria-label="Aide" title="Aide">i</button>
           </header>
           <div class="plug-aide">${AIDE[f.k]}</div>
+          ${f.k === "autotune" ? corpsAutotune(f, v) : `
           ${f.types || f.divisions || f.menus ? `<div class="plug-barre">
             ${f.types ? selecteur("fxtype", f.k, f.types, v.type) : ""}
             ${f.divisions ? selecteur("fxdiv", f.k, f.divisions, v.division) : ""}
@@ -1713,7 +1755,7 @@ const STUDIO = (() => {
           ${f.k === "autotune" ? clavierHTML(v) : ""}
           <div class="plug-boutons fx-boutons">${f.p.map(([c, n, min, max, pas, u, d]) => bouton(`fx.${f.k}.${c}`, n, min, max, pas, u, v[c], d)).join("")}</div>
           ${(f.cases || []).length ? `<div class="plug-tgs">${f.cases.map(([c, n, def]) => { const coche = v[c] === undefined ? def !== false : !!v[c];
-            return `<button class="plug-tg" data-tg aria-pressed="${coche}"><i></i>${esc(n)}<input type="checkbox" hidden data-fxcase="${f.k}.${c}"${coche ? " checked" : ""}></button>`; }).join("")}</div>` : ""}
+            return `<button class="plug-tg" data-tg aria-pressed="${coche}"><i></i>${esc(n)}<input type="checkbox" hidden data-fxcase="${f.k}.${c}"${coche ? " checked" : ""}></button>`; }).join("")}</div>` : ""}`}
         </section>`; })()}`;
       $("dpNom").addEventListener("change", e => { memoriser(); p.nom = e.target.value.trim() || p.nom; dessiner(); panneau(); sauver(); });
       $("dpPreset").addEventListener("change", e => { if (e.target.value === "perso") return; memoriser(); appliquerPreset(p, e.target.value); const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); dessiner(); panneau(); sauver(); message(`Préréglage « ${PRESETS[e.target.value].nom} »`); });
@@ -1764,6 +1806,36 @@ const STUDIO = (() => {
   const inspecteur = panneau;
 
   /* ─────────── facades des plug-ins : un ecran par effet ─────────── */
+  /* Autotune, vue simple facon Auto-Tune Artist : trois menus, un grand indicateur de
+     correction, un gros bouton Vitesse, Humanize et Tolerance de part et d'autre. */
+  function corpsAutotune(f, v){
+    const par = c => { const d = f.p.find(x => x[0] === c); return bouton(`fx.autotune.${c}`, d[1], d[2], d[3], d[4], d[5], v[c], d[6]); };
+    const cleProd = lireCle(prod && prod.key), auto = v.type === "prod";
+    const valGamme = v.type === "chroma" ? "chroma" : v.type === "libre" ? "libre" : auto ? (cleProd ? cleProd.gamme : "chroma") : v.gamme;
+    const opt = (val, lib, sel) => `<option value="${val}"${sel ? " selected" : ""}>${esc(lib)}</option>`;
+    const coche = v.formant !== false;
+    return `<div class="at-art">
+      <div class="at-menus">
+        <label class="plug-menu">Tonalité<select data-atsel="cle" translate="no">
+          ${opt("auto", cleProd && prod.keySur ? `Auto · ${NOTES[cleProd.tonique]} ${GAMMES[cleProd.gamme].nom.toLowerCase()}` : "Auto · prod", auto)}
+          ${NOTES.map((n, i) => opt(String(i), n, !auto && String(v.tonique) === String(i))).join("")}</select></label>
+        <label class="plug-menu">Gamme<select data-atsel="gamme">
+          ${Object.entries(GAMMES).map(([c, g]) => opt(c, g.nom, valGamme === c)).join("")}${opt("chroma", "Chromatique", valGamme === "chroma")}${opt("libre", "Aucune (pitch seul)", valGamme === "libre")}</select></label>
+        <label class="plug-menu">Tessiture<select data-fxmenu="autotune.tessiture">${Object.entries(TESSITURES).map(([c, t]) => opt(c, t.nom, v.tessiture === c)).join("")}</select></label>
+      </div>
+      <div class="at-centre">
+        <div class="at-cote">${par("humain")}${par("demitons")}</div>
+        <div class="at-coeur">
+          <div class="plug-vis at-metre" data-vis="autotune"><canvas></canvas></div>
+          <div class="at-grand">${par("vitesse").replace('class="kn"', 'class="kn grand"')}</div>
+        </div>
+        <div class="at-cote">${par("tolerance")}${par("diapason")}</div>
+      </div>
+      <div class="at-pied">${par("mix")}
+        <button class="plug-tg" data-tg aria-pressed="${coche}"><i></i>Formants préservés<input type="checkbox" hidden data-fxcase="autotune.formant"${coche ? " checked" : ""}></button>
+      </div>
+    </div>`;
+  }
   const selecteur = (genre, k, opts, val) => `<div class="plug-seg" role="group"><select hidden data-${genre}="${k}">${opts.map(([c, n]) => `<option value="${c}"${val === c ? " selected" : ""}>${esc(n)}</option>`).join("")}</select>${opts.map(([c, n, court]) => `<button data-seg="${c}" aria-pressed="${val === c}" title="${esc(n)}">${esc(court || n)}</button>`).join("")}</div>`;
   // clavier d'une octave : touches blanches puis noires posees par-dessus
   function clavierHTML(a){
@@ -1937,22 +2009,27 @@ const STUDIO = (() => {
       g.strokeStyle = "#FFB547"; g.lineWidth = 1.4; g.stroke();
       g.fillStyle = "rgba(255,255,255,.5)"; g.fillText(`seuil ${f.seuil} dB · plafond ${f.plafond} dB · att. ${att.toFixed(1)} dB`, hx + 6, H - 6);
     } else if (k === "autotune") {
-      const h = (n && n.atHist) || [], cl = clavierDe(f);
-      const vus = h.filter(e => e.m > 0).map(e => e.m), centre = vus.length ? vus.slice(-60).sort((a, b) => a - b)[Math.floor(Math.min(60, vus.length) / 2)] : 57, plage = 7;
-      const y = m => H / 2 - (m - centre) / plage * (H / 2 - 6), Wg = W;
-      g.font = "9px ui-monospace,Menlo,monospace";
-      for (let m = Math.floor(centre - plage); m <= Math.ceil(centre + plage); m++) { const nn = ((m % 12) + 12) % 12, yy = Math.round(y(m)) + .5;
-        const vise = cl.touches[nn] === "1", libre = cl.touches[nn] === "b";
-        g.strokeStyle = vise ? "rgba(255,255,255,.14)" : libre ? "rgba(245,165,36,.25)" : "rgba(255,255,255,.035)"; g.setLineDash(libre ? [4, 4] : []);
-        g.beginPath(); g.moveTo(26, yy); g.lineTo(Wg, yy); g.stroke(); g.setLineDash([]);
-        if (vise || libre) { g.fillStyle = vise ? "rgba(255,255,255,.4)" : "rgba(245,165,36,.6)"; g.fillText(NOTES_EN[nn] + (Math.floor(m / 12) - 1), 2, yy + 3); } }
-      const pas = (Wg - 26) / 260, trace = (cle, couleur, larg) => { g.beginPath(); let en = false; h.forEach((e, i) => { const v = cle(e); const px = 26 + (260 - h.length + i) * pas; if (v > 0) { en ? g.lineTo(px, y(v)) : g.moveTo(px, y(v)); en = true; } else en = false; }); g.strokeStyle = couleur; g.lineWidth = larg; g.stroke(); };
-      trace(e => e.m, "rgba(255,255,255,.75)", 1.5);                                    // ce qui est chante
-      trace(e => e.m > 0 ? e.m + 12 * Math.log2(e.r || 1) : 0, coul, 2.2);               // ce qui sort
-      const d = h[h.length - 1], note = boite.querySelector("[data-at-note]"), aig = boite.querySelector("[data-at-aig]"), ct = boite.querySelector("[data-at-ct]");
-      if (d && d.m > 0 && d.c) { const nn = ((Math.round(d.c) % 12) + 12) % 12, ec = Math.round((d.m - d.c) * 100);
-        note.textContent = NOTES_EN[nn] + (Math.floor(Math.round(d.c) / 12) - 1); aig.style.left = `${50 + Math.max(-50, Math.min(50, ec))}%`; aig.classList.toggle("juste", Math.abs(ec) < 10); ct.textContent = `${ec > 0 ? "+" : ""}${ec} ct`; }
-      else if (!h.length) { note.textContent = "—"; ct.textContent = joueStudio() ? "en attente de voix" : "Lance la lecture"; }
+      // indicateur de correction : de -100 a +100 cents, l'aiguille montre ce que l'autotune corrige
+      const h = (n && n.atHist) || [], d = h[h.length - 1], cx = W / 2, cy = H - 16, R = Math.min(W * .42, H - 30);
+      const corr = d && d.m > 0 ? 1200 * Math.log2(d.r || 1) : 0;
+      n && (n.atAig = (n.atAig || 0) + (corr - (n.atAig || 0)) * .35);
+      const ang = c => Math.PI * 1.5 + Math.max(-100, Math.min(100, c)) / 100 * 1.05;
+      g.lineWidth = 6; g.lineCap = "round";
+      g.strokeStyle = "rgba(255,255,255,.07)"; g.beginPath(); g.arc(cx, cy, R, ang(-100), ang(100)); g.stroke();
+      const v0 = ang(0), v1 = ang(n ? n.atAig : 0);
+      g.strokeStyle = coul; g.shadowColor = coul; g.shadowBlur = 10; g.beginPath(); g.arc(cx, cy, R, Math.min(v0, v1), Math.max(v0, v1)); g.stroke(); g.shadowBlur = 0;
+      g.lineWidth = 1; g.fillStyle = "rgba(255,255,255,.45)"; g.font = "9px ui-monospace,Menlo,monospace"; g.textAlign = "center";
+      [-100, -50, 0, 50, 100].forEach(c => { const a2 = ang(c); g.strokeStyle = "rgba(255,255,255,.35)"; g.beginPath(); g.moveTo(cx + Math.cos(a2) * (R + 6), cy + Math.sin(a2) * (R + 6)); g.lineTo(cx + Math.cos(a2) * (R + 11), cy + Math.sin(a2) * (R + 11)); g.stroke();
+        g.fillText((c > 0 ? "+" : "") + c, cx + Math.cos(a2) * (R + 20), cy + Math.sin(a2) * (R + 20) + 3); });
+      g.strokeStyle = "#fff"; g.lineWidth = 2; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(v1) * (R - 10), cy + Math.sin(v1) * (R - 10)); g.stroke();
+      g.fillStyle = "#fff"; g.beginPath(); g.arc(cx, cy, 4, 0, Math.PI * 2); g.fill();
+      // la note visee au centre, et ce qui est chante
+      const juste = d && d.m > 0 && d.c;
+      g.fillStyle = juste ? "#fff" : "rgba(255,255,255,.35)"; g.font = "700 30px ui-monospace,Menlo,monospace";
+      g.fillText(juste ? NOTES_EN[((Math.round(d.c) % 12) + 12) % 12] + (Math.floor(Math.round(d.c) / 12) - 1) : "—", cx, cy - R * .38);
+      g.font = "9.5px ui-monospace,Menlo,monospace"; g.fillStyle = "rgba(255,255,255,.5)";
+      g.fillText(juste ? `correction ${corr > 0 ? "+" : ""}${Math.round(corr)} ct` : (joueStudio() ? "en attente de voix" : "Lance la lecture"), cx, cy - R * .38 + 16);
+      g.textAlign = "left";
     }
     g.globalAlpha = 1;
     visuRAF = requestAnimationFrame(() => setTimeout(visualiser, 33));
@@ -2010,6 +2087,21 @@ const STUDIO = (() => {
       // passer en « Choisir la tonalite » part de celle de la prod quand on la connait
       if (k === "autotune" && t.value === "cle" && !p.fx.autotune.cleChoisie) { const c = lireCle(prod && prod.key); if (c) Object.assign(p.fx.autotune, { tonique: String(c.tonique), gamme: c.gamme }); }
       if (FX.find(f => f.k === k).menus) { p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; }
+    }
+    else if (t.dataset.atsel) {
+      const a = p.fx.autotune, val = t.value; memoriser(); a.clavier = "";
+      if (t.dataset.atsel === "cle") {
+        if (val === "auto") { if (a.type === "cle") a.type = "prod"; }
+        else { a.tonique = val; if (a.type === "prod") a.type = "cle"; }
+      } else {
+        if (val === "chroma" || val === "libre") a.type = val;
+        else {
+          // une gamme precise : la tonalite devient fixe (celle de la prod si on etait en auto)
+          if (a.type === "prod") { const c = lireCle(prod && prod.key); if (c) a.tonique = String(c.tonique); }
+          a.gamme = val; a.type = "cle";
+        }
+      }
+      p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return;
     }
     else if (t.dataset.fxmenu) { const [k, c] = t.dataset.fxmenu.split("."); memoriser(); p.fx[k][c] = t.value;
       if (c === "tonique" || c === "gamme") { p.fx[k].cleChoisie = true; p.fx[k].clavier = ""; p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; } }
