@@ -350,6 +350,17 @@ const I18N = (() => {
     "Pitch": ["Pitch", "Pitch"],
     "Plein écran (F)": ["Full screen (F)", "Pantalla completa (F)"],
     "Plein écran": ["Full screen", "Pantalla completa"],
+    "Sauvegarder (fichier)": ["Save (file)", "Guardar (archivo)"],
+    "Ouvrir un fichier": ["Open a file", "Abrir un archivo"],
+    "Ouvrir un projet": ["Open a project", "Abrir un proyecto"],
+    "Sauvegarder en fichier (.findings)": ["Save as file (.findings)", "Guardar como archivo (.findings)"],
+    "Sauvegarder en fichier": ["Save as file", "Guardar como archivo"],
+    "Projet sauvegardé : garde le fichier .findings": ["Project saved: keep the .findings file", "Proyecto guardado: conserva el archivo .findings"],
+    "Préparation du fichier…": ["Preparing the file…", "Preparando el archivo…"],
+    "Rien à sauvegarder sur ce projet": ["Nothing to save in this project", "Nada que guardar en este proyecto"],
+    "Projet ouvert": ["Project opened", "Proyecto abierto"],
+    "Ce fichier n'est pas un projet FINDINGS (.findings).": ["This file isn't a FINDINGS project (.findings).", "Este archivo no es un proyecto FINDINGS (.findings)."],
+    "Tu as déjà un projet sur cette prod, sur cet appareil. Le remplacer par celui du fichier ?": ["You already have a project on this beat on this device. Replace it with the one from the file?", "Ya tienes un proyecto con este beat en este dispositivo. ¿Reemplazarlo por el del archivo?"],
     "Niveau d'entrée auto": ["Auto input level", "Nivel de entrada auto"],
     "Amène le niveau des prises à la référence des préréglages (-20 dBFS), que tu aies chanté près ou loin du micro": ["Brings your takes to the presets' reference level (-20 dBFS), whether you sang close to or far from the mic", "Lleva el nivel de las tomas a la referencia de los presets (-20 dBFS), hayas cantado cerca o lejos del micro"],
     "De-esser": ["De-esser", "De-esser"],
@@ -3530,6 +3541,7 @@ async function majProjets(){
       </div>
       <div class="st-acts">
         <button class="st-ouvrir" data-pa="ouvrir">Ouvrir</button>
+        <button class="st-ic" data-pa="sauver" aria-label="Sauvegarder en fichier" title="Sauvegarder en fichier (.findings)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg></button>
         <button class="st-ic" data-pa="renommer" aria-label="Renommer" title="Renommer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>
         <button class="st-ic danger" data-pa="suppr" aria-label="Supprimer" title="Supprimer le projet"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>
       </div>
@@ -3537,6 +3549,7 @@ async function majProjets(){
   }).join("");
 }
 window.addEventListener("findings:projets", () => majProjets());
+document.getElementById("stOuvrirProjet")?.addEventListener("change", e => { const f = e.target.files[0]; e.target.value = ""; if (f) STUDIO.ouvrirFichierProjet(f); });
 document.getElementById("stListe").addEventListener("click", e => {
   const el = e.target.closest("[data-pa]"); if (!el) return;
   const carte = el.closest(".st-proj"), id = carte.dataset.id, pr = PROJETS.find(x => x.id === id);
@@ -3545,6 +3558,8 @@ document.getElementById("stListe").addEventListener("click", e => {
   if (el.dataset.pa === "ouvrir") {
     montrerVue("studio", true, id === "libre" ? "studio/" : `studio/?beat=${encodeURIComponent(id)}`);
     document.getElementById("studioHote").scrollIntoView({ behavior: "smooth", block: "start" });
+  } else if (el.dataset.pa === "sauver") {
+    STUDIO.sauverFichierProjet(id);
   } else if (el.dataset.pa === "suppr") {
     if (confirm(`Supprimer le projet « ${titre} » ? Ses ${pr.prises} prise${pr.prises > 1 ? "s" : ""} et la prod importée seront effacées de cet appareil.`)) STUDIO.supprimerProjet(id);
   } else if (el.dataset.pa === "renommer") {

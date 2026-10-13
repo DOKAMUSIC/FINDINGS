@@ -1481,6 +1481,53 @@ const STUDIO = (() => {
     if (P && P.prod === id) { clearTimeout(saveMinuteur); P = null; if (ouvert && prod) { arreterSources(); await charger(prod); } }
     signalerProjets();
   }
+  /* ── Projet en fichier .findings : l'arrangement, les prises audio et la prod importee dans
+     un seul fichier, pour le garder a l'abri ou le rouvrir sur un autre appareil. ── */
+  const versB64 = async blob => { const u = new Uint8Array(await blob.arrayBuffer()); let t = ""; for (let i = 0; i < u.length; i += 0x8000) t += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(t); };
+  const deB64 = (txt, type) => { const bin = atob(txt), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: type || "" }); };
+  async function sauverFichierProjet(id){
+    if (P && P.prod === id) { clearTimeout(saveMinuteur); try { await PRISES_DB.ecrireProjet(JSON.parse(JSON.stringify(P))); } catch (e) {} }
+    let pr = null, prises = [], f = null;
+    try { pr = await PRISES_DB.lireProjet(id); } catch (e) {}
+    try { prises = await PRISES_DB.duProd(id); } catch (e) {}
+    try { f = await PRISES_DB.lireFichier(id); } catch (e) {}
+    if (!prises.length && !pr) { message("Rien à sauvegarder sur ce projet"); return; }
+    message("Préparation du fichier…");
+    const b = BY_ID.get(id);
+    const doc = { format: "findings-projet", v: 1, enregistre: new Date().toISOString(),
+      prod: id === "libre" ? { id: "libre" } : { id, title: b && b.title, prod: b && b.prod, bpm: b && b.bpm, key: b && b.key, style: b && b.style },
+      projet: pr, prises: await Promise.all(prises.map(async x => { const { blob, ...reste } = x; return { ...reste, data: await versB64(blob) }; })),
+      fichier: f && f.blob ? { nom: f.nom, type: f.type, data: await versB64(f.blob) } : null };
+    const nom = ((pr && pr.nom) || (id === "libre" ? "Projet libre" : (b && b.title) || id)).replace(/[\\/:*?"<>|]+/g, "").slice(0, 60).trim() || "Projet";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(doc)], { type: "application/json" }));
+    a.download = `${nom}.findings`; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 8000);
+    message("Projet sauvegardé : garde le fichier .findings");
+  }
+  async function ouvrirFichierProjet(fichierChoisi){
+    let doc;
+    try { doc = JSON.parse(await fichierChoisi.text()); } catch (e) { doc = null; }
+    if (!doc || doc.format !== "findings-projet" || !Array.isArray(doc.prises)) { alert("Ce fichier n'est pas un projet FINDINGS (.findings)."); return; }
+    let id = (doc.prod && doc.prod.id) || "libre";
+    if (id !== "libre" && !BY_ID.has(id)) {
+      if (!confirm(`La prod « ${(doc.prod && doc.prod.title) || id} » n'est plus sur FINDINGS. Ouvrir le projet comme projet libre ?`)) return;
+      id = "libre";
+    }
+    let deja = false;
+    try { deja = (await PRISES_DB.duProd(id)).length > 0 || !!(await PRISES_DB.lireProjet(id)); } catch (e) {}
+    if (deja && !confirm("Tu as déjà un projet sur cette prod, sur cet appareil. Le remplacer par celui du fichier ?")) return;
+    if (deja) await supprimerProjet(id);
+    for (const x of doc.prises) { const { data, ...reste } = x; BUF.delete(x.id); PIC.delete(x.id); NIV.delete(x.id);
+      try { await PRISES_DB.ajouter({ ...reste, prod: id, blob: deB64(data, x.mime) }); } catch (e) {} }
+    if (doc.projet) { try { await PRISES_DB.ecrireProjet({ ...doc.projet, prod: id }); } catch (e) {} }
+    if (doc.fichier) { try { await PRISES_DB.ecrireFichier({ prod: id, nom: doc.fichier.nom, type: doc.fichier.type, blob: deB64(doc.fichier.data, doc.fichier.type) }); } catch (e) {} }
+    if (BY_ID.has(id)) TOPLINE_N.set(id, doc.prises.length);
+    if (typeof majToplines === "function") majToplines();
+    if (P && P.prod === id) P = null;
+    montrerVue("studio", true, id === "libre" ? "studio/" : `studio/?beat=${encodeURIComponent(id)}`);
+    setTimeout(async () => { if (ouvert && prod && prod.id === id && !P) await charger(prod); signalerProjets(); message("Projet ouvert"); }, 400);
+  }
   async function renommerProjet(id, nom){
     nom = (nom || "").trim();
     if (P && P.prod === id) { if (!nom || nom === titreParDefaut()) delete P.nom; else P.nom = nom; peindreTitre(); clearTimeout(saveMinuteur); try { await PRISES_DB.ecrireProjet(JSON.parse(JSON.stringify(P))); } catch (e) {} }
@@ -1842,6 +1889,8 @@ const STUDIO = (() => {
         <div class="dp-bloc" style="width:230px">
           <h4>Projet</h4>
           <label class="champ">Nom<input type="text" id="dpNomProjet" value="${esc(titreProjet())}" maxlength="60"></label>
+          <div class="ligne"><button class="dp-act" data-act="sauverFichier" title="Un fichier .findings avec l'arrangement, les prises et la prod importée">Sauvegarder (fichier)</button>
+          <label class="dp-act" style="display:inline-grid;place-items:center;cursor:pointer">Ouvrir un fichier<input type="file" data-act="ouvrirFichier" accept=".findings,application/json" hidden></label></div>
           <button class="dp-act danger" data-act="supprProjet">Supprimer le projet</button>
         </div>
         <div class="dp-bloc">
@@ -2126,6 +2175,7 @@ const STUDIO = (() => {
     const a = e.target.closest("[data-act]")?.dataset.act;
     if (a === "couper") couper(); else if (a === "dupliquer") dupliquer(); else if (a === "supprimer") supprimer();
     else if (a === "normaliser") normaliser();
+    else if (a === "sauverFichier") sauverFichierProjet(P.prod);
     else if (a === "supprProjet") { if (confirm(`Supprimer le projet « ${titreProjet()} » ? Ses prises et la prod importée seront effacées de cet appareil.`)) supprimerProjet(P.prod).then(() => message("Projet supprimé")); }
     else if (a === "retirer") { if (confirm("Retirer ta prod importée et revenir à la version YouTube ?")) retirerFichier(); }
   });
@@ -2156,6 +2206,7 @@ const STUDIO = (() => {
       if (c === "tonique" || c === "gamme") { p.fx[k].cleChoisie = true; p.fx[k].clavier = ""; p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; } }
     else if (t.dataset.fxcase) { const [k, c] = t.dataset.fxcase.split("."); memoriser(); p.fx[k][c] = t.checked; }
     else if (t.dataset.act === "import") { importer(t.files[0]); return; }
+    else if (t.dataset.act === "ouvrirFichier") { if (t.files[0]) ouvrirFichierProjet(t.files[0]); t.value = ""; return; }
     else return;
     p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver();
     const k = (t.dataset.fxtype || t.dataset.fxdiv || (t.dataset.fxcase || t.dataset.fxmenu || "").split(".")[0]), r = corps.querySelector(`[data-resume="${k}"]`); if (r) r.textContent = resume(k, p.fx[k]);
@@ -2664,7 +2715,7 @@ const STUDIO = (() => {
 
   /* ─────────────────────────── branchements avec le lecteur ─────────────────────────── */
   return {
-    page, importer, supprimerProjet, renommerProjet,
+    page, importer, supprimerProjet, renommerProjet, sauverFichierProjet, ouvrirFichierProjet,
     ouvert: () => ouvert,
     occupe: () => ouvert || !!rec,
     finProd(){ if (rec && !horlogeInterne()) arreterRec("fin"); },
