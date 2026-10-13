@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>FINDINGS</title>
+<meta name="robots" content="noindex">
+<script>
+/* L'accueil et le catalogue ne font plus qu'une seule page : le lecteur survit
+   au passage de l'un à l'autre. Cette page ne sert qu'aux anciens liens, qu'elle
+   réexpédie en conservant leurs paramètres. */
+location.replace("index.html" + location.search + location.hash);
+</script>
+</head>
+<body><p>Redirection vers <a href="index.html">FINDINGS</a>…</p></body>
+</html>

@@ -1,0 +1,41 @@
+# FINDINGS — passage d'ingestion automatique, tous les deux jours, chez GitHub.
+# Branche « moteur » : le programme et le catalogue complet. Branche « main » : le site publie.
+name: Ingestion FINDINGS
+on:
+  schedule:
+    - cron: "30 4 */2 * *"        # 4 h 30 UTC, un jour sur deux
+  workflow_dispatch:
+  push:
+    branches: [moteur]
+    paths: [declencher.txt]       # pousser ce fichier lance un passage
+permissions:
+  contents: write
+concurrency:
+  group: ingestion
+  cancel-in-progress: false
+jobs:
+  passage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: moteur, path: moteur }
+      - uses: actions/checkout@v4
+        with: { ref: main, path: site }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: Ingestion
+        working-directory: moteur
+        run: |
+          set -o pipefail
+          node ingest.mjs --per-style=4 2>&1 | tee journal.txt || echo "ECHEC ingestion" >> journal.txt
+      - name: Site
+        working-directory: moteur
+        run: node build.mjs --out=../site --source=publie --site=https://dokamusic.github.io/FINDINGS/ 2>&1 | tee -a journal.txt
+      - name: Enregistrer
+        run: |
+          git config --global user.name "FINDINGS (passage automatique)"
+          git config --global user.email "findings-bot@users.noreply.github.com"
+          cd moteur && date -u "+%Y-%m-%d %H:%M UTC" > dernier-passage.txt
+          git add -A && (git diff --cached --quiet || git commit -q -m "catalogue — passage du $(date -u +%Y-%m-%d)") && git push -q origin moteur
+          cd ../site && git add -A && (git diff --cached --quiet || git commit -q -m "catalogue — $(date -u '+%Y-%m-%d %H:%M')") && git push -q origin main
