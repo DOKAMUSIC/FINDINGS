@@ -1,0 +1,104 @@
+FINDINGS — ingestion 2026-10-13
+Source  : résultats de recherche publics
+Règles  : ≤ 9 mois (≤ 18 pour compléter un artiste à 20) · ≤ 800 k vues · lecture intégrée obligatoire · 52 styles
+Départ  : 6392 prods
+Nettoyage : −21 (21 trop vieilles, 0 trop vues, 0 style retiré, 0 au-delà du plafond) → 6371
+
+Contrôle : 0 prod(s) revérifiée(s), 40 retirée(s) (supprimée ou embed coupé)
+
+Achats : 1070 prod(s) lue(s), 0 lien(s) d'achat · reste 5182
+  Trap               +0
+  Drill              +0
+  Sexy drill         +0
+  Boom bap           +0
+  Jazz rap           +0
+  Lo-fi              +0
+  Soul / sample      +0
+  West coast         +0
+  Detroit            +0
+  Memphis            +0
+  Cloud rap          +0
+  Plugg / PluggnB    +0
+  New jazz           +0
+  Rage               +0
+  Phonk              +0
+  Emo rap / guitare  +0
+  Hyperpop           +0
+  R&B                +0
+  Trap soul          +0
+  Pop                +0
+  Afro               +0
+  Afro house         +0
+  Amapiano           +0
+  Alté               +0
+  Dancehall          +0
+  Shatta / Bouyon    +0
+  Kompa / Zouk       +0
+  Reggaeton          +0
+  Latin trap         +0
+  Corridos           +0
+  Dembow             +0
+  Baile funk         +0
+  Jersey club        +0
+  Grime              +0
+  UK garage          +0
+  Club / House       +0
+  Drift phonk        +0
+  Jerk               +0
+  Crunk              +0
+  Trap metal / rock  +0
+  Piano triste       +0
+  Synthwave          +0
+  Drum & bass        +0
+  Afroswing          +0
+  Gqom               +0
+  Ndombolo / Coupé-décalé +0
+  Tarraxo            +0
+  Bachata / Salsa    +0
+  Cumbia / Guaracha  +0
+  Desi / Punjabi     +0
+  K-pop              +0
+  Gospel             +0
+
+Artistes : 300 · objectif 20 prods chacun, plafond 25 · budget 25 min
+  Ken Carson 24→24 · Lil Peep 24→24 · Bryson Tiller 24→24 · Travis Scott 25 · Joey Bada$$ 25 · Kanye West 25
+  Glaive 25 · PARTYNEXTDOOR 25 · Tory Lanez 25 · Omah Lay 25 · Central Cee 26 · Gazo 26
+  Veeze 26 · SCH 26 · Skillibeng 26 · Rauw Alejandro 26 · Eladio Carrión 26 · El Alfa 26
+  Alpha Wann 27 · MF DOOM 27 · J Hus 27 · SDM 28 · Kyle Richh 28 · J Balvin 28
+  Karol G 28 · Myke Towers 28 · Romeo Santos 28 · Booba 29 · Tainy 29 · Key Glock 30
+  Rema 30 · Tayc 30 · Summrs 31 · Juice WRLD 31 · Wizkid 31 · Anuel AA 31
+  PinkPantheress 31 · Playboi Carti 32 · Ozuna 32 · PLK 34 · Josman 34 · Burna Boy 34
+  Tiakola 34 · Ninho 35 · Werenoi 36 · Asake 36 · The Weeknd 38 · Skepta 38
+  Feid 41 · Bad Bunny 55 · Drake 60 · Ovy on the Drums 20→20 · María Becerra 5→5 · Bizarrap 12→12
+  Khea 23→23 · Trueno 20→20 · Neo Pistea 20→20 · Wos 4→4 · Nicki Nicole 9→9 · Paulo Londra 12→12
+  Cazzu 9→9 · Ysy A 21→21 · Tiago PZK 23→23 · Lit Killah 20→20 · Milo J 20→20 · Pailita 11→11
+  Brray 11→11 · Pablo Chill-E 20→20 · Rels B 21→21 · Bejo 7→7 · Kaydy Cain 20→20 · Gera MX 20→20
+  Yailin La Más Viral 10→10 · Mozart La Para 0→0 · Lápiz Conciente 4→4 · Grupo Extra 1→1 · Ceky Viciny 5→5 · Luis Vargas 1→1
+  Raulin Rodriguez 3→3 · Anthony Santos 0→0 · Los Ángeles Azules 2→2 · Kumbia Kings 3→3 · Niska 20→20 · Dinos 14→14
+  Vald 20→20 · Laylow 21→21 · Naza 21→21 · Nicky Jam 14→14 · Maluma 17→17 · Sech 17→17
+  Quevedo 21→21 · Duki 31 · Álvaro Díaz 20→20 · Jul 48 · Kaaris 20→20 · Ryan Castro 20→20
+  Young Miko 20→20 · Chimbala 20→20 · Ñengo Flow 25 · PNL 20→20 · Leto 21→21 · ZKR 23→23
+  GIMS 23→23 · Bryant Myers 20→20 · Blessd 23→23 · Daddy Yankee 26 · Morad 32 · Manuel Turizo 20→20
+  Rosalía 21→21 · Franglish 21→21 · Maes 23→23 · Ronisia 19→20 · Dadju 20→20 · Tito Double P 20→20
+  Luis R Conriquez 20→20 · Óscar Maydon 20→20 · Yahritza y Su Esencia 0→0 · Grupo Frontera 20→20 · Netón Vega 22→22 · Chino Pacas 20→20
+  Eslabon Armado 12→12 · Iván Cornejo 17→17 · Natanael Cano 27 · Peso Pluma 30 · Junior H 32 · Gabito Ballesteros 20→20
+  Fuerza Regida 30 · 55ASKY 20→20 · Danyl 20→20 · TIF 36 · Videoclub 20→20 · Theodora 20→20
+  J. Cole 23→23 · Nujabes 23→23 · Earl Sweatshirt 22→22 · Joji 21→21
+  … budget atteint : 164 artiste(s) reporte(s) au prochain passage
+
+1 nouvelle(s) prod(s) · catalogue : 6332 · 52/52 styles remplis
+  · MY LOVA — Seven afro Beats🎹 (rnb, 78 BPM, 2026-10-13)
+
+Écartées : 0 trop vieilles · 150 trop vues · 2636 non lisibles hors YouTube · 24 sans titre exploitable · 230 hors format · 2815 ne nommant pas l'artiste cherché
+
+4 requête(s) en échec :
+  ! artiste Wos « Wos type beat 2026 » : ytInitialData introuvable
+  ! artiste Bryant Myers « free Bryant Myers type beat » : ytInitialData introuvable
+  ! artiste Ronisia « dark Ronisia type beat » : ytInitialData introuvable
+  ! artiste Eslabon Armado « Eslabon Armado type beat 2026 » : ytInitialData introuvable
+Artistes : profils à jour
+Liens : à jour
+Profils : 2 lu(s), 0 en échec
+
+catalog.js mis à jour.
+build : 2532 pages en 3 langues (296 artistes, 52 styles, 494 beatmakers, studio, accueil) → ../site
