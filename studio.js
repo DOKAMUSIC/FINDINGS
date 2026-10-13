@@ -320,8 +320,11 @@ const STUDIO = (() => {
     background:#0E0F11;color:#E6E7EA;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 24px rgba(0,0,0,.5);white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
   .daw-msg[hidden]{display:none}
   body.daw-ouvert{overflow:hidden}
+  .daw-o.achat{color:#fff;background:linear-gradient(180deg,#34C77B,#22A15C);text-decoration:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 1px 2px rgba(0,0,0,.4)}
+  .daw-o.achat:hover{background:linear-gradient(180deg,#3DD887,#26AE63);color:#fff}
+  .daw-o.achat[hidden]{display:none}
   /* sous 1 600 px, les outils ne gardent que leur icone (le nom reste dans l'info-bulle) */
-  @media(max-width:1600px){ .daw-outils .daw-o:not(.pri):not(#dawBascule) .lib{display:none} .daw-outils .daw-o:not(.pri){padding:0 7px} }
+  @media(max-width:1600px){ .daw-outils .daw-o:not(.pri):not(#dawBascule):not(.achat) .lib{display:none} .daw-outils .daw-o:not(.pri){padding:0 7px} }
   @media(max-width:1180px){
     .daw-haut{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"id console" "outils outils"}
     .daw-id{grid-area:id} .daw-console{grid-area:console} .daw-outils{grid-area:outils;justify-content:flex-start}
@@ -452,6 +455,7 @@ const STUDIO = (() => {
   :root:not([data-theme="dark"]) .daw-o:hover,:root:not([data-theme="dark"]) .daw-ms:hover,:root:not([data-theme="dark"]) .daw-importer:hover,:root:not([data-theme="dark"]) .ajout-piste button:hover,:root:not([data-theme="dark"]) .dp-act:hover{color:#111;background:linear-gradient(180deg,#FFFFFF,#F1F2F4)}
   :root:not([data-theme="dark"]) .daw-o:active{background:#E2E3E7;box-shadow:inset 0 1px 2px rgba(0,0,0,.2)}
   :root:not([data-theme="dark"]) .daw-o[aria-pressed="true"]{color:#D61F35;background:linear-gradient(180deg,#FFF1F3,#FFE0E5);box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(214,31,53,.3)}
+  :root:not([data-theme="dark"]) .daw-o.achat{color:#fff;background:linear-gradient(180deg,#34C77B,#22A15C);box-shadow:0 1px 2px rgba(0,0,0,.15)}
   :root:not([data-theme="dark"]) .daw-o.pri{color:#fff;background:linear-gradient(180deg,#FF3A50,#E01E36);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 1px 2px rgba(0,0,0,.2)}
   :root:not([data-theme="dark"]) .daw-sep{background:rgba(0,0,0,.14);box-shadow:1px 0 0 #fff}
   :root:not([data-theme="dark"]) .daw-ms.m[aria-pressed="true"]{background:linear-gradient(180deg,#5DA2FF,#2F7CF0);color:#fff}
@@ -582,6 +586,7 @@ const STUDIO = (() => {
         <span class="daw-mix" id="dawMix" hidden role="group" aria-label="Contenu de l'export">
           <button data-mix="voix" aria-pressed="false">Voix seule</button><button data-mix="tout" aria-pressed="true">Voix + prod</button>
         </span>
+        <a class="daw-o achat" id="dawAcheter" hidden target="_blank" rel="noopener" title="Acheter la licence de la prod"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.2l2.3 11h10.8l2-7.5H7"/><circle cx="9.5" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg><span class="lib">Acheter la prod</span></a>
         <button class="daw-o" id="dawPlein" title="Plein écran (F)" aria-label="Plein écran">${I.plein}</button>
         <button class="daw-o pri" id="dawExport" title="Exporter en WAV">${I.export}<span class="lib">Exporter</span></button>
         <button class="daw-o" id="dawFermer" title="Fermer le studio (Échap)" aria-label="Fermer">${I.fermer}</button>
@@ -2290,6 +2295,8 @@ const STUDIO = (() => {
     fixer(kn, versVal(clamp(x, 0, 1), +kn.dataset.min, +kn.dataset.max, kn.dataset.u));
   });
   function entete(){
+    const ach = $("dawAcheter"), url = prod && !estLibre() && prod.buy;
+    ach.hidden = !url; if (url) ach.href = url;
     $("dawBpm").textContent = `${bpm()}`;
     $("dawCle").textContent = prod && prod.key && !estLibre() ? `${prod.keySur ? "" : "~"}${prod.key}` : "—";
   }

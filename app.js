@@ -350,6 +350,10 @@ const I18N = (() => {
     "Pitch": ["Pitch", "Pitch"],
     "Plein écran (F)": ["Full screen (F)", "Pantalla completa (F)"],
     "Plein écran": ["Full screen", "Pantalla completa"],
+    "Acheter la prod": ["Buy the beat", "Comprar el beat"],
+    "Acheter la prod sur BeatStars": ["Buy the beat on BeatStars", "Comprar el beat en BeatStars"],
+    "Acheter la prod sur Airbit": ["Buy the beat on Airbit", "Comprar el beat en Airbit"],
+    "Acheter la prod sur Traktrain": ["Buy the beat on Traktrain", "Comprar el beat en Traktrain"],
     "Sauvegarder (fichier)": ["Save (file)", "Guardar (archivo)"],
     "Ouvrir un fichier": ["Open a file", "Abrir un archivo"],
     "Ouvrir un projet": ["Open a project", "Abrir un proyecto"],
@@ -568,6 +572,8 @@ const I18N = (() => {
     [`^Voir les ${N} autres styles$`, "See $1 more styles", "Ver $1 estilos más"],
     [`^Lire les ${N}$`, "Play all $1", "Reproducir los $1"],
     [`^Lire (.+)$`, "Play $1", "Reproducir $1"],
+    [`^Acheter la prod sur (.+)$`, "Buy the beat on $1", "Comprar el beat en $1"],
+    [`^Acheter la prod (.+)$`, "Buy the beat $1", "Comprar el beat $1"],
     [`^Chaîne YouTube de (.+)$`, "$1's YouTube channel", "Canal de YouTube de $1"],
     [`^Voir la chaîne YouTube de (.+)$`, "View $1's YouTube channel", "Ver el canal de YouTube de $1"],
     [`^Toutes les prods de (.+)$`, "All beats by $1", "Todos los beats de $1"],
@@ -698,7 +704,7 @@ function deplierCatalogue(C){
     id: r[0], title: r[1], prod: p[0], style: C.sty[r[3]], dur: r[4], views: r[5], published: jour(r[6]), bpm: r[7],
     key: C.cles[r[8]] || null, moods: liste(r[9], C.moodsL), refs: r[10] || [], fr: !!r[11], addedAt: jour(r[12]),
     artists: r[13].map(i => C.artists[i] && C.artists[i].id).filter(Boolean), est: liste(r[14], C.estL),
-    chan: p[1] ? (p[1].startsWith("http") ? p[1] : YT + p[1]) : "" }; });
+    chan: p[1] ? (p[1].startsWith("http") ? p[1] : YT + p[1]) : "", buy: r[15] ? "https://" + r[15] : "" }; });
   return { ...C, beats, chans: {} };
 }
 const CAT = window.FINDINGS_CATALOG || (window.FINDINGS_CATALOG_C && deplierCatalogue(window.FINDINGS_CATALOG_C))
@@ -911,6 +917,13 @@ const photoArtiste = id => (ARTIST_INFO[id] && ARTIST_INFO[id].img) || "";
 const CHAN_DE = new Map();   // beatmaker -> url de sa chaine (celle de sa prod la plus recente)
 BEATS.forEach(b => { if (b.chan && !CHAN_DE.has(b.prod)) CHAN_DE.set(b.prod, b.chan); });
 const profilDe = prod => CHANS[CHAN_DE.get(prod)] || null;
+/* Le lien d'achat d'une prod (lu dans la description de la video) et le nom de sa boutique. */
+function boutique(url){
+  let h = ""; try { h = new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return ""; }
+  return /beatstars|bsta\.rs/.test(h) ? "BeatStars" : /airbit/.test(h) ? "Airbit" : /traktrain/.test(h) ? "Traktrain" : /payhip/.test(h) ? "Payhip"
+    : /gumroad/.test(h) ? "Gumroad" : /bandcamp/.test(h) ? "Bandcamp" : /soundee/.test(h) ? "Soundee" : /sellfy/.test(h) ? "Sellfy" : "";
+}
+const ICO_PANIER = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.2l2.3 11h10.8l2-7.5H7"/><circle cx="9.5" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg>';
 /* Profils des chaines charges apres l'affichage (version compacte) : ils remplissent CHANS,
    puis ce qui montre des avatars ou des bannieres se redessine. */
 function chargerChans(){
@@ -1412,6 +1425,7 @@ function npHTML(b){
           <button class="np-c" data-np="yt" aria-label="Ouvrir sur YouTube" title="Ouvrir sur YouTube"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button>
         </div>
       </div>
+    ${b.buy ? `<a class="np-acheter" href="${esc(b.buy)}" target="_blank" rel="noopener">${ICO_PANIER}<span>Acheter la prod${boutique(b.buy) ? ` <small>· ${boutique(b.buy)}</small>` : ""}</span></a>` : ""}
     ${b.moods.length ? `<div class="np-tags">${b.moods.map(m => `<span class="np-tag">${esc(m)}</span>`).join("")}</div>` : ""}
     <p class="np-stats">${b.views ? `${fmtViews(b.views)} vues · ` : ""}${fmtDur(b.dur)} · il y a ${esc(fmtAge(b.days))}</p>
     ${suiv ? `<div class="np-bloc">
@@ -1620,6 +1634,7 @@ function rowHTML(b){
         ${S.crateOnly && saved ? (dans => `<button class="icon${dans?" dans":""}" data-act="dossier" aria-label="Ranger dans un dossier" title="Ranger dans un dossier">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="${dans?"currentColor":"none"}" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
         </button>`)(DOSSIERS.some(d => d.ids.has(b.id))) : ""}
+        ${b.buy ? `<button class="icon acheter" data-act="buy" aria-label="Acheter la prod ${esc(b.title)}" title="Acheter la prod${boutique(b.buy) ? " sur " + boutique(b.buy) : ""}">${ICO_PANIER}</button>` : ""}
         <button class="icon" data-act="proche" aria-label="Prods similaires à ${esc(b.title)}" title="Prods similaires">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="5"/><circle cx="15" cy="15" r="5"/></svg>
         </button>
@@ -2356,6 +2371,7 @@ list.addEventListener("click", e => {
     return;
   }
   if(act === "chan"){ openChan(b); return; }
+  if(act === "buy"){ if (b.buy) window.open(b.buy, "_blank", "noopener"); return; }
   if(act === "proche"){ voirProches(b.id); return; }
   if(act === "dossier"){ ouvrirDosMenu(b, e.target.closest('[data-act="dossier"]')); return; }
   if(act === "prod"){
