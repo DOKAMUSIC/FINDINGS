@@ -77,6 +77,7 @@ const STUDIO = (() => {
   body.yt-charge .daw.yt-mode .daw-b.lire::after{content:"";position:absolute;inset:0;margin:auto;width:14px;height:14px;border-radius:50%;
     border:2px solid currentColor;border-right-color:transparent;animation:yt-tourne .7s linear infinite}
   .daw-b.rec{color:#FF4D5E}
+  .daw-b.retour[aria-pressed="true"]{color:#5FE3D0;background:rgba(95,227,208,.14)}
   .daw-b.rec.on{background:#E5233A;color:#fff;animation:daw-pulse 1.1s ease-in-out infinite}
   @keyframes daw-pulse{50%{box-shadow:0 0 0 4px rgba(250,35,59,.28)}}
   /* l'ecran : des cases separees, comme l'afficheur de Logic */
@@ -563,6 +564,7 @@ const STUDIO = (() => {
           <button class="daw-b" id="dawDebut" title="Revenir au début (Entrée)" aria-label="Revenir au début">${I.debut}</button>
           <button class="daw-b lire" id="dawLire" title="Lecture / pause (Espace)" aria-label="Lecture ou pause">${I.lire}</button>
           <button class="daw-b rec" id="dawRec" title="Enregistrer au curseur (R)" aria-label="Enregistrer">${I.rec}</button>
+          <button class="daw-b retour" id="dawRetour" aria-pressed="false" title="Retour casque : t'entendre avec les effets pendant la prise (mets un casque)" aria-label="Retour casque avec effets"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="6.5" rx="1.6"/><rect x="16.5" y="14" width="4.5" height="6.5" rx="1.6"/></svg></button>
         </div>
         <div class="lcd" aria-live="off">
           <span class="lcd-seg"><b id="dawMesure">1.1</b><small>Mesure</small></span>
@@ -2472,6 +2474,19 @@ const STUDIO = (() => {
   const volBeat = () => { try { return P.beatVol != null ? P.beatVol : (typeof VOL !== "undefined" ? VOL : 100); } catch (e) { return 100; } };
 
   /* ─────────────────────────── enregistrement ─────────────────────────── */
+  /* Retour casque : la voix passe en direct dans la chaine d'effets de la piste visee (autotune,
+     reverb…) et revient dans le casque. Ce qui s'enregistre reste la voix brute : on peut changer
+     les effets apres coup. Sur haut-parleurs, le micro reprendrait le son : il faut un casque. */
+  let retour = (() => { try { return localStorage.getItem("findings.studio.retour") === "1"; } catch (e) { return false; } })();
+  function brancherRetour(){
+    if (!rec || !rec.flux) return;
+    if (rec.src) { try { rec.src.disconnect(); } catch (e) {} rec.src = null; }
+    if (!retour) return;
+    const c = audio(), n = noeuds.get(rec.piste), piste = P.pistes.find(x => x.id === rec.piste); if (!n) return;
+    rec.src = c.createMediaStreamSource(rec.flux); rec.src.connect(n.entree);
+    const lat = Math.round(((rec.latEntree || .01) + (c.baseLatency || 0) + (c.outputLatency || 0) + (piste ? avanceAT(piste) : 0)) * 1000);
+    message(`Retour casque : ${lat} ms de latence${lat > 45 ? " — un léger décalage peut s'entendre" : ""}`);
+  }
   const MIMES = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
   async function enregistrer(){
     if (rec) return arreterRec("bouton");
@@ -2483,7 +2498,8 @@ const STUDIO = (() => {
     const c = audio(); await c.resume();
     const reglage = flux.getAudioTracks()[0].getSettings();
     const piste = pisteCible(), debut = snap(tempsBeat());
-    rec = { flux, piste: piste.id, prod: prod.id, debut, lat: (reglage.latency || .02) + (c.outputLatency || c.baseLatency || .02), annule: false };
+    rec = { flux, piste: piste.id, prod: prod.id, debut, lat: (reglage.latency || .02) + (c.outputLatency || c.baseLatency || .02), latEntree: reglage.latency || .01, annule: false };
+    brancherRetour();
     $("dawRec").classList.add("on"); document.body.classList.add("studio-rec");
     // niveau du micro
     const an = c.createAnalyser(); an.fftSize = 1024; c.createMediaStreamSource(flux).connect(an);
@@ -2520,6 +2536,7 @@ const STUDIO = (() => {
   function nettoyerRec(){
     if (!rec) return;
     try { rec.flux.getTracks().forEach(t => t.stop()); } catch (e) {}
+    if (rec.src) { try { rec.src.disconnect(); } catch (e) {} }
     rec.el && rec.el.remove();
     rec = null; sale = true;
     $("dawRec").classList.remove("on"); document.body.classList.remove("studio-rec");
@@ -2642,6 +2659,12 @@ const STUDIO = (() => {
   $("dawRec").onclick = enregistrer;
   $("dawCouper").onclick = couper;
   $("dawSuppr").onclick = supprimer;
+  $("dawRetour").setAttribute("aria-pressed", String(retour));
+  $("dawRetour").onclick = () => {
+    retour = !retour; $("dawRetour").setAttribute("aria-pressed", String(retour));
+    try { localStorage.setItem("findings.studio.retour", retour ? "1" : "0"); } catch (e) {}
+    if (rec) brancherRetour(); else message(retour ? "Retour casque activé : tu t'entendras avec les effets pendant la prise (mets un casque)" : "Retour casque coupé");
+  };
   // plein ecran : le studio seul, sur tout l'ecran (la prod YouTube continue de jouer derriere)
   const pleinEcran = () => { if (document.fullscreenElement) document.exitFullscreen?.(); else el.requestFullscreen?.().catch(() => message("Plein écran indisponible ici")); };
   $("dawPlein").onclick = pleinEcran;
