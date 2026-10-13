@@ -678,8 +678,20 @@ I18N.demarrer();
 
 /* ============ données ============ */
 /* Le catalogue vit dans catalog.js, régénéré par ingest.mjs. */
-const CAT = window.FINDINGS_CATALOG || window.PRODYFIND_CATALOG || window.DIGGR_CATALOG
-         || { beats: [], updatedAt: null, lastRun: null };
+/* Le site publie recoit une version compacte (build.mjs) : on la deplie en objets identiques
+   a ceux du catalogue complet ; le reste du code ne voit pas la difference. */
+function deplierCatalogue(C){
+  const J0 = Date.UTC(2020, 0, 1), jour = n => n == null ? null : new Date(J0 + n * 864e5).toISOString().slice(0, 10);
+  const liste = (m, ref) => ref.filter((_, i) => m & (1 << i)), YT = "https://www.youtube.com/";
+  const beats = C.rows.map(r => { const p = C.prods[r[2]]; return {
+    id: r[0], title: r[1], prod: p[0], style: C.sty[r[3]], dur: r[4], views: r[5], published: jour(r[6]), bpm: r[7],
+    key: C.cles[r[8]] || null, moods: liste(r[9], C.moodsL), refs: r[10] || [], fr: !!r[11], addedAt: jour(r[12]),
+    artists: r[13].map(i => C.artists[i] && C.artists[i].id).filter(Boolean), est: liste(r[14], C.estL),
+    chan: p[1] ? (p[1].startsWith("http") ? p[1] : YT + p[1]) : "" }; });
+  return { ...C, beats, chans: {} };
+}
+const CAT = window.FINDINGS_CATALOG || (window.FINDINGS_CATALOG_C && deplierCatalogue(window.FINDINGS_CATALOG_C))
+         || window.PRODYFIND_CATALOG || window.DIGGR_CATALOG || { beats: [], updatedAt: null, lastRun: null };
 
 /* Les styles, leurs noms et leurs couleurs viennent du catalogue : en ajouter un
    dans ingest.mjs suffit, l'interface suit sans qu'on touche au CSS. */
@@ -888,6 +900,23 @@ const photoArtiste = id => (ARTIST_INFO[id] && ARTIST_INFO[id].img) || "";
 const CHAN_DE = new Map();   // beatmaker -> url de sa chaine (celle de sa prod la plus recente)
 BEATS.forEach(b => { if (b.chan && !CHAN_DE.has(b.prod)) CHAN_DE.set(b.prod, b.chan); });
 const profilDe = prod => CHANS[CHAN_DE.get(prod)] || null;
+/* Profils des chaines charges apres l'affichage (version compacte) : ils remplissent CHANS,
+   puis ce qui montre des avatars ou des bannieres se redessine. */
+function chargerChans(){
+  if (!CAT.chansUrl || window.FINDINGS_CHANS_OK) return;
+  window.FINDINGS_CHANS_OK = true;
+  const s = document.createElement("script"); s.src = CAT.chansUrl; s.async = true;
+  s.onload = () => {
+    const IMG = "https://yt3.googleusercontent.com/", ent = v => typeof v === "string" && v[0] === "~" ? IMG + v.slice(1) : v;
+    for (const [u, c] of Object.entries(window.FINDINGS_CHANS || {})) CHANS[u] = Object.fromEntries(Object.entries(c).map(([k, v]) => [k, ent(v)]));
+    profilCache = null;
+    try { profilPeint = null; } catch (e) {}   // le profil de beatmaker affiche se repeint avec sa photo et sa banniere
+    try { render(); } catch (e) {}
+    try { if (typeof majSuivis === "function") majSuivis(); } catch (e) {}
+    try { if (typeof npEtat === "function") npEtat(); } catch (e) {}
+  };
+  document.head.appendChild(s);
+}
 const avatarDe = prod => { const c = profilDe(prod); return c && c.a ? c.a : ""; };
 const ilYa = t => {
   const h = (Date.now() - t) / 36e5;
@@ -1138,6 +1167,7 @@ function mesurer(evenement){
   } catch (e) {}
 }
 window.addEventListener("load", () => setTimeout(() => mesurer(), 500));
+window.addEventListener("load", () => setTimeout(chargerChans, 30));   // profils des chaines, apres l'affichage
 
 /* ============ filtrage ============ */
 function filtered(){
