@@ -641,6 +641,7 @@ const search = (q, byDate) => (API_KEY ? viaApi(q, byDate) : scrape(q, byDate));
 const ITUBE_KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8";   // clé publique du lecteur web
 const ITUBE_CTX = { client:{ clientName:"WEB", clientVersion:"2.20240101.00.00", hl:"fr", gl:"FR" } };
 
+let BLOCAGES = 0;   // reponses vides qui ne disent pas « video indisponible » : YouTube nous bloque
 async function verify(id, country = "FR") {
   const r = await fetch(`https://www.youtube.com/youtubei/v1/player?key=${ITUBE_KEY}`, {
     method:"POST",
@@ -654,7 +655,20 @@ async function verify(id, country = "FR") {
   const j = await r.json();
   const mf = j?.microformat?.playerMicroformatRenderer;
   const vd = j?.videoDetails;
-  if (!mf && !vd) return { embeddable:false, gone:true };
+  if (!mf && !vd) {
+    /* Seule une vraie « video indisponible » (status ERROR) veut dire que la prod a disparu.
+       Le reste (LOGIN_REQUIRED « confirme que tu n'es pas un robot », refus de lecture…) est un
+       blocage de YouTube : on ne conclut rien. Le 13 octobre 2026, un passage lance depuis les
+       serveurs de GitHub a ainsi retire 40 prods valides et marque 1 070 prods « sans lien ». */
+    const st = j?.playabilityStatus?.status || "", raison = j?.playabilityStatus?.reason || "";
+    if (st === "ERROR") return { embeddable:false, gone:true };
+    if (!/robot|\bbot\b|unusual traffic|automated|trafic inhabituel/i.test(raison)) return { embeddable:false, gone:false };
+    if (++BLOCAGES >= 10) {
+      console.error(`\nYouTube bloque ce poste (${st || "reponse vide"} : ${j?.playabilityStatus?.reason || ""}). Passage arrete, rien n'a ete ecrit.`);
+      process.exit(3);
+    }
+    throw new Error("BLOQUE");
+  }
   const countries = mf?.availableCountries || [];
   return {
     embeddable: !!mf?.embed && mf?.isFamilySafe !== false && mf?.isUnlisted !== true
