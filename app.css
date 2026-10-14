@@ -733,6 +733,9 @@ body.vue-suivis #fbar{display:none}
 /* sur telephone, dans les likes, l'icone chaine cede sa place au dossier : avec quatre
    icones le titre n'avait plus que six lettres */
 @media(max-width:640px){ .row .acts:has([data-act="dossier"]) [data-act="chan"]{display:none} }
+/* mini-lecteur sur telephone : le titre etait reduit a « T… ». Comme Spotify, on garde lecture,
+   suivant, micro et coeur ; precedent et ecoute rapide restent au clavier et dans le panneau. */
+@media(max-width:440px){ .bar #prev,.bar #rapide{display:none} }
 .suivre.on{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
 .suivre[hidden]{display:none}
 .res-head .sub{display:block}

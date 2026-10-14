@@ -2,6 +2,15 @@
 /* La <base> des pages publiees est relative (« ./ », « ../ »). Le navigateur la recalcule a
    chaque changement d'adresse (history.pushState) : depuis /studio/, « studio/ » devenait
    /studio/studio/. On la fige une fois pour toutes, en absolu, au demarrage. */
+/* Miniatures YouTube : si la haute definition manque, la version standard ; si la video a
+   disparu entre deux controles, un aplat neutre plutot qu'une image cassee. */
+document.addEventListener("error", e => {
+  const t = e.target;
+  if (!t || t.tagName !== "IMG" || !/i\.ytimg\.com\/vi\//.test(t.src) || t.dataset.vide) return;
+  if (/maxresdefault/.test(t.src)) { t.src = t.src.replace("maxresdefault", "hqdefault"); return; }
+  t.dataset.vide = "1"; t.removeAttribute("srcset");
+  t.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 9"><rect width="16" height="9" fill="#2A2A2E"/><path d="M6.6 3v3l2.6-1.5z" fill="#55555C"/></svg>');
+}, true);
 (function figerBase(){ const b = document.querySelector("base"); if (b) b.href = new URL(b.getAttribute("href"), location.href).href; })();
 
 /* ============ langues : français, anglais, espagnol ============
@@ -939,7 +948,9 @@ const ICO_PANIER = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
 function chargerChans(){
   if (!CAT.chansUrl || window.FINDINGS_CHANS_OK) return;
   window.FINDINGS_CHANS_OK = true;
-  const s = document.createElement("script"); s.src = CAT.chansUrl; s.async = true;
+  // l'adresse est relative au catalogue (toujours a la racine du site), pas a la page : /en/… chargeait /en/chans.js
+  const cat = document.querySelector('script[src*="catalog.js"]');
+  const s = document.createElement("script"); s.src = new URL(CAT.chansUrl, cat ? cat.src : document.baseURI).href; s.async = true;
   s.onload = () => {
     const IMG = "https://yt3.googleusercontent.com/", ent = v => typeof v === "string" && v[0] === "~" ? IMG + v.slice(1) : v;
     for (const [u, c] of Object.entries(window.FINDINGS_CHANS || {})) CHANS[u] = Object.fromEntries(Object.entries(c).map(([k, v]) => [k, ent(v)]));
