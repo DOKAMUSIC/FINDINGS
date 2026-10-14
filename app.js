@@ -1,4 +1,9 @@
 
+/* La <base> des pages publiees est relative (« ./ », « ../ »). Le navigateur la recalcule a
+   chaque changement d'adresse (history.pushState) : depuis /studio/, « studio/ » devenait
+   /studio/studio/. On la fige une fois pour toutes, en absolu, au demarrage. */
+(function figerBase(){ const b = document.querySelector("base"); if (b) b.href = new URL(b.getAttribute("href"), location.href).href; })();
+
 /* ============ langues : français, anglais, espagnol ============
    Le site est ecrit en francais. Pour l'anglais et l'espagnol, une couche de traduction
    remplace les textes au moment ou ils s'affichent : un dictionnaire pour les textes fixes,
@@ -2882,27 +2887,31 @@ champQ.addEventListener("input", e => {
     S.bpmSur = false; document.getElementById("bpmSur").checked = false;
     bMin.value = BMIN; bMax.value = BMAX; syncBpm(true);   // remet aussi la jauge du tempo
     refletFiltres();
-    if (document.body.classList.contains("vue-accueil") || document.body.classList.contains("vue-studio")) montrerVue("prods", true, "?vue=prods");
+    if (horsListe()) montrerVue("prods", true, "?vue=prods");
   }
   clearTimeout(t); t = setTimeout(() => { S.q = e.target.value; render(); majAdresse(); }, 120);
 });
 
 const crateBtn = document.getElementById("crateBtn");
 const toutesBtn = document.getElementById("toutesBtn");
+/* Hors de la liste des prods (accueil ou studio), la liste est cachee : un bouton de filtre de
+   l'en-tete doit l'activer (pas l'inverser) et y emmener. Avant, depuis le studio, ces boutons
+   changeaient l'adresse sans rien montrer. */
+const horsListe = () => document.body.classList.contains("vue-accueil") || document.body.classList.contains("vue-studio");
 toutesBtn.addEventListener("click", () => {
   viderFiltres();
   refletFiltres();
   render();
-  majAdresse();
+  if (horsListe()) montrerVue("prods", true, "?vue=prods"); else majAdresse();
 });
 const ptBtn = document.getElementById("ptBtn");
 ptBtn.addEventListener("click", () => {
   const etaitActif = S.forYou;
   viderFiltres();
-  S.forYou = !etaitActif;
+  S.forYou = horsListe() ? true : !etaitActif;
   refletFiltres();
   render();
-  if (document.body.classList.contains("vue-accueil"))
+  if (horsListe())
     montrerVue("prods", true, S.forYou ? "?pourtoi=1" : "?vue=prods");
   else majAdresse();
 });
@@ -2913,7 +2922,7 @@ function voirProches(id){
   S.proche = id;
   refletFiltres();
   render();
-  if (document.body.classList.contains("vue-accueil")) montrerVue("prods", true, "?proche=" + encodeURIComponent(id));
+  if (horsListe()) montrerVue("prods", true, "?proche=" + encodeURIComponent(id));
   else {
     history.pushState({ vue: "prods" }, "", BASE + "?proche=" + encodeURIComponent(id)); majTitre(); mesurer();
     const haut = list.getBoundingClientRect().top + scrollY - 160;
@@ -2923,10 +2932,10 @@ function voirProches(id){
 document.getElementById("suivisBtn").addEventListener("click", () => {
   const etaitActif = S.suivis;
   viderFiltres();
-  S.suivis = !etaitActif;
+  S.suivis = horsListe() ? true : !etaitActif;
   refletFiltres();
   render();
-  if (document.body.classList.contains("vue-accueil"))
+  if (horsListe())
     montrerVue("prods", true, S.suivis ? "?suivis=1" : "?vue=prods");
   else majAdresse();
 });
@@ -2934,10 +2943,10 @@ const histBtn = document.getElementById("histBtn");
 histBtn.addEventListener("click", () => {
   const etaitActif = S.historyOnly;
   viderFiltres();
-  S.historyOnly = !etaitActif;
+  S.historyOnly = horsListe() ? true : !etaitActif;
   refletFiltres();
   render();
-  if (document.body.classList.contains("vue-accueil"))
+  if (horsListe())
     montrerVue("prods", true, S.historyOnly ? "?historique=1" : "?vue=prods");
   else majAdresse();
 });
@@ -2961,12 +2970,12 @@ effHist.addEventListener("click", () => {
 crateBtn.addEventListener("click", () => {
   const etaitActif = S.crateOnly;
   viderFiltres();
-  S.crateOnly = !etaitActif;
+  S.crateOnly = horsListe() ? true : !etaitActif;
   refletFiltres();
   render();
   /* Sur l'accueil le catalogue est masque : filtrer sans y basculer n'affiche rien.
      On y emmene, avec la meme adresse que le lien « Tout voir » de la section likes. */
-  if (document.body.classList.contains("vue-accueil"))
+  if (horsListe())
     montrerVue("prods", true, S.crateOnly ? "?likes=1" : "?vue=prods");
   else majAdresse();
 });
