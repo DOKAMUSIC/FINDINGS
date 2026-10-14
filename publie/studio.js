@@ -533,6 +533,19 @@ const STUDIO = (() => {
   .dp-auto{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--ink-2);cursor:pointer}
   .dp-auto input{accent-color:var(--accent);margin:0}
   .dp-auto b{margin-left:auto;font:600 11px var(--mono);color:var(--dim)}
+  
+  /* les colonnes peuvent retrecir sous la largeur de leur contenu (sur mobile, le studio
+     depassait de l'ecran de 15 px) */
+  .daw{grid-template-columns:minmax(0,1fr)}
+  .daw > *{min-width:0}
+  @media(max-width:760px){
+    .daw-haut{grid-template-columns:minmax(0,1fr)}
+    .daw-console{flex-wrap:wrap;min-width:0;gap:6px}
+    .lcd{min-width:0;flex:1 1 auto}
+    .lcd-seg{flex:1 1 0;min-width:0}
+    .lcd-seg.t b{min-width:0}
+    .daw-niv{display:none}
+  }
   </style>`);
 
   /* ─────────────────────────── balisage ─────────────────────────── */
