@@ -60,6 +60,14 @@ const I18N = (() => {
     "Passer en mode clair": ["Switch to light mode", "Cambiar a modo claro"],
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
+    "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "Les type beats qui sortent sur YouTube, rangés par artiste, style et mood. Écoute ici, pose ta topline dans le studio.": ["The type beats coming out on YouTube, sorted by artist, style and mood. Listen here, record your topline in the studio.", "Los type beats que salen en YouTube, ordenados por artista, estilo y mood. Escucha aquí, graba tu topline en el estudio."],
+    "Ouvrir le studio": ["Open the studio", "Abrir el estudio"],
+    "Plan du site": ["Site map", "Mapa del sitio"],
+    "Explorer": ["Explore", "Explorar"],
+    "Ta musique": ["Your music", "Tu música"],
+    "Pose ta topline": ["Record your topline", "Graba tu topline"],
+    "Haut de page": ["Back to top", "Volver arriba"],
     "Rechercher": ["Search", "Buscar"],
     "Rechercher une prod": ["Search for a beat", "Buscar un beat"],
     "Un artiste, un mood, un titre : « Werenoi », « Clams Casino », « sombre »…": ["An artist, a mood, a title: “Werenoi”, “Clams Casino”, “dark”…", "Un artista, un mood, un título: «Werenoi», «Clams Casino», «oscuro»…"],
@@ -1731,27 +1739,38 @@ function majHits(){
   const arts = LIVE_ARTISTS.map(a => [a, colle(a.name)]).filter(x => x[1]).sort((x, y) => y[1] - x[1] || ARTIST_N[y[0].id] - ARTIST_N[x[0].id]).slice(0, 6);
   const n = {}; BEATS.forEach(b => { if (PROD_SLUG.has(b.prod)) n[b.prod] = (n[b.prod] || 0) + 1; });
   const bms = Object.keys(n).map(p => [p, colle(p)]).filter(x => x[1]).sort((x, y) => y[1] - x[1] || n[y[0]] - n[x[0]]).slice(0, 4);
-  if (!arts.length && !bms.length) { elHits.hidden = true; elHits.innerHTML = ""; return; }
-  /* Une meme forme pour les deux : photo carree entiere (Deezer et YouTube la donnent
-     carree, un rond en coupait les coins), nom, nature et nombre de prods. */
-  const fiches = arts.map(([a, sc]) => ({ sc, href: lienArtiste(a.id), nom: a.name, img: photoArtiste(a.id).replace("1000x1000", "500x500"),
+  /* Un mood ne sort que si la saisie EST ce mood (« agressif », « dark », « chill type
+     beat ») : un debut de mot suffit, mais seulement quand aucun artiste ni beatmaker ne
+     correspond. « Ninho » ou le titre d'une prod ne font donc jamais surgir de mood. */
+  const qm = norm(q2);
+  const moodDe = m => [norm(m), ...(MOODS_AILLEURS[m] || "").split(" ")].reduce((sc, k) => Math.max(sc, k === qm ? 3 : qm.length >= 3 && k.startsWith(qm) ? 2 : 0), 0);
+  const nMoodQ = m => BEATS.reduce((n, b) => n + (b.moods.includes(m) ? 1 : 0), 0);
+  const moods = MOODS.map(m => [m, moodDe(m)]).filter(([m, sc]) => sc === 3 || (sc && !arts.length && !bms.length)).map(([m, sc]) => [m, sc, nMoodQ(m)]).filter(x => x[2]).sort((x, y) => y[1] - x[1] || y[2] - x[2]).slice(0, 2);
+  if (!arts.length && !bms.length && !moods.length) { elHits.hidden = true; elHits.innerHTML = ""; return; }
+  /* Une meme forme pour tous : photo carree entiere (Deezer et YouTube la donnent
+     carree, un rond en coupait les coins), nom, nature et nombre de prods. Le mood prend
+     son affiche de l'accueil a la place de la photo. */
+  // l'affiche de l'accueil, recadree au carre : le pictogramme passe du coin au centre
+  const affiche = (m, id) => { try { return AFFICHES[m] ? AFFICHES[m](id).replace(/transform="translate\([^)]*\) scale\([^)]*\)"/, 'transform="translate(117 67) scale(2.75)"') : ""; } catch (e) { return ""; } };   // AFFICHES est declare plus bas
+  const fiches = moods.map(([m, sc, nb], i) => ({ sc: sc + .5, href: `?mood=${encodeURIComponent(m)}`, nom: m[0].toUpperCase() + m.slice(1), art: affiche(m, "qhm" + i),
+      c: MOOD_TEINTE[m] || "var(--thumb)", nature: "Mood", style: "", n: nb, unite: "prod", mood: true })).concat(arts.map(([a, sc]) => ({ sc, href: lienArtiste(a.id), nom: a.name, img: photoArtiste(a.id).replace("1000x1000", "500x500"),
       c: `var(--s-${ARTIST_STYLE[a.id]})`, nature: "Artiste", style: STYLE_NAME[ARTIST_STYLE[a.id]] || "", n: ARTIST_N[a.id], unite: "type beat" }))
     .concat(bms.map(([p, sc]) => { const b = BEATS.find(x => x.prod === p); return { sc, href: lienProd(p), nom: p, img: avatarDe(p),
-      c: b ? `var(--s-${b.style})` : "var(--thumb)", nature: "Beatmaker", style: b ? STYLE_NAME[b.style] || "" : "", n: n[p], unite: "prod" }; }));
-  // le meilleur resultat : le nom le plus proche de la saisie ; a egalite, un artiste
+      c: b ? `var(--s-${b.style})` : "var(--thumb)", nature: "Beatmaker", style: b ? STYLE_NAME[b.style] || "" : "", n: n[p], unite: "prod" }; })));
+  // le meilleur resultat : le nom le plus proche de la saisie ; a egalite, le mood tape en entier, puis un artiste
   const top = fiches.reduce((m, f) => f.sc > m.sc ? f : m, fiches[0]);
   const autres = fiches.filter(f => f !== top);
   const nb = f => `${f.n} ${f.unite}${f.n > 1 ? "s" : ""}`;
   const fleche = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg>';
-  const photo = (f, cls) => `<span class="${cls}" style="--c:${f.c}">${f.img ? `<img src="${esc(f.img)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<i>${esc((f.nom.replace(/^prod\.?\s*/i, "")[0] || "?").toUpperCase())}</i>`}</span>`;
+  const photo = (f, cls) => `<span class="${cls}${f.mood ? " qh-mood" : ""}" style="--c:${f.c}">${f.art ? f.art : f.img ? `<img src="${esc(f.img)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<i>${esc((f.nom.replace(/^prod\.?\s*/i, "")[0] || "?").toUpperCase())}</i>`}</span>`;
   elHits.innerHTML = `<a class="qh-top" href="${top.href}" data-vue="prods" style="--c:${top.c}">
-      ${top.img ? `<span class="qh-fond" style="background-image:url('${esc(top.img)}')"></span>` : ""}
+      ${top.img ? `<span class="qh-fond" style="background-image:url('${esc(top.img)}')"></span>` : top.mood ? `<span class="qh-fond qh-fond-mood"></span>` : ""}
       ${photo(top, "qh-photo")}
       <span class="qh-in">
         <span class="qh-sur">${top.nature}${top.style ? ` · ${esc(top.style)}` : ""}</span>
         <b class="qh-nom">${esc(top.nom)}</b>
         <span class="qh-nb">${nb(top)}</span>
-        <span class="qh-voir">Voir la page${fleche}</span>
+        <span class="qh-voir">${top.mood ? "Écouter ce mood" : "Voir la page"}${fleche}</span>
       </span>
     </a>`
     + autres.map(f => `<a class="qh-tuile" href="${f.href}" data-vue="prods">
@@ -3825,7 +3844,40 @@ document.addEventListener("click", e => {
   const href = new URL(a.getAttribute("href"), document.baseURI).href;
   if (a.dataset.vue !== "studio") appliquerParams(lireAdresse(href));
   montrerVue(a.dataset.vue, true, href);
+  const cible = a.dataset.ancre && document.getElementById(a.dataset.ancre);
+  if (cible) setTimeout(() => { if (!cible.hidden) cible.scrollIntoView({ behavior: "smooth" }); }, 0);
 });
+
+/* Les ancres vers les sections de l'accueil (#vueStyles, #vueMoods…), dans l'en-tete
+   comme dans le pied de page : depuis le catalogue ou le studio, on revient a l'accueil
+   sans recharger (la lecture continue), puis on descend a la section. */
+document.addEventListener("click", e => {
+  const a = e.target.closest('a[href^="#vue"]');
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const cible = document.getElementById(a.getAttribute("href").slice(1));
+  if (!cible) return;
+  e.preventDefault();
+  if (document.body.classList.contains("vue-accueil")) { cible.scrollIntoView({ behavior: "smooth" }); return; }
+  // en changeant de vue, l'accueil se recompose encore un instant : on saute, puis on recale
+  montrerVue("accueil", true);
+  const caler = () => cible.scrollIntoView({ behavior: "instant" });
+  [0, 250, 700].forEach(ms => setTimeout(caler, ms));
+});
+
+/* Pied de page : langue et retour en haut. */
+(function piedDePage(){
+  const pied = document.getElementById("pied");
+  if (!pied) return;
+  pied.querySelectorAll("[data-lang]").forEach(b => {
+    if (!LANGUES[b.dataset.lang]) { b.hidden = true; return; }
+    b.setAttribute("aria-current", String(b.dataset.lang === LANG));
+    b.addEventListener("click", () => { if (b.dataset.lang !== LANG) allerLangue(b.dataset.lang); });
+  });
+  document.getElementById("footHaut")?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  // l'artiste n'a sa section qu'une fois le registre charge : le lien suit le bouton de l'en-tete
+  const lienArt = pied.querySelector('a[href="#vueArtistes"]'), nav = document.getElementById("navArtistes");
+  if (lienArt && nav) { const maj = () => { lienArt.hidden = nav.hidden; }; maj(); new MutationObserver(maj).observe(nav, { attributes: true, attributeFilter: ["hidden"] }); }
+})();
 
 /* La recherche du héros bascule sur le catalogue sans quitter la page. */
 document.querySelector('form[data-recherche]')?.addEventListener("submit", e => {
