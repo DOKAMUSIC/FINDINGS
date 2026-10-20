@@ -140,13 +140,12 @@ const nomStyle = (k, lg) => { const n = STYLE_NAME[k] || k; return (STYLE_TRAD[n
 const PIED = Object.fromEntries(LANGUES.map(lg => {
   const st = Object.keys(STYLE_NAME).filter(k => BEATS.some(b => b.style === k));
   const ar = Object.keys(ARTIST_NAME).map(a => [a, BEATS.filter(b => (b.artists || []).includes(a)).length]).filter(([, n]) => n).sort((x, y) => y[1] - x[1]).slice(0, 60);
-  const T = { fr: ["Parcourir FINDINGS", "Styles", "Artistes", "Outils", "Studio en ligne : pose ta topline"],
-              en: ["Browse FINDINGS", "Styles", "Artists", "Tools", "Online studio: record your topline"],
-              es: ["Explorar FINDINGS", "Estilos", "Artistas", "Herramientas", "Estudio online: graba tu topline"] }[lg];
-  return [lg, `<nav class="pied-liens" aria-label="${T[0]}">
-    <b>${T[1]}</b><div>${st.map(k => `<a href="style/${encodeURIComponent(k)}/">${esc(nomStyle(k, lg))} type beat</a>`).join("")}</div>
-    <b>${T[2]}</b><div>${ar.map(([a]) => `<a href="artiste/${encodeURIComponent(a)}/">${esc(ARTIST_NAME[a])} type beat</a>`).join("")}</div>
-    <b>${T[3]}</b><div><a href="studio/">${T[4]}</a></div>
+  const T = { fr: ["Parcourir FINDINGS", "Type beats par style", "Type beats par artiste"],
+              en: ["Browse FINDINGS", "Type beats by style", "Type beats by artist"],
+              es: ["Explorar FINDINGS", "Type beats por estilo", "Type beats por artista"] }[lg];
+  return [lg, `<nav class="pied-liens" aria-label="${T[0]}" translate="no">
+    <section><b>${T[1]}</b><div>${st.map(k => `<a href="style/${encodeURIComponent(k)}/">${esc(nomStyle(k, lg))}</a>`).join("")}</div></section>
+    <section><b>${T[2]}</b><div>${ar.map(([a]) => `<a href="artiste/${encodeURIComponent(a)}/">${esc(ARTIST_NAME[a])}</a>`).join("")}</div></section>
   </nav>`];
 }));
 
