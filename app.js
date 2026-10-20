@@ -1735,7 +1735,7 @@ function majHits(){
   const montrer = q.length >= 2 && !document.body.classList.contains("vue-profil");
   if (!montrer) { elHits.hidden = true; elHits.innerHTML = ""; return; }
   const q2 = q.replace(/ ?type beats?$/, "").trim() || q;
-  const colle = nom => { const k = cleNom(nom); return k === q2 ? 3 : k.startsWith(q2) ? 2 : (k.includes(q2) && q2.length >= 3) || (k.length >= 3 && new RegExp(`(^| )${k}( |$)`).test(q)) ? 1 : 0; };
+  const colle = nom => { const k = cleNom(nom); return k === q2 ? 3 : k.startsWith(q2) ? 2 : (k.includes(q2) && q2.replace(/ /g, "").length >= 3) || (k.length >= 3 && new RegExp(`(^| )${k}( |$)`).test(q)) ? 1 : 0; };
   const arts = LIVE_ARTISTS.map(a => [a, colle(a.name)]).filter(x => x[1]).sort((x, y) => y[1] - x[1] || ARTIST_N[y[0].id] - ARTIST_N[x[0].id]).slice(0, 6);
   const n = {}; BEATS.forEach(b => { if (PROD_SLUG.has(b.prod)) n[b.prod] = (n[b.prod] || 0) + 1; });
   const bms = Object.keys(n).map(p => [p, colle(p)]).filter(x => x[1]).sort((x, y) => y[1] - x[1] || n[y[0]] - n[x[0]]).slice(0, 4);
@@ -1746,18 +1746,33 @@ function majHits(){
   const moodDe = m => [norm(m), ...(MOODS_AILLEURS[m] || "").split(" ")].reduce((sc, k) => Math.max(sc, k === qm ? 3 : qm.length >= 3 && k.startsWith(qm) ? 2 : 0), 0);
   const nMoodQ = m => BEATS.reduce((n, b) => n + (b.moods.includes(m) ? 1 : 0), 0);
   const moods = MOODS.map(m => [m, moodDe(m)]).filter(([m, sc]) => sc === 3 || (sc && !arts.length && !bms.length)).map(([m, sc]) => [m, sc, nMoodQ(m)]).filter(x => x[2]).sort((x, y) => y[1] - x[1] || y[2] - x[2]).slice(0, 2);
-  if (!arts.length && !bms.length && !moods.length) { elHits.hidden = true; elHits.innerHTML = ""; return; }
+  /* Meme regle pour les styles : « drill », « boom bap », « boombap », « rnb »… Le style
+     le plus fourni passe devant a egalite. */
+  const qs = cleNom(q2), qsC = qs.replace(/ /g, "");
+  const styleDe = st => {
+    const noms = [st.label, st.key, ...st.label.split("/"), I18N.t(st.label)].map(cleNom).filter(Boolean);
+    return noms.reduce((sc, k) => { const kc = k.replace(/ /g, ""); return Math.max(sc, k === qs || kc === qsC ? 3 : qs.length >= 3 && (k.startsWith(qs) || kc.startsWith(qsC)) ? 2 : 0); }, 0);
+  };
+  const parStyle = {};
+  BEATS.forEach(b => { (parStyle[b.style] = parStyle[b.style] || []).push(b); });
+  const styles = STYLE_META.filter(st => parStyle[st.key]).map(st => [st, styleDe(st)]).filter(([st, sc]) => sc === 3 || (sc && !arts.length && !bms.length))
+    .sort((x, y) => y[1] - x[1] || parStyle[y[0].key].length - parStyle[x[0].key].length).slice(0, 2);
+  if (!arts.length && !bms.length && !moods.length && !styles.length) { elHits.hidden = true; elHits.innerHTML = ""; return; }
   /* Une meme forme pour tous : photo carree entiere (Deezer et YouTube la donnent
      carree, un rond en coupait les coins), nom, nature et nombre de prods. Le mood prend
      son affiche de l'accueil a la place de la photo. */
   // l'affiche de l'accueil, recadree au carre : le pictogramme passe du coin au centre
   const affiche = (m, id) => { try { return AFFICHES[m] ? AFFICHES[m](id).replace(/transform="translate\([^)]*\) scale\([^)]*\)"/, 'transform="translate(117 67) scale(2.75)"') : ""; } catch (e) { return ""; } };   // AFFICHES est declare plus bas
   const fiches = moods.map(([m, sc, nb], i) => ({ sc: sc + .5, href: `?mood=${encodeURIComponent(m)}`, nom: m[0].toUpperCase() + m.slice(1), art: affiche(m, "qhm" + i),
-      c: MOOD_TEINTE[m] || "var(--thumb)", nature: "Mood", style: "", n: nb, unite: "prod", mood: true })).concat(arts.map(([a, sc]) => ({ sc, href: lienArtiste(a.id), nom: a.name, img: photoArtiste(a.id).replace("1000x1000", "500x500"),
+      c: MOOD_TEINTE[m] || "var(--thumb)", nature: "Mood", style: "", n: nb, unite: "prod", mood: true }))
+    // le style prend la pochette de sa prod la plus ecoutee, comme son affiche de l'accueil
+    .concat(styles.map(([st, sc]) => { const une = parStyle[st.key].reduce((m, b) => b.views > m.views ? b : m); return { sc: sc + .5, href: lienStyle(st.key), nom: st.label,
+      img: `https://i.ytimg.com/vi/${une.id}/mqdefault.jpg`, c: st.color, nature: "Style", style: "", n: parStyle[st.key].length, unite: "prod", genre: true }; }))
+    .concat(arts.map(([a, sc]) => ({ sc, href: lienArtiste(a.id), nom: a.name, img: photoArtiste(a.id).replace("1000x1000", "500x500"),
       c: `var(--s-${ARTIST_STYLE[a.id]})`, nature: "Artiste", style: STYLE_NAME[ARTIST_STYLE[a.id]] || "", n: ARTIST_N[a.id], unite: "type beat" }))
     .concat(bms.map(([p, sc]) => { const b = BEATS.find(x => x.prod === p); return { sc, href: lienProd(p), nom: p, img: avatarDe(p),
       c: b ? `var(--s-${b.style})` : "var(--thumb)", nature: "Beatmaker", style: b ? STYLE_NAME[b.style] || "" : "", n: n[p], unite: "prod" }; })));
-  // le meilleur resultat : le nom le plus proche de la saisie ; a egalite, le mood tape en entier, puis un artiste
+  // le meilleur resultat : le nom le plus proche de la saisie ; a egalite, le mood ou le style tape en entier, puis un artiste
   const top = fiches.reduce((m, f) => f.sc > m.sc ? f : m, fiches[0]);
   const autres = fiches.filter(f => f !== top);
   const nb = f => `${f.n} ${f.unite}${f.n > 1 ? "s" : ""}`;
@@ -1770,7 +1785,7 @@ function majHits(){
         <span class="qh-sur">${top.nature}${top.style ? ` · ${esc(top.style)}` : ""}</span>
         <b class="qh-nom">${esc(top.nom)}</b>
         <span class="qh-nb">${nb(top)}</span>
-        <span class="qh-voir">${top.mood ? "Écouter ce mood" : "Voir la page"}${fleche}</span>
+        <span class="qh-voir">${top.mood ? "Écouter ce mood" : top.genre ? "Voir les prods" : "Voir la page"}${fleche}</span>
       </span>
     </a>`
     + autres.map(f => `<a class="qh-tuile" href="${f.href}" data-vue="prods">
