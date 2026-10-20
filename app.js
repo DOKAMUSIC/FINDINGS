@@ -61,6 +61,7 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "Voir plus de prods": ["Show more beats", "Ver más beats"],
     "Les type beats qui sortent sur YouTube, rangés par artiste, style et mood. Écoute ici, pose ta topline dans le studio.": ["The type beats coming out on YouTube, sorted by artist, style and mood. Listen here, record your topline in the studio.", "Los type beats que salen en YouTube, ordenados por artista, estilo y mood. Escucha aquí, graba tu topline en el estudio."],
     "Ouvrir le studio": ["Open the studio", "Abrir el estudio"],
     "Plan du site": ["Site map", "Mapa del sitio"],
@@ -545,6 +546,7 @@ const I18N = (() => {
     [`^${N} prods? proches$`, m => nb(m[1], ["similar beat", "similar beats"], ["beat parecido", "beats parecidos"])],
     [`^${N} prods? en tout$`, m => nb(m[1], ["beat", "beats"], ["beat", "beats"]) + (L === 0 ? " in total" : " en total")],
     [`^${N} en tout$`, "$1 in total", "$1 en total"],
+    [`^${N} sur ${N}$`, "$1 of $2", "$1 de $2"],
     [`^${N} prods? mises? de côté\\.$`, m => nb(m[1], ["beat saved.", "beats saved."], ["beat guardado.", "beats guardados."])],
     [`^${N} prods? pas encore écoutées?$`, m => nb(m[1], ["beat not played yet", "beats not played yet"], ["beat sin escuchar", "beats sin escuchar"])],
     [`^${N} nouvelles? depuis ta visite$`, "$1 new since your visit", "$1 nuevos desde tu visita"],
@@ -1366,18 +1368,31 @@ document.getElementById("hist").innerHTML =
 /* ============ rendu : liste ============ */
 const list = document.getElementById("list");
 const PAQUET = 60;
+/* Les trois premiers paquets arrivent seuls au defilement ; ensuite un bouton « Voir plus »
+   prend le relais. Sans cette limite, la liste reculait sans fin devant le pied de page,
+   qui devenait inatteignable sur « Toutes les prods ». */
+const AUTO = 3 * PAQUET;
 let lignesAffichees = 0;
-function ajouterLignes(){
-  const suite = LAST.slice(lignesAffichees, lignesAffichees + PAQUET);
-  list.querySelector(".suite")?.remove();
+function ajouterLignes(n = PAQUET){
+  const suite = LAST.slice(lignesAffichees, lignesAffichees + n);
+  list.querySelector(".suite,.plus")?.remove();
   if (!suite.length) return;
   list.insertAdjacentHTML("beforeend", suite.map(rowHTML).join(""));
   lignesAffichees += suite.length;
-  if (lignesAffichees < LAST.length) {
+  if (lignesAffichees >= LAST.length) return;
+  if (lignesAffichees < AUTO) {
     list.insertAdjacentHTML("beforeend", '<li class="suite" aria-hidden="true"></li>');
     obsSuite.observe(list.lastElementChild);
+  } else {
+    const reste = LAST.length - lignesAffichees;
+    list.insertAdjacentHTML("beforeend", `<li class="plus"><button type="button" class="plus-btn" id="plusBtn">Voir plus de prods</button><span class="plus-n">${lignesAffichees} sur ${LAST.length}</span></li>`);
   }
 }
+document.addEventListener("click", e => {
+  if (!e.target.closest("#plusBtn")) return;
+  e.stopPropagation();
+  ajouterLignes(2 * PAQUET);
+}, true);
 // on charge bien avant d'atteindre le bas : le paquet suivant est pret quand on y arrive
 const obsSuite = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) ajouterLignes(); }, { rootMargin: "1500px 0px" });
 
