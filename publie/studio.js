@@ -173,6 +173,28 @@ const STUDIO = (() => {
   .daw-fichier span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .daw-fichier button{width:18px;height:18px;border-radius:3px;flex:0 0 auto;font-size:13px;line-height:1;color:var(--dim)}
   .daw-fichier button:hover{background:var(--hover);color:var(--accent)}
+  .daw-o.ia{color:#fff;padding:0 11px;background:linear-gradient(135deg,#7C5CFF,#3DDCC8);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 2px rgba(0,0,0,.45)}
+  .daw-o.ia:hover{filter:brightness(1.1)}
+  .daw-o.ia:disabled{opacity:.45}
+  .daw-o.ia.calcul svg{animation:ia-tourne 1s linear infinite}
+  @keyframes ia-tourne{to{transform:rotate(360deg)}}
+  .daw-exp{position:relative;display:inline-flex}
+  .daw-exp-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;width:290px;display:grid;gap:2px;padding:6px;border-radius:10px;
+    background:#1B1D21;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 18px 40px rgba(0,0,0,.55)}
+  .daw-exp-menu[hidden]{display:none}
+  .daw-exp-menu button{display:grid;gap:2px;text-align:left;padding:9px 10px;border-radius:7px;color:#E8EAED}
+  .daw-exp-menu button:hover{background:rgba(255,255,255,.07)}
+  .daw-exp-menu b{font-size:12.5px;font-weight:700}
+  .daw-exp-menu small{font-size:11px;color:#8B9099;line-height:1.35}
+  .exp-master{display:flex;gap:9px;align-items:flex-start;margin-top:4px;padding:10px 10px 6px;border-top:1px solid rgba(255,255,255,.07);color:#E8EAED;cursor:pointer}
+  .exp-master input{margin-top:2px;accent-color:#3DDCC8}
+  .exp-master span{display:grid;gap:2px}
+  .exp-master:has(input:disabled){opacity:.5;cursor:default}
+  :root:not([data-theme="dark"]) .daw-exp-menu{background:#FFFFFF;box-shadow:0 0 0 1px rgba(0,0,0,.1),0 18px 40px rgba(0,0,0,.16)}
+  :root:not([data-theme="dark"]) .daw-exp-menu button{color:#1D1D1F}
+  :root:not([data-theme="dark"]) .daw-exp-menu button:hover{background:rgba(0,0,0,.05)}
+  :root:not([data-theme="dark"]) .daw-exp-menu small{color:#6E6E73}
+  :root:not([data-theme="dark"]) .exp-master{color:#1D1D1F;border-top-color:rgba(0,0,0,.08)}
   .daw-mix{display:flex;padding:2px;border-radius:6px;background:var(--creux);box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
   .daw-mix[hidden]{display:none}
   .daw-mix button{height:24px;padding:0 9px;border-radius:4px;font-size:11px;font-weight:650;color:var(--dim)}
@@ -558,6 +580,16 @@ const STUDIO = (() => {
   .gr-aide{margin:0;font-size:10.5px;color:var(--p-dim,#8B9099)}
   .gr-aide b{color:var(--p-txt,#E8EAED);font-weight:650}
   .gr-vide{margin:18px 4px;font-size:12.5px;line-height:1.5;color:var(--p-dim,#8B9099);max-width:460px}
+  .net-bloc h4{display:flex;align-items:center;gap:8px}
+  .net-marque{font:800 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:#7CE38B;padding:3px 6px;border-radius:4px;background:rgba(124,227,139,.12)}
+  .net-on{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 13px 0 9px;border-radius:999px;font-size:12px;font-weight:700;color:var(--ink-2);background:rgba(118,118,128,.14);transition:background .15s,color .15s}
+  .net-on i{width:26px;height:15px;border-radius:999px;background:rgba(118,118,128,.45);position:relative;transition:background .15s}
+  .net-on i::after{content:"";position:absolute;left:2px;top:2px;width:11px;height:11px;border-radius:50%;background:#fff;transition:transform .18s}
+  .net-on[aria-pressed="true"]{color:var(--ink);background:rgba(124,227,139,.14)}
+  .net-on[aria-pressed="true"] i{background:#34C759}
+  .net-on[aria-pressed="true"] i::after{transform:translateX(11px)}
+  .net-etat{margin:2px 0 0;font:600 10.5px var(--mono);color:var(--dim)}
+  .net-bloc.on .net-etat{color:#34C759}
   .clip .clip-fx{position:absolute;right:4px;top:1px;font-size:9px;line-height:14px;color:rgba(0,0,0,.7);pointer-events:auto;cursor:help}
   .at-bloc{display:grid;gap:4px;align-content:start;min-width:0;padding-top:8px}
   .at-bloc-clavier .at-clavier{margin:2px 0 0}
@@ -637,9 +669,18 @@ const STUDIO = (() => {
         <span class="daw-mix" id="dawMix" hidden role="group" aria-label="Contenu de l'export">
           <button data-mix="voix" aria-pressed="false">Voix seule</button><button data-mix="tout" aria-pressed="true">Voix + prod</button>
         </span>
+        <button class="daw-o ia" id="dawMixAuto" title="Mix auto : analyse tes voix et règle chaque piste sur la prod, en un clic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 1.9 1.9.8-1.9.8L19 20.4l-.8-1.9-1.9-.8 1.9-.8z"/></svg><span class="lib">Mix auto</span></button>
         <a class="daw-o achat" id="dawAcheter" hidden target="_blank" rel="noopener" title="Acheter la licence de la prod"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.2l2.3 11h10.8l2-7.5H7"/><circle cx="9.5" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg><span class="lib">Acheter la prod</span></a>
         <button class="daw-o" id="dawPlein" title="Plein écran (F)" aria-label="Plein écran">${I.plein}</button>
-        <button class="daw-o pri" id="dawExport" title="Exporter en WAV">${I.export}<span class="lib">Exporter</span></button>
+        <span class="daw-exp">
+          <button class="daw-o pri" id="dawExport" title="Exporter" aria-haspopup="true" aria-expanded="false">${I.export}<span class="lib">Exporter</span></button>
+          <div class="daw-exp-menu" id="dawExpMenu" role="menu" hidden>
+            <button role="menuitem" data-exp="mix"><b>Mix complet</b><small id="dawExpMixTxt">Voix + prod, en WAV</small></button>
+            <button role="menuitem" data-exp="voix"><b>Voix seule</b><small>Toutes les voix mixées, calées sur 0:00 de la prod</small></button>
+            <button role="menuitem" data-exp="stems"><b>Pistes séparées</b><small>Un WAV par piste, effets compris, dans un ZIP</small></button>
+            <label class="exp-master"><input type="checkbox" id="dawMaster"><span><b>Mastering auto</b><small>Pour le mix complet : niveau des plateformes (-14 LUFS), crêtes à -1 dB</small></span></label>
+          </div>
+        </span>
         <button class="daw-o" id="dawFermer" title="Fermer le studio (Échap)" aria-label="Fermer">${I.fermer}</button>
       </div>
     </div>
@@ -1612,15 +1653,84 @@ const STUDIO = (() => {
     try {
       const f = P.prisesFx && P.prisesFx[id];
       let buf = BUF.get(id);
-      if (buf && f && netActif(f.net) && typeof nettoyer === "function") buf = await nettoyer(buf, f.net);
+      if (buf && f && netActif(f.net)) buf = await nettoyer(buf, { ...f.net, prise: id });
       if (buf && f && retActive(f.ret)) { const an = await analyserHauteur(id); if (an) buf = await decalerHauteur(buf, courbeRetouche(an, f.ret), an); }
       if (!buf || buf === BUF.get(id)) BUF_PROC.delete(id); else BUF_PROC.set(id, buf);
       SIGN.set(id, sig); sale = true;
     } catch (e) { console.warn("traitement de prise", e); }
     RENDU_EN_COURS.delete(id);
+    const etat = document.getElementById("netEtat"), k0 = regionSel();
+    if (etat && k0 && k0.prise === id) etat.textContent = etatNet(id);
     if (RENDU_EN_COURS.has(id + ":encore")) { RENDU_EN_COURS.delete(id + ":encore"); rendrePrise(id); }
     dessinerBadges();
   }
+  /* ── Nettoyage voix (FINDINGS Clean) ──
+     Reduction de bruit spectrale : le bruit de fond est mesure sur les passages les plus calmes
+     de la prise (les 10 % de trames les plus faibles), puis chaque frequence est attenuee
+     d'autant que le bruit y domine. Les gains sont lisses dans le temps et entre frequences
+     (pas de « gazouillis »), et un plancher garde un peu d'ambiance a faible force.
+     « Grondements » coupe sous 70 Hz (pied de micro, trafic, clim). */
+  function fft(re, im, inv){
+    const n = re.length;
+    for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+    for (let len = 2; len <= n; len <<= 1) {
+      const a = (inv ? 2 : -2) * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a);
+      for (let i = 0; i < n; i += len) { let cr = 1, ci = 0;
+        for (let j = 0; j < len / 2; j++) { const u = i + j, v = u + len / 2, xr = re[v] * cr - im[v] * ci, xi = re[v] * ci + im[v] * cr;
+          re[v] = re[u] - xr; im[v] = im[u] - xi; re[u] += xr; im[u] += xi; const t = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = t; } }
+    }
+    if (inv) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+  }
+  const BRUIT = new Map();   // bruit de fond mesure par prise (dBFS), pour l'affichage
+  async function nettoyer(buf, o){
+    const sr = buf.sampleRate, N = 2048, H = 512, K = N / 2 + 1, len = buf.length;
+    const x = new Float32Array(len); for (let c = 0; c < buf.numberOfChannels; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) x[i] += d[i] / buf.numberOfChannels; }
+    const win = new Float32Array(N).map((_, i) => .5 - .5 * Math.cos(2 * Math.PI * i / N));
+    const nf = Math.ceil((len + N) / H), P2 = new Float32Array(nf * K), E = new Float32Array(nf), ET = new Float32Array(nf);
+    const re = new Float32Array(N), im = new Float32Array(N);
+    // 1. spectre de puissance de chaque trame
+    for (let f = 0; f < nf; f++) {
+      if (f % 200 === 199) await new Promise(r => setTimeout(r, 0));
+      const o0 = f * H - N; re.fill(0); im.fill(0);
+      let et = 0;
+      for (let i = 0; i < N; i++) { const j = o0 + i; re[i] = j >= 0 && j < len ? x[j] * win[i] : 0; if (j >= 0 && j < len) et += x[j] * x[j]; }
+      ET[f] = et / N;
+      fft(re, im, false); let e = 0;
+      for (let k = 0; k < K; k++) { const p = re[k] * re[k] + im[k] * im[k]; P2[f * K + k] = p; e += p; }
+      E[f] = e;
+    }
+    // 2. le bruit : moyenne des 10 % de trames les plus calmes (hors silence numerique)
+    const ord = [...E.keys()].filter(f => E[f] > 1e-12).sort((a, b) => E[a] - E[b]), nq = Math.max(4, Math.floor(ord.length * .1));
+    const bruit = new Float32Array(K);
+    ord.slice(0, nq).forEach(f => { for (let k = 0; k < K; k++) bruit[k] += P2[f * K + k] / nq; });
+    const eB = bruit.reduce((a, b) => a + b, 0), eV = ord.length ? ord.slice(-Math.max(1, Math.floor(ord.length * .3))).reduce((a, f) => a + E[f], 0) / Math.max(1, Math.floor(ord.length * .3)) : 0;
+    const force = Math.max(0, Math.min(100, o.force == null ? 50 : o.force)) / 100;
+    // une prise sans vrai silence : le « bruit » mesure est de la voix, on y va doucement
+    const confiance = eV > 0 ? Math.max(.25, Math.min(1, (10 * Math.log10(eV / Math.max(eB, 1e-12)) - 6) / 18)) : 1;
+    const alpha = (1 + 2.2 * force) * confiance, plancher = Math.pow(10, -(6 + 22 * force) / 20);
+    const coupe = o.graves !== false ? Math.round(70 / (sr / N)) : 0, rampe = Math.round(110 / (sr / N));
+    // 3. gains lisses, resynthese par addition-recouvrement
+    const y = new Float32Array(len + N), g = new Float32Array(K), gPrec = new Float32Array(K).fill(1), gL = new Float32Array(K);
+    for (let f = 0; f < nf; f++) {
+      if (f % 200 === 199) await new Promise(r => setTimeout(r, 0));
+      const o0 = f * H - N; re.fill(0); im.fill(0);
+      for (let i = 0; i < N; i++) { const j = o0 + i; re[i] = j >= 0 && j < len ? x[j] * win[i] : 0; }
+      fft(re, im, false);
+      for (let k = 0; k < K; k++) { const p = P2[f * K + k], v = p > 0 ? 1 - alpha * bruit[k] / p : 0; g[k] = Math.max(plancher, Math.min(1, v)); }
+      for (let k = 0; k < K; k++) { const m = (g[Math.max(0, k - 1)] + 2 * g[k] + g[Math.min(K - 1, k + 1)]) / 4;
+        // le gain remonte vite (attaque de la voix) et redescend doucement (pas de bruit qui clignote)
+        gL[k] = m > gPrec[k] ? m : gPrec[k] * .65 + m * .35; gPrec[k] = gL[k]; }
+      for (let k = 0; k < K; k++) { let G = gL[k]; if (coupe) G *= k < coupe ? 0 : k < rampe ? (k - coupe) / (rampe - coupe) : 1;
+        re[k] *= G; im[k] *= G; if (k > 0 && k < N / 2) { re[N - k] = re[k]; im[N - k] = -im[k]; } }
+      fft(re, im, true);
+      for (let i = 0; i < N; i++) { const j = o0 + i; if (j >= 0 && j < len) y[j] += re[i] * win[i] / 1.5; }
+    }
+    BRUIT.set(o.prise, 10 * Math.log10(Math.max(1e-12, ord.slice(0, nq).reduce((a, f) => a + ET[f], 0) / nq)));
+    const out = new AudioBuffer({ numberOfChannels: 1, length: len, sampleRate: sr }); out.copyToChannel(y.subarray(0, len), 0);
+    return out;
+  }
+  const etatNet = id => { const f = P.prisesFx && P.prisesFx[id], b = BRUIT.get(id);
+    return RENDU_EN_COURS.has(id) ? "Calcul en cours…" : f && netActif(f.net) ? (b != null ? `Actif · bruit de fond mesuré ${Math.round(b)} dBFS` : "Actif") : "Désactivé"; };
   const planifies = new Map();
   const planifierRendu = id => { clearTimeout(planifies.get(id)); planifies.set(id, setTimeout(() => rendrePrise(id), 250)); };
   const majTraitements = () => { if (!P) return; const ids = new Set(P.clips.map(k => k.prise)); ids.forEach(id => { if (SIGN.get(id) !== signature(id)) planifierRendu(id); }); };
@@ -1877,7 +1987,7 @@ const STUDIO = (() => {
       <div class="daw-curseur" id="dawCurseur"></div>`;
     grilleEl.querySelectorAll(".clip").forEach(n => ondeRegion(n));
     if (fichier) ondeFichier();
-    $("dawMix").hidden = !fichier;
+    $("dawMix").hidden = true;   // remplace par le menu d'export
     $("dawMix").querySelectorAll("[data-mix]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mix === mixExport)));
     placerCurseur(tempsBeat());
     remplirCurseurs(el);
@@ -1982,6 +2092,7 @@ const STUDIO = (() => {
     $("dawSuppr").disabled = !(sel && sel.type === "clip");
     $("dawDupliquer").disabled = !(sel && sel.type === "clip");
     $("dawExport").disabled = !P || !P.clips.length;
+    $("dawMixAuto").disabled = !P || !P.clips.length;
     $("dawGrille").setAttribute("aria-pressed", String(grille));
   }
 
@@ -2035,6 +2146,7 @@ const STUDIO = (() => {
   /* une cle de reglage → l'objet et la propriete qu'elle designe */
   function cible(cle){
     const [quoi, a, b] = cle.split(".");
+    if (quoi === "net") { const k = regionSel(); if (!k) return [null]; const f = fxPrise(k.prise, true); if (!f.net) f.net = { on: true, force: 50, graves: true }; return [f.net, a, null]; }
     if (quoi === "ret") { const k = clipGraphe(); if (!k) return [null]; const f = fxPrise(k.prise, true); if (!f.ret) f.ret = { decal: {}, aplanir: 0, transition: 40 }; return [f.ret, a, null]; }
     if (quoi === "fx") { const p = pisteCible(); return [p.fx[a], b, p]; }
     if (quoi === "piste") { const p = pisteCible(); return [p, a, p]; }
@@ -2052,6 +2164,7 @@ const STUDIO = (() => {
     else if (cle === "projet.beatVol") { if (modeFichier()) { if (gainProd) gainProd.gain.value = val / 100; } else { try { player.setVolume(val); VOL = val; } catch (e) {} } }
     else if (cle === "projet.decal") sale = true;
     else if (cle.startsWith("ret.")) { const k = clipGraphe(); if (k) planifierRendu(k.prise); }
+    else if (cle.startsWith("net.")) { const k = regionSel(); if (k) planifierRendu(k.prise); }
     else if (p) { p.preset = p.preset && cle.startsWith("fx.") ? "perso" : p.preset; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif());
       if (cle.startsWith("fx.")) { const k = cle.split(".")[1], r = corps.querySelector(`[data-resume="${k}"]`); if (r) r.textContent = resume(k, p.fx[k]); }
       if (cle === "piste.vol") { const r = grilleEl.querySelector(`[data-vol="${p.id}"]`); if (r) r.value = Math.round(val * 100); } }
@@ -2120,6 +2233,15 @@ const STUDIO = (() => {
           <p class="dp-aide">${fmt(k.start)} → ${fmt(k.start + k.dur)} · ${k.dur.toFixed(2)} s, sur « ${esc((P.pistes.find(x => x.id === k.piste) || {}).nom || "")} »</p>
           <div class="ligne">${bouton("region.gain", "Volume", 0, 2, .01, "x", k.gain, 1)}${bouton("region.fadeIn", "Fondu entrée", 0, 3, .01, "s", k.fadeIn, .01)}${bouton("region.fadeOut", "Fondu sortie", 0, 3, .01, "s", k.fadeOut, .02)}</div>
         </div>
+        ${(() => { const nt = (P.prisesFx && P.prisesFx[k.prise] && P.prisesFx[k.prise].net) || {}, on = netActif(nt); return `
+        <div class="dp-bloc net-bloc${on ? " on" : ""}" style="width:300px">
+          <h4><span class="net-marque" translate="no">FINDINGS Clean</span>Nettoyage voix</h4>
+          <p class="dp-aide">Retire le souffle, la ventilation et le bruit de la pièce, sans toucher à ta voix. Mesuré sur les passages calmes de la prise.</p>
+          <div class="ligne"><button class="net-on" data-act="netOn" aria-pressed="${on}"><i></i>${on ? "Activé" : "Activer"}</button>${bouton("net.force", "Force", 0, 100, 1, "%", nt.force == null ? 50 : nt.force, 50)}</div>
+          <label class="dp-auto"><input type="checkbox" data-act="netGraves"${nt.graves !== false ? " checked" : ""}>Couper les grondements graves (sous 70 Hz)</label>
+          <p class="net-etat" id="netEtat">${etatNet(k.prise)}</p>
+          <button class="dp-act" data-act="netPiste">Appliquer à toute la piste</button>
+        </div>`; })()}
         <div class="dp-bloc">
           <h4>Actions</h4>
           <div class="ligne"><button class="dp-act" data-act="couper">Couper au curseur</button><button class="dp-act" data-act="dupliquer">Dupliquer</button><button class="dp-act" data-act="normaliser">Normaliser</button></div>
@@ -2573,6 +2695,15 @@ const STUDIO = (() => {
     const a = e.target.closest("[data-act]")?.dataset.act;
     if (a === "couper") couper(); else if (a === "dupliquer") dupliquer(); else if (a === "supprimer") supprimer();
     else if (a === "normaliser") normaliser();
+    else if (a === "netOn" || a === "netPiste") {
+      const k = regionSel(); if (!k) return;
+      memoriser();
+      const f = fxPrise(k.prise, true), base = f.net || { force: 50, graves: true };
+      if (a === "netOn") { f.net = { ...base, on: !netActif(f.net) }; planifierRendu(k.prise); message(f.net.on ? "Nettoyage voix activé sur cette prise" : "Nettoyage voix retiré"); }
+      else { const ids = [...new Set(P.clips.filter(x => x.piste === k.piste).map(x => x.prise))];
+        ids.forEach(id => { fxPrise(id, true).net = { ...base, on: true }; planifierRendu(id); }); message(`Nettoyage voix sur ${ids.length} prise${ids.length > 1 ? "s" : ""} de la piste`); }
+      sauver(); panneau();
+    }
     else if (a === "sauverFichier") sauverFichierProjet(P.prod);
     else if (a === "supprProjet") { if (confirm(`Supprimer le projet « ${titreProjet()} » ? Ses prises et la prod importée seront effacées de cet appareil.`)) supprimerProjet(P.prod).then(() => message("Projet supprimé")); }
     else if (a === "retirer") { if (confirm("Retirer ta prod importée et revenir à la version YouTube ?")) retirerFichier(); }
@@ -2606,6 +2737,7 @@ const STUDIO = (() => {
       if (c === "tonique" || c === "gamme" || c === "cle") { p.fx[k].cleChoisie = true; p.fx[k].clavier = ""; p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; } }
     else if (t.dataset.fxcase) { const [k, c] = t.dataset.fxcase.split("."); memoriser(); p.fx[k][c] = t.checked; }
     else if (t.dataset.act === "import") { importer(t.files[0]); return; }
+    else if (t.dataset.act === "netGraves") { const k = regionSel(); if (!k) return; memoriser(); const f = fxPrise(k.prise, true); f.net = { ...(f.net || { on: true, force: 50 }), graves: t.checked }; sauver(); planifierRendu(k.prise); return; }
     else if (t.dataset.act === "ouvrirFichier") { if (t.files[0]) ouvrirFichierProjet(t.files[0]); t.value = ""; return; }
     else return;
     p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver();
@@ -2972,41 +3104,200 @@ const STUDIO = (() => {
   }
   /* Le fichier commence a 0:00 de la prod : on le pose au debut de la prod dans n'importe
      quel logiciel et tout tombe en place, effets compris. La prod n'y est pas. */
-  async function exporter(){
-    if (!P || !P.clips.length) return;
-    const btn = $("dawExport"); btn.disabled = true; message("Export en cours…");
+  /* ─────────── Mix auto ───────────
+     Pour chaque piste : son role (lead, doublage/backs, ad-libs, intro), deduit du nom puis du
+     placement (une piste qui chante en meme temps que le lead le double) ; si la voix est
+     chantee ou rappee (part du temps passee sur des notes tenues) ; son timbre (boue, nasal,
+     presence, air, sifflantes) mesure sur ses prises. On part du preregle du role, puis on
+     corrige l'egaliseur, le de-esser et la compression d'apres ces mesures. Les volumes,
+     panoramiques et la prod importee sont ensuite equilibres. Tout s'annule d'un ⌘Z. */
+  async function analyserVoix(ks){
+    const N = 2048, sr = 44100, bandes = { boue: [200, 500], nasal: [800, 1500], corps: [1000, 4000], pres: [2000, 5000], sif: [5000, 9000], air: [9000, 15000], bas: [80, 200] };
+    const E = Object.fromEntries(Object.keys(bandes).map(b => [b, 0])), re = new Float32Array(N), im = new Float32Array(N);
+    let trames = 0, pics = [], somme = 0, nb = 0;
+    for (const k of ks) {
+      const b = bufDe(k.prise); if (!b) continue;
+      const d = b.getChannelData(0), hz = b.sampleRate / N, a0 = Math.floor(k.offset * b.sampleRate), a1 = Math.min(d.length, Math.floor((k.offset + k.dur) * b.sampleRate));
+      for (let o = a0; o + N <= a1 && trames < 900; o += N) {
+        let e = 0, pk = 0; for (let i = 0; i < N; i++) { const v = d[o + i]; e += v * v; if (Math.abs(v) > pk) pk = Math.abs(v); }
+        const rms = Math.sqrt(e / N); if (rms < .006) continue;   // sous -45 dBFS : silence
+        for (let i = 0; i < N; i++) { re[i] = d[o + i] * (.5 - .5 * Math.cos(2 * Math.PI * i / N)); im[i] = 0; }
+        fft(re, im, false);
+        for (const [nom, [f0, f1]] of Object.entries(bandes)) { let z = 0; for (let j = Math.floor(f0 / hz); j < Math.min(N / 2, Math.ceil(f1 / hz)); j++) z += re[j] * re[j] + im[j] * im[j]; E[nom] += z; }
+        trames++; pics.push(pk / rms); somme += e; nb += N;
+        if (trames % 150 === 0) await new Promise(r => setTimeout(r, 0));
+      }
+    }
+    if (!trames) return null;
+    const db = (a, b) => 10 * Math.log10(Math.max(E[a], 1e-12) / Math.max(E[b], 1e-12));
+    pics.sort((x, y) => x - y);
+    // chantee ? part du temps actif passee sur des notes de plus de 150 ms
+    let chante = 0;
+    try { const an = await analyserHauteur(ks[0].prise); if (an) { const tn = an.notes.filter(n => (n.b - n.a) * an.hop / an.sr > .15).reduce((s2, n) => s2 + (n.b - n.a), 0), ta = an.m.reduce((s2, v) => s2 + (v ? 1 : 0), 0); chante = ta ? tn / ta : 0; } } catch (e) {}
+    return { boue: db("boue", "corps"), nasal: db("nasal", "corps"), pres: db("pres", "boue"), sif: db("sif", "corps"), air: db("air", "corps"), bas: db("bas", "corps"),
+      crete: 20 * Math.log10(pics[Math.floor(pics.length * .9)] || 4), rms: 10 * Math.log10(somme / nb), chante };
+  }
+  function roleDe(p, i, leadId){
+    const n = (p.nom || "").toLowerCase();
+    if (/back|chœur|choeur|ch\u0153ur|harmo|double|dbl/.test(n)) return "backs";
+    if (/ad.?lib|adlib|ambiance|cri|hook ?bg/.test(n)) return "adlibs";
+    if (/intro|outro|skit|parl/.test(n)) return "intro";
+    if (!leadId || p.id === leadId) return "lead";
+    // une piste generique qui chante en meme temps que le lead le double
+    const temps = id => P.clips.filter(k => k.piste === id).map(k => [k.start, k.start + k.dur]);
+    const lead = temps(leadId), moi = temps(p.id), dur = moi.reduce((a, [x, y]) => a + y - x, 0);
+    const commun = moi.reduce((a, [x, y]) => a + lead.reduce((b, [u, v]) => b + Math.max(0, Math.min(y, v) - Math.max(x, u)), 0), 0);
+    return dur && commun / dur > .5 ? "backs" : "lead";
+  }
+  async function mixAuto(){
+    if (!P || !P.clips.length) { message("Enregistre d'abord une prise : le mix auto règle les voix qui existent"); return; }
+    const btn = $("dawMixAuto"); btn.disabled = true; btn.classList.add("calcul"); message("Mix auto : écoute de tes voix…");
     try {
-      const dec = (P.decal || 0) / 1000, sr = 44100;
-      const avecProd = !!fichier && mixExport === "tout";
-      const fin = Math.max(...P.clips.map(k => k.start + k.dur - dec), avecProd ? (P.beatStart || 0) + fichier.buf.duration : 0) + 2.6;
-      const oc = new OfflineAudioContext(2, Math.ceil(sr * fin), sr), b = bus(oc), solo = soloActif();
-      if (P.pistes.some(p => pitchActif(p.fx))) await chargerAT(oc);
-      b.master.gain.value = P.master != null ? P.master : 1;
-      if (avecProd) {
-        const gp = oc.createGain(); gp.gain.value = volBeat() / 100; gp.connect(b.master);
-        const s = oc.createBufferSource(); s.buffer = fichier.buf; s.connect(gp);
-        const debut = P.beatStart || 0; s.start(Math.max(0, debut), Math.max(0, -debut));
+      const avant = instantane();
+      const avec = P.pistes.filter(p => P.clips.some(k => k.piste === p.id));
+      const lead = avec.find(p => !/back|ch.?ur|harmo|double|ad.?lib|intro|outro/i.test(p.nom || "")) || avec[0];
+      let cote = 1; const notes = [];
+      for (const [i, p] of avec.entries()) {
+        const role = roleDe(p, i, lead && lead.id), an = await analyserVoix(P.clips.filter(k => k.piste === p.id));
+        const chante = an && an.chante > .45;
+        const base = role === "lead" ? (chante ? "melodique" : "lead") : role === "backs" ? "backs" : role === "adlibs" ? "adlibs" : "intro";
+        appliquerPreset(p, base);
+        const f = p.fx;
+        // des backs chantes restent justes avec le lead
+        if (chante && role === "backs") Object.assign(f.autopitch, { on: true, type: "naturel", intensite: 50, cle: "auto", effet: "aucun" });
+        if (an) {
+          // egaliseur : on retire ce qui deborde, on rend ce qui manque (bornes douces)
+          if (an.boue > 4) Object.assign(f.eq, { mid: -Math.min(4.5, Math.round((an.boue - 2) * 2) / 4), midF: 350, midQ: 1.2 });
+          else if (an.nasal > 1) Object.assign(f.eq, { mid: -Math.min(3.5, Math.round((an.nasal + 1) * 2) / 4), midF: 1000, midQ: 1.4 });
+          else if (an.pres < -12) Object.assign(f.eq, { mid: Math.min(3, Math.round(-(an.pres + 12) * 2) / 4 + 1), midF: 3000, midQ: .9 });
+          if (an.air < -24) f.eq.haut = Math.min(4.5, (f.eq.haut || 0) + 1.5); else if (an.air > -12) f.eq.haut = Math.max(0, (f.eq.haut || 0) - 1.5);
+          if (an.bas > 2 && f.hpf) f.hpf.freq = Math.max(f.hpf.freq, 120);
+          f.eq.on = true;
+          // sifflantes : de-esser plus ferme si elles depassent
+          if (f.deesser) { f.deesser.on = true; f.deesser.portee = an.sif > -6 ? 10 : an.sif > -10 ? 8 : 6; f.deesser.seuil = an.sif > -6 ? -34 : -30; }
+          // dynamique : une voix tres irreguliere est un peu plus tenue
+          if (f.comp && f.comp.on && an.crete > 13) { f.comp.ratio = Math.min(6, f.comp.ratio + 1); f.comp.gain = Math.min(12, f.comp.gain + 1); }
+        }
+        // place dans le mix
+        p.vol = role === "lead" ? 1 : role === "backs" ? .62 : role === "adlibs" ? .66 : .85;
+        p.pan = role === "backs" ? .35 * cote : role === "adlibs" ? .5 * cote : 0;
+        if (role === "backs" || role === "adlibs") cote = -cote;
+        p.mute = false; p.preset = "perso"; p.mixAuto = true;
+        notes.push(`${p.nom} : ${{ lead: chante ? "lead chanté" : "lead rap", backs: "backs", adlibs: "ad-libs", intro: "intro" }[role]}`);
       }
-      const ns = new Map(P.pistes.map(p => { const n = chaine(oc, b); regler(n, p, solo); return [p.id, n]; }));
-      for (const k of P.clips) {
-        const n = ns.get(k.piste), buf = bufDe(k.prise), pi = P.pistes.find(x => x.id === k.piste); if (!n || !buf) continue;
-        const debut = k.start - dec - (pi ? avanceAT(pi) : 0), dans = Math.max(0, -debut), when = Math.max(0, debut);
-        if (dans >= k.dur) continue;
-        const s = oc.createBufferSource(); s.buffer = buf;
-        const g = oc.createGain(); s.connect(g); g.connect(n.entree);
-        enveloppe(g.gain, k, when, dans);
-        s.start(when, k.offset + dans, k.dur - dans);
+      // la prod importee : son niveau sur celui des voix (une voix devant, la prod juste dessous)
+      if (fichier) { let z = 0, n = 0; for (let c = 0; c < fichier.buf.numberOfChannels; c++) { const d = fichier.buf.getChannelData(c); for (let i = 0; i < d.length; i += 8) { z += d[i] * d[i]; n++; } }
+        const db = 10 * Math.log10(z / Math.max(1, n)); P.beatVol = Math.round(Math.max(35, Math.min(100, 100 * Math.pow(10, (-17 - db) / 20)))); appliquer("projet.beatVol", P.beatVol); }
+      memoriser(avant);
+      construireNoeuds(); dessiner(); panneau(); sauver();
+      message(`Mix auto · ${notes.join(" · ")}`);
+    } catch (e) { console.warn(e); message("Le mix auto n'a pas pu analyser les voix"); }
+    btn.classList.remove("calcul"); btn.disabled = !P || !P.clips.length;
+  }
+  /* Rendu hors ligne : toutes les pistes (ou celles de « seules »), avec ou sans la prod. */
+  async function rendreMix({ avecProd, seules = null, sansProdNiVoix = false } = {}){
+    const dec = (P.decal || 0) / 1000, sr = 44100;
+    const fin = Math.max(...P.clips.map(k => k.start + k.dur - dec), avecProd ? (P.beatStart || 0) + fichier.buf.duration : 0) + 2.6;
+    const oc = new OfflineAudioContext(2, Math.ceil(sr * fin), sr), b = bus(oc), solo = seules ? false : soloActif();
+    if (P.pistes.some(p => pitchActif(p.fx))) await chargerAT(oc);
+    b.master.gain.value = P.master != null ? P.master : 1;
+    if (avecProd) {
+      const gp = oc.createGain(); gp.gain.value = volBeat() / 100; gp.connect(b.master);
+      const s2 = oc.createBufferSource(); s2.buffer = fichier.buf; s2.connect(gp);
+      const debut = P.beatStart || 0; s2.start(Math.max(0, debut), Math.max(0, -debut));
+    }
+    const pistes = sansProdNiVoix ? [] : P.pistes.filter(p => !seules || seules.has(p.id));
+    const ns = new Map(pistes.map(p => { const n = chaine(oc, b); const q = seules ? { ...p, mute: false, solo: false } : p; regler(n, q, solo); return [p.id, n]; }));
+    for (const k of P.clips) {
+      const n = ns.get(k.piste), buf = bufDe(k.prise), pi = P.pistes.find(x => x.id === k.piste); if (!n || !buf) continue;
+      const debut = k.start - dec - (pi ? avanceAT(pi) : 0), dans = Math.max(0, -debut), when = Math.max(0, debut);
+      if (dans >= k.dur) continue;
+      const s2 = oc.createBufferSource(); s2.buffer = buf;
+      const g = oc.createGain(); s2.connect(g); g.connect(n.entree);
+      enveloppe(g.gain, k, when, dans);
+      s2.start(when, k.offset + dans, k.dur - dans);
+    }
+    const rendu = await oc.startRendering();
+    ns.forEach(n => { try { n.osc.stop(); } catch (e) {} });
+    return rendu;
+  }
+  /* Mastering : sonie integree (BS.1770, ponderation K et portes) ramenee a -14 LUFS, puis
+     limiteur a anticipation (5 ms) qui tient les crêtes sous -1 dBFS. */
+  async function sonie(buf){
+    const oc = new OfflineAudioContext(buf.numberOfChannels, buf.length, buf.sampleRate);
+    const s2 = oc.createBufferSource(); s2.buffer = buf;
+    const sh = oc.createBiquadFilter(); sh.type = "highshelf"; sh.frequency.value = 1681; sh.gain.value = 4;
+    const hp = oc.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 38; hp.Q.value = .5;
+    s2.connect(sh); sh.connect(hp); hp.connect(oc.destination); s2.start();
+    const k = await oc.startRendering(), sr = buf.sampleRate, bl = Math.round(.4 * sr), pas = Math.round(.1 * sr), blocs = [];
+    for (let o = 0; o + bl <= k.length; o += pas) { let z = 0; for (let c = 0; c < k.numberOfChannels; c++) { const d = k.getChannelData(c); for (let i = o; i < o + bl; i += 2) z += d[i] * d[i]; } blocs.push(z / (bl / 2)); }
+    const L = z => -.691 + 10 * Math.log10(Math.max(z, 1e-12));
+    const abs = blocs.filter(z => L(z) > -70); if (!abs.length) return -70;
+    const moy = abs.reduce((a, z) => a + z, 0) / abs.length, rel = abs.filter(z => L(z) > L(moy) - 10);
+    return L(rel.reduce((a, z) => a + z, 0) / Math.max(1, rel.length));
+  }
+  function limiter(buf, gain, plafond){
+    const sr = buf.sampleRate, n = buf.length, chs = [...Array(buf.numberOfChannels)].map((_, c) => buf.getChannelData(c));
+    const la = Math.round(.005 * sr), rel = 1 - Math.exp(-1 / (.08 * sr)), req = new Float32Array(n);
+    for (let i = 0; i < n; i++) { let p = 0; for (const d of chs) { const v = Math.abs(d[i] * gain); if (v > p) p = v; } req[i] = p > plafond ? plafond / p : 1; }
+    // minimum glissant sur la fenetre d'anticipation (file monotone), puis moyenne glissante : pas de clic
+    const mn = new Float32Array(n), q = []; let h = 0;
+    for (let i = 0; i < n + la; i++) {
+      if (i < n) { while (q.length > h && req[q[q.length - 1]] >= req[i]) q.pop(); q.push(i); }
+      const j = i - la; if (j < 0) continue;
+      while (q[h] < j - la) h++;
+      mn[j] = req[q[h]];
+    }
+    const g = new Float32Array(n); let som = la, prec = 1;
+    for (let i = 0; i < n; i++) { som += mn[i] - (i >= la ? mn[i - la] : 1); const lisse = Math.min(mn[i], som / la); prec = Math.min(lisse, prec + (1 - prec) * rel); g[i] = prec; }
+    for (const d of chs) for (let i = 0; i < n; i++) { const v = d[i] * gain * g[i]; d[i] = v > plafond ? plafond : v < -plafond ? -plafond : v; }
+  }
+  // archive ZIP sans compression (les WAV ne se compressent presque pas)
+  function zip(fichiers){
+    const T = zip.T || (zip.T = [...Array(256)].map((_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; }));
+    const crc = u => { let c = 0xFFFFFFFF; for (let i = 0; i < u.length; i++) c = T[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+    const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+    for (const f of fichiers) {
+      const nom = enc.encode(f.nom), c = crc(f.data), h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint32(14, c, true); h.setUint32(18, f.data.length, true); h.setUint32(22, f.data.length, true); h.setUint16(26, nom.length, true);
+      parts.push(new Uint8Array(h.buffer), nom, f.data);
+      const ce = new DataView(new ArrayBuffer(46));
+      ce.setUint32(0, 0x02014b50, true); ce.setUint16(4, 20, true); ce.setUint16(6, 20, true); ce.setUint16(8, 0x0800, true); ce.setUint32(16, c, true); ce.setUint32(20, f.data.length, true); ce.setUint32(24, f.data.length, true); ce.setUint16(28, nom.length, true); ce.setUint32(42, off, true);
+      central.push(new Uint8Array(ce.buffer), nom);
+      off += 30 + nom.length + f.data.length;
+    }
+    const tc = central.reduce((a, u) => a + u.length, 0), fin = new DataView(new ArrayBuffer(22));
+    fin.setUint32(0, 0x06054b50, true); fin.setUint16(8, fichiers.length, true); fin.setUint16(10, fichiers.length, true); fin.setUint32(12, tc, true); fin.setUint32(16, off, true);
+    return new Blob([...parts, ...central, new Uint8Array(fin.buffer)], { type: "application/zip" });
+  }
+  const telecharger = (blob, nom) => { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nom; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 15000); };
+  const propre = t => t.replace(/[\\/:*?"<>|]+/g, "").slice(0, 60).trim() || "piste";
+  /* Le fichier commence a 0:00 de la prod : on le pose au debut de la prod dans n'importe
+     quel logiciel et tout tombe en place, effets compris. */
+  async function exporter(mode = "mix"){
+    if (!P || !P.clips.length) return;
+    const btn = $("dawExport"); btn.disabled = true;
+    const titre = propre(estLibre() && fichier ? fichier.nom.replace(/\.[a-z0-9]+$/i, "") : prod.title);
+    try {
+      if (mode === "stems") {
+        const pistes = P.pistes.filter(p => P.clips.some(k => k.piste === p.id)), fichiers = [];
+        for (const [i, p] of pistes.entries()) {
+          message(`Export des pistes… ${i + 1}/${pistes.length}`);
+          const r = await rendreMix({ avecProd: false, seules: new Set([p.id]) });
+          fichiers.push({ nom: `${String(i + 1).padStart(2, "0")} - ${propre(p.nom)}.wav`, data: new Uint8Array(await wav(r).arrayBuffer()) });
+        }
+        if (fichier) { message("Export de la prod…"); const r = await rendreMix({ avecProd: true, sansProdNiVoix: true }); fichiers.push({ nom: "00 - Prod.wav", data: new Uint8Array(await wav(r).arrayBuffer()) }); }
+        telecharger(zip(fichiers), `Topline - ${titre} (pistes separees).zip`);
+        message(`Exporté : ${fichiers.length} pistes, calées sur 0:00 de la prod`);
+      } else {
+        message("Export en cours…");
+        const avecProd = !!fichier && mode === "mix", master = avecProd && $("dawMaster").checked;
+        const r = await rendreMix({ avecProd });
+        if (master) { message("Mastering…"); const l = await sonie(r); limiter(r, Math.pow(10, Math.max(-12, Math.min(18, -14 - l)) / 20), Math.pow(10, -1 / 20)); }
+        telecharger(wav(r), avecProd ? `Topline - ${titre} (voix + prod${master ? ", master" : ""}).wav` : `Topline - ${titre} (voix calee sur 0m00s de la prod).wav`);
+        message(avecProd ? (master ? "Exporté : mix masterisé, prêt pour les plateformes" : "Exporté : ta voix mixée avec la prod") : "Exporté : pose le fichier au tout début de la prod");
       }
-      const rendu = await oc.startRendering();
-      ns.forEach(n => { try { n.osc.stop(); } catch (e) {} });
-      const titre = (estLibre() && fichier ? fichier.nom.replace(/\.[a-z0-9]+$/i, "") : prod.title).replace(/[\\/:*?"<>|]+/g, "").slice(0, 60).trim();
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(wav(rendu));
-      a.download = avecProd ? `Topline - ${titre} (voix + prod).wav` : `Topline - ${titre} (voix calee sur 0m00s de la prod).wav`;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 8000);
-      message(avecProd ? "Exporté : ta voix mixée avec la prod" : "Exporté : pose le fichier au tout début de la prod");
-    } catch (e) { message("L'export a échoué"); }
+    } catch (e) { console.warn(e); message("L'export a échoué"); }
     btn.disabled = false;
   }
 
@@ -3069,7 +3360,14 @@ const STUDIO = (() => {
   $("dawAnnuler").onclick = annuler;
   $("dawRefaire").onclick = retablir;
   $("dawGrille").onclick = () => { grille = !grille; outils(); };
-  $("dawExport").onclick = exporter;
+  const menuExp = $("dawExpMenu");
+  const fermerExp = () => { menuExp.hidden = true; $("dawExport").setAttribute("aria-expanded", "false"); };
+  $("dawExport").onclick = e => { e.stopPropagation();
+    $("dawExpMixTxt").textContent = fichier ? "Voix + prod, en WAV" : "Importe ta prod pour l'avoir dans le mix (sinon : voix seule)";
+    $("dawMaster").disabled = !fichier; menuExp.hidden = !menuExp.hidden; $("dawExport").setAttribute("aria-expanded", String(!menuExp.hidden)); };
+  menuExp.addEventListener("click", e => { const b = e.target.closest("[data-exp]"); if (!b) return; fermerExp(); exporter(b.dataset.exp); });
+  document.addEventListener("click", e => { if (!menuExp.hidden && !e.target.closest(".daw-exp")) fermerExp(); });
+  $("dawMixAuto").onclick = mixAuto;
   $("dawFermer").onclick = fermer;
   $("dawZoom").addEventListener("input", e => {
     const t = tempsBeat(), avant = t * zoom - zone.scrollLeft;
