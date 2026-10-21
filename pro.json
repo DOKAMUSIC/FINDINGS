@@ -1,0 +1,13 @@
+{
+  "_aide": [
+    "FINDINGS Pro — les beatmakers qui paient. Ce fichier est lu à chaque construction du site (./publish.sh et le passage automatique).",
+    "contact : l'adresse (mailto:… ou https://…) du bouton « Nous contacter » de la page /pour-les-beatmakers/. Vide : le bouton indique que le contact arrive bientôt.",
+    "sponsorises : les prods mises en avant. prod = l'identifiant YouTube de la vidéo (ce qui suit v= dans l'adresse). du / au = dates AAAA-MM-JJ (incluses). ou = où l'afficher : accueil (bloc « À la une ») et/ou liste (en tête des listes et recherches qui lui correspondent). Toujours affichées avec la mention « Sponsorisé ».",
+    "beatmakers : les profils Pro, par nom exact du beatmaker tel qu'il apparaît sur FINDINGS. verifie = badge vérifié. bio = 400 caractères max. banniere = adresse https d'une image large (1500×500 conseillé). liens = instagram, tiktok, youtube, beatstars, boutique, site, email (adresses complètes ; email sans mailto:). jusqua = fin de l'abonnement (AAAA-MM-JJ), le profil redevient normal ensuite.",
+    "Exemple de prod sponsorisée : { \"prod\": \"dQw4w9WgXcQ\", \"du\": \"2026-11-01\", \"au\": \"2026-11-30\", \"ou\": [\"accueil\", \"liste\"] }",
+    "Exemple de profil : \"Nom du beatmaker\": { \"verifie\": true, \"bio\": \"…\", \"banniere\": \"https://…\", \"liens\": { \"instagram\": \"https://instagram.com/…\", \"beatstars\": \"https://…\", \"email\": \"contact@…\" }, \"jusqua\": \"2026-12-31\" }"
+  ],
+  "contact": "",
+  "sponsorises": [],
+  "beatmakers": {}
+}

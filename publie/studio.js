@@ -2394,7 +2394,7 @@ const STUDIO = (() => {
     const an = PITCH.get(k.prise);
     g.fillStyle = "#0B0D10"; g.fillRect(0, 0, W, H);
     if (!an) { if (!RENDU_EN_COURS.has("an:" + k.prise)) { RENDU_EN_COURS.add("an:" + k.prise); analyserHauteur(k.prise).finally(() => RENDU_EN_COURS.delete("an:" + k.prise)); }
-      g.fillStyle = "rgba(255,255,255,.55)"; g.font = "12px ui-monospace,Menlo,monospace"; g.textAlign = "center"; g.fillText("Analyse des notes de la prise…", W / 2, H / 2); g.textAlign = "left"; return; }
+      g.fillStyle = "rgba(255,255,255,.55)"; g.font = "12px ui-monospace,Menlo,monospace"; g.textAlign = "center"; g.fillText(typeof T === "function" ? T("Analyse des notes de la prise…") : "Analyse des notes de la prise…", W / 2, H / 2); g.textAlign = "left"; return; }
     const r = (P.prisesFx[k.prise] && P.prisesFx[k.prise].ret) || { decal: {}, aplanir: 0 };
     const tf = i => (i * an.hop + an.dec) / an.sr;                   // temps (dans la prise) d'une trame
     const i0 = Math.max(0, Math.floor((k.offset * an.sr - an.dec) / an.hop)), i1 = Math.min(an.m.length, Math.ceil(((k.offset + k.dur) * an.sr - an.dec) / an.hop));
@@ -2437,7 +2437,8 @@ const STUDIO = (() => {
     if (t > k.offset && t < k.offset + k.dur) { const x = X(t); g.strokeStyle = "rgba(255,255,255,.75)"; g.lineWidth = 1; g.beginPath(); g.moveTo(x + .5, 0); g.lineTo(x + .5, H); g.stroke(); }
     const enCours = RENDU_EN_COURS.has(k.prise) || planifies.has(k.prise) && SIGN.get(k.prise) !== signature(k.prise);
     g.fillStyle = "rgba(255,255,255,.5)"; g.font = "9.5px ui-monospace,Menlo,monospace"; g.textAlign = "right";
-    g.fillText(enCours ? "calcul de la prise…" : `${notes.length} note${notes.length > 1 ? "s" : ""}`, W - 8, H - 7); g.textAlign = "left";
+    const tx = enCours ? "calcul de la prise…" : `${notes.length} note${notes.length > 1 ? "s" : ""}`;
+    g.fillText(typeof T === "function" ? T(tx) : tx, W - 8, H - 7); g.textAlign = "left";
   }
   const zoneGraphe = (cv, e) => { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
     return { x, y, z: grZones.find(z => x >= z.x0 - 2 && x <= z.x1 + 2 && Math.abs(y - z.y) <= Math.max(7, z.h / 2 + 3)) }; };

@@ -54,6 +54,29 @@ Object.keys(nProd).filter(p => nProd[p] >= MIN_PRODS_BEATMAKER).sort().forEach(p
   while (SLUG_PROD.has(k)) k = `${s}-${i++}`;
   SLUG_PROD.set(k, p); PROD_SLUG.set(p, k);
 });
+/* FINDINGS Pro (pro.json) : prods sponsorisees et profils Pro des beatmakers. Les entrees
+   expirees ou qui ne correspondent a rien dans le catalogue sont ecartees, avec un avertissement. */
+const PRO = (() => {
+  const f = path.resolve(DIR, arg("pro", "pro.json")), vide = { contact: "", sponsorises: [], beatmakers: {} };
+  if (!fs.existsSync(f)) return vide;
+  let o; try { o = JSON.parse(fs.readFileSync(f, "utf8")); } catch (e) { console.warn(`pro.json illisible (${e.message}) : ignore`); return vide; }
+  const auj = new Date().toISOString().slice(0, 10), date = d => /^\d{4}-\d{2}-\d{2}$/.test(d || "") ? d : null;
+  const url = u => typeof u === "string" && /^(https:\/\/|mailto:)/.test(u.trim()) ? u.trim() : null;
+  const ids = new Set(BEATS.map(b => b.id)), noms = new Set(BEATS.map(b => b.prod));
+  const sponsorises = (Array.isArray(o.sponsorises) ? o.sponsorises : []).filter(x => {
+    if (!x || !ids.has(x.prod)) { console.warn(`pro.json : prod sponsorisee inconnue (${x && x.prod})`); return false; }
+    return !(date(x.au) && date(x.au) < auj);
+  }).map(x => ({ id: x.prod, du: date(x.du), au: date(x.au), ou: (Array.isArray(x.ou) && x.ou.length ? x.ou : ["accueil", "liste"]).filter(k => k === "accueil" || k === "liste") }));
+  const beatmakers = {};
+  for (const [nom, b] of Object.entries(o.beatmakers || {})) {
+    if (!noms.has(nom)) { console.warn(`pro.json : beatmaker inconnu (${nom})`); continue; }
+    if (!b || (date(b.jusqua) && date(b.jusqua) < auj)) continue;
+    const liens = {};
+    for (const [k, v] of Object.entries(b.liens || {})) { if (k === "email" && /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(String(v).trim())) liens.email = String(v).trim(); else if (url(v)) liens[k] = url(v); }
+    beatmakers[nom] = { verifie: !!b.verifie, bio: String(b.bio || "").trim().slice(0, 400), banniere: url(b.banniere) && url(b.banniere).startsWith("https://") ? url(b.banniere) : "", liens, jusqua: date(b.jusqua) };
+  }
+  return { contact: url(o.contact) || "", sponsorises, beatmakers };
+})();
 const CHAN_DE = new Map(); BEATS.forEach(b => { if (b.chan && !CHAN_DE.has(b.prod)) CHAN_DE.set(b.prod, b.chan); });
 // les mieux classees d'abord, comme la « pertinence » de l'application (vues, fraicheur)
 const jours = d => d ? (Date.now() - new Date(d + "T12:00:00Z")) / 864e5 : 999;
@@ -116,6 +139,9 @@ ${ld.map(o => `<script type="application/ld+json">${json(o)}</script>`).join("\n
   } else if (vue === "studio") {
     h = h.replace('<div id="vueAccueil">', '<div id="vueAccueil" hidden>').replace('<div id="vueStudio" hidden>', '<div id="vueStudio">');
     h = h.replace("<body>", '<body class="vue-studio">');
+  } else if (vue === "offre") {
+    h = h.replace('<div id="vueAccueil">', '<div id="vueAccueil" hidden>').replace('<div id="vueOffre" hidden>', '<div id="vueOffre">');
+    h = h.replace("<body>", '<body class="vue-offre">');
   }
   return h.replace("<!--SEO:PRE-->", pre).replace("<!--SEO:PIED-->", pied || PIED.fr);
 }
@@ -151,7 +177,7 @@ const PIED = Object.fromEntries(LANGUES.map(lg => {
 
 /* ─────────── ecrire ─────────── */
 fs.mkdirSync(OUT, { recursive: true });
-for (const d of ["artiste", "style", "beatmaker", "studio", "en", "es"]) fs.rmSync(path.join(OUT, d), { recursive: true, force: true });
+for (const d of ["artiste", "style", "beatmaker", "studio", "pour-les-beatmakers", "en", "es"]) fs.rmSync(path.join(OUT, d), { recursive: true, force: true });
 const ecrire = (chemin, contenu) => { const f = path.join(OUT, chemin); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, contenu); };
 const urls = [];
 const ajouter = (chemin, html, prio = .6) => { ecrire(chemin ? chemin + "index.html" : "index.html", html); urls.push([chemin, prio]); };
@@ -162,7 +188,9 @@ const TX = {
     accTitre: "FINDINGS : type beats à écouter et studio pour poser ta topline",
     accDesc: (n, st) => `${n} type beats récents à écouter direct (rap FR, drill, afro, reggaeton… ${st} styles), triés par artiste, style, mood et tempo. Et un studio gratuit pour poser ta topline dessus.`,
     stuTitre: "Studio en ligne gratuit : pose ta topline sur une prod | FINDINGS",
-    stuDesc: "Enregistre ta voix sur une prod du site ou sur la tienne, coupe, déplace, ajoute réverb et écho, puis exporte en WAV. Gratuit, dans le navigateur, sans compte.",
+    stuDesc: "Enregistre ta voix sur une prod du site ou sur la tienne, corrige la justesse (Auto-Pitch, Tune Pro), nettoie le bruit, mixe en un clic et exporte en WAV. Gratuit, dans le navigateur, sans compte.",
+    offTitre: "Pour les beatmakers : mets tes prods en avant sur FINDINGS", offFil: "Pour les beatmakers",
+    offDesc: (n, bm) => `FINDINGS range ${n} type beats de ${bm} beatmakers par artiste, style et mood. Mets ta prod en tête de l'accueil et des recherches, et donne à ta page un profil Pro : bannière, bio, badge vérifié, liens vers ta boutique.`,
     os: "Navigateur web", studio: "Studio",
     artiste: "Artiste", artistes: "Artistes", style: "Style", styles: "Styles", beatmakers: "Beatmakers",
     artP: (nom, n, bm, st) => `Les ${n} meilleurs type beats ${nom} du moment, par ${bm} beatmakers : des prods récentes (${st}) à écouter direct, triées par tempo, mood et tonalité. Pose ta topline dessus dans le studio.`,
@@ -181,7 +209,9 @@ const TX = {
     accTitre: "FINDINGS: type beats to listen to, and a free studio to record your topline",
     accDesc: (n, st) => `${n} recent type beats to listen to right away (French rap, drill, afro, reggaeton… ${st} styles), sorted by artist, style, mood and tempo. Plus a free studio to record your topline on them.`,
     stuTitre: "Free online studio: record your topline on a beat | FINDINGS",
-    stuDesc: "Record your voice on a beat from the site or on your own, cut, move, add reverb and echo, then export as WAV. Free, in your browser, no account.",
+    stuDesc: "Record your voice on a beat from the site or on your own, fix the pitch (Auto-Pitch, Tune Pro), clean the noise, mix in one click and export as WAV. Free, in your browser, no account.",
+    offTitre: "For beatmakers: put your beats in the spotlight on FINDINGS", offFil: "For beatmakers",
+    offDesc: (n, bm) => `FINDINGS sorts ${n} type beats from ${bm} beatmakers by artist, style and mood. Put your beat at the top of the home page and searches, and give your page a Pro profile: banner, bio, verified badge, links to your store.`,
     os: "Web browser", studio: "Studio",
     artiste: "Artist", artistes: "Artists", style: "Style", styles: "Styles", beatmakers: "Beatmakers",
     artP: (nom, n, bm, st) => `The ${n} best ${nom} type beats right now, by ${bm} beatmakers: recent beats (${st}) to listen to right away, sorted by tempo, mood and key. Record your topline on them in the studio.`,
@@ -200,7 +230,9 @@ const TX = {
     accTitre: "FINDINGS: type beats para escuchar y un estudio gratis para grabar tu topline",
     accDesc: (n, st) => `${n} type beats recientes para escuchar al instante (rap francés, drill, afro, reggaeton… ${st} estilos), ordenados por artista, estilo, mood y tempo. Y un estudio gratis para grabar tu topline encima.`,
     stuTitre: "Estudio online gratis: graba tu topline sobre un beat | FINDINGS",
-    stuDesc: "Graba tu voz sobre un beat del sitio o sobre el tuyo, corta, mueve, añade reverb y eco y exporta en WAV. Gratis, en el navegador, sin cuenta.",
+    stuDesc: "Graba tu voz sobre un beat del sitio o sobre el tuyo, corrige la afinación (Auto-Pitch, Tune Pro), limpia el ruido, mezcla en un clic y exporta en WAV. Gratis, en el navegador, sin cuenta.",
+    offTitre: "Para beatmakers: destaca tus beats en FINDINGS", offFil: "Para beatmakers",
+    offDesc: (n, bm) => `FINDINGS ordena ${n} type beats de ${bm} beatmakers por artista, estilo y mood. Pon tu beat arriba del inicio y de las búsquedas, y dale a tu página un perfil Pro: banner, bio, insignia verificada, enlaces a tu tienda.`,
     os: "Navegador web", studio: "Estudio",
     artiste: "Artista", artistes: "Artistas", style: "Estilo", styles: "Estilos", beatmakers: "Beatmakers",
     artP: (nom, n, bm, st) => `Los ${n} mejores type beats de ${nom} del momento, de ${bm} beatmakers: beats recientes (${st}) para escuchar al instante, ordenados por tempo, mood y tonalidad. Graba tu topline encima en el estudio.`,
@@ -233,6 +265,10 @@ for (const lg of LANGUES) {
   // studio
   mettre("studio/", page({ chemin: "studio/", vue: "studio", titre: t.stuTitre, description: t.stuDesc,
     ld: [{ "@context": "https://schema.org", "@type": "WebApplication", name: "Studio FINDINGS", url: S + "studio/", inLanguage: lg, applicationCategory: "MultimediaApplication", operatingSystem: t.os, offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" } }, fil([t.studio, S + "studio/"])] }), .8);
+
+  // l'offre aux beatmakers
+  mettre("pour-les-beatmakers/", page({ chemin: "pour-les-beatmakers/", vue: "offre", titre: t.offTitre, description: t.offDesc(BEATS.length, SLUG_PROD.size),
+    ld: [fil([t.offFil, S + "pour-les-beatmakers/"])] }), .6);
 
   // artistes
   for (const id of artistesTries) {
@@ -273,16 +309,17 @@ for (const lg of LANGUES) {
     const c = CHANS[CHAN_DE.get(nomP)] || {}, nom = c.n || nomP;
     const vises = [...new Set(l.flatMap(b => b.artists || []))].filter(a => ARTIST_NAME[a]).slice(0, 6);
     const styles = [...new Set(l.map(b => nomStyle(b.style, lg)))].slice(0, 3).join(", ");
-    const vNoms = vises.map(a => ARTIST_NAME[a]).join(", ");
+    const vNoms = vises.map(a => ARTIST_NAME[a]).join(", "), pro = PRO.beatmakers[nomP];
     const pre = `<section class="seo-pre" id="seoPre">
   <span class="eyebrow">Beatmaker</span>
   <h1>${esc(nom)}</h1>
+  ${pro && pro.bio ? `<p>${esc(pro.bio)}</p>` : ""}
   <p>${esc(t.bmP(nom, l.length, c.s, styles, vNoms))}</p>
   ${liste(l, 40, lg)}
   <nav aria-label="${t.bmNav}">${vises.map(a => `<a href="artiste/${encodeURIComponent(a)}/">${esc(ARTIST_NAME[a])} type beat</a>`).join("")}</nav>
 </section>`;
-    mettre(chemin, page({ chemin, vue: "prods", pre, image: c.a,
-      titre: t.bmTitre(nom, l.length), description: t.bmDesc(nom, l.length, styles, vNoms),
+    mettre(chemin, page({ chemin, vue: "prods", pre, image: (pro && pro.banniere) || c.a,
+      titre: t.bmTitre(nom, l.length), description: pro && pro.bio ? pro.bio.slice(0, 160) : t.bmDesc(nom, l.length, styles, vNoms),
       ld: [ldListe(nom, S + chemin, l), fil([t.beatmakers, S], [nom, S + chemin])] }), .5);
   }
 }
@@ -317,7 +354,7 @@ ecrire("app.js", appJs);
   fs.writeFileSync(path.join(OUT, "chans.js"), chansTxt);
   const petit = { v: 1, updatedAt: CAT.updatedAt, lastRun: CAT.lastRun, styles: CAT.styles, maxAgeMonths: CAT.maxAgeMonths, artists: CAT.artists,
     artistMaxAgeMonths: CAT.artistMaxAgeMonths, artistMin: CAT.artistMin, artistInfo: CAT.artistInfo, exclus: CAT.exclus,
-    chansUrl: `chans.js?v=${empreinte(chansTxt)}`, moodsL: MOODS, estL: EST, cles: CLES, sty: STY, prods, rows };
+    chansUrl: `chans.js?v=${empreinte(chansTxt)}`, moodsL: MOODS, estL: EST, cles: CLES, sty: STY, prods, rows, pro: PRO };
   fs.writeFileSync(path.join(OUT, "catalog.js"), `window.FINDINGS_CATALOG_C=${json(petit)};\n`);
 }
 fs.writeFileSync(path.join(OUT, "studio.js"), studioJs);
