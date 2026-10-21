@@ -61,6 +61,145 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "Choisis une prod du site ou importe la tienne, enregistre ta voix, corrige la justesse, nettoie, mixe en un clic et exporte. Gratuit, dans le navigateur, et tes projets restent sur ton appareil.": ["Pick a beat from the site or import your own, record your voice, fix the pitch, clean it, mix in one click and export. Free, in your browser, and your projects stay on your device.", "Elige un beat del sitio o importa el tuyo, graba tu voz, corrige la afinación, límpiala, mezcla en un clic y exporta. Gratis, en el navegador, y tus proyectos se quedan en tu dispositivo."],
+    "Auto-Pitch et Tune Pro": ["Auto-Pitch and Tune Pro", "Auto-Pitch y Tune Pro"],
+    "La justesse en un geste, ou note par note dans le mode graphique.": ["Pitch correction in one move, or note by note in graph mode.", "La afinación en un gesto, o nota a nota en el modo gráfico."],
+    "Un clic : chaque voix réglée sur la prod, lead, backs et ad-libs.": ["One click: every vocal set against the beat, lead, backs and ad-libs.", "Un clic: cada voz ajustada al beat, lead, coros y ad-libs."],
+    "Souffle, ventilation et bruit de la pièce retirés.": ["Hiss, fans and room noise removed.", "Soplido, ventilación y ruido de la habitación eliminados."],
+    "Effets de studio": ["Studio effects", "Efectos de estudio"],
+    "Égaliseur, compresseur, de-esser, réverb, écho, limiteur.": ["EQ, compressor, de-esser, reverb, echo, limiter.", "Ecualizador, compresor, de-esser, reverb, eco, limitador."],
+    "Export pro": ["Pro export", "Exportación pro"],
+    "WAV, pistes séparées, mastering au niveau des plateformes.": ["WAV, separate tracks, mastering at streaming level.", "WAV, pistas separadas, mastering al nivel de las plataformas."],
+    "Enregistre ta voix direct sur la prod, corrige la justesse avec Auto-Pitch ou Tune Pro, nettoie le bruit et lance le mix auto. Tu peux aussi importer ta propre prod. Gratuit, sans compte.": ["Record your voice right on the beat, fix the pitch with Auto-Pitch or Tune Pro, clean the noise and run the auto mix. You can also import your own beat. Free, no account.", "Graba tu voz directamente sobre el beat, corrige la afinación con Auto-Pitch o Tune Pro, limpia el ruido y lanza la mezcla auto. También puedes importar tu propio beat. Gratis, sin cuenta."],
+    "Pour les beatmakers : mets tes prods en avant sur FINDINGS": ["For beatmakers: put your beats in the spotlight on FINDINGS", "Para beatmakers: destaca tus beats en FINDINGS"],
+    "À la une": ["Featured", "Destacados"],
+    "Des prods mises en avant par leurs beatmakers.": ["Beats promoted by their beatmakers.", "Beats destacados por sus beatmakers."],
+    "Mettre ta prod ici →": ["Put your beat here →", "Pon tu beat aquí →"],
+    "Sponsorisé": ["Sponsored", "Patrocinado"],
+    "Mise en avant payée par le beatmaker": ["Promotion paid for by the beatmaker", "Promoción pagada por el beatmaker"],
+    "Vérifié": ["Verified", "Verificado"],
+    "Beatmaker Pro": ["Pro beatmaker", "Beatmaker Pro"],
+    "Passe ton profil en Pro →": ["Upgrade to a Pro profile →", "Pasa tu perfil a Pro →"],
+    "Boutique ↗": ["Store ↗", "Tienda ↗"],
+    "Site ↗": ["Website ↗", "Web ↗"],
+    "Contact ↗": ["Contact ↗", "Contacto ↗"],
+    "Beatmakers": ["Beatmakers", "Beatmakers"],
+    "Mettre ta prod en avant": ["Promote your beat", "Destaca tu beat"],
+    "Profil Pro": ["Pro profile", "Perfil Pro"],
+    "FINDINGS pour les beatmakers": ["FINDINGS for beatmakers", "FINDINGS para beatmakers"],
+    "Fais écouter tes prods aux artistes qui cherchent.": ["Get your beats heard by the artists who are looking.", "Haz que tus beats lleguen a los artistas que buscan."],
+    "Sur FINDINGS, les rappeurs et les chanteurs trouvent leurs type beats par artiste, style, mood et tempo, puis posent leur voix dessus dans le studio. Chaque écoute passe par ta vidéo YouTube, et chaque clic « Acheter » mène à ta boutique.": ["On FINDINGS, rappers and singers find their type beats by artist, style, mood and tempo, then record their vocals on them in the studio. Every play goes through your YouTube video, and every “Buy” click leads to your store.", "En FINDINGS, raperos y cantantes encuentran sus type beats por artista, estilo, mood y tempo, y luego graban su voz encima en el estudio. Cada escucha pasa por tu vídeo de YouTube y cada clic en «Comprar» lleva a tu tienda."],
+    "Nous contacter": ["Contact us", "Contáctanos"],
+    "Contact bientôt ouvert": ["Contact opening soon", "Contacto disponible pronto"],
+    "Voir les offres": ["See the offers", "Ver las ofertas"],
+    "type beats": ["type beats", "type beats"],
+    "langues": ["languages", "idiomas"],
+    "Mise en avant": ["Spotlight", "Destacado"],
+    "Ta prod en tête de l'accueil, dans « À la une », et en haut des listes quand elle correspond à ce que l'artiste cherche.": ["Your beat at the top of the home page, in “Featured”, and at the top of lists when it matches what the artist is looking for.", "Tu beat arriba del inicio, en «Destacados», y arriba de las listas cuando encaja con lo que busca el artista."],
+    "Le bloc « À la une », en haut de l'accueil": ["The “Featured” block, at the top of the home page", "El bloque «Destacados», arriba del inicio"],
+    "En tête des recherches et des filtres qui lui correspondent : style, mood, tempo, artiste": ["At the top of the searches and filters it matches: style, mood, tempo, artist", "Arriba de las búsquedas y filtros que le corresponden: estilo, mood, tempo, artista"],
+    "La durée que tu choisis": ["For as long as you choose", "Durante el tiempo que elijas"],
+    "Toujours signalée « Sponsorisé » : les artistes savent ce qu'ils écoutent": ["Always labelled “Sponsored”: artists know what they're listening to", "Siempre marcado «Patrocinado»: los artistas saben lo que escuchan"],
+    "Ta page beatmaker à ton image, et ton nom reconnaissable partout sur le site.": ["Your beatmaker page, your way, and your name recognisable across the site.", "Tu página de beatmaker a tu imagen, y tu nombre reconocible en todo el sitio."],
+    "Ta bannière et ta bio": ["Your banner and bio", "Tu banner y tu bio"],
+    "Le badge vérifié à côté de ton nom, sur chacune de tes prods": ["The verified badge next to your name, on every one of your beats", "La insignia verificada junto a tu nombre, en cada uno de tus beats"],
+    "Les liens vers ta boutique, ton Instagram, ton TikTok, ton contact": ["Links to your store, your Instagram, your TikTok, your contact", "Enlaces a tu tienda, tu Instagram, tu TikTok, tu contacto"],
+    "Une page à mettre dans ta bio, en français, en anglais et en espagnol": ["A page to put in your bio, in French, English and Spanish", "Una página para poner en tu bio, en francés, inglés y español"],
+    "Ton nom": ["Your name", "Tu nombre"],
+    "Comment ça marche": ["How it works", "Cómo funciona"],
+    "Écris-nous": ["Write to us", "Escríbenos"],
+    "Dis-nous quelle prod tu veux mettre en avant, ou envoie ta bannière, ta bio et tes liens.": ["Tell us which beat you want to promote, or send your banner, bio and links.", "Dinos qué beat quieres destacar, o envía tu banner, tu bio y tus enlaces."],
+    "On cale ensemble": ["We set it up together", "Lo cerramos juntos"],
+    "Les emplacements, la durée et le tarif.": ["The placements, the duration and the price.", "Los espacios, la duración y la tarifa."],
+    "C'est en ligne": ["It goes live", "Se publica"],
+    "Ta prod ou ton profil Pro apparaît sur FINDINGS, dans les trois langues du site.": ["Your beat or your Pro profile appears on FINDINGS, in all three languages of the site.", "Tu beat o tu perfil Pro aparece en FINDINGS, en los tres idiomas del sitio."],
+    "Tes prods sont peut-être déjà là": ["Your beats may already be here", "Puede que tus beats ya estén aquí"],
+    "FINDINGS ajoute tout seul les type beats récents publiés sur YouTube. Cherche ton nom de beatmaker :": ["FINDINGS automatically adds recent type beats published on YouTube. Search for your beatmaker name:", "FINDINGS añade solo los type beats recientes publicados en YouTube. Busca tu nombre de beatmaker:"],
+    "Ton nom de beatmaker": ["Your beatmaker name", "Tu nombre de beatmaker"],
+    "Chercher ton nom de beatmaker": ["Search for your beatmaker name", "Busca tu nombre de beatmaker"],
+    "Pas encore de prods à ce nom. Publie un type beat sur YouTube (« … type beat » dans le titre) : il arrivera au prochain passage.": ["No beats under this name yet. Publish a type beat on YouTube (“… type beat” in the title): it will arrive on the next pass.", "Todavía no hay beats con este nombre. Publica un type beat en YouTube («… type beat» en el título): llegará en la próxima pasada."],
+    "Questions": ["Questions", "Preguntas"],
+    "FINDINGS héberge-t-il mes fichiers ?": ["Does FINDINGS host my files?", "¿FINDINGS aloja mis archivos?"],
+    "Non. Chaque prod est lue depuis ta vidéo YouTube publique : les vues comptent chez toi, et le bouton « Acheter » renvoie vers le lien d'achat de ta description.": ["No. Every beat is played from your public YouTube video: the views count on your channel, and the “Buy” button points to the purchase link in your description.", "No. Cada beat se reproduce desde tu vídeo público de YouTube: las vistas cuentan en tu canal, y el botón «Comprar» lleva al enlace de compra de tu descripción."],
+    "Comment mes prods arrivent-elles sur FINDINGS ?": ["How do my beats get onto FINDINGS?", "¿Cómo llegan mis beats a FINDINGS?"],
+    "Une recherche automatique ajoute les type beats récents publiés sur YouTube, tous les deux jours. Tu n'as rien à faire pour y être.": ["An automatic search adds recent type beats published on YouTube, every two days. You don't need to do anything to be listed.", "Una búsqueda automática añade los type beats recientes publicados en YouTube, cada dos días. No tienes que hacer nada para aparecer."],
+    "Que voient les artistes sur une prod sponsorisée ?": ["What do artists see on a sponsored beat?", "¿Qué ven los artistas en un beat patrocinado?"],
+    "La même ligne que les autres, en tête, avec la mention « Sponsorisé ». Ils l'écoutent, la likent, posent leur topline dessus ou l'achètent comme n'importe quelle prod.": ["The same row as the others, at the top, with the “Sponsored” label. They play it, like it, record their topline on it or buy it like any other beat.", "La misma fila que las demás, arriba, con la mención «Patrocinado». La escuchan, le dan like, graban su topline encima o la compran como cualquier otro beat."],
+    "Je veux retirer mes prods de FINDINGS.": ["I want my beats removed from FINDINGS.", "Quiero retirar mis beats de FINDINGS."],
+    "Écris-nous avec le nom de ta chaîne : on les retire.": ["Write to us with your channel name: we'll remove them.", "Escríbenos con el nombre de tu canal: los retiramos."],
+    "Justesse auto": ["Auto pitch", "Afinación auto"],
+    "Naturel": ["Natural", "Natural"],
+    "Marqué": ["Strong", "Marcado"],
+    "Robot": ["Robot", "Robot"],
+    "Intensité": ["Amount", "Intensidad"],
+    "Effet": ["Effect", "Efecto"],
+    "Aucun": ["None", "Ninguno"],
+    "Octave grave": ["Octave down", "Octava grave"],
+    "Octave aiguë": ["Octave up", "Octava aguda"],
+    "Autotune": ["Autotune", "Autotune"],
+    "Auto": ["Auto", "Auto"],
+    "Avancé": ["Advanced", "Avanzado"],
+    "Graphique": ["Graph", "Gráfico"],
+    "Notes visées": ["Target notes", "Notas objetivo"],
+    "Vibrato": ["Vibrato", "Vibrato"],
+    "Voix": ["Voice", "Voz"],
+    "Ajouté": ["Added", "Añadido"],
+    "Délai": ["Delay", "Retardo"],
+    "Timbre": ["Timbre", "Timbre"],
+    "Aplanir": ["Flatten", "Aplanar"],
+    "Caler sur la gamme": ["Snap to scale", "Ajustar a la escala"],
+    "Tout remettre": ["Reset all", "Restablecer todo"],
+    "Pose chaque note sur la note juste la plus proche de la gamme": ["Moves each note to the nearest in-tune note of the scale", "Coloca cada nota en la nota afinada más cercana de la escala"],
+    "Glisse une note vers le haut ou le bas ·": ["Drag a note up or down ·", "Arrastra una nota arriba o abajo ·"],
+    ": au centième près ·": [": to the cent ·", ": al céntimo ·"],
+    ": la remettre ·": [": reset it ·", ": restablecerla ·"],
+    "les retouches sont gravées dans la prise": ["edits are rendered into the take", "los retoques se graban en la toma"],
+    "double-clic": ["double-click", "doble clic"],
+    "Enregistre ou importe une prise sur cette piste : ses notes s'afficheront ici, et tu pourras les déplacer une par une.": ["Record or import a take on this track: its notes will show here, and you can move them one by one.", "Graba o importa una toma en esta pista: sus notas aparecerán aquí y podrás moverlas una a una."],
+    "Analyse des notes de la prise…": ["Analysing the take's notes…", "Analizando las notas de la toma…"],
+    "calcul de la prise…": ["rendering the take…", "calculando la toma…"],
+    "Notes remises comme chantées": ["Notes reset to how they were sung", "Notas restablecidas tal como se cantaron"],
+    "tonalité auto": ["auto key", "tonalidad auto"],
+    "octave grave": ["octave down", "octava grave"],
+    "octave aiguë": ["octave up", "octava aguda"],
+    "Tune Pro remplace Auto-Pitch sur cette piste": ["Tune Pro replaces Auto-Pitch on this track", "Tune Pro reemplaza a Auto-Pitch en esta pista"],
+    "Auto-Pitch remplace Tune Pro sur cette piste": ["Auto-Pitch replaces Tune Pro on this track", "Auto-Pitch reemplaza a Tune Pro en esta pista"],
+    "Remet la voix juste, en trois gestes. Tonalité : celle de la prod (auto) ou la tienne. Style : Naturel garde ta voix, Marqué s'entend, Robot donne l'effet autotune franc. Intensité : de rien (0 %) à la correction complète. Effet : une octave plus grave ou plus aiguë, pour les ad-libs.": ["Puts the voice in tune, in three moves. Key: the beat's (auto) or your own. Style: Natural keeps your voice, Strong is audible, Robot gives the hard autotune effect. Amount: from nothing (0 %) to full correction. Effect: an octave lower or higher, for ad-libs.", "Afina la voz en tres gestos. Tonalidad: la del beat (auto) o la tuya. Estilo: Natural conserva tu voz, Marcado se nota, Robot da el efecto autotune franco. Intensidad: de nada (0 %) a la corrección completa. Efecto: una octava más grave o más aguda, para los ad-libs."],
+    "L'autotune complet. Vitesse : 0 = effet robot, 30 ms et plus = correction discrète. Humanize laisse respirer les notes tenues. Tolérance : en dessous de cet écart (centièmes de demi-ton), la voix n'est pas touchée. Vibrato naturel : 0 = effacé, 100 % = gardé tel que chanté. Vibrato ajouté : en crée un sur les notes tenues, après le délai. Timbre : la couleur de la voix, plus grave ou plus claire, sans changer la note. Clavier : clic sur une touche pour la viser, la laisser libre ou la retirer.": ["The full autotune. Speed: 0 = robot effect, 30 ms and more = discreet correction. Humanize lets held notes breathe. Tolerance: below this gap (cents), the voice is left untouched. Natural vibrato: 0 = removed, 100 % = kept as sung. Added vibrato: creates one on held notes, after the delay. Timbre: the colour of the voice, darker or brighter, without changing the note. Keyboard: click a key to target it, leave it free or remove it.", "El autotune completo. Velocidad: 0 = efecto robot, 30 ms o más = corrección discreta. Humanize deja respirar las notas largas. Tolerancia: por debajo de esta diferencia (céntimos), la voz no se toca. Vibrato natural: 0 = eliminado, 100 % = tal como se cantó. Vibrato añadido: crea uno en las notas largas, tras el retardo. Timbre: el color de la voz, más grave o más claro, sin cambiar la nota. Teclado: clic en una tecla para apuntarla, dejarla libre o quitarla."],
+    "Nettoyage voix": ["Voice cleaner", "Limpieza de voz"],
+    "Retire le souffle, la ventilation et le bruit de la pièce, sans toucher à ta voix. Mesuré sur les passages calmes de la prise.": ["Removes hiss, fans and room noise without touching your voice. Measured on the quiet parts of the take.", "Quita el soplido, la ventilación y el ruido de la habitación sin tocar tu voz. Medido en las partes tranquilas de la toma."],
+    "Activer": ["Turn on", "Activar"],
+    "Activé": ["On", "Activado"],
+    "Désactivé": ["Off", "Desactivado"],
+    "Actif": ["On", "Activo"],
+    "Couper les grondements graves (sous 70 Hz)": ["Cut low rumble (below 70 Hz)", "Cortar retumbos graves (por debajo de 70 Hz)"],
+    "Appliquer à toute la piste": ["Apply to the whole track", "Aplicar a toda la pista"],
+    "Calcul en cours…": ["Processing…", "Calculando…"],
+    "Nettoyage voix activé sur cette prise": ["Voice cleaner on for this take", "Limpieza de voz activada en esta toma"],
+    "Nettoyage voix retiré": ["Voice cleaner removed", "Limpieza de voz retirada"],
+    "Nettoyée": ["Cleaned", "Limpiada"],
+    "Notes retouchées": ["Notes edited", "Notas retocadas"],
+    "Mix auto": ["Auto mix", "Mezcla auto"],
+    "Mix auto : analyse tes voix et règle chaque piste sur la prod, en un clic": ["Auto mix: analyses your vocals and sets each track against the beat, in one click", "Mezcla auto: analiza tus voces y ajusta cada pista al beat, en un clic"],
+    "Mix auto : écoute de tes voix…": ["Auto mix: listening to your vocals…", "Mezcla auto: escuchando tus voces…"],
+    "Enregistre d'abord une prise : le mix auto règle les voix qui existent": ["Record a take first: auto mix sets the vocals that exist", "Graba primero una toma: la mezcla auto ajusta las voces que existen"],
+    "Le mix auto n'a pas pu analyser les voix": ["Auto mix couldn't analyse the vocals", "La mezcla auto no pudo analizar las voces"],
+    "lead chanté": ["sung lead", "lead cantado"],
+    "lead rap": ["rap lead", "lead rap"],
+    "backs": ["backs", "coros"],
+    "ad-libs": ["ad-libs", "ad-libs"],
+    "intro": ["intro", "intro"],
+    "Mix complet": ["Full mix", "Mezcla completa"],
+    "Voix + prod, en WAV": ["Vocals + beat, as WAV", "Voz + beat, en WAV"],
+    "Importe ta prod pour l'avoir dans le mix (sinon : voix seule)": ["Import your beat to have it in the mix (otherwise: vocals only)", "Importa tu beat para tenerlo en la mezcla (si no: solo voz)"],
+    "Toutes les voix mixées, calées sur 0:00 de la prod": ["All vocals mixed, aligned to 0:00 of the beat", "Todas las voces mezcladas, alineadas en el 0:00 del beat"],
+    "Pistes séparées": ["Separate tracks", "Pistas separadas"],
+    "Un WAV par piste, effets compris, dans un ZIP": ["One WAV per track, effects included, in a ZIP", "Un WAV por pista, con efectos, en un ZIP"],
+    "Mastering auto": ["Auto mastering", "Mastering auto"],
+    "Pour le mix complet : niveau des plateformes (-14 LUFS), crêtes à -1 dB": ["For the full mix: streaming level (-14 LUFS), peaks at -1 dB", "Para la mezcla completa: nivel de plataformas (-14 LUFS), picos a -1 dB"],
+    "Mastering…": ["Mastering…", "Mastering…"],
+    "Export de la prod…": ["Exporting the beat…", "Exportando el beat…"],
+    "Exporté : mix masterisé, prêt pour les plateformes": ["Exported: mastered mix, ready for streaming platforms", "Exportado: mezcla masterizada, lista para las plataformas"],
     "Voir plus de prods": ["Show more beats", "Ver más beats"],
     "Les type beats qui sortent sur YouTube, rangés par artiste, style et mood. Écoute ici, pose ta topline dans le studio.": ["The type beats coming out on YouTube, sorted by artist, style and mood. Listen here, record your topline in the studio.", "Los type beats que salen en YouTube, ordenados por artista, estilo y mood. Escucha aquí, graba tu topline en el estudio."],
     "Ouvrir le studio": ["Open the studio", "Abrir el estudio"],
@@ -546,6 +685,15 @@ const I18N = (() => {
     [`^${N} prods? proches$`, m => nb(m[1], ["similar beat", "similar beats"], ["beat parecido", "beats parecidos"])],
     [`^${N} prods? en tout$`, m => nb(m[1], ["beat", "beats"], ["beat", "beats"]) + (L === 0 ? " in total" : " en total")],
     [`^${N} en tout$`, "$1 in total", "$1 en total"],
+    [`^Mix auto · (.+)$`, m => (L === 0 ? "Auto mix · " : "Mezcla auto · ") + m[1].split(" · ").map(x => x.replace(/ : (.+)$/, (_, r) => " : " + t(r))).join(" · ")],
+    [`^${N} notes calées sur la gamme$`, "$1 notes snapped to the scale", "$1 notas ajustadas a la escala"],
+    [`^${N} notes?$`, m => nb(m[1], ["note", "notes"], ["nota", "notas"])],
+    [`^Nettoyage voix sur ${N} prises? de la piste$`, "Voice cleaner on $1 take(s) of the track", "Limpieza de voz en $1 toma(s) de la pista"],
+    [`^Actif · bruit de fond mesuré (.+) dBFS$`, "On · measured background noise $1 dBFS", "Activo · ruido de fondo medido $1 dBFS"],
+    [`^Région ${N} · (.+)$`, "Region $1 · $2", "Región $1 · $2"],
+    [`^Export des pistes… ${N}/${N}$`, "Exporting tracks… $1/$2", "Exportando pistas… $1/$2"],
+    [`^Exporté : ${N} pistes, calées sur 0:00 de la prod$`, "Exported: $1 tracks, aligned to 0:00 of the beat", "Exportado: $1 pistas, alineadas en el 0:00 del beat"],
+    [`^naturel ${N} %$`, "natural $1 %", "natural $1 %"], [`^marqué ${N} %$`, "strong $1 %", "marcado $1 %"], [`^robot ${N} %$`, "robot $1 %", "robot $1 %"],
     [`^${N} sur ${N}$`, "$1 of $2", "$1 de $2"],
     [`^${N} prods? mises? de côté\\.$`, m => nb(m[1], ["beat saved.", "beats saved."], ["beat guardado.", "beats guardados."])],
     [`^${N} prods? pas encore écoutées?$`, m => nb(m[1], ["beat not played yet", "beats not played yet"], ["beat sin escuchar", "beats sin escuchar"])],
@@ -894,6 +1042,23 @@ BEATS.forEach(b => b._h = haystack(b));
    entendues. Tout se calcule ici, dans le navigateur : rien ne part vers un serveur, et
    c'est aussi pourquoi le profil ne suit pas d'un appareil a l'autre. */
 const BY_ID = new Map(BEATS.map(b => [b.id, b]));
+/* ============ FINDINGS Pro ============
+   Les prods sponsorisees et les profils Pro des beatmakers (pro.json, ecrit dans le catalogue
+   par build.mjs). Les dates sont reverifiees ici : une offre finie disparait meme si le site
+   n'a pas encore ete reconstruit. */
+const PRO = CAT.pro || { contact: "", sponsorises: [], beatmakers: {} };
+const AUJ = new Date().toISOString().slice(0, 10);
+const SPONSO = (PRO.sponsorises || []).filter(x => BY_ID.has(x.id) && (!x.du || x.du <= AUJ) && (!x.au || x.au >= AUJ));
+const proDe = nom => { const p = (PRO.beatmakers || {})[nom]; return p && (!p.jusqua || p.jusqua >= AUJ) ? p : null; };
+const verifie = nom => !!(proDe(nom) || {}).verifie;
+const ICO_VERIF = '<svg class="verif" width="14" height="14" viewBox="0 0 24 24" aria-label="Vérifié"><path fill="currentColor" d="M12 1.8l2.4 1.9 3-.3.9 2.9 2.7 1.4-.6 3 1.5 2.6-2.1 2.2.1 3.1-3 .7-1.6 2.6-2.9-1-2.9 1-1.6-2.6-3-.7.1-3.1-2.1-2.2 1.5-2.6-.6-3 2.7-1.4.9-2.9 3 .3z"/><path d="M8.2 12.3l2.5 2.5 5.1-5.3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+// une prod sponsorisee qui colle a la liste affichee (meme filtres, meme recherche), une par visite
+const GRAINE = Math.floor(Math.random() * 1e6);
+function sponsoPour(res){
+  if (!SPONSO.length || S.historyOnly || S.crateOnly || S.forYou || S.suivis || S.proche || S.toplines || S.prod) return null;
+  const ids = new Set(res.map(b => b.id)), ok = SPONSO.filter(x => (x.ou || []).includes("liste") && ids.has(x.id));
+  return ok.length ? BY_ID.get(ok[GRAINE % ok.length].id) : null;
+}
 
 /* ============ nouveau depuis ta derniere visite ============
    Le catalogue ne date ses ajouts qu'au jour pres : on retient plutot les prods que le
@@ -1176,12 +1341,13 @@ function lireAdresse(u){
   const url = new URL(u, document.baseURI);
   const p = new URLSearchParams(url.search);
   const rel = url.pathname.startsWith(BASE) ? decodeURIComponent(url.pathname.slice(BASE.length)) : "";
-  const m = /^(artiste|style|beatmaker|studio)\/?([^/]*)\/?/.exec(rel);
+  const m = /^(artiste|style|beatmaker|studio|pour-les-beatmakers)\/?([^/]*)\/?/.exec(rel);
   if (m) {
     if (m[1] === "artiste" && m[2]) p.set("artist", m[2]);
     if (m[1] === "style" && m[2]) p.set("style", m[2]);
     if (m[1] === "beatmaker" && m[2]) p.set("prod", SLUG_PROD.get(m[2]) || m[2]);
     if (m[1] === "studio") p.set("studio", "1");
+    if (m[1] === "pour-les-beatmakers") p.set("offre", "1");
   }
   return p;
 }
@@ -1189,6 +1355,7 @@ function lireAdresse(u){
 function faireAdresse(p){
   const cles = [...p.keys()].filter(k => k !== "vue");
   if (p.get("studio") === "1") return `${BASE}studio/${p.get("beat") ? "?beat=" + encodeURIComponent(p.get("beat")) : ""}`;
+  if (p.get("offre") === "1") return `${BASE}pour-les-beatmakers/`;
   if (cles.length === 1) {
     if (cles[0] === "artist") return lienArtiste(p.get("artist"));
     if (cles[0] === "style") return lienStyle(p.get("style"));
@@ -1202,6 +1369,7 @@ function majTitre(){
   const n = typeof LAST !== "undefined" ? LAST.length : 0;
   let t = "FINDINGS : type beats à écouter et studio pour poser ta topline", d = null;
   if (document.body.classList.contains("vue-studio")) t = "Studio en ligne : pose ta topline sur une prod | FINDINGS";
+  else if (document.body.classList.contains("vue-offre")) t = "Pour les beatmakers : mets tes prods en avant sur FINDINGS";
   else if (!document.body.classList.contains("vue-accueil")) {
     const ar = S.artists.size === 1 && !S.styles.size && !S.moods.size && !S.prod ? [...S.artists][0] : null;
     if (S.q.trim()) { t = `« ${S.q.trim()} » : ${n} prods | FINDINGS`; }
@@ -1372,12 +1540,12 @@ const PAQUET = 60;
    prend le relais. Sans cette limite, la liste reculait sans fin devant le pied de page,
    qui devenait inatteignable sur « Toutes les prods ». */
 const AUTO = 3 * PAQUET;
-let lignesAffichees = 0;
+let lignesAffichees = 0, epinglee = null;   // epinglee : la prod sponsorisee affichee en tete (pas de doublon plus bas)
 function ajouterLignes(n = PAQUET){
   const suite = LAST.slice(lignesAffichees, lignesAffichees + n);
   list.querySelector(".suite,.plus")?.remove();
   if (!suite.length) return;
-  list.insertAdjacentHTML("beforeend", suite.map(rowHTML).join(""));
+  list.insertAdjacentHTML("beforeend", suite.map(b => b.id === epinglee ? "" : rowHTML(b)).join(""));
   lignesAffichees += suite.length;
   if (lignesAffichees >= LAST.length) return;
   if (lignesAffichees < AUTO) {
@@ -1660,7 +1828,7 @@ function rowHTML(b){
         <span class="pill">${esc(STYLE_NAME[b.style])}</span>
         ${TOPLINE_N.get(b.id)?`<span class="tl-n" title="Tes prises sur cette prod">🎙 ${TOPLINE_N.get(b.id)}</span>`:""}
         ${estNouvelle(b)?`<span class="new" title="${VISITE_PREC ? "Ajoutée depuis ta dernière visite" : "Ajoutée ces derniers jours"}">nouveau</span>`:""}
-        <span class="prod">par <button data-act="prod" title="Toutes les prods de ${esc(b.prod)}"><b>${esc(b.prod)}</b></button></span>
+        <span class="prod">par <button data-act="prod" title="Toutes les prods de ${esc(b.prod)}"><b>${esc(b.prod)}</b>${verifie(b.prod) ? ICO_VERIF : ""}</button></span>
         ${b.refs.length?`<span class="refs">${b.refs.map(r=>{ const id = artisteDeRef(r, b); return id ? `<a class="ref-art" href="${lienArtiste(id)}" data-vue="prods" title="Page de ${esc(ARTIST_NAME[id])}">${esc(r)}</a>` : `<button data-act="ref" data-ref="${esc(r)}">${esc(r)}</button>`; }).join("")}</span>`:""}
       </div>
     </div>
@@ -1825,7 +1993,10 @@ function render(){
   lignesAffichees = 0;
   if (res.length) {
     list.innerHTML = "";
+    const sp = sponsoPour(res);
+    epinglee = sp ? sp.id : null;
     ajouterLignes();
+    if (sp) list.insertAdjacentHTML("afterbegin", rowHTML(sp).replace('<li class="row', '<li class="row sponso ').replace('<span class="pill">', '<span class="sponso-tag" title="Mise en avant payée par le beatmaker">Sponsorisé</span><span class="pill">'));
     // un filtre change en bas de page : on repart du haut de la nouvelle liste. En haut de
     // page il n'y a rien a corriger, et la mesure force une mise en page complete (~23 ms).
     if (scrollY > 80) {
@@ -2481,8 +2652,8 @@ function majProfil(res){
   const nbProds = new Set(toutes.map(b => b.prod)).size;
   let v;   // ce qui differe entre un beatmaker et un artiste
   if (S.prod) {
-    const c = profilDe(S.prod) || {};
-    v = { type: "Beatmaker", nom: c.n || S.prod, img: c.a, ban: c.b || "",
+    const c = profilDe(S.prod) || {}, pro = proDe(S.prod);
+    v = { type: pro ? "Beatmaker Pro" : "Beatmaker", nom: c.n || S.prod, img: c.a, ban: (pro && pro.banniere) || c.b || "", pro,
           chiffre: c.s ? `<span><b>${esc(c.s)}</b> abonnés YouTube</span>` : "",
           compte: `<b>${toutes.length}</b> prod${toutes.length > 1 ? "s" : ""} sur FINDINGS`,
           lien: "Chaîne YouTube ↗", couleur: styles[0] || "trap",
@@ -2513,7 +2684,8 @@ function majProfil(res){
       ${v.img ? `<img class="ava" src="${esc(v.img)}" alt="" referrerpolicy="no-referrer">` : `<div class="ava">${esc(initiale)}</div>`}
       <div class="profil-txt">
         <span class="eyebrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 9.5 4.5H6v3.5L3.5 10.5 6 13v3.5h3.5L12 19l2.5-2.5H18V13l2.5-2.5L18 8V4.5h-3.5z" opacity=".9"/></svg>${v.type}</span>
-        <h2>${esc(v.nom)}</h2>
+        <h2>${esc(v.nom)}${v.pro && v.pro.verifie ? ICO_VERIF : ""}</h2>
+        ${v.pro && v.pro.bio ? `<p class="prof-bio">${esc(v.pro.bio)}</p>` : ""}
         <div class="meta">
           ${v.chiffre}
           <span>${v.compte}</span>
@@ -2527,9 +2699,10 @@ function majProfil(res){
           <button class="pbtn" id="profPartager" title="Partager cette page">↗ Partager</button>
           ${(v.ecouter || []).map(([k, nom, url]) =>
             `<a class="pbtn plat" href="${esc(url)}" target="_blank" rel="noopener" style="--pc:var(--pc-${k})"><i></i>${nom}</a>`).join("")}
+          ${v.pro ? Object.entries(v.pro.liens || {}).map(([k, u]) => `<a class="pbtn lien-pro" href="${esc(k === "email" ? "mailto:" + u : u)}"${k === "email" ? "" : ' target="_blank" rel="noopener"'}>${({ instagram: "Instagram", tiktok: "TikTok", youtube: "YouTube", beatstars: "BeatStars", boutique: "Boutique", site: "Site", email: "Contact" })[k] || esc(k)} ↗</a>`).join("") : ""}
         </div>
         ${v.liste.length ? `<div class="cibles">${S.prod ? "" : `<span class="cibles-t">Type beats ${esc(v.nom)} par</span>`}${v.liste.join("")}</div>` : ""}
-        ${S.prod ? `<p class="prof-toi">C'est toi ? Mets le lien de cette page dans ta bio : tes auditeurs y trouvent toutes tes prods, et peuvent poser leur topline dessus.</p>` : ""}
+        ${S.prod && !v.pro ? `<p class="prof-toi">C'est toi ? Mets le lien de cette page dans ta bio : tes auditeurs y trouvent toutes tes prods, et peuvent poser leur topline dessus. <a href="pour-les-beatmakers/" data-vue="offre">Passe ton profil en Pro →</a></p>` : ""}
       </div>
     </div>`;
   const img = elProfil.querySelector("img.ava");
@@ -2957,7 +3130,7 @@ const toutesBtn = document.getElementById("toutesBtn");
 /* Hors de la liste des prods (accueil ou studio), la liste est cachee : un bouton de filtre de
    l'en-tete doit l'activer (pas l'inverser) et y emmener. Avant, depuis le studio, ces boutons
    changeaient l'adresse sans rien montrer. */
-const horsListe = () => document.body.classList.contains("vue-accueil") || document.body.classList.contains("vue-studio");
+const horsListe = () => ["vue-accueil", "vue-studio", "vue-offre"].some(c => document.body.classList.contains(c));
 toutesBtn.addEventListener("click", () => {
   viderFiltres();
   refletFiltres();
@@ -3342,6 +3515,50 @@ function brancherRangees(){
     maj();
   });
 }
+
+/* ============ page « Pour les beatmakers » ============ */
+(function offre(){
+  const nbBm = new Set(BEATS.map(b => b.prod)).size, nbSt = new Set(BEATS.map(b => b.style)).size;
+  const fr = n => n.toLocaleString(LOCALE);
+  document.getElementById("offStats").innerHTML =
+    `<div><b>${fr(BEATS.length)}</b><span>type beats</span></div><div><b>${fr(nbBm)}</b><span>beatmakers</span></div><div><b>${fr(nbSt)}</b><span>styles</span></div><div><b>3</b><span>langues</span></div>`;
+  const c = PRO.contact || "";
+  document.getElementById("offContact").outerHTML = c
+    ? `<a class="hbtn pri" id="offContact" href="${esc(c.startsWith("mailto:") && !c.includes("?") ? c + "?subject=" + encodeURIComponent("FINDINGS Pro") : c)}"${c.startsWith("mailto:") ? "" : ' target="_blank" rel="noopener"'}>Nous contacter</a>`
+    : `<span class="hbtn pri off-bientot" id="offContact" aria-disabled="true">Contact bientôt ouvert</span>`;
+  // l'apercu d'une ligne sponsorisee : une vraie prod recente du catalogue
+  const ex = BEATS.filter(b => b.views > 1000).sort((a, b) => (b.published || "").localeCompare(a.published || ""))[0];
+  if (ex) document.getElementById("offApercuSponso").innerHTML =
+    `<div class="ap-ligne"><img src="https://i.ytimg.com/vi/${ex.id}/mqdefault.jpg" alt="" loading="lazy"><div><span class="sponso-tag">Sponsorisé</span><b translate="no">${esc(ex.title)}</b><small>par ${esc(ex.prod)}</small></div></div>`;
+  // trouver sa page
+  const q = document.getElementById("offQ"), res = document.getElementById("offRes");
+  const n = {}; BEATS.forEach(b => n[b.prod] = (n[b.prod] || 0) + 1);
+  q.addEventListener("input", () => {
+    const v = cleNom(q.value);
+    if (v.length < 2) { res.innerHTML = ""; return; }
+    const l = Object.keys(n).filter(p => cleNom(p).includes(v)).sort((a, b) => (cleNom(b).startsWith(v) - cleNom(a).startsWith(v)) || n[b] - n[a]).slice(0, 6);
+    res.innerHTML = l.length ? l.map(p => `<a href="${lienProd(p)}" data-vue="prods">${avatarDe(p) ? `<img src="${esc(avatarDe(p))}" alt="" referrerpolicy="no-referrer">` : `<i>${esc((p[0] || "?").toUpperCase())}</i>`}<b>${esc(p)}</b><small>${n[p]} prod${n[p] > 1 ? "s" : ""}</small></a>`).join("")
+      : `<p>Pas encore de prods à ce nom. Publie un type beat sur YouTube (« … type beat » dans le titre) : il arrivera au prochain passage.</p>`;
+  });
+})();
+
+/* ============ à la une (sponsorisées) ============ */
+const UNE = SPONSO.filter(x => (x.ou || []).includes("accueil")).map(x => BY_ID.get(x.id)).filter(Boolean);
+(function une(){
+  const sec = document.getElementById("vueUne"); if (!sec || !UNE.length) return;
+  document.getElementById("unewall").innerHTML = UNE.map(b => `
+    <a class="tile sortie une" data-id="${b.id}" href="?play=${encodeURIComponent(b.id)}" style="--c:var(--s-${b.style})">
+      <div class="art"><img src="https://i.ytimg.com/vi/${b.id}/maxresdefault.jpg" alt="" loading="lazy" onload="if(this.naturalWidth<=120){this.onload=null;this.classList.add('hq');this.src=this.src.replace('maxresdefault','hqdefault')}"></div>
+      <span class="sponso-tag sur-image">Sponsorisé</span>
+      <div class="v-in">
+        <span class="raison">${esc(b.prod)}${verifie(b.prod) ? ICO_VERIF : ""}</span>
+        <span class="t" translate="no">${esc(b.title)}</span>
+        <span class="s"><span class="pill">${esc(STYLE_NAME[b.style] || b.style)}</span><span>${b.bpmSur ? "" : "~"}${b.bpm} BPM</span>${b.keySur ? `<span>${esc(b.key)}</span>` : ""}</span>
+      </div>
+      <span class="go">${ICO_LIRE}</span>
+    </a>`).join("");
+  sec.hidden = false;
+})();
 
 /* ============ dernières arrivées ============ */
 /* les dix sorties les plus récentes, en classement : c'est aussi la file d'attente du lecteur */
@@ -3842,16 +4059,18 @@ const AFFICHES = (() => {
 const vAccueil = document.getElementById("vueAccueil");
 const vProds = document.querySelector("main.shell");
 
-const vStudio = document.getElementById("vueStudio");
+const vStudio = document.getElementById("vueStudio"), vOffre = document.getElementById("vueOffre");
 function montrerVue(nom, pousser = true, params = ""){
-  const studio = nom === "studio", accueil = !studio && nom !== "prods";
+  const studio = nom === "studio", offre = nom === "offre", accueil = !studio && !offre && nom !== "prods";
   vAccueil.hidden = !accueil;
-  vProds.hidden = accueil || studio;
+  vProds.hidden = accueil || studio || offre;
   vStudio.hidden = !studio;
+  vOffre.hidden = !offre;
   document.body.classList.toggle("vue-accueil", accueil);
   document.body.classList.toggle("vue-studio", studio);
+  document.body.classList.toggle("vue-offre", offre);
   if (pousser) {
-    const u = new URL(params || (studio ? "studio/" : "?vue=prods"), document.baseURI);
+    const u = new URL(params || (studio ? "studio/" : offre ? "pour-les-beatmakers/" : "?vue=prods"), document.baseURI);
     const url = accueil ? BASE : u.pathname + u.search;
     if (url !== location.pathname + location.search) history.pushState({ vue: nom }, "", url);
   }
@@ -3882,12 +4101,13 @@ document.addEventListener("click", e => {
    comme dans le pied de page : depuis le catalogue ou le studio, on revient a l'accueil
    sans recharger (la lecture continue), puis on descend a la section. */
 document.addEventListener("click", e => {
-  const a = e.target.closest('a[href^="#vue"]');
+  const a = e.target.closest('a[href^="#"]');
   if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-  const cible = document.getElementById(a.getAttribute("href").slice(1));
+  const cible = a.getAttribute("href").length > 1 && document.getElementById(a.getAttribute("href").slice(1));
   if (!cible) return;
   e.preventDefault();
-  if (document.body.classList.contains("vue-accueil")) { cible.scrollIntoView({ behavior: "smooth" }); return; }
+  // une ancre de la page affichee (« Voir les offres ») : on y descend, sans toucher a l'adresse
+  if (!cible.closest("#vueAccueil") || document.body.classList.contains("vue-accueil")) { cible.scrollIntoView({ behavior: "smooth" }); return; }
   // en changeant de vue, l'accueil se recompose encore un instant : on saute, puis on recale
   montrerVue("accueil", true);
   const caler = () => cible.scrollIntoView({ behavior: "instant" });
@@ -3922,6 +4142,7 @@ document.querySelector('form[data-recherche]')?.addEventListener("submit", e => 
 addEventListener("popstate", () => {
   const p = lireAdresse(location.href);
   if (p.get("studio") === "1") { montrerVue("studio", false); return; }
+  if (p.get("offre") === "1") { montrerVue("offre", false); return; }
   appliquerParams(p);
   montrerVue(p.toString() ? "prods" : "accueil", false);
 });
@@ -3939,6 +4160,7 @@ function brancherTuiles(id, liste){
   });
 }
 brancherTuiles("fresh", () => FRESH);
+brancherTuiles("unewall", () => UNE);
 brancherTuiles("likewall", () => LIKED);
 brancherTuiles("pourtoiwall", () => POURTOI);
 brancherTuiles("suiviswall", () => SUIVIES);
@@ -4010,11 +4232,11 @@ function appliquerParams(p, reprendreLecture = false){
    d'une recherche ou d'une prod, c'est le catalogue. */
 (function demarrer(){
   const p = lireAdresse(location.href);
-  const versStudio = p.get("studio") === "1";
-  const versProds = !versStudio && (p.get("vue") === "prods" || ["style","sort","q","mood","likes","play","artist","historique","pourtoi","proche","nouveau","prod","suivis","toplines"].some(k => p.get(k)));
+  const versStudio = p.get("studio") === "1", versOffre = p.get("offre") === "1";
+  const versProds = !versStudio && !versOffre && (p.get("vue") === "prods" || ["style","sort","q","mood","likes","play","artist","historique","pourtoi","proche","nouveau","prod","suivis","toplines"].some(k => p.get(k)));
   document.getElementById("seoPre")?.remove();   // le contenu pre-rendu cede la place a l'application
   appliquerParams(p, true);
-  const vue = versStudio ? "studio" : versProds ? "prods" : "accueil";
+  const vue = versStudio ? "studio" : versOffre ? "offre" : versProds ? "prods" : "accueil";
   history.replaceState({ vue }, "", location.pathname + location.search);
   // le studio (studio.js) se charge apres ce script : on le monte une fois pret
   if (versStudio) { montrerVue("studio", false); }

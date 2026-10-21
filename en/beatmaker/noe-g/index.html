@@ -53,7 +53,7 @@ if (window.FINDINGS_STATS) {
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
-<link rel="stylesheet" href="../app.css?v=78ab35cde1">
+<link rel="stylesheet" href="../app.css?v=7200fedc11">
 </head>
 <body>
 
@@ -212,6 +212,17 @@ if (window.FINDINGS_STATS) {
     <div class="liste" id="suiviswall"></div>
   </section>
 
+  <section class="sec wrap" id="vueUne" hidden>
+    <div class="sec-head">
+      <div>
+        <h2>À la une</h2>
+        <p>Des prods mises en avant par leurs beatmakers.</p>
+      </div>
+      <a href="pour-les-beatmakers/" data-vue="offre">Mettre ta prod ici →</a>
+    </div>
+    <div class="rail-wrap"><div class="rail sorties une" id="unewall"></div><button class="rail-nav g" aria-label="Précédent" tabindex="-1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button><button class="rail-nav d" aria-label="Suivant" tabindex="-1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></div>
+  </section>
+
   <section class="sec wrap" id="vuePourToi">
     <div class="sec-head">
       <div>
@@ -238,7 +249,7 @@ if (window.FINDINGS_STATS) {
     <div class="sp-txt">
       <span class="eyebrow">Studio</span>
       <h2>Une prod te plaît ? Pose ta topline dessus.</h2>
-      <p>Enregistre ta voix direct sur la prod, coupe, ajoute de la réverb ou de l'écho, puis exporte. Tu peux aussi importer ta propre prod. Gratuit, sans compte.</p>
+      <p>Enregistre ta voix direct sur la prod, corrige la justesse avec Auto-Pitch ou Tune Pro, nettoie le bruit et lance le mix auto. Tu peux aussi importer ta propre prod. Gratuit, sans compte.</p>
     </div>
     <a class="hbtn pri" href="studio/" data-vue="studio">Ouvrir le studio</a>
   </section>
@@ -282,7 +293,7 @@ if (window.FINDINGS_STATS) {
     <div class="st-intro-txt">
       <span class="eyebrow">Studio</span>
       <h1>Pose ta topline, direct sur la prod.</h1>
-      <p>Choisis une prod du site ou importe la tienne, enregistre ta voix au micro, coupe, déplace, ajoute de la réverb ou de l'écho, puis exporte en WAV. Gratuit, dans le navigateur, et tes projets restent sur ton appareil.</p>
+      <p>Choisis une prod du site ou importe la tienne, enregistre ta voix, corrige la justesse, nettoie, mixe en un clic et exporte. Gratuit, dans le navigateur, et tes projets restent sur ton appareil.</p>
       <div class="st-intro-cta">
         <label class="hbtn pri st-import"><input type="file" id="stImport" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.aif,.aiff" hidden>↥ Importer ma prod</label>
         <a class="hbtn ghost" href="?vue=prods" data-vue="prods">Choisir une prod du site</a>
@@ -290,10 +301,12 @@ if (window.FINDINGS_STATS) {
       </div>
     </div>
     <ul class="st-points">
+      <li><b>Auto-Pitch et Tune Pro</b><span>La justesse en un geste, ou note par note dans le mode graphique.</span></li>
+      <li><b>Mix auto</b><span>Un clic : chaque voix réglée sur la prod, lead, backs et ad-libs.</span></li>
+      <li><b>Nettoyage voix</b><span>Souffle, ventilation et bruit de la pièce retirés.</span></li>
       <li><b>Pistes illimitées</b><span>Voix, backs, ad-libs : une piste par idée, muet et solo.</span></li>
-      <li><b>Édition au doigt</b><span>Couper, rogner, déplacer, fondus, annuler à volonté.</span></li>
-      <li><b>Effets par piste</b><span>Réverb, écho calé sur le tempo, graves, aigus, compresseur.</span></li>
-      <li><b>Export WAV</b><span>Ta voix seule, ou mixée avec ta prod si tu l'as importée.</span></li>
+      <li><b>Effets de studio</b><span>Égaliseur, compresseur, de-esser, réverb, écho, limiteur.</span></li>
+      <li><b>Export pro</b><span>WAV, pistes séparées, mastering au niveau des plateformes.</span></li>
     </ul>
   </section>
   <section class="wrap st-projets" id="stProjets" hidden>
@@ -302,10 +315,79 @@ if (window.FINDINGS_STATS) {
   </section>
 </div>
 
+<div id="vueOffre" hidden>
+  <section class="off-hero wrap">
+    <span class="eyebrow">FINDINGS pour les beatmakers</span>
+    <h1>Fais écouter tes prods aux artistes qui cherchent.</h1>
+    <p class="off-lead">Sur FINDINGS, les rappeurs et les chanteurs trouvent leurs type beats par artiste, style, mood et tempo, puis posent leur voix dessus dans le studio. Chaque écoute passe par ta vidéo YouTube, et chaque clic « Acheter » mène à ta boutique.</p>
+    <div class="off-cta"><span id="offContact"></span><a class="hbtn ghost" href="#offOffres">Voir les offres</a></div>
+    <div class="off-stats" id="offStats"></div>
+  </section>
+
+  <section class="off-offres wrap" id="offOffres">
+    <article class="off-carte">
+      <span class="off-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>
+      <h2>Mise en avant</h2>
+      <p>Ta prod en tête de l'accueil, dans « À la une », et en haut des listes quand elle correspond à ce que l'artiste cherche.</p>
+      <ul>
+        <li>Le bloc « À la une », en haut de l'accueil</li>
+        <li>En tête des recherches et des filtres qui lui correspondent : style, mood, tempo, artiste</li>
+        <li>La durée que tu choisis</li>
+        <li>Toujours signalée « Sponsorisé » : les artistes savent ce qu'ils écoutent</li>
+      </ul>
+      <div class="off-apercu" id="offApercuSponso" aria-hidden="true"></div>
+    </article>
+    <article class="off-carte pro">
+      <span class="off-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l2.3 1.8 2.9-.3.9 2.8 2.6 1.3-.6 2.9 1.4 2.5-2 2.1.1 3-2.9.6-1.5 2.5-2.8-.9-2.8.9-1.5-2.5-2.9-.6.1-3-2-2.1 1.4-2.5-.6-2.9 2.6-1.3.9-2.8 2.9.3z"/><path d="m8.6 12.2 2.3 2.3 4.6-4.8"/></svg></span>
+      <h2>Profil Pro</h2>
+      <p>Ta page beatmaker à ton image, et ton nom reconnaissable partout sur le site.</p>
+      <ul>
+        <li>Ta bannière et ta bio</li>
+        <li>Le badge vérifié à côté de ton nom, sur chacune de tes prods</li>
+        <li>Les liens vers ta boutique, ton Instagram, ton TikTok, ton contact</li>
+        <li>Une page à mettre dans ta bio, en français, en anglais et en espagnol</li>
+      </ul>
+      <div class="off-apercu pro" aria-hidden="true">
+        <div class="ap-ban"></div>
+        <div class="ap-corps"><span class="ap-ava"></span><span class="ap-nom">Ton nom</span></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="off-etapes wrap">
+    <h2>Comment ça marche</h2>
+    <ol>
+      <li><b>Écris-nous</b><span>Dis-nous quelle prod tu veux mettre en avant, ou envoie ta bannière, ta bio et tes liens.</span></li>
+      <li><b>On cale ensemble</b><span>Les emplacements, la durée et le tarif.</span></li>
+      <li><b>C'est en ligne</b><span>Ta prod ou ton profil Pro apparaît sur FINDINGS, dans les trois langues du site.</span></li>
+    </ol>
+  </section>
+
+  <section class="off-trouve wrap">
+    <div>
+      <h2>Tes prods sont peut-être déjà là</h2>
+      <p>FINDINGS ajoute tout seul les type beats récents publiés sur YouTube. Cherche ton nom de beatmaker :</p>
+    </div>
+    <div class="off-recherche">
+      <input type="search" id="offQ" placeholder="Ton nom de beatmaker" autocomplete="off" aria-label="Chercher ton nom de beatmaker">
+      <div class="off-res" id="offRes"></div>
+    </div>
+  </section>
+
+  <section class="off-faq wrap">
+    <h2>Questions</h2>
+    <details><summary>FINDINGS héberge-t-il mes fichiers ?</summary><p>Non. Chaque prod est lue depuis ta vidéo YouTube publique : les vues comptent chez toi, et le bouton « Acheter » renvoie vers le lien d'achat de ta description.</p></details>
+    <details><summary>Comment mes prods arrivent-elles sur FINDINGS ?</summary><p>Une recherche automatique ajoute les type beats récents publiés sur YouTube, tous les deux jours. Tu n'as rien à faire pour y être.</p></details>
+    <details><summary>Que voient les artistes sur une prod sponsorisée ?</summary><p>La même ligne que les autres, en tête, avec la mention « Sponsorisé ». Ils l'écoutent, la likent, posent leur topline dessus ou l'achètent comme n'importe quelle prod.</p></details>
+    <details><summary>Je veux retirer mes prods de FINDINGS.</summary><p>Écris-nous avec le nom de ta chaîne : on les retire.</p></details>
+  </section>
+</div>
+
 <main class="shell">
 <section class="seo-pre" id="seoPre">
   <span class="eyebrow">Beatmaker</span>
   <h1>Noé G</h1>
+  
   <p>4 beats by Noé G on FINDINGS (7,22 k YouTube subscribers): Trap, Drill, Trap soul, Werenoi, Freeze Corleone, ZKR type beats. Listen right away, and use them for your topline in the studio.</p>
   <ol>
   <li><img src="https://i.ytimg.com/vi/N1SUdEywZYw/mqdefault.jpg" alt="" loading="lazy" width="62" height="40"><div><a href="https://www.youtube.com/watch?v=N1SUdEywZYw" rel="nofollow">Manque</a><br><span>by <a href="beatmaker/noe-g/">Noé G</a> · Trap · 132 BPM · F#m</span></div></li>
@@ -454,6 +536,11 @@ if (window.FINDINGS_STATS) {
           <a href="studio/#stProjets" data-vue="studio" data-ancre="stProjets">Tes projets</a>
         </div>
         <div class="foot-col">
+          <b>Beatmakers</b>
+          <a href="pour-les-beatmakers/" data-vue="offre">Mettre ta prod en avant</a>
+          <a href="pour-les-beatmakers/" data-vue="offre">Profil Pro</a>
+        </div>
+        <div class="foot-col">
           <b>Langue</b>
           <button type="button" data-lang="fr" translate="no">Français</button>
           <button type="button" data-lang="en" translate="no">English</button>
@@ -535,8 +622,8 @@ if (window.FINDINGS_STATS) {
 
 <div class="dosmenu" id="dosMenu" hidden role="menu"></div>
 <script src="../catalog.js?v=ab12ea64e1" defer></script>
-<script src="../app.js?v=181ffc319e" defer></script>
-<script src="../studio.js?v=24c4ca436e" defer></script>
+<script src="../app.js?v=7134b9642a" defer></script>
+<script src="../studio.js?v=5fb3bcd91e" defer></script>
 <script type="module">
 /* ============ la note, en volume ============
    Un vrai maillage extrudé, éclairé et tourné en continu. Si WebGL manque ou si
