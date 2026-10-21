@@ -529,6 +529,42 @@ const STUDIO = (() => {
   .at-grille .kn svg{width:40px!important;height:40px!important}
   .at-grille .kn .kn-n{font-size:8.5px!important}
   @media(max-width:640px){ .at-ligne{grid-template-columns:1fr} }
+  /* Auto-Pitch : style et effet en boutons segmentes a droite du gros bouton */
+  .fxc.detail.plug[data-fx="autopitch"]{--vis:#7CE38B}
+  .ap-choix{display:grid;gap:6px;align-content:center;justify-items:start;min-width:0}
+  .ap-t{font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--p-dim,#8B9099)}
+  .ap-choix .ap-t + .plug-seg{margin-bottom:4px}
+  /* Tune Pro : clavier, vibrato et timbre sous la ligne principale */
+  .at-bas{display:grid;grid-template-columns:minmax(220px,1.3fr) auto auto;gap:18px;align-items:start;padding:2px 0 8px}
+  .at-onglets{display:flex;gap:2px;align-self:flex-start;padding:2px;border-radius:7px;background:var(--p-ecran,#0D0F12);box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
+  .at-onglets button{height:24px;padding:0 12px;border-radius:5px;font-size:11px;font-weight:700;color:var(--p-dim,#8B9099);transition:color .15s,background .15s}
+  .at-onglets button:hover{color:var(--p-txt,#E8EAED)}
+  .at-onglets button[aria-selected="true"]{color:#0B0D10;background:var(--vis,#3DDCC8)}
+  /* Tune Pro, mode graphique */
+  .gr-art{gap:8px}
+  .gr-barre{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .gr-barre .plug-menu select{min-width:150px}
+  .gr-kn{display:flex;gap:2px}
+  .gr-kn .kn{width:60px!important}
+  .gr-kn .kn svg{width:34px!important;height:34px!important}
+  .gr-kn .kn .kn-n{font-size:8.5px!important}
+  .gr-acts{display:flex;gap:6px;margin-left:auto}
+  .gr-act{height:28px;padding:0 12px;border-radius:6px;font-size:11.5px;font-weight:700;color:var(--p-txt,#E8EAED);background:linear-gradient(180deg,#2A2D33,#202227);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 0 0 1px rgba(0,0,0,.5);transition:filter .15s}
+  .gr-act:hover{filter:brightness(1.25)}
+  .gr-act[data-gr="caler"]{color:#0B0D10;background:var(--vis,#3DDCC8)}
+  .fxc.detail.plug .plug-vis.gr-vis{flex:1 1 auto;min-height:230px;height:auto;border-radius:6px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+  /* le graphique a besoin de place : le panneau s'ouvre au moins a cette hauteur tant qu'il est affiche */
+  .daw .dp-corps.rack.graphe{min-height:430px}
+  .gr-aide{margin:0;font-size:10.5px;color:var(--p-dim,#8B9099)}
+  .gr-aide b{color:var(--p-txt,#E8EAED);font-weight:650}
+  .gr-vide{margin:18px 4px;font-size:12.5px;line-height:1.5;color:var(--p-dim,#8B9099);max-width:460px}
+  .clip .clip-fx{position:absolute;right:4px;top:1px;font-size:9px;line-height:14px;color:rgba(0,0,0,.7);pointer-events:auto;cursor:help}
+  .at-bloc{display:grid;gap:4px;align-content:start;min-width:0;padding-top:8px}
+  .at-bloc-clavier .at-clavier{margin:2px 0 0}
+  .at-bloc-clavier .at-legende{margin:4px 0 0}
+  .at-grille.g4{grid-template-columns:repeat(4,auto)}
+  .at-grille.g1{grid-template-columns:auto}
+  @media(max-width:900px){ .at-bas{grid-template-columns:1fr} }
   
   .dp-auto{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--ink-2);cursor:pointer}
   .dp-auto input{accent-color:var(--accent);margin:0}
@@ -745,13 +781,20 @@ const STUDIO = (() => {
     const t = ({ C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0) + 12) % 12;
     return { tonique: t, gamme: m[3] ? "mineur" : "majeur" }; };
   const FX = [
-    { k: "autotune", modele: "Tune RT", nom: "Autotune / pitch", types: [["prod", "Tonalité de la prod", "Prod"], ["cle", "Choisir la tonalité", "Choisir"], ["chroma", "Chromatique", "Chroma"], ["libre", "Sans correction", "Libre"]],
+    /* Auto-Pitch : la justesse en trois gestes (tonalite, style, intensite), comme l'Auto-Pitch
+       de BandLab. Tune Pro : le vrai autotune, avec tous ses reglages (vitesse, humanize,
+       vibrato, timbre, clavier). Les deux pilotent le meme processeur : une piste n'en a qu'un. */
+    { k: "autopitch", modele: "Auto-Pitch", nom: "Justesse auto", types: [["naturel", "Naturel"], ["marque", "Marqué"], ["robot", "Robot"]],
+      p: [["intensite", "Intensité", 0, 100, 1, "%", 60]] },
+    { k: "autotune", modele: "Tune Pro", nom: "Autotune", types: [["prod", "Tonalité de la prod", "Prod"], ["cle", "Choisir la tonalité", "Choisir"], ["chroma", "Chromatique", "Chroma"], ["libre", "Sans correction", "Libre"]],
       // [cle, libelle, options, mode ou le menu apparait (absent = toujours)]
       menus: [["tonique", "Note", NOTES.map((n, i) => [String(i), n]), "cle"], ["gamme", "Gamme", Object.entries(GAMMES).map(([c, g]) => [c, g.nom]), "cle"],
               ["tessiture", "Range", Object.entries(TESSITURES).map(([c, t]) => [c, t.nom])]],
       p: [["vitesse", "Vitesse", 0, 200, 1, "ms", 15], ["transition", "Transition", 0, 300, 1, "ms", 0], ["humain", "Humanize", 0, 100, 1, "%", 0],
           ["tolerance", "Tolérance", 0, 50, 1, "ct", 0], ["demitons", "Pitch", -12, 12, 1, "dt", 0], ["diapason", "Diapason", 430, 450, .5, "Hz", 440],
-          ["mix", "Mélange", 0, 100, 1, "%", 100]],
+          ["mix", "Mélange", 0, 100, 1, "%", 100],
+          ["vibnat", "Naturel", 0, 150, 1, "%", 0], ["vibprof", "Ajouté", 0, 100, 1, "ct", 0], ["vibvit", "Vitesse", 3, 9, .1, "Hz", 5.5],
+          ["vibdel", "Délai", 0, 1000, 10, "ms", 300], ["timbre", "Timbre", -5, 5, .5, "dt", 0]],
       cases: [["formant", "Formants préservés"]] },
     { k: "hpf", modele: "LowCut", nom: "Coupe-bas", p: [["freq", "Fréquence", 20, 400, 1, "Hz", 80]] },
     { k: "eq", modele: "VoxEQ", nom: "Égaliseur", p: [["bas", "Graves", -15, 15, .5, "dB", 0], ["basF", "F. graves", 60, 500, 1, "Hz", 200],
@@ -773,7 +816,8 @@ const STUDIO = (() => {
       p: [["retour", "Répétitions", 0, 85, 1, "%", 22], ["filtre", "Brillance", 800, 10000, 100, "Hz", 3200], ["mix", "Niveau", 0, 100, 1, "%", 10]], cases: [["pingpong", "Ping-pong"]] }
   ];
   const AIDE = {
-    autotune: "Cale la voix sur les notes de la gamme. Vitesse 0 = effet robot, 30 ms et plus = correction discrète. Humanize adoucit la correction sur les notes tenues. Tolérance : en dessous de cet écart (centièmes de demi-ton), la voix n'est pas touchée. Diapason : le La de référence, si la prod n'est pas accordée à 440 Hz.",
+    autopitch: "Remet la voix juste, en trois gestes. Tonalité : celle de la prod (auto) ou la tienne. Style : Naturel garde ta voix, Marqué s'entend, Robot donne l'effet autotune franc. Intensité : de rien (0 %) à la correction complète. Effet : une octave plus grave ou plus aiguë, pour les ad-libs.",
+    autotune: "L'autotune complet. Vitesse : 0 = effet robot, 30 ms et plus = correction discrète. Humanize laisse respirer les notes tenues. Tolérance : en dessous de cet écart (centièmes de demi-ton), la voix n'est pas touchée. Vibrato naturel : 0 = effacé, 100 % = gardé tel que chanté. Vibrato ajouté : en crée un sur les notes tenues, après le délai. Timbre : la couleur de la voix, plus grave ou plus claire, sans changer la note. Clavier : clic sur une touche pour la viser, la laisser libre ou la retirer.",
     hpf: "Retire le grave inutile (souffle, pied de micro, plosives). À laisser sur presque toutes les voix.",
     eq: "Creuse ou renforce des zones : moins de « boue » vers 300–500 Hz, plus d'air dans les aigus.",
     comp: "Resserre les écarts de volume pour que la voix reste devant. Seuil bas = plus compressé.",
@@ -788,6 +832,9 @@ const STUDIO = (() => {
   const resume = (k, v) => ({
     deesser: () => `${v.freq >= 1000 ? (v.freq / 1000).toFixed(1) + " kHz" : v.freq + " Hz"} · ${v.seuil} dB`,
     limit: () => `${v.seuil} dB → ${v.plafond} dB`,
+    autopitch: () => [v.cle === "auto" || v.cle == null ? "tonalité auto" : `${NOTES_EN[+v.cle] || ""}${v.gamme === "majeur" ? "" : "m"}`,
+      +v.intensite ? ({ naturel: "naturel", marque: "marqué", robot: "robot" }[v.type] || "") + ` ${Math.round(v.intensite)} %` : "sans correction",
+      v.effet === "grave" ? "octave grave" : v.effet === "aigu" ? "octave aiguë" : ""].filter(Boolean).join(" · "),
     autotune: () => [v.type === "libre" ? "sans correction" : v.type === "cle" ? `${NOTES_EN[+v.tonique || 0]}${(GAMMES[v.gamme] || GAMMES.mineur).suffixe}` : v.type === "chroma" ? "chromatique" : "",
       v.type === "libre" ? "" : `${Math.round(v.vitesse)} ms`, v.demitons ? `${v.demitons > 0 ? "+" : ""}${v.demitons} dt` : ""].filter(Boolean).join(" · "),
     hpf: () => `${Math.round(v.freq)} Hz`,
@@ -807,6 +854,7 @@ const STUDIO = (() => {
       if (f.types) o[f.k].type = f.types[0][0];
       if (f.divisions) o[f.k].division = "1/4";
       if (f.menus) { o[f.k].tonique = "9"; o[f.k].gamme = "mineur"; o[f.k].tessiture = "large"; o[f.k].clavier = ""; }
+      if (f.k === "autopitch") Object.assign(o[f.k], { cle: "auto", gamme: "mineur", effet: "aucun" });
       (f.cases || []).forEach(([c, , def]) => o[f.k][c] = def !== false);
     }
     return o;
@@ -835,7 +883,7 @@ const STUDIO = (() => {
                 reverb: { on: 1, taille: 1, predelay: 25, amorti: 5500, mix: 6 } } },
     // voix chantee avec un autotune leger, qui garde le naturel
     melodique:{ nom: "Lead mélodique", fx: {
-                autotune: { on: 1, type: "prod", vitesse: 35, transition: 0, humain: 35, tolerance: 10, demitons: 0, diapason: 440, mix: 100, formant: true, tessiture: "large" },
+                autopitch: { on: 1, type: "naturel", intensite: 55, cle: "auto", gamme: "mineur", effet: "aucun" },
                 hpf: { on: 1, freq: 100 },
                 eq: { on: 1, bas: -1.5, basF: 200, mid: -2, midF: 400, midQ: 1, haut: 3, hautF: 10000, analog: true },
                 comp: { on: 1, seuil: -24, ratio: 3.5, attaque: 8, relache: 120, gain: 8, analog: true },
@@ -862,7 +910,7 @@ const STUDIO = (() => {
                 delay: { on: 1, division: "1/8p", retour: 14, filtre: 3200, mix: 7, pingpong: true },
                 reverb: { on: 1, taille: 2, predelay: 25, amorti: 6000, mix: 14 } } },
     melo:     { nom: "Mélo / planant", fx: {
-                autotune: { on: 1, type: "prod", vitesse: 25, transition: 0, humain: 50, tolerance: 15, demitons: 0, diapason: 440, mix: 100, formant: true, tessiture: "large" },
+                autopitch: { on: 1, type: "marque", intensite: 55, cle: "auto", gamme: "mineur", effet: "aucun" },
                 hpf: { on: 1, freq: 90 },
                 eq: { on: 1, bas: 0, basF: 200, mid: -1.5, midF: 300, midQ: 1, haut: 2, hautF: 11000, analog: true },
                 comp: { on: 1, seuil: -22, ratio: 3, attaque: 12, relache: 160, gain: 5, analog: true },
@@ -884,14 +932,14 @@ const STUDIO = (() => {
                 delay: { on: 1, division: "1/4", retour: 30, filtre: 2600, mix: 16, pingpong: true },
                 reverb: { on: 1, taille: 1.5, predelay: 20, amorti: 5000, mix: 12 } } },
     grave:    { nom: "Ad-libs pitchés (grave)", fx: {
-                autotune: { on: 1, type: "libre", vitesse: 15, transition: 0, humain: 0, tolerance: 0, demitons: -12, diapason: 440, mix: 100, formant: false, tessiture: "large" },
+                autopitch: { on: 1, type: "naturel", intensite: 0, cle: "auto", gamme: "mineur", effet: "grave" },
                 hpf: { on: 1, freq: 80 },
                 eq: { on: 1, bas: 0, basF: 200, mid: 0, midF: 1500, midQ: 1, haut: -2, hautF: 8000, analog: true },
                 comp: { on: 1, seuil: -24, ratio: 5, attaque: 4, relache: 90, gain: 5, analog: true },
                 delay: { on: 1, division: "1/4", retour: 20, filtre: 2400, mix: 10, pingpong: true },
                 reverb: { on: 1, taille: 1.4, predelay: 20, amorti: 4500, mix: 10 } } },
     aigu:     { nom: "Ad-libs pitchés (aigu)", fx: {
-                autotune: { on: 1, type: "libre", vitesse: 15, transition: 0, humain: 0, tolerance: 0, demitons: 12, diapason: 440, mix: 100, formant: false, tessiture: "large" },
+                autopitch: { on: 1, type: "naturel", intensite: 0, cle: "auto", gamme: "mineur", effet: "aigu" },
                 hpf: { on: 1, freq: 250 },
                 eq: { on: 1, bas: -3, basF: 300, mid: 0, midF: 1500, midQ: 1, haut: 0, hautF: 9000, analog: true },
                 comp: { on: 1, seuil: -24, ratio: 5, attaque: 3, relache: 80, gain: 5, analog: true },
@@ -938,10 +986,13 @@ const STUDIO = (() => {
   const LAT_AT = .040;   // latence fixe du processeur (s), compensee a la lecture et a l'export
   const CODE_AT = `
   class FindingsAutotune extends AudioWorkletProcessor {
-    constructor(){
+    constructor(opts){
       super();
       this.on = false; this.mode = "gamme"; this.vitesse = 15; this.transition = 0; this.humain = 0; this.tolerance = 0; this.diapason = 440;
       this.demitons = 0; this.mix = 1; this.masque = 4095; this.libres = 0; this.formant = true; this.fmin = 60; this.fmax = 1100; this.telem = false;
+      this.vibnat = 0; this.vibprof = 0; this.vibvit = 5.5; this.vibdel = 300; this.timbre = 0;
+      // lissage de la detection, centre glissant (pour isoler le vibrato chante), vibrato cree
+      this.hm = [0, 0, 0]; this.mc = 0; this.voisePrec = false; this.vph = 0; this.vibA = 0; this.vibC = 0;
       this.port.onmessage = e => Object.assign(this, e.data);
       const sr = sampleRate;
       // detection (YIN, sous-echantillonnee par 2)
@@ -956,6 +1007,16 @@ const STUDIO = (() => {
       this.fen = Math.round(.028 * sr); this.phase = 0;                    // moteur « formants decales »
       this.out = new Float32Array(this.N); this.som = new Float32Array(this.N);
       this.ts = this.L; this.ta = 0; this.T = Math.round(sr * .006);        // moteur PSOLA (formants preserves)
+      // retouche des notes (mode graphique) : une courbe de decalage, en demi-tons, par trame d'analyse
+      this.courbe = null; this.chop = 512; this.cdec = 400;
+      if (opts && opts.processorOptions) Object.assign(this, opts.processorOptions);
+    }
+    // decalage (demi-tons) prevu par la courbe a l'instant d'entree ti, interpole entre les trames
+    valCourbe(ti){
+      const c = this.courbe, x = (ti - this.cdec) / this.chop;
+      if (x <= 0) return c[0] || 0;
+      const i = Math.floor(x); if (i >= c.length - 1) return c[c.length - 1] || 0;
+      const f = x - i; return c[i] + (c[i + 1] - c[i]) * f;
     }
     detecter(){
       const R = this.R, tmin = Math.max(2, Math.floor(sampleRate / 2 / this.fmax)), tmax = Math.min(this.TMAX, Math.ceil(sampleRate / 2 / this.fmin));
@@ -981,26 +1042,46 @@ const STUDIO = (() => {
       for (let k = r - 6; k <= r + 6; k++) if (toutes & (1 << (((k % 12) + 12) % 12))) { const e = Math.abs(k - m); if (e < ecart) { ecart = e; mieux = k; } }
       return mieux;
     }
+    // la note k (en demi-tons MIDI) fait-elle partie des notes visees ou libres ?
+    permise(k){ const toutes = this.mode === "chroma" ? 4095 : (this.masque | this.libres); return !toutes || !!(toutes & (1 << (((k % 12) + 12) % 12))); }
     analyser(){
       const sr = sampleRate, pasS = 512 / sr;
       const f0 = this.mode === "libre" ? this.detecterLibre() : this.detecter();
       this.f0 = f0;
+      let vibCible = 0;
       if (f0 > 0) {
         this.T = Math.max(16, Math.min(Math.round(this.L / 2.6), Math.round(sr / f0)));
-        const m = 69 + 12 * Math.log2(f0 / this.diapason); this.m = m;
+        // mediane des trois dernieres mesures : une erreur d'octave isolee ne fait plus sauter la note
+        const m0 = 69 + 12 * Math.log2(f0 / this.diapason), h = this.hm; h[0] = h[1]; h[1] = h[2]; h[2] = m0;
+        const m = h[0] > 0 && h[1] > 0 ? Math.max(Math.min(h[0], h[1]), Math.min(Math.max(h[0], h[1]), h[2])) : m0;
+        this.m = m;
+        // centre de la note chantee (140 ms) : ce qui s'en ecarte, c'est le vibrato
+        this.mc = this.voisePrec ? this.mc + (m - this.mc) * (1 - Math.exp(-pasS / .14)) : m;
+        const dv = m - this.mc;
         if (this.mode === "libre") { this.cible = 1; this.noteG = m; this.note = null; }
         else {
-          const n = this.noteCible(m), libre = this.mode !== "chroma" && (this.libres & (1 << (((n % 12) + 12) % 12)));
+          let n = this.noteCible(m);
+          // hysteresis : la note en cours tient tant que la voix n'est pas nettement passee a la
+          // suivante (un vibrato a cheval entre deux notes ne fait plus clignoter la correction)
+          if (this.note !== null && n !== this.note && this.permise(this.note) && Math.abs(m - this.note) < Math.abs(m - n) + .4) n = this.note;
+          const libre = this.mode !== "chroma" && (this.libres & (1 << (((n % 12) + 12) % 12)));
           this.tenue = n === this.note ? this.tenue + pasS : 0;
           // transition : la note visee glisse de l'ancienne a la nouvelle
           if (this.note === null || this.transition <= 0) this.noteG = n;
           else this.noteG += (n - this.noteG) * (1 - Math.exp(-pasS / (this.transition / 1000)));
           this.note = n;
-          this.cible = libre || Math.abs(n - m) * 100 < this.tolerance ? 1 : Math.pow(2, (this.noteG - m) / 12);
+          // vibrato naturel : 0 = efface par la correction, 100 % = garde tel que chante, 150 % = amplifie
+          const vise = this.noteG + this.vibnat * dv;
+          this.cible = libre || Math.abs(n - m) * 100 < this.tolerance ? 1 : Math.pow(2, (vise - m) / 12);
+          // vibrato cree : il demarre apres le delai sur une note tenue et monte en 150 ms
+          if (!libre && this.vibprof > 0) { const t0 = this.tenue - this.vibdel / 1000; vibCible = t0 > 0 ? this.vibprof / 100 * Math.min(1, t0 / .15) : 0; }
         }
-      } else { this.cible += (1 - this.cible) * .3; this.note = null; this.tenue = 0; this.T = Math.round(sr * .006); this.m = 0; }
-      const v = this.vitesse + this.humain * 400 * Math.min(1, this.tenue / .35);
-      this.k = v > 0 ? 1 - Math.exp(-1 / (v / 1000 * sr)) : 1;
+      } else { this.cible += (1 - this.cible) * .3; this.note = null; this.tenue = 0; this.T = Math.round(sr * .006); this.m = 0; this.hm[0] = this.hm[1] = this.hm[2] = 0; }
+      this.voisePrec = f0 > 0;
+      this.vibC = vibCible;
+      // vitesse 0 : le saut reste instantane a l'oreille, mais en 1,5 ms il ne claque plus
+      const v = Math.max(1.5, this.vitesse + this.humain * 400 * Math.min(1, this.tenue / .35));
+      this.k = 1 - Math.exp(-1 / (v / 1000 * sr));
       if (this.telem && ++this.envoi >= 2) { this.envoi = 0; this.port.postMessage({ f: f0, m: this.m, c: f0 > 0 && this.mode !== "libre" ? this.noteG : 0, r: this.corr }); }
     }
     detecterLibre(){ return this.formant || this.telem ? this.detecter() : 0; }   // sans correction : la periode sert encore au PSOLA
@@ -1011,13 +1092,17 @@ const STUDIO = (() => {
       const a0 = ent[0], a1 = ent[1];
       if (!this.on) { for (let i = 0; i < sor.length; i++) sor[i] = a1 ? (a0[i] + a1[i]) * .5 : a0[i]; return true; }
       const N1 = this.N - 1, trans = Math.pow(2, this.demitons / 12), L = this.L, fen = this.fen, base = L - fen / 2 - 1;
+      const fs = this.formant ? Math.pow(2, this.timbre / 12) : 1, dvph = 2 * Math.PI * this.vibvit / sampleRate, kv = 1 - Math.exp(-1 / (.02 * sampleRate));
       for (let i = 0; i < sor.length; i++) {
         const x = a1 ? (a0[i] + a1[i]) * .5 : a0[i], t = this.t;
         this.buf[t & N1] = x;
         this.acc += x; this.impair = !this.impair;
         if (!this.impair) { this.ds[this.dp] = this.acc * .5; this.acc = 0; this.dp = (this.dp + 1) % this.R; if (++this.pas >= 256) { this.pas = 0; this.analyser(); } }
         this.corr += (this.cible - this.corr) * this.k;
-        const ratio = this.corr * trans;
+        // vibrato cree, calcule a chaque echantillon : une sinusoide sans marches
+        this.vibA += (this.vibC - this.vibA) * kv;
+        let ratio = this.courbe ? Math.pow(2, this.valCourbe(t - L) / 12) * trans : this.corr * trans;
+        if (this.vibA > 1e-4) { this.vph += dvph; if (this.vph > 6.283185307) this.vph -= 6.283185307; ratio *= Math.pow(2, this.vibA * Math.sin(this.vph) / 12); }
         let y = 0;
         if (this.formant) {
           // PSOLA : des grains de deux periodes, pris tous les T dans l'entree, reposes tous les T/ratio
@@ -1027,7 +1112,11 @@ const STUDIO = (() => {
             while (this.ta + T / 2 < cible) this.ta += T;
             while (this.ta - T / 2 > cible) this.ta -= T;
             const ca = Math.round(this.ta), cs = Math.round(this.ts);
-            for (let j = -T; j < T; j++) { const w = .5 + .5 * Math.cos(Math.PI * j / T); const o = (cs + j) & N1; this.out[o] += this.buf[(ca + j) & N1] * w; this.som[o] += w; }
+            if (fs === 1) for (let j = -T; j < T; j++) { const w = .5 + .5 * Math.cos(Math.PI * j / T); const o = (cs + j) & N1; this.out[o] += this.buf[(ca + j) & N1] * w; this.som[o] += w; }
+            // timbre : le grain est relu plus vite (formants plus hauts) ou plus lentement
+            // (plus graves) ; sa cadence, elle, fixe toujours la note
+            else for (let j = -T; j < T; j++) { const w = .5 + .5 * Math.cos(Math.PI * j / T), o = (cs + j) & N1, pos = ca + j * fs, i0 = Math.floor(pos), fr = pos - i0;
+              const a = this.buf[i0 & N1]; this.out[o] += (a + (this.buf[(i0 + 1) & N1] - a) * fr) * w; this.som[o] += w; }
             this.ts += Math.max(1, T / r);
           }
           const o = t & N1, s = this.som[o];
@@ -1119,7 +1208,32 @@ const STUDIO = (() => {
     [...touches].forEach((c, i) => { if (c === "1") masque |= 1 << i; else if (c === "b") libres |= 1 << i; });
     return { touches, masque: masque || (libres ? 0 : 4095), libres };
   }
-  const avanceAT = p => p.fx && p.fx.autotune && p.fx.autotune.on ? LAT_AT : 0;
+  const pitchActif = f => !!f && ((f.autotune && f.autotune.on) || (f.autopitch && f.autopitch.on));
+  const avanceAT = p => pitchActif(p.fx) ? LAT_AT : 0;
+  /* Ce que recoit le processeur. Tune Pro passe en premier ; sinon Auto-Pitch traduit ses trois
+     gestes en reglages. La gamme de la prod ne sert que si sa tonalite est lue dans le titre :
+     une tonalite estimee (« ~ ») peut etre fausse et tirerait la voix vers les mauvaises notes. */
+  function reglagesAT(f){
+    const a = f.autotune, ap = f.autopitch;
+    if (a && a.on) {
+      const cl = clavierDe(a), t = TESSITURES[a.tessiture] || TESSITURES.large;
+      return { on: true, mode: a.type === "libre" ? "libre" : cl.masque === 4095 && !cl.libres ? "chroma" : "gamme",
+        vitesse: a.vitesse, transition: a.transition || 0, humain: (a.humain || 0) / 100, tolerance: a.tolerance || 0, diapason: a.diapason || 440,
+        demitons: a.demitons, mix: a.mix / 100, masque: cl.masque, libres: cl.libres, formant: a.formant !== false, fmin: t.min, fmax: t.max,
+        vibnat: (a.vibnat || 0) / 100, vibprof: a.vibprof || 0, vibvit: a.vibvit || 5.5, vibdel: a.vibdel == null ? 300 : a.vibdel, timbre: a.formant !== false ? a.timbre || 0 : 0 };
+    }
+    if (ap && ap.on) {
+      const i = Math.max(0, Math.min(1, (+ap.intensite || 0) / 100)), st = ap.type || "naturel";
+      const masque = ap.cle === "auto" || ap.cle == null ? (prod && prod.keySur ? masqueGamme(prod.key) : 4095) : masqueDe(+ap.cle, ap.gamme === "majeur" ? "majeur" : "mineur");
+      // chaque style : [vitesse a 100 %, vitesse a 0 %, humanize, vibrato garde]
+      const S = { naturel: [22, 160, .5, .8], marque: [6, 60, .15, .35], robot: [0, 14, 0, 0] }[st] || [22, 160, .5, .8];
+      const oct = ap.effet === "grave" ? -12 : ap.effet === "aigu" ? 12 : 0;
+      return { on: true, mode: i === 0 ? "libre" : masque === 4095 ? "chroma" : "gamme", masque, libres: 0,
+        vitesse: S[1] + (S[0] - S[1]) * i, transition: 0, humain: S[2], tolerance: Math.round((1 - i) * 25), diapason: 440,
+        demitons: oct, mix: 1, formant: !oct, fmin: 60, fmax: 1100, vibnat: S[3], vibprof: 0, vibvit: 5.5, vibdel: 300, timbre: 0 };
+    }
+    return { on: false };
+  }
   // gamme de la prod (« Am », « F#m », « Eb ») en masque de 12 notes ; chromatique sans tonalite connue
   function masqueGamme(cle){
     const m = /^~?([A-G])([#b]?)(m?)/.exec(cle || "");
@@ -1250,16 +1364,11 @@ const STUDIO = (() => {
     const f = p.fx, c = n.c, on = k => f[k] && f[k].on;
     n.entree.gain.value = dB(trimAuto(p));
     if (n.at.port && f.autotune) {
-      const a = f.autotune;
-      // la gamme de la prod seulement si sa tonalite est lue dans le titre : une tonalite
-      // estimee (« ~ ») peut etre fausse et tirerait la voix vers les mauvaises notes
-      const cl = clavierDe(a), t = TESSITURES[a.tessiture] || TESSITURES.large;
-      n.at.port.postMessage({ on: !!a.on, mode: a.type === "libre" ? "libre" : cl.masque === 4095 && !cl.libres ? "chroma" : "gamme",
-        vitesse: a.vitesse, transition: a.transition || 0, humain: (a.humain || 0) / 100, tolerance: a.tolerance || 0, diapason: a.diapason || 440,
-        demitons: a.demitons, mix: a.mix / 100, masque: cl.masque, libres: cl.libres, formant: a.formant !== false, fmin: t.min, fmax: t.max,
-        telem: fxOuvert === "autotune" && pisteCible() === p });
+      const m = reglagesAT(f);
+      m.telem = (fxOuvert === "autotune" || fxOuvert === "autopitch") && pisteCible() === p;
+      n.at.port.postMessage(m);
       // la latence du processeur se compense en lisant la piste plus tot : on reprogramme si elle change
-      if (n.atOn !== !!a.on) { n.atOn = !!a.on; sale = true; }
+      if (n.atOn !== m.on) { n.atOn = m.on; sale = true; }
     }
     n.hpf.frequency.value = on("hpf") ? f.hpf.freq : 10;
     n.eqB.frequency.value = f.eq.basF; n.eqB.gain.value = on("eq") ? f.eq.bas : 0;
@@ -1360,7 +1469,7 @@ const STUDIO = (() => {
     }
     for (const k of P.clips) {
       if (rec && k.piste === rec.piste && k.start + k.dur > rec.debut) continue;   // ce qu'on remplace se tait
-      const n = noeuds.get(k.piste), buf = BUF.get(k.prise), pi = P.pistes.find(x => x.id === k.piste);
+      const n = noeuds.get(k.piste), buf = bufDe(k.prise), pi = P.pistes.find(x => x.id === k.piste);
       const st = k.start - (pi ? avanceAT(pi) : 0);   // l'autotune retarde la voix : elle part d'autant plus tot
       if (!n || !buf || st + k.dur <= Bv) continue;
       const dans = Math.max(0, Bv - st), when = T + Math.max(0, st - Bv);
@@ -1418,6 +1527,112 @@ const STUDIO = (() => {
     if (!v.length) return 0;
     return Math.round(clamp(-20 - v.reduce((a, b) => a + b, 0) / v.length, -12, 18) * 2) / 2;
   }
+  /* ─────────── traitements d'une prise : nettoyage, puis retouche des notes ───────────
+     Rendus hors ligne une fois, puis lus a la place de l'original (le timeline, les fondus et
+     les effets de la piste ne changent pas). P.prisesFx[id] = { net: {...}, ret: {...} }. */
+  const BUF_PROC = new Map(), PITCH = new Map(), SIGN = new Map(), RENDU_EN_COURS = new Set();
+  const bufDe = id => BUF_PROC.get(id) || BUF.get(id);
+  const fxPrise = (id, creer) => { if (!P.prisesFx) P.prisesFx = {}; if (!P.prisesFx[id] && creer) P.prisesFx[id] = {}; return P.prisesFx[id] || null; };
+  const retActive = r => !!r && (r.aplanir > 0 || Object.values(r.decal || {}).some(d => Math.abs(d) > .005));
+  const netActif = n => !!n && n.on;
+  const signature = id => { const f = P.prisesFx && P.prisesFx[id]; if (!f) return ""; return JSON.stringify([netActif(f.net) ? f.net : 0, retActive(f.ret) ? f.ret : 0]); };
+  /* Hauteur de la prise, trame par trame (YIN sur le signal sous-echantillonne de moitie,
+     une trame toutes les 512 echantillons, ~11,6 ms), puis decoupage en notes. */
+  async function analyserHauteur(id){
+    if (PITCH.has(id)) return PITCH.get(id);
+    const b = BUF.get(id); if (!b) return null;
+    const sr = b.sampleRate, x0 = b.getChannelData(0), x1 = b.numberOfChannels > 1 ? b.getChannelData(1) : null;
+    const n2 = Math.floor(x0.length / 2), d = new Float32Array(n2);
+    for (let i = 0; i < n2; i++) d[i] = x1 ? (x0[2 * i] + x0[2 * i + 1] + x1[2 * i] + x1[2 * i + 1]) * .25 : (x0[2 * i] + x0[2 * i + 1]) * .5;
+    const sr2 = sr / 2, hop = 256, W = 400, tmin = Math.floor(sr2 / 1100), tmax = Math.ceil(sr2 / 65);
+    const nf = Math.max(0, Math.floor((n2 - W - tmax) / hop)), m = new Float32Array(nf), df = new Float32Array(tmax + 2);
+    for (let f = 0; f < nf; f++) {
+      if (f % 120 === 119) await new Promise(r => setTimeout(r, 0));   // la page reste fluide pendant l'analyse
+      const o = f * hop; let e = 0; for (let j = 0; j < W; j++) e += d[o + j] * d[o + j];
+      if (e / W < 2e-5) continue;                                      // silence (sous ~ -47 dBFS)
+      let som = 0; df[0] = 1;
+      for (let t = 1; t <= tmax; t++) { let s2 = 0; for (let j = 0; j < W; j++) { const u = d[o + j] - d[o + j + t]; s2 += u * u; } som += s2; df[t] = som > 0 ? s2 * t / som : 1; }
+      let best = -1; for (let t = tmin; t <= tmax; t++) if (df[t] < .12) { while (t + 1 <= tmax && df[t + 1] < df[t]) t++; best = t; break; }
+      if (best < 1) continue;
+      const a = df[best - 1], bb = df[best], c = df[best + 1], den = a - 2 * bb + c;
+      m[f] = 69 + 12 * Math.log2(sr2 / (best + (den ? .5 * (a - c) / den : 0)) / 440);
+    }
+    // mediane sur trois trames : une erreur d'octave isolee disparait
+    const mm = new Float32Array(nf);
+    for (let i = 0; i < nf; i++) { const a = m[i - 1] || 0, b2 = m[i], c = m[i + 1] || 0; mm[i] = !b2 ? 0 : a && c ? Math.max(Math.min(a, b2), Math.min(Math.max(a, b2), c)) : b2; }
+    const res = { sr, hop: hop * 2, dec: W, m: mm, notes: segmenter(mm) };
+    PITCH.set(id, res); return res;
+  }
+  // une note : une suite de trames chantees ; elle change quand la voix part a plus de 0,7 demi-ton pendant 3 trames
+  function segmenter(m){
+    const notes = []; let a = -1, vals = [];
+    const med = v => { const t = v.slice().sort((x, y) => x - y); return t[t.length >> 1]; };
+    const fin = b => { if (a >= 0 && b - a >= 5) notes.push({ a, b, m: med(vals) }); a = -1; vals = []; };
+    for (let i = 0; i < m.length; i++) {
+      const v = m[i];
+      if (!v) { fin(i); continue; }
+      if (a < 0) { a = i; vals = [v]; continue; }
+      const ref = med(vals.slice(-8)), loin = x => x && Math.abs(x - ref) > .7;
+      if (loin(v) && loin(m[i + 1]) && loin(m[i + 2])) { fin(i); a = i; vals = [v]; continue; }
+      vals.push(v);
+    }
+    fin(m.length);
+    return notes;
+  }
+  /* La courbe de decalage (demi-tons) par trame : chaque note bouge de son decalage, et
+     « Aplanir » ramene ses ecarts (vibrato, derive) vers son centre. Les passages d'une note a
+     l'autre sont lisses sur « Transition » ms, dans les deux sens (pas de retard). */
+  function courbeRetouche(an, r){
+    const n = an.m.length, c = new Float32Array(n), ap = (r.aplanir || 0) / 100;
+    for (const no of an.notes) { const d = (r.decal && r.decal[no.a]) || 0;
+      for (let i = no.a; i < no.b; i++) c[i] = d - (an.m[i] ? (an.m[i] - no.m) * ap : 0); }
+    const tau = Math.max(.5, (r.transition == null ? 40 : r.transition) / 1000 * an.sr / an.hop), k = 1 - Math.exp(-1 / tau);
+    for (let i = 1; i < n; i++) c[i] = c[i - 1] + (c[i] - c[i - 1]) * k;
+    for (let i = n - 2; i >= 0; i--) c[i] = c[i + 1] + (c[i] - c[i + 1]) * k;
+    return c;
+  }
+  async function decalerHauteur(buf, courbe, an){
+    const sr = buf.sampleRate, L = Math.round(LAT_AT * sr), n = buf.length;
+    const oc = new OfflineAudioContext(1, n + L, sr);
+    if (!await chargerAT(oc) || !AT_PRET.has(oc)) return buf;
+    const node = new AudioWorkletNode(oc, "findings-autotune", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1],
+      processorOptions: { on: true, mode: "libre", formant: true, mix: 1, demitons: 0, courbe, chop: an.hop, cdec: an.dec } });
+    const s = oc.createBufferSource(); s.buffer = buf; s.connect(node); node.connect(oc.destination); s.start();
+    const r = await oc.startRendering(), out = new AudioBuffer({ numberOfChannels: 1, length: n, sampleRate: sr });
+    out.copyToChannel(r.getChannelData(0).subarray(L, L + n), 0);
+    return out;
+  }
+  /* Recalcule la version traitee d'une prise si ses reglages ont change (apres une
+     retouche, un annuler, l'ouverture du projet). */
+  async function rendrePrise(id){
+    const sig = signature(id);
+    if (SIGN.get(id) === sig && (sig === "" || BUF_PROC.has(id))) return;
+    if (RENDU_EN_COURS.has(id)) { RENDU_EN_COURS.add(id + ":encore"); return; }
+    RENDU_EN_COURS.add(id);
+    try {
+      const f = P.prisesFx && P.prisesFx[id];
+      let buf = BUF.get(id);
+      if (buf && f && netActif(f.net) && typeof nettoyer === "function") buf = await nettoyer(buf, f.net);
+      if (buf && f && retActive(f.ret)) { const an = await analyserHauteur(id); if (an) buf = await decalerHauteur(buf, courbeRetouche(an, f.ret), an); }
+      if (!buf || buf === BUF.get(id)) BUF_PROC.delete(id); else BUF_PROC.set(id, buf);
+      SIGN.set(id, sig); sale = true;
+    } catch (e) { console.warn("traitement de prise", e); }
+    RENDU_EN_COURS.delete(id);
+    if (RENDU_EN_COURS.has(id + ":encore")) { RENDU_EN_COURS.delete(id + ":encore"); rendrePrise(id); }
+    dessinerBadges();
+  }
+  const planifies = new Map();
+  const planifierRendu = id => { clearTimeout(planifies.get(id)); planifies.set(id, setTimeout(() => rendrePrise(id), 250)); };
+  const majTraitements = () => { if (!P) return; const ids = new Set(P.clips.map(k => k.prise)); ids.forEach(id => { if (SIGN.get(id) !== signature(id)) planifierRendu(id); }); };
+  // petit repere sur les regions dont la prise est traitee
+  function dessinerBadges(){
+    if (!P || typeof grilleEl === "undefined" || !grilleEl) return;
+    P.clips.forEach(k => { const el2 = grilleEl.querySelector(`.clip[data-clip="${k.id}"]`); if (!el2) return;
+      const f = P.prisesFx && P.prisesFx[k.prise], t = [f && netActif(f.net) ? "Nettoyée" : "", f && retActive(f.ret) ? "Notes retouchées" : ""].filter(Boolean);
+      let b = el2.querySelector(".clip-fx"); if (!t.length) { if (b) b.remove(); return; }
+      if (!b) { b = document.createElement("span"); b.className = "clip-fx"; el2.appendChild(b); }
+      b.textContent = (t.length > 1 ? "✦✦" : "✦"); b.title = t.join(" · "); });
+  }
   async function decoder(p){
     if (BUF.has(p.id)) return true;
     try {
@@ -1444,7 +1659,9 @@ const STUDIO = (() => {
     }
     if (pr.beatStart == null) pr.beatStart = 0;
     pr.pistes.forEach(migrer);
+    if (!pr.prisesFx) pr.prisesFx = {};
     P = pr;
+    BUF_PROC.clear(); SIGN.clear(); setTimeout(majTraitements, 0);
     arreterInterne(); fichier = null;
     try {
       const f = await PRISES_DB.lireFichier(b.id);
@@ -1560,10 +1777,10 @@ const STUDIO = (() => {
     signalerProjets();
   }
   function sauver(){ clearTimeout(saveMinuteur); saveMinuteur = setTimeout(() => { if (!P) return; P.maj = Date.now(); try { PRISES_DB.ecrireProjet(JSON.parse(JSON.stringify(P))); } catch (e) {} }, 350); }
-  const instantane = () => JSON.stringify({ pistes: P.pistes, clips: P.clips, decal: P.decal, beatStart: P.beatStart });
+  const instantane = () => JSON.stringify({ pistes: P.pistes, clips: P.clips, decal: P.decal, beatStart: P.beatStart, prisesFx: P.prisesFx || {} });
   function memoriser(avant){ histo.push(avant || instantane()); if (histo.length > 60) histo.shift(); refaire = []; outils(); }
   function restaurer(json){
-    const o = JSON.parse(json); P.pistes = o.pistes; P.clips = o.clips; P.decal = o.decal; P.beatStart = o.beatStart || 0;
+    const o = JSON.parse(json); P.pistes = o.pistes; P.clips = o.clips; P.decal = o.decal; P.beatStart = o.beatStart || 0; P.prisesFx = o.prisesFx || {}; majTraitements();
     if (sel && !(sel.type === "clip" ? P.clips : P.pistes).some(x => x.id === sel.id)) sel = null;
     construireNoeuds(); dessiner(); inspecteur(); outils(); sauver();
   }
@@ -1613,7 +1830,8 @@ const STUDIO = (() => {
 
   /* ─────────────────────────── dessin ─────────────────────────── */
   const largeur = () => Math.max(fichier ? 0 : (estLibre() ? 60 : duree()), finProjet(), 10) * zoom + 160;
-  function dessiner(){
+  function dessiner(){ dessinerBrut(); dessinerBadges(); }
+  function dessinerBrut(){
     if (!P) return;
     const W = largeur(), styleVar = `var(--s-${prod.style})`;
     // regle : un repere par mesure, espaces selon le zoom
@@ -1772,7 +1990,7 @@ const STUDIO = (() => {
      « Region » (volume et fondus de la region choisie), « Projet » (reglages generaux).
      Les reglages sont des boutons rotatifs : on les tire vers le haut ou le bas (Maj pour
      affiner), double-clic pour revenir a la valeur d'origine, molette ou fleches au clavier. */
-  let onglet = "piste", fxOuvert = "reverb";
+  let onglet = "piste", fxOuvert = "reverb", atVue = "auto";   // atVue : l'onglet ouvert dans Tune Pro
   const corps = $("dawCorps"), pan = $("dawPan");
   const ARC = (v01) => { const a0 = -225, a1 = a0 + 270 * v01, r = 17, cx = 21, cy = 21;
     const pt = a => [cx + r * Math.cos(a * Math.PI / 180), cy + r * Math.sin(a * Math.PI / 180)];
@@ -1789,7 +2007,7 @@ const STUDIO = (() => {
     if (u === "dB") return `${v > 0 ? "+" : ""}${(+v).toFixed(Math.abs(v) < 10 && v % 1 ? 1 : 0)} dB`;
     if (u === "%") return `${Math.round(v)} %`;
     if (u === "ms") return `${Math.round(v)} ms`;
-    if (u === "dt") return `${v > 0 ? "+" : ""}${Math.round(v)} dt`;
+    if (u === "dt") return `${v > 0 ? "+" : ""}${v % 1 ? (+v).toFixed(1) : Math.round(v)} dt`;
     if (u === "ct") return `${Math.round(v)} ct`;
     if (u === "s") return `${(+v).toFixed(1)} s`;
     if (u === ":1") return `${(+v).toFixed(v % 1 ? 1 : 0)}:1`;
@@ -1817,6 +2035,7 @@ const STUDIO = (() => {
   /* une cle de reglage → l'objet et la propriete qu'elle designe */
   function cible(cle){
     const [quoi, a, b] = cle.split(".");
+    if (quoi === "ret") { const k = clipGraphe(); if (!k) return [null]; const f = fxPrise(k.prise, true); if (!f.ret) f.ret = { decal: {}, aplanir: 0, transition: 40 }; return [f.ret, a, null]; }
     if (quoi === "fx") { const p = pisteCible(); return [p.fx[a], b, p]; }
     if (quoi === "piste") { const p = pisteCible(); return [p, a, p]; }
     if (quoi === "region") { const k = regionSel(); return [k, a, null]; }
@@ -1832,6 +2051,7 @@ const STUDIO = (() => {
     } else if (cle === "projet.master") { if (busV) busV.master.gain.value = val; }
     else if (cle === "projet.beatVol") { if (modeFichier()) { if (gainProd) gainProd.gain.value = val / 100; } else { try { player.setVolume(val); VOL = val; } catch (e) {} } }
     else if (cle === "projet.decal") sale = true;
+    else if (cle.startsWith("ret.")) { const k = clipGraphe(); if (k) planifierRendu(k.prise); }
     else if (p) { p.preset = p.preset && cle.startsWith("fx.") ? "perso" : p.preset; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif());
       if (cle.startsWith("fx.")) { const k = cle.split(".")[1], r = corps.querySelector(`[data-resume="${k}"]`); if (r) r.textContent = resume(k, p.fx[k]); }
       if (cle === "piste.vol") { const r = grilleEl.querySelector(`[data-vol="${p.id}"]`); if (r) r.value = Math.round(val * 100); } }
@@ -1844,6 +2064,7 @@ const STUDIO = (() => {
     $("dawOngletPiste").textContent = `${p.nom} · effets`;
     pan.querySelectorAll("[data-onglet]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.onglet === onglet)));
     corps.classList.toggle("rack", onglet === "piste");
+    corps.classList.toggle("graphe", onglet === "piste" && fxOuvert === "autotune" && atVue === "graph");
     if (onglet === "piste") {
       const presets = Object.entries(PRESETS).map(([c, x]) => `<option value="${c}"${p.preset === c ? " selected" : ""}>${esc(x.nom)}</option>`).join("")
         + (p.preset === "perso" ? '<option value="perso" selected>Réglages perso</option>' : "");
@@ -1871,7 +2092,7 @@ const STUDIO = (() => {
             <button class="plug-i" data-aide aria-label="Aide" title="Aide">i</button>
           </header>
           <div class="plug-aide">${AIDE[f.k]}</div>
-          ${f.k === "autotune" ? corpsAutotune(f, v) : `
+          ${f.k === "autotune" ? corpsAutotune(f, v) : f.k === "autopitch" ? corpsAutoPitch(f, v) : `
           <div class="plug-main"><div class="plug-gauche">
           ${f.types || f.divisions || f.menus ? `<div class="plug-barre">
             ${f.types ? selecteur("fxtype", f.k, f.types, v.type) : ""}
@@ -1944,7 +2165,29 @@ const STUDIO = (() => {
     const valGamme = v.type === "chroma" ? "chroma" : v.type === "libre" ? "libre" : auto ? (cleProd ? cleProd.gamme : "chroma") : v.gamme;
     const opt = (val, lib, sel) => `<option value="${val}"${sel ? " selected" : ""}>${esc(lib)}</option>`;
     const coche = v.formant !== false;
-    return `<div class="at-art">
+    const onglets = `<div class="at-onglets" role="tablist">${[["auto", "Auto"], ["avance", "Avancé"], ["graph", "Graphique"]].map(([c, n]) => `<button role="tab" data-atvue="${c}" aria-selected="${atVue === c}">${n}</button>`).join("")}</div>`;
+    if (atVue === "graph") {
+      const p = pisteCible(), ks = P.clips.filter(k => k.piste === p.id).sort((a, b) => a.start - b.start), k = clipGraphe();
+      if (!k) return `<div class="at-art">${onglets}<p class="gr-vide">Enregistre ou importe une prise sur cette piste : ses notes s'afficheront ici, et tu pourras les déplacer une par une.</p></div>`;
+      const r = (P.prisesFx[k.prise] && P.prisesFx[k.prise].ret) || {};
+      return `<div class="at-art gr-art">${onglets}
+      <div class="gr-barre">
+        <label class="plug-menu">Région<select data-grclip>${ks.map((x, i) => `<option value="${x.id}"${x.id === k.id ? " selected" : ""}>Région ${i + 1} · ${fmt(x.start)}</option>`).join("")}</select></label>
+        <div class="gr-kn">${bouton("ret.aplanir", "Aplanir", 0, 100, 1, "%", r.aplanir || 0, 0)}${bouton("ret.transition", "Transition", 5, 200, 1, "ms", r.transition == null ? 40 : r.transition, 40)}</div>
+        <div class="gr-acts"><button class="gr-act" data-gr="caler" title="Pose chaque note sur la note juste la plus proche de la gamme">Caler sur la gamme</button><button class="gr-act" data-gr="raz">Tout remettre</button></div>
+      </div>
+      <div class="plug-vis gr-vis" data-vis="graph"><canvas></canvas></div>
+      <p class="gr-aide">Glisse une note vers le haut ou le bas · <b>Alt</b> : au centième près · <b>double-clic</b> : la remettre · les retouches sont gravées dans la prise</p>
+    </div>`;
+    }
+    if (atVue === "avance") return `<div class="at-art">${onglets}
+      <div class="at-bas">
+        <div class="at-bloc at-bloc-clavier"><span class="ap-t">Notes visées</span>${clavierHTML(v)}</div>
+        <div class="at-bloc"><span class="ap-t">Vibrato</span><div class="at-grille g4">${par("vibnat")}${par("vibprof")}${par("vibvit")}${par("vibdel")}</div></div>
+        <div class="at-bloc"><span class="ap-t">Voix</span><div class="at-grille g1">${par("timbre")}</div></div>
+      </div>
+    </div>`;
+    return `<div class="at-art">${onglets}
       <div class="at-menus">
         <label class="plug-menu">Tonalité<select data-atsel="cle" translate="no">
           ${opt("auto", cleProd && prod.keySur ? `Auto · ${NOTES[cleProd.tonique]} ${GAMMES[cleProd.gamme].nom.toLowerCase()}` : "Auto · prod", auto)}
@@ -1958,6 +2201,28 @@ const STUDIO = (() => {
         <div class="plug-vis at-metre" data-vis="autotune"><canvas></canvas></div>
         <div class="at-grand">${par("vitesse").replace('class="kn"', 'class="kn grand"')}</div>
         <div class="at-grille">${par("humain")}${par("tolerance")}${par("mix")}${par("demitons")}${par("diapason")}</div>
+      </div>
+    </div>`;
+  }
+  /* Auto-Pitch, la version simple : tonalite, un gros bouton Intensite, le style et l'effet. */
+  function corpsAutoPitch(f, v){
+    const cleProd = lireCle(prod && prod.key), auto = v.cle === "auto" || v.cle == null;
+    const opt = (val, lib, sel) => `<option value="${val}"${sel ? " selected" : ""}>${esc(lib)}</option>`;
+    const d = f.p.find(x => x[0] === "intensite");
+    return `<div class="at-art ap-art">
+      <div class="at-menus">
+        <label class="plug-menu">Tonalité<select data-fxmenu="autopitch.cle" translate="no">
+          ${opt("auto", cleProd && prod.keySur ? `Auto · ${NOTES[cleProd.tonique]} ${GAMMES[cleProd.gamme].nom.toLowerCase()}` : "Auto · prod", auto)}
+          ${NOTES.map((n, i) => opt(String(i), n, !auto && String(v.cle) === String(i))).join("")}</select></label>
+        ${auto ? "" : `<label class="plug-menu">Gamme<select data-fxmenu="autopitch.gamme">${opt("mineur", "Mineure", v.gamme !== "majeur")}${opt("majeur", "Majeure", v.gamme === "majeur")}</select></label>`}
+      </div>
+      <div class="at-ligne">
+        <div class="plug-vis at-metre" data-vis="autopitch"><canvas></canvas></div>
+        <div class="at-grand">${bouton("fx.autopitch.intensite", d[1], d[2], d[3], d[4], d[5], v.intensite, d[6]).replace('class="kn"', 'class="kn grand"')}</div>
+        <div class="ap-choix">
+          <span class="ap-t">Style</span>${selecteur("fxtype", "autopitch", f.types, v.type)}
+          <span class="ap-t">Effet</span>${selecteur("fxmenu", "autopitch.effet", [["aucun", "Aucun"], ["grave", "Octave grave", "−12"], ["aigu", "Octave aiguë", "+12"]], v.effet || "aucun")}
+        </div>
       </div>
     </div>`;
   }
@@ -1992,11 +2257,118 @@ const STUDIO = (() => {
     const base = versBas ? H : H / 2; g.lineTo(W, base); g.lineTo(0, base); g.closePath(); g.fillStyle = coul.replace("rgb(", "rgba(").replace(")", versBas ? ",.10)" : ",.14)"); g.fill();
   }
   let visuRAF = 0, eqPoints = [], eqDrag = null;
+  /* ─────────── Tune Pro, mode graphique ───────────
+     La prise de la region choisie : sa hauteur trame par trame (gris), ses notes (pastilles),
+     la voix retouchee (couleur). On glisse une pastille pour changer la note. */
+  let grClip = null, grDrag = null, grZones = [];
+  function clipGraphe(){
+    if (!P) return null;
+    const p = pisteCible(), ks = P.clips.filter(k => k.piste === p.id).sort((a, b) => a.start - b.start);
+    const r = regionSel(); if (r && r.piste === p.id) grClip = r.id;
+    return ks.find(k => k.id === grClip) || ks[0] || null;
+  }
+  function dessinerGraphe(g, W, H, coul){
+    const k = clipGraphe(); if (!k) return;
+    const an = PITCH.get(k.prise);
+    g.fillStyle = "#0B0D10"; g.fillRect(0, 0, W, H);
+    if (!an) { if (!RENDU_EN_COURS.has("an:" + k.prise)) { RENDU_EN_COURS.add("an:" + k.prise); analyserHauteur(k.prise).finally(() => RENDU_EN_COURS.delete("an:" + k.prise)); }
+      g.fillStyle = "rgba(255,255,255,.55)"; g.font = "12px ui-monospace,Menlo,monospace"; g.textAlign = "center"; g.fillText("Analyse des notes de la prise…", W / 2, H / 2); g.textAlign = "left"; return; }
+    const r = (P.prisesFx[k.prise] && P.prisesFx[k.prise].ret) || { decal: {}, aplanir: 0 };
+    const tf = i => (i * an.hop + an.dec) / an.sr;                   // temps (dans la prise) d'une trame
+    const i0 = Math.max(0, Math.floor((k.offset * an.sr - an.dec) / an.hop)), i1 = Math.min(an.m.length, Math.ceil(((k.offset + k.dur) * an.sr - an.dec) / an.hop));
+    const notes = an.notes.filter(no => no.b > i0 && no.a < i1), courbe = courbeRetouche(an, r);
+    // plage verticale : les notes visibles, avant et apres retouche, plus une marge
+    let lo = 99, hi = 0;
+    notes.forEach(no => { const d = (r.decal && r.decal[no.a]) || 0; lo = Math.min(lo, no.m, no.m + d); hi = Math.max(hi, no.m, no.m + d); });
+    if (lo > hi) { lo = 57; hi = 69; }
+    lo = Math.floor(lo) - 2; hi = Math.ceil(hi) + 2; if (hi - lo < 12) { const c = (hi + lo) / 2; lo = Math.floor(c - 6); hi = lo + 12; }
+    const G = 34, X = t => G + (t - k.offset) / k.dur * (W - G - 6), Y = m => 8 + (hi - m) / (hi - lo) * (H - 16), rang = (H - 16) / (hi - lo);
+    // lignes de demi-tons : les notes de la gamme de Tune Pro sont eclairees
+    const cl = clavierDe(pisteCible().fx.autotune);
+    g.font = "9px ui-monospace,Menlo,monospace";
+    for (let m = lo; m <= hi; m++) {
+      const pc = ((m % 12) + 12) % 12, y = Y(m), dansGamme = cl.masque & (1 << pc);
+      if (dansGamme) { g.fillStyle = "rgba(255,255,255,.035)"; g.fillRect(G, y - rang / 2, W - G, rang); }
+      g.strokeStyle = pc === 0 ? "rgba(255,255,255,.16)" : "rgba(255,255,255,.05)"; g.beginPath(); g.moveTo(G, y + .5); g.lineTo(W, y + .5); g.stroke();
+      if (rang >= 9 || pc === 0) { g.fillStyle = dansGamme ? "rgba(255,255,255,.62)" : "rgba(255,255,255,.28)"; g.fillText(NOTES_EN[pc] + (Math.floor(m / 12) - 1), 4, y + 3); }
+    }
+    // la voix chantee (gris), puis retouchee (couleur)
+    const trace = (val, style, w) => { g.beginPath(); let en = false;
+      for (let i = i0; i < i1; i++) { const v = an.m[i]; if (!v) { en = false; continue; } const x = X(tf(i)), y = Y(val(i, v)); en ? g.lineTo(x, y) : g.moveTo(x, y); en = true; }
+      g.strokeStyle = style; g.lineWidth = w; g.stroke(); };
+    trace((i, v) => v, "rgba(255,255,255,.28)", 1.2);
+    // les notes
+    grZones = [];
+    notes.forEach(no => {
+      const d = (r.decal && r.decal[no.a]) || 0, x0 = Math.max(G, X(tf(no.a))), x1 = Math.min(W - 4, X(tf(no.b))), y = Y(no.m + d), h = Math.max(6, Math.min(16, rang * .72));
+      const actif = grDrag && grDrag.a === no.a, bouge = Math.abs(d) > .005;
+      const alpha = a2 => coul.replace("rgb(", "rgba(").replace(")", `,${a2})`);
+      g.fillStyle = actif ? coul : bouge ? alpha(.62) : "rgba(255,255,255,.16)";
+      g.strokeStyle = bouge || actif ? coul : "rgba(255,255,255,.4)"; g.lineWidth = actif ? 1.5 : 1;
+      const rr = Math.min(h / 2, 5); g.beginPath(); g.roundRect ? g.roundRect(x0, y - h / 2, Math.max(3, x1 - x0), h, rr) : g.rect(x0, y - h / 2, Math.max(3, x1 - x0), h); g.fill(); g.stroke();
+      if (x1 - x0 > 30) { const nn = Math.round(no.m + d); g.fillStyle = bouge || actif ? "#0B0D10" : "rgba(255,255,255,.8)"; g.font = "700 9px ui-monospace,Menlo,monospace"; g.fillText(NOTES_EN[((nn % 12) + 12) % 12] + (Math.floor(nn / 12) - 1), x0 + 5, y + 3); }
+      grZones.push({ a: no.a, m: no.m, x0, x1, y, h, rang });
+    });
+    trace((i, v) => v + courbe[i], coul, 1.6);
+    // la tete de lecture
+    const t = tempsBeat() - (P.decal || 0) / 1000 - k.start + k.offset;
+    if (t > k.offset && t < k.offset + k.dur) { const x = X(t); g.strokeStyle = "rgba(255,255,255,.75)"; g.lineWidth = 1; g.beginPath(); g.moveTo(x + .5, 0); g.lineTo(x + .5, H); g.stroke(); }
+    const enCours = RENDU_EN_COURS.has(k.prise) || planifies.has(k.prise) && SIGN.get(k.prise) !== signature(k.prise);
+    g.fillStyle = "rgba(255,255,255,.5)"; g.font = "9.5px ui-monospace,Menlo,monospace"; g.textAlign = "right";
+    g.fillText(enCours ? "calcul de la prise…" : `${notes.length} note${notes.length > 1 ? "s" : ""}`, W - 8, H - 7); g.textAlign = "left";
+  }
+  const zoneGraphe = (cv, e) => { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    return { x, y, z: grZones.find(z => x >= z.x0 - 2 && x <= z.x1 + 2 && Math.abs(y - z.y) <= Math.max(7, z.h / 2 + 3)) }; };
+  pan.addEventListener("pointerdown", e => {
+    const cv = e.target.closest('.plug-vis[data-vis="graph"] canvas'); if (!cv) return;
+    const { y, z } = zoneGraphe(cv, e); if (!z) return;
+    const k = clipGraphe(); if (!k) return;
+    e.preventDefault(); cv.setPointerCapture(e.pointerId);
+    const f = fxPrise(k.prise, true); if (!f.ret) f.ret = { decal: {}, aplanir: 0, transition: 40 }; if (!f.ret.decal) f.ret.decal = {};
+    grDrag = { a: z.a, m: z.m, y0: y, d0: f.ret.decal[z.a] || 0, rang: z.rang, avant: instantane(), prise: k.prise, cv };
+  });
+  pan.addEventListener("pointermove", e => {
+    if (!grDrag) { const cv = e.target.closest('.plug-vis[data-vis="graph"] canvas'); if (cv) cv.style.cursor = zoneGraphe(cv, e).z ? "ns-resize" : "default"; return; }
+    const r = grDrag.cv.getBoundingClientRect(), dy = (grDrag.y0 - (e.clientY - r.top)) / grDrag.rang;
+    const d = e.altKey ? Math.round((grDrag.d0 + dy) * 100) / 100 : Math.round(grDrag.m + grDrag.d0 + dy) - grDrag.m;
+    const ret = P.prisesFx[grDrag.prise].ret; if (Math.abs(d) < .005) delete ret.decal[grDrag.a]; else ret.decal[grDrag.a] = Math.round(d * 1000) / 1000;
+  });
+  pan.addEventListener("pointerup", () => { if (!grDrag) return; const g2 = grDrag; grDrag = null;
+    if (instantane() !== g2.avant) { memoriser(g2.avant); sauver(); planifierRendu(g2.prise); } });
+  pan.addEventListener("dblclick", e => {
+    const cv = e.target.closest('.plug-vis[data-vis="graph"] canvas'); if (!cv) return;
+    const { z } = zoneGraphe(cv, e), k = clipGraphe(); if (!z || !k) return;
+    const ret = P.prisesFx[k.prise] && P.prisesFx[k.prise].ret; if (!ret || !ret.decal || ret.decal[z.a] == null) return;
+    memoriser(); delete ret.decal[z.a]; sauver(); planifierRendu(k.prise);
+  });
+  async function actionGraphe(quoi){
+    const k = clipGraphe(); if (!k) return;
+    const an = await analyserHauteur(k.prise); if (!an) return;
+    memoriser();
+    const f = fxPrise(k.prise, true); if (!f.ret) f.ret = { decal: {}, aplanir: 0, transition: 40 };
+    if (quoi === "raz") { f.ret = { decal: {}, aplanir: 0, transition: 40 }; message("Notes remises comme chantées"); }
+    else {
+      // chaque note vers la note permise la plus proche (gamme et clavier de Tune Pro)
+      const cl = clavierDe(pisteCible().fx.autotune), ok = m => cl.masque & (1 << (((m % 12) + 12) % 12));
+      f.ret.decal = {};
+      an.notes.forEach(no => { let best = Math.round(no.m), e2 = 99; for (let m = Math.round(no.m) - 2; m <= Math.round(no.m) + 2; m++) if (ok(m) && Math.abs(m - no.m) < e2) { e2 = Math.abs(m - no.m); best = m; }
+        const d = best - no.m; if (Math.abs(d) > .005) f.ret.decal[no.a] = Math.round(d * 1000) / 1000; });
+      if (!f.ret.aplanir) f.ret.aplanir = 30;
+      message(`${Object.keys(f.ret.decal).length} notes calées sur la gamme`);
+    }
+    sauver(); planifierRendu(k.prise); panneau();
+  }
   function visualiser(){
     cancelAnimationFrame(visuRAF);
     const boite = pan.querySelector(".plug-vis"); if (!boite || !ouvert || pan.classList.contains("ferme")) return;
-    const cv = boite.querySelector("canvas"), k = boite.dataset.vis, p = pisteCible(), f = p.fx[k], n = noeuds.get(p.id);
+    const cv = boite.querySelector("canvas"), k = boite.dataset.vis, p = pisteCible(), f = p.fx[k === "graph" ? "autotune" : k], n = noeuds.get(p.id);
     const dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
+    if (k === "graph") {
+      if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+      const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+      dessinerGraphe(g, W, H, teinte(getComputedStyle(boite.closest(".fxc")).getPropertyValue("--vis").trim(), 0));
+      visuRAF = requestAnimationFrame(() => setTimeout(visualiser, 33)); return;
+    }
     if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     const facade = boite.closest(".fxc"), coul = teinte(getComputedStyle(facade).getPropertyValue("--vis").trim() || getComputedStyle(pan).getPropertyValue("--pc").trim(), 0), on = f.on;
@@ -2126,7 +2498,7 @@ const STUDIO = (() => {
       g.beginPath(); hist.forEach((v, i) => { const px = hx + i / 220 * hw, py = 10 + Math.min(1, v / 12) * (H - 30); i ? g.lineTo(px, py) : g.moveTo(px, py); });
       g.strokeStyle = "#FFB547"; g.lineWidth = 1.4; g.stroke();
       g.fillStyle = "rgba(255,255,255,.5)"; g.fillText(`seuil ${f.seuil} dB · plafond ${f.plafond} dB · att. ${att.toFixed(1)} dB`, hx + 6, H - 6);
-    } else if (k === "autotune") {
+    } else if (k === "autotune" || k === "autopitch") {
       // indicateur de correction : de -100 a +100 cents, l'aiguille montre ce que l'autotune corrige
       const h = (n && n.atHist) || [], d = h[h.length - 1], cx = W / 2, cy = H - 16, R = Math.min(W * .42, H - 30);
       const corr = d && d.m > 0 ? 1200 * Math.log2(d.r || 1) : 0;
@@ -2175,6 +2547,8 @@ const STUDIO = (() => {
   pan.addEventListener("pointerup", () => { if (eqDrag) { eqDrag = null; sauver(); } });
   pan.addEventListener("click", e => {
     const o = e.target.closest("[data-onglet]"); if (o) { onglet = o.dataset.onglet; pan.classList.remove("ferme"); panneau(); return; }
+    const av = e.target.closest("[data-atvue]"); if (av) { atVue = av.dataset.atvue; panneau(); return; }
+    const gr = e.target.closest("[data-gr]"); if (gr) { actionGraphe(gr.dataset.gr); return; }
     if (e.target.closest("#dawReplier")) { pan.classList.toggle("ferme"); setTimeout(() => { dessiner(); visualiser(); }, 50); return; }
     const ouv = e.target.closest("[data-ouvrir]");
     if (ouv && !e.target.closest("[data-fxon]")) { fxOuvert = ouv.dataset.ouvrir; panneau(); reglerTout(); return; }
@@ -2191,7 +2565,11 @@ const STUDIO = (() => {
       memoriser(); a.clavier = cl.touches.slice(0, i) + suiv + cl.touches.slice(i + 1); if (a.type === "prod" || a.type === "chroma") a.type = a.type;
       p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; }
     const on = e.target.closest("[data-fxon]");
-    if (on) { const p = pisteCible(), f = p.fx[on.dataset.fxon]; memoriser(); f.on = !f.on; p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); panneau(); dessiner(); sauver(); return; }
+    if (on) { const p = pisteCible(), k = on.dataset.fxon, f = p.fx[k]; memoriser(); f.on = !f.on;
+      // un seul correcteur de justesse par piste : Auto-Pitch et Tune Pro se remplacent
+      const autre = { autopitch: "autotune", autotune: "autopitch" }[k];
+      if (f.on && autre && p.fx[autre] && p.fx[autre].on) { p.fx[autre].on = false; message(k === "autotune" ? "Tune Pro remplace Auto-Pitch sur cette piste" : "Auto-Pitch remplace Tune Pro sur cette piste"); }
+      p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); panneau(); dessiner(); sauver(); return; }
     const a = e.target.closest("[data-act]")?.dataset.act;
     if (a === "couper") couper(); else if (a === "dupliquer") dupliquer(); else if (a === "supprimer") supprimer();
     else if (a === "normaliser") normaliser();
@@ -2207,6 +2585,7 @@ const STUDIO = (() => {
       if (k === "autotune" && t.value === "cle" && !p.fx.autotune.cleChoisie) { const c = lireCle(prod && prod.key); if (c) Object.assign(p.fx.autotune, { tonique: String(c.tonique), gamme: c.gamme }); }
       if (FX.find(f => f.k === k).menus) { p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; }
     }
+    else if (t.dataset.grclip != null) { grClip = t.value; panneau(); return; }
     else if (t.dataset.atsel) {
       const a = p.fx.autotune, val = t.value; memoriser(); a.clavier = "";
       if (t.dataset.atsel === "cle") {
@@ -2223,7 +2602,8 @@ const STUDIO = (() => {
       p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return;
     }
     else if (t.dataset.fxmenu) { const [k, c] = t.dataset.fxmenu.split("."); memoriser(); p.fx[k][c] = t.value;
-      if (c === "tonique" || c === "gamme") { p.fx[k].cleChoisie = true; p.fx[k].clavier = ""; p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; } }
+      if (c === "cle" && t.value !== "auto") { const cp = lireCle(prod && prod.key); if (cp && !p.fx[k].cleChoisie) p.fx[k].gamme = cp.gamme; }
+      if (c === "tonique" || c === "gamme" || c === "cle") { p.fx[k].cleChoisie = true; p.fx[k].clavier = ""; p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; } }
     else if (t.dataset.fxcase) { const [k, c] = t.dataset.fxcase.split("."); memoriser(); p.fx[k][c] = t.checked; }
     else if (t.dataset.act === "import") { importer(t.files[0]); return; }
     else if (t.dataset.act === "ouvrirFichier") { if (t.files[0]) ouvrirFichierProjet(t.files[0]); t.value = ""; return; }
@@ -2600,7 +2980,7 @@ const STUDIO = (() => {
       const avecProd = !!fichier && mixExport === "tout";
       const fin = Math.max(...P.clips.map(k => k.start + k.dur - dec), avecProd ? (P.beatStart || 0) + fichier.buf.duration : 0) + 2.6;
       const oc = new OfflineAudioContext(2, Math.ceil(sr * fin), sr), b = bus(oc), solo = soloActif();
-      if (P.pistes.some(p => p.fx.autotune && p.fx.autotune.on)) await chargerAT(oc);
+      if (P.pistes.some(p => pitchActif(p.fx))) await chargerAT(oc);
       b.master.gain.value = P.master != null ? P.master : 1;
       if (avecProd) {
         const gp = oc.createGain(); gp.gain.value = volBeat() / 100; gp.connect(b.master);
@@ -2609,7 +2989,7 @@ const STUDIO = (() => {
       }
       const ns = new Map(P.pistes.map(p => { const n = chaine(oc, b); regler(n, p, solo); return [p.id, n]; }));
       for (const k of P.clips) {
-        const n = ns.get(k.piste), buf = BUF.get(k.prise), pi = P.pistes.find(x => x.id === k.piste); if (!n || !buf) continue;
+        const n = ns.get(k.piste), buf = bufDe(k.prise), pi = P.pistes.find(x => x.id === k.piste); if (!n || !buf) continue;
         const debut = k.start - dec - (pi ? avanceAT(pi) : 0), dans = Math.max(0, -debut), when = Math.max(0, debut);
         if (dans >= k.dur) continue;
         const s = oc.createBufferSource(); s.buffer = buf;
@@ -2767,7 +3147,9 @@ const STUDIO = (() => {
       if (rec && id !== rec.prod) arreterRec("changement");
       if (ouvert && !estLibre() && (!prod || prod.id !== id)) { const b = BY_ID.get(id); if (b) { arreterSources(); setTimeout(() => charger(b), 0); } }
     },
-    ouvrir
+    ouvrir,
+    // pour les bancs d'essai (outils/) : l'etat interne, en lecture
+    diag(){ return { P, BUF, BUF_PROC, PITCH, SIGN, grZones }; }
   };
 })();
 
