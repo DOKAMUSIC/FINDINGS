@@ -614,8 +614,8 @@ const STUDIO = (() => {
   .dp-cle{gap:8px}
   /* guide de premiere visite */
   .daw-guide{position:fixed;inset:0;z-index:2147483000}
-  .dg-trou{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(5,6,8,.62),0 0 0 2px #FA233B,0 0 24px rgba(250,35,59,.45);transition:all .28s cubic-bezier(.2,.8,.2,1);pointer-events:none}
-  .dg-bulle{position:fixed;display:grid;gap:8px;padding:16px 16px 12px;border-radius:14px;background:#111215;color:#F2F3F5;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 22px 50px rgba(0,0,0,.55);transition:top .28s,left .28s}
+  .dg-trou{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(5,6,8,.62),0 0 0 2px #FA233B,0 0 24px rgba(250,35,59,.45);transition:opacity .2s;pointer-events:none}
+  .dg-bulle{position:fixed;display:grid;gap:8px;padding:16px 16px 12px;border-radius:14px;background:#111215;color:#F2F3F5;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 22px 50px rgba(0,0,0,.55)}
   .dg-n{font:800 22px/1 var(--sans);letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1.2px #FA233B}
   .dg-n i{font-style:normal;font-size:12px;-webkit-text-stroke:0;color:rgba(255,255,255,.35);margin-left:3px}
   .dg-bulle b{font:800 17px/1.15 var(--sans);letter-spacing:-.02em}
@@ -3703,25 +3703,46 @@ const STUDIO = (() => {
     document.querySelector(".daw-guide")?.remove();
     const g = document.createElement("div"); g.className = "daw-guide"; g.innerHTML = '<div class="dg-trou"></div><div class="dg-bulle" role="dialog" aria-live="polite"></div>';
     document.body.appendChild(g);
+    const trou = g.firstChild, b = g.lastChild;
     let i = 0;
-    const fin = () => { g.remove(); removeEventListener("keydown", touche); removeEventListener("resize", placer); try { localStorage.setItem("findings.studio.guide", "vu"); } catch (e) {} };
+    const cible = () => el.querySelector(ETAPES_GUIDE[i][0]) || el;
+    const fin = () => { g.remove(); removeEventListener("keydown", touche); removeEventListener("resize", suivre, true); removeEventListener("scroll", suivre, true); try { localStorage.setItem("findings.studio.guide", "vu"); } catch (e) {} };
     const touche = e => { if (e.key === "Escape") fin(); };
-    function placer(){
-      const [sel, titre, texte] = ETAPES_GUIDE[i], c = el.querySelector(sel) || el, r = c.getBoundingClientRect(), trou = g.firstChild, b = g.lastChild;
-      if (r.top < 70 || r.bottom > innerHeight - 20) { c.scrollIntoView({ block: "center" }); }
-      const q = c.getBoundingClientRect(), m = 6;
-      Object.assign(trou.style, { left: q.left - m + "px", top: q.top - m + "px", width: q.width + 2 * m + "px", height: q.height + 2 * m + "px" });
+    /* Le cadre et la bulle suivent la cible a chaque defilement (la page comme les panneaux
+       du studio). Le cadre est rogne a la partie visible ; la bulle se pose dessous, dessus ou
+       a cote, la ou elle tient sans recouvrir la cible. */
+    function poser(){
+      const r = cible().getBoundingClientRect(), m = 6, haut = 64;
+      // le lecteur du site, en bas, passe devant : le cadre s'arrete au-dessus
+      const lecteur = document.querySelector(".bar.up"), basMax = lecteur ? Math.min(innerHeight, lecteur.getBoundingClientRect().top) - 6 : innerHeight - 4;
+      const q = { left: Math.max(4, r.left - m), top: Math.max(haut, r.top - m), right: Math.min(innerWidth - 4, r.right + m), bottom: Math.min(basMax, r.bottom + m) };
+      const visible = q.bottom - q.top > 8 && q.right - q.left > 8;
+      trou.style.opacity = visible ? 1 : 0;
+      Object.assign(trou.style, { left: q.left + "px", top: q.top + "px", width: Math.max(0, q.right - q.left) + "px", height: Math.max(0, q.bottom - q.top) + "px" });
+      const bw = Math.min(320, innerWidth - 24), bh = b.offsetHeight || 180, e = 14;
+      b.style.width = bw + "px";
+      let x, y;
+      if (q.bottom + e + bh < basMax) { x = (q.left + q.right) / 2 - bw / 2; y = q.bottom + e; }
+      else if (q.top - e - bh > haut) { x = (q.left + q.right) / 2 - bw / 2; y = q.top - e - bh; }
+      else if (q.right + e + bw < innerWidth - 8) { x = q.right + e; y = q.top + 8; }
+      else if (q.left - e - bw > 8) { x = q.left - e - bw; y = q.top + 8; }
+      else { x = innerWidth / 2 - bw / 2; y = innerHeight - bh - 16; }
+      b.style.left = Math.max(12, Math.min(innerWidth - bw - 12, x)) + "px";
+      b.style.top = Math.max(haut + 4, Math.min(innerHeight - bh - 12, y)) + "px";
+    }
+    const suivre = () => poser();   // direct : quelques mesures, et le cadre ne decroche jamais
+    function etape(){
+      const [, titre, texte] = ETAPES_GUIDE[i], c = cible(), r = c.getBoundingClientRect();
       b.innerHTML = `<span class="dg-n">${i + 1}<i>/${ETAPES_GUIDE.length}</i></span><b>${titre}</b><p>${texte}</p>
         <div class="dg-acts"><button class="dg-passer">${i < ETAPES_GUIDE.length - 1 ? "Passer" : ""}</button><button class="dg-suiv">${i < ETAPES_GUIDE.length - 1 ? "Suivant" : "C'est parti"}</button></div>`;
-      const bw = Math.min(320, innerWidth - 24), dessous = q.bottom + 14 + 190 < innerHeight;
-      b.style.width = bw + "px";
-      b.style.left = Math.max(12, Math.min(innerWidth - bw - 12, q.left + q.width / 2 - bw / 2)) + "px";
-      b.style.top = (dessous ? q.bottom + 14 : Math.max(12, q.top - 14 - b.offsetHeight)) + "px";
-      b.querySelector(".dg-suiv").onclick = () => { if (++i >= ETAPES_GUIDE.length) fin(); else placer(); };
+      b.querySelector(".dg-suiv").onclick = () => { if (++i >= ETAPES_GUIDE.length) fin(); else etape(); };
       b.querySelector(".dg-passer").onclick = fin;
+      // la cible hors de l'ecran : on la ramene (une fois, au changement d'etape)
+      if (r.top < 70 || r.top > innerHeight - 120) c.scrollIntoView({ block: r.height > innerHeight * .6 ? "start" : "center" });
+      poser(); setTimeout(poser, 350);
     }
-    addEventListener("keydown", touche); addEventListener("resize", placer);
-    placer();
+    addEventListener("keydown", touche); addEventListener("resize", suivre, true); addEventListener("scroll", suivre, true);
+    etape();
   }
 
   /* ─────────────────────────── ouvrir / fermer ─────────────────────────── */
