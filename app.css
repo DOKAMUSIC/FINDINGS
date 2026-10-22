@@ -711,8 +711,9 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .off-hero h1{margin:0;max-width:880px;font-size:clamp(34px,6vw,68px);font-weight:800;letter-spacing:-.045em;line-height:1.02}
 .off-lead{margin:0;max-width:640px;font-size:17px;line-height:1.55;color:var(--dim)}
 .off-cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
-.off-bientot{opacity:.6;cursor:default;pointer-events:none}
-.off-stats{display:flex;flex-wrap:wrap;gap:10px 36px;margin-top:26px;padding-top:22px;border-top:1px solid var(--line-soft);width:100%}
+.hbtn.off-sec{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--sh-1)}
+.hbtn.off-sec:hover{box-shadow:var(--sh-2);transform:translateY(-1px)}
+.off-stats{display:grid;grid-template-columns:repeat(4,max-content);gap:12px 40px;margin-top:26px;padding-top:22px;border-top:1px solid var(--line-soft);width:100%}
 .off-stats div{display:grid;gap:2px}
 .off-stats b{font-size:28px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
 .off-stats span{font-size:12.5px;color:var(--dim)}
@@ -767,6 +768,7 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 @media(max-width:820px){
   .off-offres,.off-trouve{grid-template-columns:minmax(0,1fr)}
   .off-etapes ol{grid-template-columns:minmax(0,1fr)}
+  .off-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   #vueOffre .off-hero{padding-top:40px}
   .off-carte{padding:22px}
 }

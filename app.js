@@ -3525,7 +3525,9 @@ function brancherRangees(){
   const c = PRO.contact || "";
   document.getElementById("offContact").outerHTML = c
     ? `<a class="hbtn pri" id="offContact" href="${esc(c.startsWith("mailto:") && !c.includes("?") ? c + "?subject=" + encodeURIComponent("FINDINGS Pro") : c)}"${c.startsWith("mailto:") ? "" : ' target="_blank" rel="noopener"'}>Nous contacter</a>`
-    : `<span class="hbtn pri off-bientot" id="offContact" aria-disabled="true">Contact bientôt ouvert</span>`;
+    : "";
+  // sans contact (pas encore rempli dans pro.json), « Voir les offres » devient le bouton principal
+  if (!c) document.getElementById("offVoir").classList.replace("off-sec", "pri");
   // l'apercu d'une ligne sponsorisee : une vraie prod recente du catalogue
   const ex = BEATS.filter(b => b.views > 1000).sort((a, b) => (b.published || "").localeCompare(a.published || ""))[0];
   if (ex) document.getElementById("offApercuSponso").innerHTML =
