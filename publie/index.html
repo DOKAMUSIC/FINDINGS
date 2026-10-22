@@ -750,8 +750,9 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .off-hero h1{margin:0;max-width:880px;font-size:clamp(34px,6vw,68px);font-weight:800;letter-spacing:-.045em;line-height:1.02}
 .off-lead{margin:0;max-width:640px;font-size:17px;line-height:1.55;color:var(--dim)}
 .off-cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
-.off-bientot{opacity:.6;cursor:default;pointer-events:none}
-.off-stats{display:flex;flex-wrap:wrap;gap:10px 36px;margin-top:26px;padding-top:22px;border-top:1px solid var(--line-soft);width:100%}
+.hbtn.off-sec{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--sh-1)}
+.hbtn.off-sec:hover{box-shadow:var(--sh-2);transform:translateY(-1px)}
+.off-stats{display:grid;grid-template-columns:repeat(4,max-content);gap:12px 40px;margin-top:26px;padding-top:22px;border-top:1px solid var(--line-soft);width:100%}
 .off-stats div{display:grid;gap:2px}
 .off-stats b{font-size:28px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
 .off-stats span{font-size:12.5px;color:var(--dim)}
@@ -806,6 +807,7 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 @media(max-width:820px){
   .off-offres,.off-trouve{grid-template-columns:minmax(0,1fr)}
   .off-etapes ol{grid-template-columns:minmax(0,1fr)}
+  .off-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   #vueOffre .off-hero{padding-top:40px}
   .off-carte{padding:22px}
 }
@@ -2321,7 +2323,7 @@ body.vue-accueil .hcta{display:inline-flex}
     <span class="eyebrow">FINDINGS pour les beatmakers</span>
     <h1>Fais écouter tes prods aux artistes qui cherchent.</h1>
     <p class="off-lead">Sur FINDINGS, les rappeurs et les chanteurs trouvent leurs type beats par artiste, style, mood et tempo, puis posent leur voix dessus dans le studio. Chaque écoute passe par ta vidéo YouTube, et chaque clic « Acheter » mène à ta boutique.</p>
-    <div class="off-cta"><span id="offContact"></span><a class="hbtn ghost" href="#offOffres">Voir les offres</a></div>
+    <div class="off-cta"><span id="offContact"></span><a class="hbtn off-sec" id="offVoir" href="#offOffres">Voir les offres</a></div>
     <div class="off-stats" id="offStats"></div>
   </section>
 
@@ -6135,7 +6137,9 @@ function brancherRangees(){
   const c = PRO.contact || "";
   document.getElementById("offContact").outerHTML = c
     ? `<a class="hbtn pri" id="offContact" href="${esc(c.startsWith("mailto:") && !c.includes("?") ? c + "?subject=" + encodeURIComponent("FINDINGS Pro") : c)}"${c.startsWith("mailto:") ? "" : ' target="_blank" rel="noopener"'}>Nous contacter</a>`
-    : `<span class="hbtn pri off-bientot" id="offContact" aria-disabled="true">Contact bientôt ouvert</span>`;
+    : "";
+  // sans contact (pas encore rempli dans pro.json), « Voir les offres » devient le bouton principal
+  if (!c) document.getElementById("offVoir").classList.replace("off-sec", "pri");
   // l'apercu d'une ligne sponsorisee : une vraie prod recente du catalogue
   const ex = BEATS.filter(b => b.views > 1000).sort((a, b) => (b.published || "").localeCompare(a.published || ""))[0];
   if (ex) document.getElementById("offApercuSponso").innerHTML =
