@@ -336,9 +336,23 @@ const STUDIO = (() => {
   .kn .kn-ind{stroke:#F5F6F7;stroke-width:2;stroke-linecap:round}
   .kn .kn-v{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--lcd-ink);white-space:nowrap;background:#121315;border-radius:3px;padding:1px 5px;box-shadow:inset 0 1px 2px rgba(0,0,0,.7)}
   .kn .kn-n{font-size:9.5px;font-weight:650;color:var(--dim);white-space:nowrap;max-width:72px;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.04em}
-  .daw-decompte{position:absolute;inset:0;z-index:20;display:grid;place-items:center;pointer-events:none;
-    font-size:120px;font-weight:900;font-family:var(--mono);letter-spacing:-.05em;color:#FF3A50;text-shadow:0 10px 40px rgba(250,35,59,.35)}
-  .daw-decompte[hidden]{display:none}
+  /* decompte : trait rouge en haut du studio, temps dans l'ecran du transport, bouton qui bat */
+  .daw-preroll{position:absolute;left:0;right:0;top:0;height:3px;z-index:22;pointer-events:none;overflow:hidden;border-radius:inherit}
+  .daw-preroll i{display:block;height:100%;width:0;background:#FF3A50;box-shadow:0 0 12px #FF3A50}
+  .daw-preroll.go i{animation:daw-preroll var(--d,2s) linear forwards}
+  @keyframes daw-preroll{to{width:100%}}
+  .lcd-seg.t{position:relative}
+  .lcd-dec{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:inherit;background:var(--lcd,#0B0E10)}
+  .lcd-dec[hidden]{display:none}
+  .lcd-dec b{font:800 11px/1 var(--mono);letter-spacing:.1em;color:#FF3A50;margin-right:3px;animation:rec-clign .5s steps(2) infinite}
+  .lcd-dec i{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,58,80,.45);transition:background .08s,box-shadow .08s}
+  .lcd-dec i.on{background:#FF3A50;border-color:#FF3A50;box-shadow:0 0 8px #FF3A50}
+  .lcd-dec i:nth-of-type(1){width:11px;height:11px}
+  @keyframes rec-clign{50%{opacity:.35}}
+  .daw.decompte #dawRec{color:#fff;background:#FF3A50;box-shadow:0 0 0 3px rgba(255,58,80,.3),0 0 16px rgba(255,58,80,.5)}
+  #dawRec.bat{animation:rec-bat .28s cubic-bezier(.2,.8,.2,1)}
+  @keyframes rec-bat{0%{transform:scale(1.18)}100%{transform:scale(1)}}
+  @media(prefers-reduced-motion:reduce){ #dawRec.bat,.lcd-dec b{animation:none} }
   .daw-msg{position:absolute;left:50%;top:64px;transform:translateX(-50%);z-index:21;padding:7px 13px;border-radius:6px;
     background:#0E0F11;color:#E6E7EA;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 24px rgba(0,0,0,.5);white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
   .daw-msg[hidden]{display:none}
@@ -742,7 +756,7 @@ const STUDIO = (() => {
         </div>
         <div class="lcd" aria-live="off">
           <span class="lcd-seg"><b id="dawMesure">1.1</b><small>Mesure</small></span>
-          <span class="lcd-seg t"><b id="dawTemps">0:00.0</b><small>Temps</small></span>
+          <span class="lcd-seg t"><b id="dawTemps">0:00.0</b><small>Temps</small><span class="lcd-dec" id="dawDec" hidden></span></span>
           <span class="lcd-seg"><b id="dawBpm">120</b><small>Tempo</small></span>
           <span class="lcd-seg k"><b id="dawCle">—</b><small>4/4</small></span>
         </div>
@@ -797,7 +811,7 @@ const STUDIO = (() => {
       <radialGradient id="cap-vert" cx="45%" cy="28%" r="80%"><stop offset="0" stop-color="#8FE3A2"/><stop offset=".6" stop-color="#2E8F4E"/><stop offset="1" stop-color="#14502A"/></radialGradient>
       <radialGradient id="cap-bleu" cx="45%" cy="28%" r="80%"><stop offset="0" stop-color="#8CC0FF"/><stop offset=".6" stop-color="#2F68C4"/><stop offset="1" stop-color="#173A73"/></radialGradient>
       <radialGradient id="cap-or" cx="45%" cy="28%" r="80%"><stop offset="0" stop-color="#FFE7A8"/><stop offset=".55" stop-color="#C79A45"/><stop offset="1" stop-color="#6E521F"/></radialGradient></defs></svg>
-    <div class="daw-decompte" id="dawDecompte" hidden></div>
+    <div class="daw-preroll" id="dawPreroll" aria-hidden="true"><i></i></div>
     <div class="daw-msg" id="dawMsg" hidden></div>
   </div>`);
 
@@ -873,6 +887,13 @@ const STUDIO = (() => {
     });
   }
   const attendre = ms => new Promise(r => setTimeout(r, ms));
+  // clic de metronome : un « tic » court et doux, plus aigu sur le premier temps (dans le casque, pas dans la prise)
+  function clic(fort){
+    try { const c = audio(), o = c.createOscillator(), g = c.createGain(), t = c.currentTime + .005;
+      o.type = "sine"; o.frequency.value = fort ? 1760 : 1320;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(fort ? .32 : .2, t + .002); g.gain.exponentialRampToValueAtTime(.0001, t + .06);
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + .08); } catch (e) {}
+  }
   const joueStudio = () => horlogeInterne() ? interne.joue : (memeProd() && enLecture());
   /* Lecture par le studio (prod importee) : la meme horloge pour la prod et les voix. */
   function lancerInterne(depuis, delai = 0){
@@ -3222,9 +3243,20 @@ const STUDIO = (() => {
     try { player.pauseVideo(); } catch (e) {}
     arreterInterne();
     positionner(debut);
-    const dc = $("dawDecompte"); dc.hidden = false;
-    for (const n of [3, 2, 1]) { dc.textContent = n; await attendre(700); if (!rec || rec.annule) { dc.hidden = true; return; } }
-    dc.hidden = true;
+    /* Decompte d'une mesure au tempo de la prod, comme dans un vrai logiciel : un clic de
+       metronome par temps (le premier accentue), les temps qui s'allument dans l'ecran du
+       transport, le bouton qui bat, un trait rouge qui se remplit en haut du studio. */
+    const pasT = clamp(60 / bpm(), .35, .9), NT = 4, dec = $("dawDec"), pr = $("dawPreroll"), bR = $("dawRec");
+    const finDecompte = () => { el.classList.remove("decompte"); dec.hidden = true; pr.classList.remove("go"); bR.classList.remove("bat"); };
+    dec.innerHTML = '<b>REC</b>' + "<i></i>".repeat(NT); dec.hidden = false; el.classList.add("decompte");
+    pr.style.setProperty("--d", pasT * NT + "s"); pr.classList.remove("go"); void pr.offsetWidth; pr.classList.add("go");
+    for (let k = 0; k < NT; k++) {
+      dec.children[k + 1].classList.add("on"); clic(k === 0);
+      bR.classList.remove("bat"); void bR.offsetWidth; bR.classList.add("bat");
+      await attendre(pasT * 1000);
+      if (!rec || rec.annule) { finDecompte(); return; }
+    }
+    finDecompte();
     sale = true;
     if (horlogeInterne()) lancerInterne(debut, .05);
     else {

@@ -61,6 +61,12 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "Ta prod": ["Your beat", "Tu beat"],
+    "par Ton nom": ["by Your name", "de Tu nombre"],
+    "Ta prod mérite d'être entendue.": ["Your beat deserves to be heard.", "Tu beat merece ser escuchado."],
+    "Une mise en avant, un profil Pro, ou les deux : on regarde ensemble ce qui colle à tes prods.": ["A spotlight, a Pro profile, or both: let's see together what fits your beats.", "Un destacado, un perfil Pro o los dos: vemos juntos lo que encaja con tus beats."],
+    "Instagram ↗": ["Instagram ↗", "Instagram ↗"],
+    "BeatStars ↗": ["BeatStars ↗", "BeatStars ↗"],
     "Enregistre": ["Record", "Graba"],
     "Touche R ou ce bouton : ta voix s'enregistre direct sur la prod. Mets un casque, et active le retour pour t'entendre avec les effets.": ["Press R or this button: your voice records right on the beat. Wear headphones, and turn on monitoring to hear yourself with the effects.", "Pulsa R o este botón: tu voz se graba directamente sobre el beat. Ponte cascos y activa el retorno para oírte con los efectos."],
     "Les effets de chaque piste": ["Each track's effects", "Los efectos de cada pista"],
@@ -713,6 +719,7 @@ const I18N = (() => {
     [`^${N} prods? proches$`, m => nb(m[1], ["similar beat", "similar beats"], ["beat parecido", "beats parecidos"])],
     [`^${N} prods? en tout$`, m => nb(m[1], ["beat", "beats"], ["beat", "beats"]) + (L === 0 ? " in total" : " en total")],
     [`^${N} en tout$`, "$1 in total", "$1 en total"],
+    [`^${N} BPM · (.+)$`, m => `${m[1]} BPM · ` + t(m[2])],
     [`^Harmonies créées : (.+)$`, m => (L === 0 ? "Harmonies created: " : "Armonías creadas: ") + m[1]],
     [`^(Harmonies|Doublage) : voix ${N}/${N}…$`, m => (m[1] === "Doublage" ? (L === 0 ? "Doubling" : "Doblaje") : (L === 0 ? "Harmonies" : "Armonías")) + ` : ${L === 0 ? "voice" : "voz"} ${m[2]}/${m[3]}…`],
     // tonalites en lettres : « A mineur » -> « A minor » / « A menor »
@@ -3562,10 +3569,10 @@ function brancherRangees(){
     : "";
   // sans contact (pas encore rempli dans pro.json), « Voir les offres » devient le bouton principal
   if (!c) document.getElementById("offVoir").classList.replace("off-sec", "pri");
-  // l'apercu d'une ligne sponsorisee : une vraie prod recente du catalogue
-  const ex = BEATS.filter(b => b.views > 1000).sort((a, b) => (b.published || "").localeCompare(a.published || ""))[0];
-  if (ex) document.getElementById("offApercuSponso").innerHTML =
-    `<div class="ap-ligne"><img src="https://i.ytimg.com/vi/${ex.id}/mqdefault.jpg" alt="" loading="lazy"><div><span class="sponso-tag">Sponsorisé</span><b translate="no">${esc(ex.title)}</b><small>par ${esc(ex.prod)}</small></div></div>`;
+  else document.getElementById("offFinCta").innerHTML = document.getElementById("offContact").outerHTML.replace('id="offContact"', "");
+  // l'apercu d'une ligne sponsorisee : un exemple fictif (une vraie prod laisserait croire que son beatmaker a paye)
+  document.getElementById("offApercuSponso").innerHTML =
+    `<div class="ap-ligne"><span class="ap-mini"></span><div><span class="sponso-tag">Sponsorisé</span><b>Ta prod</b><small>par Ton nom</small></div></div>`;
   // trouver sa page
   const q = document.getElementById("offQ"), res = document.getElementById("offRes");
   const n = {}; BEATS.forEach(b => n[b.prod] = (n[b.prod] || 0) + 1);

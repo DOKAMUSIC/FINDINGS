@@ -53,7 +53,7 @@ if (window.FINDINGS_STATS) {
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="app.css?v=117d0dc569">
+<link rel="stylesheet" href="app.css?v=e466e85b6c">
 </head>
 <body>
 
@@ -317,10 +317,30 @@ if (window.FINDINGS_STATS) {
 
 <div id="vueOffre" hidden>
   <section class="off-hero wrap">
-    <span class="eyebrow">FINDINGS pour les beatmakers</span>
-    <h1>Fais écouter tes prods aux artistes qui cherchent.</h1>
-    <p class="off-lead">Sur FINDINGS, les rappeurs et les chanteurs trouvent leurs type beats par artiste, style, mood et tempo, puis posent leur voix dessus dans le studio. Chaque écoute passe par ta vidéo YouTube, et chaque clic « Acheter » mène à ta boutique.</p>
-    <div class="off-cta"><span id="offContact"></span><a class="hbtn off-sec" id="offVoir" href="#offOffres">Voir les offres</a></div>
+    <div class="off-hero-txt">
+      <span class="eyebrow">FINDINGS pour les beatmakers</span>
+      <h1>Fais écouter tes prods aux artistes qui cherchent.</h1>
+      <p class="off-lead">Sur FINDINGS, les rappeurs et les chanteurs trouvent leurs type beats par artiste, style, mood et tempo, puis posent leur voix dessus dans le studio. Chaque écoute passe par ta vidéo YouTube, et chaque clic « Acheter » mène à ta boutique.</p>
+      <div class="off-cta"><span id="offContact"></span><a class="hbtn off-sec" id="offVoir" href="#offOffres">Voir les offres</a></div>
+    </div>
+    <div class="off-scene" aria-hidden="true">
+      <span class="sc-aura"></span>
+      <div class="sc-carte sc-une">
+        <span class="sponso-tag sur-image">Sponsorisé</span>
+        <span class="sc-play"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+        <div class="sc-une-in"><small>Ton nom<svg class="verif" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.8l2.4 1.9 3-.3.9 2.9 2.7 1.4-.6 3 1.5 2.6-2.1 2.2.1 3.1-3 .7-1.6 2.6-2.9-1-2.9 1-1.6-2.6-3-.7.1-3.1-2.1-2.2 1.5-2.6-.6-3 2.7-1.4.9-2.9 3 .3z"/><path d="M8.2 12.3l2.5 2.5 5.1-5.3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></small><b>Ta prod</b><span><i>Trap</i>140 BPM · A mineur</span></div>
+      </div>
+      <div class="sc-carte sc-profil">
+        <div class="sc-ban"></div>
+        <div class="sc-profil-in"><span class="sc-ava"></span><div><small>Beatmaker Pro</small><b>Ton nom<svg class="verif" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.8l2.4 1.9 3-.3.9 2.9 2.7 1.4-.6 3 1.5 2.6-2.1 2.2.1 3.1-3 .7-1.6 2.6-2.9-1-2.9 1-1.6-2.6-3-.7.1-3.1-2.1-2.2 1.5-2.6-.6-3 2.7-1.4.9-2.9 3 .3z"/><path d="M8.2 12.3l2.5 2.5 5.1-5.3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></b></div></div>
+        <div class="sc-liens"><span>Instagram ↗</span><span>BeatStars ↗</span><span>Contact ↗</span></div>
+      </div>
+      <div class="sc-carte sc-ligne">
+        <span class="sc-mini"></span>
+        <div><span class="sponso-tag">Sponsorisé</span><b>Ta prod</b><small>par Ton nom</small></div>
+        <span class="sc-nums">140<i>BPM</i></span>
+      </div>
+    </div>
     <div class="off-stats" id="offStats"></div>
   </section>
 
@@ -371,6 +391,15 @@ if (window.FINDINGS_STATS) {
     <div class="off-recherche">
       <input type="search" id="offQ" placeholder="Ton nom de beatmaker" autocomplete="off" aria-label="Chercher ton nom de beatmaker">
       <div class="off-res" id="offRes"></div>
+    </div>
+  </section>
+
+  <section class="off-fin wrap">
+    <div class="off-fin-in">
+      <span class="sc-aura"></span>
+      <h2>Ta prod mérite d'être entendue.</h2>
+      <p>Une mise en avant, un profil Pro, ou les deux : on regarde ensemble ce qui colle à tes prods.</p>
+      <div class="off-cta" id="offFinCta"><a class="hbtn pri" href="#offOffres">Voir les offres</a></div>
     </div>
   </section>
 
@@ -628,8 +657,8 @@ if (window.FINDINGS_STATS) {
 
 <div class="dosmenu" id="dosMenu" hidden role="menu"></div>
 <script src="catalog.js?v=8f44a2c763" defer></script>
-<script src="app.js?v=9737c8af33" defer></script>
-<script src="studio.js?v=7da12ee879" defer></script>
+<script src="app.js?v=1774375194" defer></script>
+<script src="studio.js?v=9e9fa0a2da" defer></script>
 <script type="module">
 /* ============ la note, en volume ============
    Un vrai maillage extrudé, éclairé et tourné en continu. Si WebGL manque ou si
