@@ -142,6 +142,9 @@ ${ld.map(o => `<script type="application/ld+json">${json(o)}</script>`).join("\n
   } else if (vue === "offre") {
     h = h.replace('<div id="vueAccueil">', '<div id="vueAccueil" hidden>').replace('<div id="vueOffre" hidden>', '<div id="vueOffre">');
     h = h.replace("<body>", '<body class="vue-offre">');
+  } else if (vue === "pro") {
+    h = h.replace('<div id="vueAccueil">', '<div id="vueAccueil" hidden>').replace('<div id="vuePro" hidden>', '<div id="vuePro">');
+    h = h.replace("<body>", '<body class="vue-pro">');
   }
   return h.replace("<!--SEO:PRE-->", pre).replace("<!--SEO:PIED-->", pied || PIED.fr);
 }
@@ -177,7 +180,7 @@ const PIED = Object.fromEntries(LANGUES.map(lg => {
 
 /* ─────────── ecrire ─────────── */
 fs.mkdirSync(OUT, { recursive: true });
-for (const d of ["artiste", "style", "beatmaker", "studio", "pour-les-beatmakers", "en", "es"]) fs.rmSync(path.join(OUT, d), { recursive: true, force: true });
+for (const d of ["artiste", "style", "beatmaker", "studio", "pour-les-beatmakers", "pro", "en", "es"]) fs.rmSync(path.join(OUT, d), { recursive: true, force: true });
 const ecrire = (chemin, contenu) => { const f = path.join(OUT, chemin); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, contenu); };
 const urls = [];
 const ajouter = (chemin, html, prio = .6) => { ecrire(chemin ? chemin + "index.html" : "index.html", html); urls.push([chemin, prio]); };
@@ -190,6 +193,8 @@ const TX = {
     stuTitre: "Studio en ligne gratuit : pose ta topline sur une prod | FINDINGS",
     stuDesc: "Enregistre ta voix sur une prod du site ou sur la tienne, corrige la justesse (Auto-Pitch, Tune Pro), nettoie le bruit, mixe en un clic et exporte en WAV. Gratuit, dans le navigateur, sans compte.",
     offTitre: "Pour les beatmakers : mets tes prods en avant sur FINDINGS", offFil: "Pour les beatmakers",
+    proTitre: "FINDINGS Pro : le studio complet, pour 4,99 € par mois", proFil: "FINDINGS Pro",
+    proDesc: "Tune Pro (l'autotune complet), Mix auto, Nettoyage voix, harmonies, doubleur, mastering et pistes séparées : la FINDINGS Suite Pro, dans ton navigateur, pour 4,99 € par mois.",
     offDesc: (n, bm) => `FINDINGS range ${n} type beats de ${bm} beatmakers par artiste, style et mood. Mets ta prod en tête de l'accueil et des recherches, et donne à ta page un profil Pro : bannière, bio, badge vérifié, liens vers ta boutique.`,
     os: "Navigateur web", studio: "Studio",
     artiste: "Artiste", artistes: "Artistes", style: "Style", styles: "Styles", beatmakers: "Beatmakers",
@@ -211,6 +216,8 @@ const TX = {
     stuTitre: "Free online studio: record your topline on a beat | FINDINGS",
     stuDesc: "Record your voice on a beat from the site or on your own, fix the pitch (Auto-Pitch, Tune Pro), clean the noise, mix in one click and export as WAV. Free, in your browser, no account.",
     offTitre: "For beatmakers: put your beats in the spotlight on FINDINGS", offFil: "For beatmakers",
+    proTitre: "FINDINGS Pro: the full studio, for €4.99 a month", proFil: "FINDINGS Pro",
+    proDesc: "Tune Pro (the full autotune), Auto mix, Voice cleaner, harmonies, doubler, mastering and separate tracks: the FINDINGS Pro Suite, in your browser, for €4.99 a month.",
     offDesc: (n, bm) => `FINDINGS sorts ${n} type beats from ${bm} beatmakers by artist, style and mood. Put your beat at the top of the home page and searches, and give your page a Pro profile: banner, bio, verified badge, links to your store.`,
     os: "Web browser", studio: "Studio",
     artiste: "Artist", artistes: "Artists", style: "Style", styles: "Styles", beatmakers: "Beatmakers",
@@ -232,6 +239,8 @@ const TX = {
     stuTitre: "Estudio online gratis: graba tu topline sobre un beat | FINDINGS",
     stuDesc: "Graba tu voz sobre un beat del sitio o sobre el tuyo, corrige la afinación (Auto-Pitch, Tune Pro), limpia el ruido, mezcla en un clic y exporta en WAV. Gratis, en el navegador, sin cuenta.",
     offTitre: "Para beatmakers: destaca tus beats en FINDINGS", offFil: "Para beatmakers",
+    proTitre: "FINDINGS Pro: el estudio completo, por 4,99 € al mes", proFil: "FINDINGS Pro",
+    proDesc: "Tune Pro (el autotune completo), Mezcla auto, Limpieza de voz, armonías, doblador, mastering y pistas separadas: la FINDINGS Suite Pro, en tu navegador, por 4,99 € al mes.",
     offDesc: (n, bm) => `FINDINGS ordena ${n} type beats de ${bm} beatmakers por artista, estilo y mood. Pon tu beat arriba del inicio y de las búsquedas, y dale a tu página un perfil Pro: banner, bio, insignia verificada, enlaces a tu tienda.`,
     os: "Navegador web", studio: "Estudio",
     artiste: "Artista", artistes: "Artistas", style: "Estilo", styles: "Estilos", beatmakers: "Beatmakers",
@@ -265,6 +274,9 @@ for (const lg of LANGUES) {
   // studio
   mettre("studio/", page({ chemin: "studio/", vue: "studio", titre: t.stuTitre, description: t.stuDesc,
     ld: [{ "@context": "https://schema.org", "@type": "WebApplication", name: "Studio FINDINGS", url: S + "studio/", inLanguage: lg, applicationCategory: "MultimediaApplication", operatingSystem: t.os, offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" } }, fil([t.studio, S + "studio/"])] }), .8);
+
+  // FINDINGS Pro
+  mettre("pro/", page({ chemin: "pro/", vue: "pro", titre: t.proTitre, description: t.proDesc, ld: [fil([t.proFil, S + "pro/"])] }), .6);
 
   // l'offre aux beatmakers
   mettre("pour-les-beatmakers/", page({ chemin: "pour-les-beatmakers/", vue: "offre", titre: t.offTitre, description: t.offDesc(BEATS.length, SLUG_PROD.size),

@@ -736,17 +736,101 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .sortie .sponso-tag.sur-image{position:absolute;top:12px;left:12px;color:#1A1405;background:#F2C14E}
 .sortie.une .raison .verif{color:#7CC4FF}
 
+/* ─────────── page FINDINGS Pro ───────────
+   Meme gabarit que la page beatmakers ; les outils y portent la signature de la Suite
+   (chassis sombre, aura de leur couleur, monogramme en contour). */
+.pro-bientot{opacity:.75;cursor:default;pointer-events:none}
+.pro-beta{display:flex;align-items:center;gap:10px;margin:2px 0 0;font-size:13.5px;color:var(--dim)}
+.pro-beta b{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#1A1405;background:#F2C14E;padding:3px 8px;border-radius:999px}
+.sc-aura.pro{background:radial-gradient(closest-side at 30% 40%,#3DDCC8,transparent),radial-gradient(closest-side at 72% 62%,#7C5CFF,transparent),radial-gradient(closest-side at 55% 20%,#FA233B,transparent)}
+.sc-plug{position:absolute;overflow:hidden;isolation:isolate;border-radius:18px;background:#0B0C0E;color:#F5F5F7;padding:14px;box-shadow:0 24px 60px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08);animation:sc-flotte 7s ease-in-out infinite}
+.pro-aura{position:absolute;left:-60px;top:-80px;width:280px;height:200px;z-index:-1;border-radius:50%;filter:blur(40px);opacity:.55;pointer-events:none;
+  background:radial-gradient(closest-side at 40% 50%,var(--vis),transparent),radial-gradient(closest-side at 80% 45%,var(--vis2),transparent)}
+.sp-tete{display:flex;align-items:center;gap:10px}
+.sp-tete i{width:26px;height:15px;border-radius:999px;background:#FA233B;position:relative;flex:0 0 auto;box-shadow:0 0 10px rgba(250,35,59,.5)}
+.sp-tete i::after{content:"";position:absolute;right:2px;top:2px;width:11px;height:11px;border-radius:50%;background:#fff}
+.sp-tete span{display:grid;gap:1px}
+.sp-tete small{font:800 9px/1 var(--sans);letter-spacing:-.01em;color:#fff;opacity:.9}
+.sp-tete b{font:800 17px/1 var(--sans);letter-spacing:-.04em;color:var(--vis)}
+.sp-tete em{margin-left:auto;font:800 30px/1 var(--sans);font-style:normal;letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1px color-mix(in srgb,var(--vis) 60%,transparent)}
+.sc-plug.p1{--r:-3deg;left:2%;top:4%;width:64%;height:44%;transform:rotate(-3deg)}
+.sp-notes{position:relative;height:calc(100% - 34px);margin-top:10px;border-radius:10px;background:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1.2px) 0 0/10px 10px,#070809}
+.sp-notes span{position:absolute;height:9px;border-radius:5px;background:color-mix(in srgb,var(--vis) 70%,transparent);box-shadow:0 0 0 1px var(--vis);animation:sp-cale 3.2s ease-in-out infinite}
+.sp-notes span:nth-child(2){animation-delay:-.6s} .sp-notes span:nth-child(3){animation-delay:-1.2s} .sp-notes span:nth-child(4){animation-delay:-1.8s} .sp-notes span:nth-child(5){animation-delay:-2.4s}
+/* Tune Pro : les notes chantees un peu fausses se calent sur la grille, une tete de lecture balaie */
+@keyframes sp-cale{0%,15%{transform:translateY(-5px);filter:saturate(.4);opacity:.6}45%,85%{transform:none;filter:none;opacity:1}100%{transform:translateY(-5px);filter:saturate(.4);opacity:.6}}
+.sp-notes::after{content:"";position:absolute;top:6px;bottom:6px;left:0;width:2px;border-radius:2px;background:#FA233B;box-shadow:0 0 8px #FA233B;animation:sp-tete 3.2s linear infinite}
+@keyframes sp-tete{from{left:2%}to{left:97%}}
+.sc-plug.p2{--r:3.5deg;right:0;top:30%;width:52%;transform:rotate(3.5deg);animation-delay:-2.5s}
+.sp-roles{display:grid;gap:9px;margin-top:12px}
+.sp-roles span{display:grid;grid-template-columns:52px 1fr;align-items:center;gap:8px;font-size:11px;font-weight:650;color:rgba(255,255,255,.7)}
+.sp-roles b{height:6px;border-radius:999px;background:linear-gradient(90deg,var(--vis),var(--vis2));transform-origin:left;animation:sp-niveau 1.8s ease-in-out infinite alternate}
+.sp-roles span:nth-child(2) b{animation-duration:1.4s;animation-delay:-.5s} .sp-roles span:nth-child(3) b{animation-duration:2.2s;animation-delay:-1s}
+@keyframes sp-niveau{from{transform:scaleX(.72)}to{transform:scaleX(1)}}
+.sc-plug.p3{--r:-1.5deg;left:12%;bottom:2%;width:50%;transform:rotate(-1.5deg);animation-delay:-4.5s}
+.sp-accord{display:flex;gap:8px;margin-top:12px}
+.sp-accord span{flex:1;height:42px;border-radius:10px;display:grid;place-items:center;font:800 18px var(--sans);color:#0B0C0E;background:linear-gradient(160deg,var(--vis),var(--vis2))}
+.sp-accord span{animation:sp-accord 2.4s ease-in-out infinite}
+.sp-accord span:nth-child(2){animation-delay:.25s} .sp-accord span:nth-child(3){animation-delay:.5s}
+@keyframes sp-accord{0%,100%{opacity:.55;transform:none}20%{opacity:1;transform:translateY(-4px);box-shadow:0 8px 18px color-mix(in srgb,var(--vis) 45%,transparent)}45%{opacity:.8;transform:none}}
+:is(#vuePro) .pro-suite,:is(#vuePro) .pro-compare{padding-top:64px;padding-bottom:8px}
+.pro-suite h2,.pro-compare h2{margin:0 0 6px;font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.03em}
+.pro-sous{margin:0 0 20px;color:var(--dim);font-size:15px}
+.pro-grille{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pro-carte{position:relative;overflow:hidden;isolation:isolate;display:grid;align-content:start;gap:6px;min-height:200px;padding:22px;border-radius:20px;background:#0B0C0E;color:#F5F5F7;
+  border:1px solid rgba(255,255,255,.08);box-shadow:var(--sh-2);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.pro-carte:hover{transform:translateY(-3px)}
+.pro-carte .pro-aura{width:320px;height:220px;opacity:.5}
+.pro-mono{position:absolute;right:16px;top:12px;font:800 52px/1 var(--sans);letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1.2px color-mix(in srgb,var(--vis) 55%,transparent)}
+.pro-marque{font:800 10.5px/1 var(--sans);letter-spacing:-.01em;color:#fff;opacity:.9}
+.pro-carte h3{margin:0;font:800 24px/1.05 var(--sans);letter-spacing:-.04em;color:var(--vis)}
+.pro-carte p{margin:auto 0 0;padding-top:28px;font-size:14px;line-height:1.5;color:rgba(255,255,255,.72)}
+.pro-table{border-radius:20px;overflow:hidden;border:1px solid var(--line-soft);background:var(--surface)}
+.pro-table table{width:100%;border-collapse:collapse}
+.pro-table th,.pro-table td{padding:14px 18px;text-align:center;border-bottom:1px solid var(--line-soft);font-size:14px}
+.pro-table tbody tr:last-child th,.pro-table tbody tr:last-child td{border-bottom:0}
+.pro-table th[scope=row]{text-align:left;font-weight:600}
+.pro-table thead th{font-size:16px;font-weight:800;letter-spacing:-.02em;vertical-align:bottom}
+.pro-table thead small{display:block;font-size:12px;font-weight:600;color:var(--dim);letter-spacing:0;margin-top:2px}
+.pro-table .pro-col{color:var(--accent)}
+.pro-table td:last-child{background:rgba(250,35,59,.05)}
+.pro-table td svg{color:var(--accent);vertical-align:middle}
+.pro-table td:nth-child(2) svg{color:var(--ink)}
+.pro-non{color:var(--dimmer)}
+@media(max-width:900px){ .pro-grille{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media(max-width:600px){
+  .pro-grille{grid-template-columns:minmax(0,1fr)}
+  .pro-table th,.pro-table td{padding:11px 10px;font-size:13px}
+  .sc-plug.p1{width:80%} .sc-plug.p2{width:66%;top:40%} .sc-plug.p3{width:62%}
+}
+
 /* ─────────── page « Pour les beatmakers » ─────────── */
-#vueOffre{padding-bottom:20px}
+#vueOffre,#vuePro{padding-bottom:20px}
 /* hero en deux colonnes : le texte, puis une petite scene (les trois mises en avant, en cartes) */
-#vueOffre .off-hero{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);column-gap:48px;align-items:center}
+:is(#vueOffre,#vuePro) .off-hero{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);column-gap:48px;align-items:center}
 .off-hero-txt{display:grid;justify-items:start;gap:16px}
-#vueOffre .off-stats{grid-column:1 / -1}
+:is(#vueOffre,#vuePro) .off-stats{grid-column:1 / -1}
 .off-scene{position:relative;height:440px;min-width:0;width:100%;justify-self:stretch}
 .sc-aura{position:absolute;inset:8% 4% 10% 8%;border-radius:50%;filter:blur(60px);opacity:.55;pointer-events:none;
   background:radial-gradient(closest-side at 30% 40%,#FA233B,transparent),radial-gradient(closest-side at 72% 62%,#7C5CFF,transparent),radial-gradient(closest-side at 60% 20%,#F2C14E,transparent)}
-.sc-carte{position:absolute;border-radius:18px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.08);animation:sc-flotte 7s ease-in-out infinite}
-@keyframes sc-flotte{50%{transform:translateY(-8px) rotate(var(--r,0deg))}}
+.sc-carte{position:absolute;border-radius:18px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.08);animation:sc-flotte 6s ease-in-out infinite}
+/* les cartes flottent et basculent, chacune a son rythme ; elles suivent aussi la souris en
+   profondeur (--mx / --my poses par le script, --z = la profondeur de chaque carte) */
+@keyframes sc-flotte{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-16px) rotate(calc(var(--r,0deg) + 1.4deg))}}
+.sc-carte,.sc-plug{translate:calc(var(--mx,0) * var(--z,14px)) calc(var(--my,0) * var(--z,14px));transition:translate .5s cubic-bezier(.2,.8,.2,1)}
+.sc-une,.sc-plug.p1{--z:22px;animation-duration:6.5s}
+.sc-profil,.sc-plug.p2{--z:-16px;animation-duration:5.4s}
+.sc-ligne,.sc-plug.p3{--z:30px;animation-duration:7.2s}
+.sc-aura{animation:sc-aura 9s ease-in-out infinite alternate}
+@keyframes sc-aura{to{transform:scale(1.12) rotate(14deg)}}
+/* page beatmakers : le bouton lecture pulse, un reflet passe sur la ligne sponsorisee, la banniere ondule */
+.sc-play{animation:sc-pulse 2s ease-out infinite}
+@keyframes sc-pulse{0%{box-shadow:0 6px 18px rgba(250,35,59,.45),0 0 0 0 rgba(250,35,59,.55)}70%,100%{box-shadow:0 6px 18px rgba(250,35,59,.45),0 0 0 14px rgba(250,35,59,0)}}
+.sc-ligne{overflow:hidden}
+.sc-ligne::after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:35%;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.18),transparent);animation:sc-reflet 3.6s ease-in-out infinite}
+@keyframes sc-reflet{0%,40%{left:-40%}100%{left:120%}}
+.sc-ban{background-size:200% 100%;animation:sc-ban 8s ease-in-out infinite alternate}
+@keyframes sc-ban{to{background-position:100% 0}}
 .sc-une{--r:-3deg;left:4%;top:4%;width:62%;aspect-ratio:16/10;transform:rotate(-3deg);color:#fff;display:flex;flex-direction:column;justify-content:flex-end;
   background:radial-gradient(60% 80% at 25% 30%,#FF7A3D,transparent 70%),radial-gradient(60% 70% at 80% 70%,#E8263C,transparent 70%),#1A0508}
 .sc-une::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.75))}
@@ -775,19 +859,19 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .sc-ligne small{font-size:11.5px;color:var(--dim)}
 .sc-nums{margin-left:auto;display:grid;justify-items:center;font:700 14px var(--mono);line-height:1.1}
 .sc-nums i{font-style:normal;font-size:8.5px;color:var(--dimmer);letter-spacing:.06em}
-@media(prefers-reduced-motion:reduce){ .sc-carte{animation:none} }
+@media(prefers-reduced-motion:reduce){ .sc-carte,.sc-plug,.sc-aura,.sc-play,.sc-ligne::after,.sc-ban,.sp-notes span,.sp-notes::after,.sp-roles b,.sp-accord span{animation:none} .sc-carte,.sc-plug{translate:none} }
 /* bande finale */
-#vueOffre .off-fin{padding-top:64px;padding-bottom:8px}
+:is(#vueOffre,#vuePro) .off-fin{padding-top:64px;padding-bottom:8px}
 .off-fin-in{position:relative;overflow:hidden;isolation:isolate;border-radius:var(--r-xl);padding:56px 40px;display:grid;justify-items:center;text-align:center;gap:12px;background:#0B0B0D;color:#fff}
 .off-fin-in .sc-aura{inset:-30% 10% auto;height:120%;opacity:.5;z-index:-1}
 .off-fin-in h2{margin:0;font-size:clamp(28px,4.4vw,48px);font-weight:800;letter-spacing:-.04em;line-height:1.05;max-width:720px}
 .off-fin-in p{margin:0;max-width:520px;font-size:15.5px;line-height:1.5;color:rgba(255,255,255,.75)}
 .off-fin-in .off-cta{justify-content:center}
 /* les marges verticales passent par #vueOffre : .wrap (plus bas) remet le padding a zero */
-#vueOffre .off-hero{padding-top:72px;padding-bottom:40px}
-#vueOffre .off-offres{padding-top:24px;padding-bottom:24px}
-#vueOffre .off-etapes,#vueOffre .off-trouve,#vueOffre .off-faq{padding-top:64px;padding-bottom:8px}
-#vueOffre .off-faq{padding-bottom:40px}
+:is(#vueOffre,#vuePro) .off-hero{padding-top:72px;padding-bottom:40px}
+:is(#vueOffre,#vuePro) .off-offres{padding-top:24px;padding-bottom:24px}
+:is(#vueOffre,#vuePro) .off-etapes,:is(#vueOffre,#vuePro) .off-trouve,:is(#vueOffre,#vuePro) .off-faq{padding-top:64px;padding-bottom:8px}
+:is(#vueOffre,#vuePro) .off-faq{padding-bottom:40px}
 .off-hero{display:grid;justify-items:start;gap:16px;position:relative}
 .off-hero .eyebrow{color:var(--accent)}
 .off-hero h1{margin:0;max-width:880px;font-size:clamp(34px,6vw,68px);font-weight:800;letter-spacing:-.045em;line-height:1.02}
@@ -840,7 +924,7 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .off-res b{font-size:14px}
 .off-res small{margin-left:auto;font-size:12px;color:var(--dim)}
 .off-res p{margin:6px 2px;font-size:13.5px;color:var(--dim);line-height:1.5}
-#vueOffre .off-faq{max-width:860px}
+:is(#vueOffre,#vuePro) .off-faq{max-width:860px}
 .off-faq details{border-bottom:1px solid var(--line-soft)}
 .off-faq summary{cursor:pointer;list-style:none;padding:18px 32px 18px 0;font-size:16px;font-weight:700;position:relative}
 .off-faq summary::-webkit-details-marker{display:none}
@@ -851,7 +935,7 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
   .off-offres,.off-trouve{grid-template-columns:minmax(0,1fr)}
   .off-etapes ol{grid-template-columns:minmax(0,1fr)}
   .off-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-  #vueOffre .off-hero{grid-template-columns:minmax(0,1fr)}
+  :is(#vueOffre,#vuePro) .off-hero{grid-template-columns:minmax(0,1fr)}
   .off-scene{height:430px;margin-top:12px}
   .sc-une{width:78%;left:0;top:0}
   .sc-une-in b{font-size:20px}
@@ -859,7 +943,7 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
   .sc-liens span:nth-child(3){display:none}
   .sc-ligne{width:88%;left:2%;bottom:0}
   .off-fin-in{padding:40px 22px}
-  #vueOffre .off-hero{padding-top:40px}
+  :is(#vueOffre,#vuePro) .off-hero{padding-top:40px}
   .off-carte{padding:22px}
 }
 .profil .cibles-t{font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.6);align-self:center;margin-right:2px}
@@ -2369,6 +2453,78 @@ body.vue-accueil .hcta{display:inline-flex}
   </section>
 </div>
 
+<div id="vuePro" hidden>
+  <section class="off-hero wrap">
+    <div class="off-hero-txt">
+      <span class="eyebrow">FINDINGS Pro</span>
+      <h1>Le studio complet, pour 4,99 € par mois.</h1>
+      <p class="off-lead">L'autotune complet, le mix en un clic, une voix propre, des harmonies justes et un master prêt pour les plateformes. Tout ce qu'il faut pour sortir un son, dans ton navigateur.</p>
+      <div class="off-cta"><span class="hbtn pri pro-bientot" aria-disabled="true">Bientôt disponible</span><a class="hbtn off-sec" href="studio/" data-vue="studio">Essayer le studio</a></div>
+      <p class="pro-beta"><b>Bêta</b>Tous les outils Pro sont ouverts en ce moment : profites-en.</p>
+    </div>
+    <div class="off-scene pro-scene" aria-hidden="true">
+      <span class="sc-aura pro"></span>
+      <div class="sc-plug p1" style="--vis:#3DDCC8;--vis2:#5B7CFF"><span class="pro-aura"></span><div class="sp-tete"><i></i><span><small>FINDINGS</small><b>Tune Pro</b></span><em>02</em></div>
+        <div class="sp-notes"><span style="left:6%;top:62%;width:18%"></span><span style="left:27%;top:42%;width:16%"></span><span style="left:46%;top:24%;width:20%"></span><span style="left:69%;top:36%;width:14%"></span><span style="left:86%;top:58%;width:10%"></span></div></div>
+      <div class="sc-plug p2" style="--vis:#7C5CFF;--vis2:#3DDCC8"><span class="pro-aura"></span><div class="sp-tete"><i></i><span><small>FINDINGS</small><b>Mix auto</b></span></div>
+        <div class="sp-roles"><span>Lead<b style="width:92%"></b></span><span>Backs<b style="width:62%"></b></span><span>Ad-libs<b style="width:68%"></b></span></div></div>
+      <div class="sc-plug p3" style="--vis:#B79CFF;--vis2:#FF4D7E"><span class="pro-aura"></span><div class="sp-tete"><i></i><span><small>FINDINGS</small><b>Harmonies</b></span></div>
+        <div class="sp-accord"><span>A</span><span>C</span><span>E</span></div></div>
+    </div>
+  </section>
+
+  <section class="pro-suite wrap">
+    <h2>La FINDINGS Suite Pro</h2>
+    <p class="pro-sous">Six outils pensés pour la voix, au même endroit que tes prods.</p>
+    <div class="pro-grille">
+      <article class="pro-carte" style="--vis:#3DDCC8;--vis2:#5B7CFF"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">TP</span><span class="pro-marque">FINDINGS</span><h3>Tune Pro</h3><p>L'autotune complet : vitesse, humanize, vibrato, timbre, et la retouche note par note dans le mode graphique.</p></article>
+      <article class="pro-carte" style="--vis:#7C5CFF;--vis2:#3DDCC8"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">MX</span><span class="pro-marque">FINDINGS</span><h3>Mix auto</h3><p>Le studio écoute tes voix et règle chaque piste sur la prod : lead, backs et ad-libs, en un clic.</p></article>
+      <article class="pro-carte" style="--vis:#7CE38B;--vis2:#2FB8A0"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">NV</span><span class="pro-marque">FINDINGS</span><h3>Nettoyage voix</h3><p>Souffle, ventilation, bruit de la pièce : retirés, sans toucher à ta voix.</p></article>
+      <article class="pro-carte" style="--vis:#B79CFF;--vis2:#FF4D7E"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">HM</span><span class="pro-marque">FINDINGS</span><h3>Harmonies auto</h3><p>Tierce, quinte, octave ou accord, toujours justes dans la tonalité de la prod.</p></article>
+      <article class="pro-carte" style="--vis:#8FB8FF;--vis2:#A78BFA"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">DB</span><span class="pro-marque">FINDINGS</span><h3>Doubleur de voix</h3><p>Deux voix décalées comme une vraie double prise, une à gauche, une à droite.</p></article>
+      <article class="pro-carte" style="--vis:#FFD25E;--vis2:#FF8A4C"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">MS</span><span class="pro-marque">FINDINGS</span><h3>Mastering et pistes</h3><p>Un master au niveau des plateformes (-14 LUFS), ou chaque piste en WAV séparé pour ton ingé son.</p></article>
+    </div>
+  </section>
+
+  <section class="pro-compare wrap">
+    <h2>Gratuit ou Pro</h2>
+    <div class="pro-table">
+      <table>
+        <thead><tr><th></th><th>Gratuit<small>0 €</small></th><th class="pro-col">Pro<small>4,99 € / mois</small></th></tr></thead>
+        <tbody>
+        <tr><th scope="row">Recherche, écoute, likes, suivis</th><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td></tr>
+        <tr><th scope="row">Studio : pistes, enregistrement, édition</th><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td></tr>
+        <tr><th scope="row">Auto-Pitch</th><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td></tr>
+        <tr><th scope="row">Effets de base : égaliseur, compresseur, de-esser, saturation, réverb, écho, limiteur…</th><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td></tr>
+        <tr><th scope="row">Export WAV : mix ou voix seule</th><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td></tr>
+        <tr><th scope="row">Tune Pro : l'autotune complet et le mode graphique</th><td><span class="pro-non" aria-label="Non inclus">—</span></td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td></tr>
+        <tr><th scope="row">Mix auto</th><td><span class="pro-non" aria-label="Non inclus">—</span></td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td></tr>
+        <tr><th scope="row">Nettoyage voix</th><td><span class="pro-non" aria-label="Non inclus">—</span></td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td></tr>
+        <tr><th scope="row">FINDINGS Voices : harmonies et doubleur</th><td><span class="pro-non" aria-label="Non inclus">—</span></td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td></tr>
+        <tr><th scope="row">Mastering auto et pistes séparées</th><td><span class="pro-non" aria-label="Non inclus">—</span></td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="off-fin wrap">
+    <div class="off-fin-in">
+      <span class="sc-aura pro"></span>
+      <h2>Ton prochain son mérite le son pro.</h2>
+      <p>Pendant la bêta, tout est ouvert : enregistre, mixe, masterise, et dis-nous ce que tu en penses.</p>
+      <div class="off-cta"><a class="hbtn pri" href="studio/" data-vue="studio">Ouvrir le studio</a></div>
+    </div>
+  </section>
+
+  <section class="off-faq wrap">
+    <h2>Questions</h2>
+    <details><summary>Qu'est-ce qui reste gratuit ?</summary><p>La recherche et l'écoute des prods, le studio (pistes, enregistrement, édition), Auto-Pitch, les effets de base et l'export WAV. De quoi enregistrer et sortir une maquette sans payer.</p></details>
+    <details><summary>Pourquoi les outils Pro marchent-ils déjà ?</summary><p>Le studio est en bêta : tout est ouvert pour que tu l'essaies. Les outils Pro passeront en abonnement au lancement.</p></details>
+    <details><summary>Où sont mes projets ?</summary><p>Dans ton navigateur, sur ton appareil : tes prises et tes projets ne partent sur aucun serveur.</p></details>
+    <details><summary>C'est quoi la différence entre Auto-Pitch et Tune Pro ?</summary><p>Auto-Pitch remet la voix juste en trois réglages. Tune Pro est l'autotune complet : tous les réglages, le vibrato, le timbre, et le mode graphique pour corriger chaque note à la main.</p></details>
+  </section>
+</div>
+
 <div id="vueOffre" hidden>
   <section class="off-hero wrap">
     <div class="off-hero-txt">
@@ -2605,6 +2761,7 @@ body.vue-accueil .hcta{display:inline-flex}
           <b>Studio</b>
           <a href="studio/" data-vue="studio">Pose ta topline</a>
           <a href="studio/#stProjets" data-vue="studio" data-ancre="stProjets">Tes projets</a>
+          <a href="pro/" data-vue="pro">FINDINGS Pro</a>
         </div>
         <div class="foot-col">
           <b>Beatmakers</b>
@@ -2753,6 +2910,49 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "FINDINGS Pro": ["FINDINGS Pro", "FINDINGS Pro"],
+    "Le studio complet, pour 4,99 € par mois.": ["The full studio, for €4.99 a month.", "El estudio completo, por 4,99 € al mes."],
+    "L'autotune complet, le mix en un clic, une voix propre, des harmonies justes et un master prêt pour les plateformes. Tout ce qu'il faut pour sortir un son, dans ton navigateur.": ["The full autotune, one-click mixing, a clean voice, in-tune harmonies and a master ready for streaming platforms. Everything you need to release a track, in your browser.", "El autotune completo, la mezcla en un clic, una voz limpia, armonías afinadas y un máster listo para las plataformas. Todo lo que necesitas para sacar un tema, en tu navegador."],
+    "Bientôt disponible": ["Coming soon", "Muy pronto"],
+    "Essayer le studio": ["Try the studio", "Probar el estudio"],
+    "Bêta": ["Beta", "Beta"],
+    "Tous les outils Pro sont ouverts en ce moment : profites-en.": ["All Pro tools are open right now: make the most of it.", "Todas las herramientas Pro están abiertas ahora mismo: aprovecha."],
+    "La FINDINGS Suite Pro": ["The FINDINGS Pro Suite", "La FINDINGS Suite Pro"],
+    "Six outils pensés pour la voix, au même endroit que tes prods.": ["Six tools built for vocals, in the same place as your beats.", "Seis herramientas pensadas para la voz, en el mismo sitio que tus beats."],
+    "L'autotune complet : vitesse, humanize, vibrato, timbre, et la retouche note par note dans le mode graphique.": ["The full autotune: speed, humanize, vibrato, timbre, and note-by-note editing in graph mode.", "El autotune completo: velocidad, humanize, vibrato, timbre y el retoque nota a nota en el modo gráfico."],
+    "Le studio écoute tes voix et règle chaque piste sur la prod : lead, backs et ad-libs, en un clic.": ["The studio listens to your vocals and sets each track against the beat: lead, backs and ad-libs, in one click.", "El estudio escucha tus voces y ajusta cada pista al beat: lead, coros y ad-libs, en un clic."],
+    "Souffle, ventilation, bruit de la pièce : retirés, sans toucher à ta voix.": ["Hiss, fans, room noise: removed, without touching your voice.", "Soplido, ventilación, ruido de la habitación: eliminados, sin tocar tu voz."],
+    "Harmonies auto": ["Auto harmonies", "Armonías auto"],
+    "Tierce, quinte, octave ou accord, toujours justes dans la tonalité de la prod.": ["Third, fifth, octave or chord, always in tune with the beat's key.", "Tercera, quinta, octava o acorde, siempre afinados en la tonalidad del beat."],
+    "Doubleur de voix": ["Voice doubler", "Doblador de voz"],
+    "Deux voix décalées comme une vraie double prise, une à gauche, une à droite.": ["Two voices offset like a real double take, one left, one right.", "Dos voces desfasadas como una doble toma real, una a la izquierda, otra a la derecha."],
+    "Mastering et pistes": ["Mastering and tracks", "Mastering y pistas"],
+    "Un master au niveau des plateformes (-14 LUFS), ou chaque piste en WAV séparé pour ton ingé son.": ["A master at streaming level (-14 LUFS), or each track as a separate WAV for your engineer.", "Un máster al nivel de las plataformas (-14 LUFS), o cada pista en WAV separado para tu ingeniero."],
+    "Gratuit ou Pro": ["Free or Pro", "Gratis o Pro"],
+    "Gratuit": ["Free", "Gratis"],
+    "Pro": ["Pro", "Pro"],
+    "0 €": ["€0", "0 €"],
+    "4,99 € / mois": ["€4.99 / month", "4,99 € / mes"],
+    "Recherche, écoute, likes, suivis": ["Search, listening, likes, follows", "Búsqueda, escucha, likes, seguidos"],
+    "Studio : pistes, enregistrement, édition": ["Studio: tracks, recording, editing", "Estudio: pistas, grabación, edición"],
+    "Effets de base : égaliseur, compresseur, de-esser, saturation, réverb, écho, limiteur…": ["Basic effects: EQ, compressor, de-esser, saturation, reverb, echo, limiter…", "Efectos básicos: ecualizador, compresor, de-esser, saturación, reverb, eco, limitador…"],
+    "Export WAV : mix ou voix seule": ["WAV export: mix or vocals only", "Exportación WAV: mezcla o solo voz"],
+    "Tune Pro : l'autotune complet et le mode graphique": ["Tune Pro: the full autotune and graph mode", "Tune Pro: el autotune completo y el modo gráfico"],
+    "FINDINGS Voices : harmonies et doubleur": ["FINDINGS Voices: harmonies and doubler", "FINDINGS Voices: armonías y doblador"],
+    "Mastering auto et pistes séparées": ["Auto mastering and separate tracks", "Mastering auto y pistas separadas"],
+    "Inclus": ["Included", "Incluido"],
+    "Non inclus": ["Not included", "No incluido"],
+    "Ton prochain son mérite le son pro.": ["Your next track deserves the pro sound.", "Tu próximo tema merece el sonido pro."],
+    "Pendant la bêta, tout est ouvert : enregistre, mixe, masterise, et dis-nous ce que tu en penses.": ["During the beta, everything is open: record, mix, master, and tell us what you think.", "Durante la beta todo está abierto: graba, mezcla, masteriza y cuéntanos qué te parece."],
+    "Qu'est-ce qui reste gratuit ?": ["What stays free?", "¿Qué sigue siendo gratis?"],
+    "La recherche et l'écoute des prods, le studio (pistes, enregistrement, édition), Auto-Pitch, les effets de base et l'export WAV. De quoi enregistrer et sortir une maquette sans payer.": ["Searching and listening to beats, the studio (tracks, recording, editing), Auto-Pitch, basic effects and WAV export. Enough to record and release a demo without paying.", "La búsqueda y escucha de beats, el estudio (pistas, grabación, edición), Auto-Pitch, los efectos básicos y la exportación WAV. Suficiente para grabar y sacar una maqueta sin pagar."],
+    "Pourquoi les outils Pro marchent-ils déjà ?": ["Why do the Pro tools already work?", "¿Por qué ya funcionan las herramientas Pro?"],
+    "Le studio est en bêta : tout est ouvert pour que tu l'essaies. Les outils Pro passeront en abonnement au lancement.": ["The studio is in beta: everything is open for you to try. The Pro tools will move to a subscription at launch.", "El estudio está en beta: todo está abierto para que lo pruebes. Las herramientas Pro pasarán a suscripción en el lanzamiento."],
+    "Où sont mes projets ?": ["Where are my projects?", "¿Dónde están mis proyectos?"],
+    "Dans ton navigateur, sur ton appareil : tes prises et tes projets ne partent sur aucun serveur.": ["In your browser, on your device: your takes and projects don't go to any server.", "En tu navegador, en tu dispositivo: tus tomas y proyectos no van a ningún servidor."],
+    "C'est quoi la différence entre Auto-Pitch et Tune Pro ?": ["What's the difference between Auto-Pitch and Tune Pro?", "¿Cuál es la diferencia entre Auto-Pitch y Tune Pro?"],
+    "Auto-Pitch remet la voix juste en trois réglages. Tune Pro est l'autotune complet : tous les réglages, le vibrato, le timbre, et le mode graphique pour corriger chaque note à la main.": ["Auto-Pitch puts the voice in tune with three settings. Tune Pro is the full autotune: every setting, vibrato, timbre, and graph mode to fix each note by hand.", "Auto-Pitch afina la voz con tres ajustes. Tune Pro es el autotune completo: todos los ajustes, el vibrato, el timbre y el modo gráfico para corregir cada nota a mano."],
+    "FINDINGS Pro : le studio complet, pour 4,99 € par mois": ["FINDINGS Pro: the full studio, for €4.99 a month", "FINDINGS Pro: el estudio completo, por 4,99 € al mes"],
     "Ta prod": ["Your beat", "Tu beat"],
     "par Ton nom": ["by Your name", "de Tu nombre"],
     "Ta prod mérite d'être entendue.": ["Your beat deserves to be heard.", "Tu beat merece ser escuchado."],
@@ -3411,6 +3611,8 @@ const I18N = (() => {
     [`^${N} prods? proches$`, m => nb(m[1], ["similar beat", "similar beats"], ["beat parecido", "beats parecidos"])],
     [`^${N} prods? en tout$`, m => nb(m[1], ["beat", "beats"], ["beat", "beats"]) + (L === 0 ? " in total" : " en total")],
     [`^${N} en tout$`, "$1 in total", "$1 en total"],
+    [`^(.+) : outil Pro, ouvert pendant la bêta$`, m => t(m[1]) + (L === 0 ? ": Pro tool, open during the beta" : ": herramienta Pro, abierta durante la beta")],
+    [`^(.+) fait partie de FINDINGS Pro$`, m => t(m[1]) + (L === 0 ? " is part of FINDINGS Pro" : " forma parte de FINDINGS Pro")],
     [`^${N} BPM · (.+)$`, m => `${m[1]} BPM · ` + t(m[2])],
     [`^Harmonies créées : (.+)$`, m => (L === 0 ? "Harmonies created: " : "Armonías creadas: ") + m[1]],
     [`^(Harmonies|Doublage) : voix ${N}/${N}…$`, m => (m[1] === "Doublage" ? (L === 0 ? "Doubling" : "Doblaje") : (L === 0 ? "Harmonies" : "Armonías")) + ` : ${L === 0 ? "voice" : "voz"} ${m[2]}/${m[3]}…`],
@@ -4074,13 +4276,14 @@ function lireAdresse(u){
   const url = new URL(u, document.baseURI);
   const p = new URLSearchParams(url.search);
   const rel = url.pathname.startsWith(BASE) ? decodeURIComponent(url.pathname.slice(BASE.length)) : "";
-  const m = /^(artiste|style|beatmaker|studio|pour-les-beatmakers)\/?([^/]*)\/?/.exec(rel);
+  const m = /^(artiste|style|beatmaker|studio|pour-les-beatmakers|pro)\/?([^/]*)\/?/.exec(rel);
   if (m) {
     if (m[1] === "artiste" && m[2]) p.set("artist", m[2]);
     if (m[1] === "style" && m[2]) p.set("style", m[2]);
     if (m[1] === "beatmaker" && m[2]) p.set("prod", SLUG_PROD.get(m[2]) || m[2]);
     if (m[1] === "studio") p.set("studio", "1");
     if (m[1] === "pour-les-beatmakers") p.set("offre", "1");
+    if (m[1] === "pro") p.set("pro", "1");
   }
   return p;
 }
@@ -4089,6 +4292,7 @@ function faireAdresse(p){
   const cles = [...p.keys()].filter(k => k !== "vue");
   if (p.get("studio") === "1") return `${BASE}studio/${p.get("beat") ? "?beat=" + encodeURIComponent(p.get("beat")) : ""}`;
   if (p.get("offre") === "1") return `${BASE}pour-les-beatmakers/`;
+  if (p.get("pro") === "1") return `${BASE}pro/`;
   if (cles.length === 1) {
     if (cles[0] === "artist") return lienArtiste(p.get("artist"));
     if (cles[0] === "style") return lienStyle(p.get("style"));
@@ -4103,6 +4307,7 @@ function majTitre(){
   let t = "FINDINGS : type beats à écouter et studio pour poser ta topline", d = null;
   if (document.body.classList.contains("vue-studio")) t = "Studio en ligne : pose ta topline sur une prod | FINDINGS";
   else if (document.body.classList.contains("vue-offre")) t = "Pour les beatmakers : mets tes prods en avant sur FINDINGS";
+  else if (document.body.classList.contains("vue-pro")) t = "FINDINGS Pro : le studio complet, pour 4,99 € par mois";
   else if (!document.body.classList.contains("vue-accueil")) {
     const ar = S.artists.size === 1 && !S.styles.size && !S.moods.size && !S.prod ? [...S.artists][0] : null;
     if (S.q.trim()) { t = `« ${S.q.trim()} » : ${n} prods | FINDINGS`; }
@@ -5863,7 +6068,7 @@ const toutesBtn = document.getElementById("toutesBtn");
 /* Hors de la liste des prods (accueil ou studio), la liste est cachee : un bouton de filtre de
    l'en-tete doit l'activer (pas l'inverser) et y emmener. Avant, depuis le studio, ces boutons
    changeaient l'adresse sans rien montrer. */
-const horsListe = () => ["vue-accueil", "vue-studio", "vue-offre"].some(c => document.body.classList.contains(c));
+const horsListe = () => ["vue-accueil", "vue-studio", "vue-offre", "vue-pro"].some(c => document.body.classList.contains(c));
 toutesBtn.addEventListener("click", () => {
   viderFiltres();
   refletFiltres();
@@ -6248,6 +6453,15 @@ function brancherRangees(){
     maj();
   });
 }
+
+/* Les scenes des pages Pro et beatmakers suivent la souris en profondeur. */
+document.querySelectorAll(".off-scene").forEach(sc => {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const hero = sc.closest(".off-hero") || sc;
+  hero.addEventListener("pointermove", e => { const r = hero.getBoundingClientRect();
+    sc.style.setProperty("--mx", ((e.clientX - r.left) / r.width - .5).toFixed(3)); sc.style.setProperty("--my", ((e.clientY - r.top) / r.height - .5).toFixed(3)); });
+  hero.addEventListener("pointerleave", () => { sc.style.setProperty("--mx", 0); sc.style.setProperty("--my", 0); });
+});
 
 /* ============ page « Pour les beatmakers » ============ */
 (function offre(){
@@ -6794,18 +7008,20 @@ const AFFICHES = (() => {
 const vAccueil = document.getElementById("vueAccueil");
 const vProds = document.querySelector("main.shell");
 
-const vStudio = document.getElementById("vueStudio"), vOffre = document.getElementById("vueOffre");
+const vStudio = document.getElementById("vueStudio"), vOffre = document.getElementById("vueOffre"), vPro = document.getElementById("vuePro");
 function montrerVue(nom, pousser = true, params = ""){
-  const studio = nom === "studio", offre = nom === "offre", accueil = !studio && !offre && nom !== "prods";
+  const studio = nom === "studio", offre = nom === "offre", pro = nom === "pro", accueil = !studio && !offre && !pro && nom !== "prods";
   vAccueil.hidden = !accueil;
-  vProds.hidden = accueil || studio || offre;
+  vProds.hidden = accueil || studio || offre || pro;
   vStudio.hidden = !studio;
   vOffre.hidden = !offre;
+  vPro.hidden = !pro;
   document.body.classList.toggle("vue-accueil", accueil);
   document.body.classList.toggle("vue-studio", studio);
   document.body.classList.toggle("vue-offre", offre);
+  document.body.classList.toggle("vue-pro", pro);
   if (pousser) {
-    const u = new URL(params || (studio ? "studio/" : offre ? "pour-les-beatmakers/" : "?vue=prods"), document.baseURI);
+    const u = new URL(params || (studio ? "studio/" : offre ? "pour-les-beatmakers/" : pro ? "pro/" : "?vue=prods"), document.baseURI);
     const url = accueil ? BASE : u.pathname + u.search;
     if (url !== location.pathname + location.search) history.pushState({ vue: nom }, "", url);
   }
@@ -6878,6 +7094,7 @@ addEventListener("popstate", () => {
   const p = lireAdresse(location.href);
   if (p.get("studio") === "1") { montrerVue("studio", false); return; }
   if (p.get("offre") === "1") { montrerVue("offre", false); return; }
+  if (p.get("pro") === "1") { montrerVue("pro", false); return; }
   appliquerParams(p);
   montrerVue(p.toString() ? "prods" : "accueil", false);
 });
@@ -6967,11 +7184,11 @@ function appliquerParams(p, reprendreLecture = false){
    d'une recherche ou d'une prod, c'est le catalogue. */
 (function demarrer(){
   const p = lireAdresse(location.href);
-  const versStudio = p.get("studio") === "1", versOffre = p.get("offre") === "1";
-  const versProds = !versStudio && !versOffre && (p.get("vue") === "prods" || ["style","sort","q","mood","likes","play","artist","historique","pourtoi","proche","nouveau","prod","suivis","toplines"].some(k => p.get(k)));
+  const versStudio = p.get("studio") === "1", versOffre = p.get("offre") === "1", versPro = p.get("pro") === "1";
+  const versProds = !versStudio && !versOffre && !versPro && (p.get("vue") === "prods" || ["style","sort","q","mood","likes","play","artist","historique","pourtoi","proche","nouveau","prod","suivis","toplines"].some(k => p.get(k)));
   document.getElementById("seoPre")?.remove();   // le contenu pre-rendu cede la place a l'application
   appliquerParams(p, true);
-  const vue = versStudio ? "studio" : versOffre ? "offre" : versProds ? "prods" : "accueil";
+  const vue = versStudio ? "studio" : versOffre ? "offre" : versPro ? "pro" : versProds ? "prods" : "accueil";
   history.replaceState({ vue }, "", location.pathname + location.search);
   // le studio (studio.js) se charge apres ce script : on le monte une fois pret
   if (versStudio) { montrerVue("studio", false); }
