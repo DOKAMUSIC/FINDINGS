@@ -773,7 +773,20 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .sp-accord span{animation:sp-accord 2.4s ease-in-out infinite}
 .sp-accord span:nth-child(2){animation-delay:.25s} .sp-accord span:nth-child(3){animation-delay:.5s}
 @keyframes sp-accord{0%,100%{opacity:.55;transform:none}20%{opacity:1;transform:translateY(-4px);box-shadow:0 8px 18px color-mix(in srgb,var(--vis) 45%,transparent)}45%{opacity:.8;transform:none}}
-:is(#vuePro) .pro-suite,:is(#vuePro) .pro-compare{padding-top:64px;padding-bottom:8px}
+:is(#vuePro) .pro-suite,:is(#vuePro) .pro-compare,:is(#vuePro) .pro-prix{padding-top:64px;padding-bottom:8px}
+.pro-prix{scroll-margin-top:80px}
+.pro-prix h2{margin:0 0 6px;font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.03em}
+.pro-plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-width:820px}
+.pro-plan{position:relative;display:grid;align-content:start;justify-items:start;gap:10px;padding:26px;border-radius:22px;background:var(--surface);border:1px solid var(--line-soft);box-shadow:var(--sh-1)}
+.pro-plan.conseil{border:2px solid var(--accent);box-shadow:0 18px 40px rgba(250,35,59,.15)}
+.pp-badge{position:absolute;top:18px;right:18px;font-size:12px;font-weight:800;color:#fff;background:var(--accent);padding:4px 10px;border-radius:999px}
+.pp-nom{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.pp-prix{margin:0;display:flex;align-items:baseline;gap:6px}
+.pp-prix b{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.pp-prix span{font-size:15px;color:var(--dim);font-weight:600}
+.pp-note{margin:0 0 6px;font-size:14px;line-height:1.5;color:var(--dim)}
+.pp-note b{color:var(--ink)}
+@media(max-width:600px){ .pro-plans{grid-template-columns:minmax(0,1fr)} }
 .pro-suite h2,.pro-compare h2{margin:0 0 6px;font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.03em}
 .pro-sous{margin:0 0 20px;color:var(--dim);font-size:15px}
 .pro-grille{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
@@ -2457,9 +2470,9 @@ body.vue-accueil .hcta{display:inline-flex}
   <section class="off-hero wrap">
     <div class="off-hero-txt">
       <span class="eyebrow">FINDINGS Pro</span>
-      <h1>Le studio complet, pour 4,99 € par mois.</h1>
+      <h1>Le studio complet, dès 3,33 € par mois.</h1>
       <p class="off-lead">L'autotune complet, le mix en un clic, une voix propre, des harmonies justes et un master prêt pour les plateformes. Tout ce qu'il faut pour sortir un son, dans ton navigateur.</p>
-      <div class="off-cta"><span class="hbtn pri pro-bientot" aria-disabled="true">Bientôt disponible</span><a class="hbtn off-sec" href="studio/" data-vue="studio">Essayer le studio</a></div>
+      <div class="off-cta"><a class="hbtn pri" href="#proPrix">Voir les prix</a><a class="hbtn off-sec" href="studio/" data-vue="studio">Essayer le studio</a></div>
       <p class="pro-beta"><b>Bêta</b>Tous les outils Pro sont ouverts en ce moment : profites-en.</p>
     </div>
     <div class="off-scene pro-scene" aria-hidden="true">
@@ -2486,11 +2499,31 @@ body.vue-accueil .hcta{display:inline-flex}
     </div>
   </section>
 
+  <section class="pro-prix wrap" id="proPrix">
+    <h2>Prix de lancement</h2>
+    <p class="pro-sous">Garanti à vie pour les premiers abonnés. Ensuite, 6,99 € par mois ou 49,99 € par an pour les nouveaux.</p>
+    <div class="pro-plans">
+      <article class="pro-plan">
+        <span class="pp-nom">Mensuel</span>
+        <p class="pp-prix"><b>4,99 €</b><span>/ mois</span></p>
+        <p class="pp-note">Sans engagement de durée : un mois à la fois.</p>
+        <span class="hbtn off-sec pro-bientot" aria-disabled="true">Bientôt disponible</span>
+      </article>
+      <article class="pro-plan conseil">
+        <span class="pp-badge">−33 %</span>
+        <span class="pp-nom">Annuel</span>
+        <p class="pp-prix"><b>39,99 €</b><span>/ an</span></p>
+        <p class="pp-note">Soit <b>3,33 € par mois</b> : près de 20 € d'économie sur l'année.</p>
+        <span class="hbtn pri pro-bientot" aria-disabled="true">Bientôt disponible</span>
+      </article>
+    </div>
+  </section>
+
   <section class="pro-compare wrap">
     <h2>Gratuit ou Pro</h2>
     <div class="pro-table">
       <table>
-        <thead><tr><th></th><th>Gratuit<small>0 €</small></th><th class="pro-col">Pro<small>4,99 € / mois</small></th></tr></thead>
+        <thead><tr><th></th><th>Gratuit<small>0 €</small></th><th class="pro-col">Pro<small>4,99 € / mois ou 39,99 € / an</small></th></tr></thead>
         <tbody>
         <tr><th scope="row">Recherche, écoute, likes, suivis</th><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td></tr>
         <tr><th scope="row">Studio : pistes, enregistrement, édition</th><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Inclus"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></td></tr>
@@ -2910,6 +2943,19 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "Prix de lancement": ["Launch pricing", "Precio de lanzamiento"],
+    "Garanti à vie pour les premiers abonnés. Ensuite, 6,99 € par mois ou 49,99 € par an pour les nouveaux.": ["Locked in for life for the first subscribers. After that, €6.99 a month or €49.99 a year for new ones.", "Garantizado de por vida para los primeros suscriptores. Después, 6,99 € al mes o 49,99 € al año para los nuevos."],
+    "Mensuel": ["Monthly", "Mensual"],
+    "Annuel": ["Yearly", "Anual"],
+    "/ mois": ["/ month", "/ mes"],
+    "/ an": ["/ year", "/ año"],
+    "Sans engagement de durée : un mois à la fois.": ["No minimum term: one month at a time.", "Sin permanencia: un mes cada vez."],
+    "Soit": ["That's", "O sea"],
+    "3,33 € par mois": ["€3.33 a month", "3,33 € al mes"],
+    ": près de 20 € d'économie sur l'année.": [": almost €20 saved over the year.", ": casi 20 € de ahorro al año."],
+    "4,99 € / mois ou 39,99 € / an": ["€4.99 / month or €39.99 / year", "4,99 € / mes o 39,99 € / año"],
+    "Le studio complet, dès 3,33 € par mois.": ["The full studio, from €3.33 a month.", "El estudio completo, desde 3,33 € al mes."],
+    "Voir les prix": ["See pricing", "Ver precios"],
     "FINDINGS Pro": ["FINDINGS Pro", "FINDINGS Pro"],
     "Le studio complet, pour 4,99 € par mois.": ["The full studio, for €4.99 a month.", "El estudio completo, por 4,99 € al mes."],
     "L'autotune complet, le mix en un clic, une voix propre, des harmonies justes et un master prêt pour les plateformes. Tout ce qu'il faut pour sortir un son, dans ton navigateur.": ["The full autotune, one-click mixing, a clean voice, in-tune harmonies and a master ready for streaming platforms. Everything you need to release a track, in your browser.", "El autotune completo, la mezcla en un clic, una voz limpia, armonías afinadas y un máster listo para las plataformas. Todo lo que necesitas para sacar un tema, en tu navegador."],
@@ -2952,7 +2998,7 @@ const I18N = (() => {
     "Dans ton navigateur, sur ton appareil : tes prises et tes projets ne partent sur aucun serveur.": ["In your browser, on your device: your takes and projects don't go to any server.", "En tu navegador, en tu dispositivo: tus tomas y proyectos no van a ningún servidor."],
     "C'est quoi la différence entre Auto-Pitch et Tune Pro ?": ["What's the difference between Auto-Pitch and Tune Pro?", "¿Cuál es la diferencia entre Auto-Pitch y Tune Pro?"],
     "Auto-Pitch remet la voix juste en trois réglages. Tune Pro est l'autotune complet : tous les réglages, le vibrato, le timbre, et le mode graphique pour corriger chaque note à la main.": ["Auto-Pitch puts the voice in tune with three settings. Tune Pro is the full autotune: every setting, vibrato, timbre, and graph mode to fix each note by hand.", "Auto-Pitch afina la voz con tres ajustes. Tune Pro es el autotune completo: todos los ajustes, el vibrato, el timbre y el modo gráfico para corregir cada nota a mano."],
-    "FINDINGS Pro : le studio complet, pour 4,99 € par mois": ["FINDINGS Pro: the full studio, for €4.99 a month", "FINDINGS Pro: el estudio completo, por 4,99 € al mes"],
+    "FINDINGS Pro : le studio complet, dès 3,33 € par mois": ["FINDINGS Pro: the full studio, from €3.33 a month", "FINDINGS Pro: el estudio completo, desde 3,33 € al mes"],
     "Ta prod": ["Your beat", "Tu beat"],
     "par Ton nom": ["by Your name", "de Tu nombre"],
     "Ta prod mérite d'être entendue.": ["Your beat deserves to be heard.", "Tu beat merece ser escuchado."],
@@ -4307,7 +4353,7 @@ function majTitre(){
   let t = "FINDINGS : type beats à écouter et studio pour poser ta topline", d = null;
   if (document.body.classList.contains("vue-studio")) t = "Studio en ligne : pose ta topline sur une prod | FINDINGS";
   else if (document.body.classList.contains("vue-offre")) t = "Pour les beatmakers : mets tes prods en avant sur FINDINGS";
-  else if (document.body.classList.contains("vue-pro")) t = "FINDINGS Pro : le studio complet, pour 4,99 € par mois";
+  else if (document.body.classList.contains("vue-pro")) t = "FINDINGS Pro : le studio complet, dès 3,33 € par mois";
   else if (!document.body.classList.contains("vue-accueil")) {
     const ar = S.artists.size === 1 && !S.styles.size && !S.moods.size && !S.prod ? [...S.artists][0] : null;
     if (S.q.trim()) { t = `« ${S.q.trim()} » : ${n} prods | FINDINGS`; }
