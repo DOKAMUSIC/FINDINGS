@@ -61,6 +61,13 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "Les prix": ["Pricing", "Precios"],
+    "Un abonnement, tous les outils Pro. Au mois ou à l'année.": ["One subscription, every Pro tool. Monthly or yearly.", "Una suscripción, todas las herramientas Pro. Al mes o al año."],
+    "4,58 € par mois": ["€4.58 a month", "4,58 € al mes"],
+    ": près de 28 € d'économie sur l'année.": [": almost €28 saved over the year.", ": casi 28 € de ahorro al año."],
+    "6,90 € / mois ou 54,90 € / an": ["€6.90 / month or €54.90 / year", "6,90 € / mes o 54,90 € / año"],
+    "Le studio complet, pour 6,90 € par mois.": ["The full studio, for €6.90 a month.", "El estudio completo, por 6,90 € al mes."],
+    "FINDINGS Pro : le studio complet, pour 6,90 € par mois": ["FINDINGS Pro: the full studio, for €6.90 a month", "FINDINGS Pro: el estudio completo, por 6,90 € al mes"],
     "Prix de lancement": ["Launch pricing", "Precio de lanzamiento"],
     "Garanti à vie pour les premiers abonnés. Ensuite, 6,99 € par mois ou 49,99 € par an pour les nouveaux.": ["Locked in for life for the first subscribers. After that, €6.99 a month or €49.99 a year for new ones.", "Garantizado de por vida para los primeros suscriptores. Después, 6,99 € al mes o 49,99 € al año para los nuevos."],
     "Mensuel": ["Monthly", "Mensual"],
@@ -1471,7 +1478,7 @@ function majTitre(){
   let t = "FINDINGS : type beats à écouter et studio pour poser ta topline", d = null;
   if (document.body.classList.contains("vue-studio")) t = "Studio en ligne : pose ta topline sur une prod | FINDINGS";
   else if (document.body.classList.contains("vue-offre")) t = "Pour les beatmakers : mets tes prods en avant sur FINDINGS";
-  else if (document.body.classList.contains("vue-pro")) t = "FINDINGS Pro : le studio complet, dès 3,33 € par mois";
+  else if (document.body.classList.contains("vue-pro")) t = "FINDINGS Pro : le studio complet, pour 6,90 € par mois";
   else if (!document.body.classList.contains("vue-accueil")) {
     const ar = S.artists.size === 1 && !S.styles.size && !S.moods.size && !S.prod ? [...S.artists][0] : null;
     if (S.q.trim()) { t = `« ${S.q.trim()} » : ${n} prods | FINDINGS`; }
