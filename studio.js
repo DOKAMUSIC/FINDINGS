@@ -444,6 +444,78 @@ const STUDIO = (() => {
   .plug-tg[aria-pressed="true"]{color:var(--vis);border-color:color-mix(in srgb,var(--vis) 45%,transparent);background:color-mix(in srgb,var(--vis) 12%,#0F1114)}
   .plug-tg[aria-pressed="true"] i{background:var(--vis);box-shadow:0 0 6px var(--vis)}
   .fxc.detail.plug:not(.on) .plug-vis,.fxc.detail.plug:not(.on) .plug-boutons{opacity:.45;filter:saturate(.3)}
+  /* ═══════════ la signature FINDINGS Suite ═══════════
+     Ce qui rend les plug-ins reconnaissables, repris du site :
+       · l'aura : deux taches de couleur floues dans le coin, comme les affiches des moods ;
+       · le numero de serie geant en contour (01, 02…), comme le classement des sorties ;
+       · le rouge FINDINGS en constante : temoin d'allumage et aiguille de chaque bouton ;
+       · la typo du logo (800, serree) pour la marque et le nom du modele ;
+       · des details d'appareil : ecrans a trame de points, LED segmentees, signature gravee.
+     Chaque plug-in garde sa paire de couleurs (--vis, --vis2). */
+  .fxc.detail.plug,.rk-case{--fr:#FA233B}
+  .fxc.detail.plug[data-fx="autopitch"],.rk-case[data-fx="autopitch"]{--vis:#7CE38B;--vis2:#2FB8A0}
+  .fxc.detail.plug[data-fx="autotune"],.rk-case[data-fx="autotune"]{--vis:#3DDCC8;--vis2:#5B7CFF}
+  .fxc.detail.plug[data-fx="hpf"],.rk-case[data-fx="hpf"]{--vis:#7AA2FF;--vis2:#3D5AFE}
+  .fxc.detail.plug[data-fx="eq"],.rk-case[data-fx="eq"]{--vis:#FFB547;--vis2:#FF6B3D}
+  .fxc.detail.plug[data-fx="comp"],.rk-case[data-fx="comp"]{--vis:#FF8A4C;--vis2:#E8263C}
+  .fxc.detail.plug[data-fx="deesser"],.rk-case[data-fx="deesser"]{--vis:#6FD3FF;--vis2:#7C5CFF}
+  .fxc.detail.plug[data-fx="sat"],.rk-case[data-fx="sat"]{--vis:#FF6B5E;--vis2:#FFB547}
+  .fxc.detail.plug[data-fx="filtre"],.rk-case[data-fx="filtre"]{--vis:#C792EA;--vis2:#FF4D7E}
+  .fxc.detail.plug[data-fx="chorus"],.rk-case[data-fx="chorus"]{--vis:#8FB8FF;--vis2:#A78BFA}
+  .fxc.detail.plug[data-fx="reverb"],.rk-case[data-fx="reverb"]{--vis:#A78BFA;--vis2:#5B7CFF}
+  .fxc.detail.plug[data-fx="limit"],.rk-case[data-fx="limit"]{--vis:#FFD25E;--vis2:#FF8A4C}
+  .fxc.detail.plug[data-fx="delay"],.rk-case[data-fx="delay"]{--vis:#5EE6A8;--vis2:#3DDCC8}
+  .fxc.detail.plug{background:#0B0C0E;border:1px solid rgba(255,255,255,.08);border-radius:16px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 18px 40px rgba(0,0,0,.45);isolation:isolate}
+  .fxc.detail.plug > *:not(.plug-aura){position:relative;z-index:1}
+  .plug-aura{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;border-radius:inherit;transition:opacity .3s}
+  .plug-aura::before,.plug-aura::after{content:"";position:absolute;border-radius:50%;filter:blur(52px)}
+  .plug-aura::before{left:-120px;top:-150px;width:460px;height:340px;opacity:.55;
+    background:radial-gradient(closest-side at 40% 50%,var(--vis),transparent),radial-gradient(closest-side at 80% 45%,var(--vis2,var(--vis)),transparent)}
+  .plug-aura::after{right:-140px;bottom:-170px;width:420px;height:320px;opacity:.22;background:radial-gradient(closest-side,var(--vis2,var(--vis)),transparent)}
+  .fxc.detail.plug:not(.on) .plug-aura{opacity:.3;filter:saturate(.15)}
+  /* signature gravee */
+  .fxc.detail.plug::after{content:"FINDINGS SUITE";position:absolute;right:16px;bottom:7px;z-index:1;font:800 8px/1 var(--sans);letter-spacing:.32em;color:rgba(255,255,255,.16);pointer-events:none}
+  /* en-tete : la marque comme le logo du site, le modele en grand, le numero de serie en contour */
+  .fxc.detail.plug .plug-tete{height:58px;padding:0 16px;gap:14px;background:transparent;border-bottom:1px solid rgba(255,255,255,.07)}
+  .plug-nom{display:grid;gap:3px;align-items:end}
+  .plug-marque{font:800 10.5px/1 var(--sans)!important;letter-spacing:-.01em!important;color:#fff!important;opacity:.92}
+  .plug-nom b{font:800 21px/1 var(--sans)!important;letter-spacing:-.04em!important;color:var(--vis)!important}
+  .fxc.detail.plug .plug-fn{align-self:end;margin-bottom:3px;font:600 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+  .plug-num{font:800 46px/1 var(--sans);letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1.2px rgba(255,255,255,.22);margin-right:4px;font-variant-numeric:tabular-nums;user-select:none}
+  .fxc.detail.plug.on .plug-num{-webkit-text-stroke-color:color-mix(in srgb,var(--vis) 55%,transparent)}
+  /* le temoin : rouge FINDINGS, sur toute la gamme */
+  .fxc.detail.plug .plug-pwr{width:34px;height:20px;background:#22252B}
+  .fxc.detail.plug .plug-pwr::after{top:3px;left:3px;width:14px;height:14px;background:#6B7079}
+  .fxc.detail.plug.on .plug-pwr{background:var(--fr);box-shadow:0 0 14px rgba(250,35,59,.55),inset 0 1px 0 rgba(255,255,255,.25)}
+  .fxc.detail.plug.on .plug-pwr::after{transform:translateX(14px);background:#fff}
+  /* ecrans : trame de points, coins plus doux */
+  .fxc.detail.plug .plug-vis{border-radius:12px;border-color:rgba(255,255,255,.07);
+    background:radial-gradient(rgba(255,255,255,.045) 1px,transparent 1.2px) 0 0/12px 12px,radial-gradient(ellipse at 30% 0%,color-mix(in srgb,var(--vis) 9%,#08090B),#08090B 70%)}
+  /* boutons : arc de la couleur du plug-in, aiguille rouge FINDINGS */
+  .fxc.detail.plug .kn .kn-fond{stroke:#1E2126;stroke-width:3.6}
+  .fxc.detail.plug .kn .kn-val{stroke-width:3.6;stroke-linecap:round}
+  .fxc.detail.plug .kn .kn-cap{fill:#16181C;stroke:rgba(255,255,255,.1)}
+  .fxc.detail.plug .kn .kn-ind{stroke:var(--fr);stroke-width:2.6;stroke-linecap:round}
+  .fxc.detail.plug .kn .kn-v{font:700 11.5px var(--mono,ui-monospace);letter-spacing:-.02em}
+  .fxc.detail.plug .kn .kn-n{color:rgba(255,255,255,.5)}
+  .fxc.detail.plug .kn:hover .kn-cap{fill:#1D2025}
+  /* boutons segmentes et pastilles : la couleur pleine quand c'est choisi */
+  .plug-seg{border-radius:999px;background:#070809;border-color:rgba(255,255,255,.07)}
+  .plug-seg button{border-radius:999px;font-weight:700}
+  .plug-seg button[aria-pressed="true"]{color:#0B0C0E;background:var(--vis);box-shadow:0 0 12px color-mix(in srgb,var(--vis) 40%,transparent)}
+  .plug-tg{border-radius:999px;background:#070809}
+  .plug-tg[aria-pressed="true"]{color:#0B0C0E;background:var(--vis);border-color:var(--vis)}
+  .plug-tg[aria-pressed="true"] i{background:#0B0C0E;box-shadow:none}
+  .plug-menu select{border-radius:999px;background-color:#070809}
+  /* vumetres : LED segmentees */
+  .plug-io .io span{width:7px;border-radius:2px;background:#070809}
+  .plug-io .io i{background:linear-gradient(0deg,#3DDC84,#E5D84C 72%,var(--fr));-webkit-mask:repeating-linear-gradient(0deg,#000 0 3px,transparent 3px 4px);mask:repeating-linear-gradient(0deg,#000 0 3px,transparent 3px 4px)}
+  .at-onglets{border-radius:999px} .at-onglets button{border-radius:999px}
+  /* la liste des effets reprend le numero et la couleur de chaque plug-in */
+  .rk-num{font:800 10px/1 var(--mono,ui-monospace);font-style:normal;letter-spacing:-.02em;color:var(--dimmer);width:16px;flex:0 0 auto}
+  .rk-case.on .rk-num{color:var(--vis)}
+  .rk-case.ouvert{box-shadow:inset 3px 0 0 var(--vis)}
   /* liste des effets */
   .rk-modele{font-style:normal;font-weight:700;color:var(--ink);margin-right:6px;letter-spacing:-.01em}
   .rk-case:not(.on) .rk-modele{color:var(--dim)}
@@ -2282,17 +2354,20 @@ const STUDIO = (() => {
           ${P.pistes.length > 1 ? '<button class="dp-act danger" id="dpSupprPiste">Supprimer la piste</button>' : ""}
         </div>
         <div class="rk" role="list">${FX.map(f => { const v = p.fx[f.k]; return `
-          <div class="rk-case${v.on ? " on" : ""}${fxOuvert === f.k ? " ouvert" : ""}" role="listitem" data-ouvrir="${f.k}">
+          <div class="rk-case${v.on ? " on" : ""}${fxOuvert === f.k ? " ouvert" : ""}" role="listitem" data-ouvrir="${f.k}" data-fx="${f.k}">
             <button class="fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}"></button>
+            <i class="rk-num" aria-hidden="true">${String(FX.indexOf(f) + 1).padStart(2, "0")}</i>
             <span class="txt"><b><em class="rk-modele" translate="no">${esc(f.modele || "")}</em>${esc(f.nom)}</b><small data-resume="${f.k}">${esc(resume(f.k, v))}</small></span>
           </div>`; }).join("")}</div>
         ${(() => { const f = FX.find(x => x.k === fxOuvert), v = p.fx[f.k]; return `
         <section class="fxc detail plug${v.on ? " on" : ""}" data-fx="${f.k}">
+          <span class="plug-aura" aria-hidden="true"></span>
           <header class="plug-tete">
             <button class="plug-pwr fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}" title="Activer / couper"></button>
             <div class="plug-nom" translate="no"><span class="plug-marque">FINDINGS</span><b>${esc(f.modele || f.nom)}</b></div>
             <span class="plug-fn">${esc(f.nom)}</span>
             <span class="plug-esp"></span>
+            <span class="plug-num" aria-hidden="true">${String(FX.indexOf(f) + 1).padStart(2, "0")}</span>
             <button class="plug-i" data-aide aria-label="Aide" title="Aide">i</button>
           </header>
           <div class="plug-aide">${AIDE[f.k]}</div>
