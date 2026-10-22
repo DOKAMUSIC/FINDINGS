@@ -61,6 +61,19 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "Prix de lancement": ["Launch pricing", "Precio de lanzamiento"],
+    "Garanti à vie pour les premiers abonnés. Ensuite, 6,99 € par mois ou 49,99 € par an pour les nouveaux.": ["Locked in for life for the first subscribers. After that, €6.99 a month or €49.99 a year for new ones.", "Garantizado de por vida para los primeros suscriptores. Después, 6,99 € al mes o 49,99 € al año para los nuevos."],
+    "Mensuel": ["Monthly", "Mensual"],
+    "Annuel": ["Yearly", "Anual"],
+    "/ mois": ["/ month", "/ mes"],
+    "/ an": ["/ year", "/ año"],
+    "Sans engagement de durée : un mois à la fois.": ["No minimum term: one month at a time.", "Sin permanencia: un mes cada vez."],
+    "Soit": ["That's", "O sea"],
+    "3,33 € par mois": ["€3.33 a month", "3,33 € al mes"],
+    ": près de 20 € d'économie sur l'année.": [": almost €20 saved over the year.", ": casi 20 € de ahorro al año."],
+    "4,99 € / mois ou 39,99 € / an": ["€4.99 / month or €39.99 / year", "4,99 € / mes o 39,99 € / año"],
+    "Le studio complet, dès 3,33 € par mois.": ["The full studio, from €3.33 a month.", "El estudio completo, desde 3,33 € al mes."],
+    "Voir les prix": ["See pricing", "Ver precios"],
     "FINDINGS Pro": ["FINDINGS Pro", "FINDINGS Pro"],
     "Le studio complet, pour 4,99 € par mois.": ["The full studio, for €4.99 a month.", "El estudio completo, por 4,99 € al mes."],
     "L'autotune complet, le mix en un clic, une voix propre, des harmonies justes et un master prêt pour les plateformes. Tout ce qu'il faut pour sortir un son, dans ton navigateur.": ["The full autotune, one-click mixing, a clean voice, in-tune harmonies and a master ready for streaming platforms. Everything you need to release a track, in your browser.", "El autotune completo, la mezcla en un clic, una voz limpia, armonías afinadas y un máster listo para las plataformas. Todo lo que necesitas para sacar un tema, en tu navegador."],
@@ -103,7 +116,7 @@ const I18N = (() => {
     "Dans ton navigateur, sur ton appareil : tes prises et tes projets ne partent sur aucun serveur.": ["In your browser, on your device: your takes and projects don't go to any server.", "En tu navegador, en tu dispositivo: tus tomas y proyectos no van a ningún servidor."],
     "C'est quoi la différence entre Auto-Pitch et Tune Pro ?": ["What's the difference between Auto-Pitch and Tune Pro?", "¿Cuál es la diferencia entre Auto-Pitch y Tune Pro?"],
     "Auto-Pitch remet la voix juste en trois réglages. Tune Pro est l'autotune complet : tous les réglages, le vibrato, le timbre, et le mode graphique pour corriger chaque note à la main.": ["Auto-Pitch puts the voice in tune with three settings. Tune Pro is the full autotune: every setting, vibrato, timbre, and graph mode to fix each note by hand.", "Auto-Pitch afina la voz con tres ajustes. Tune Pro es el autotune completo: todos los ajustes, el vibrato, el timbre y el modo gráfico para corregir cada nota a mano."],
-    "FINDINGS Pro : le studio complet, pour 4,99 € par mois": ["FINDINGS Pro: the full studio, for €4.99 a month", "FINDINGS Pro: el estudio completo, por 4,99 € al mes"],
+    "FINDINGS Pro : le studio complet, dès 3,33 € par mois": ["FINDINGS Pro: the full studio, from €3.33 a month", "FINDINGS Pro: el estudio completo, desde 3,33 € al mes"],
     "Ta prod": ["Your beat", "Tu beat"],
     "par Ton nom": ["by Your name", "de Tu nombre"],
     "Ta prod mérite d'être entendue.": ["Your beat deserves to be heard.", "Tu beat merece ser escuchado."],
@@ -1458,7 +1471,7 @@ function majTitre(){
   let t = "FINDINGS : type beats à écouter et studio pour poser ta topline", d = null;
   if (document.body.classList.contains("vue-studio")) t = "Studio en ligne : pose ta topline sur une prod | FINDINGS";
   else if (document.body.classList.contains("vue-offre")) t = "Pour les beatmakers : mets tes prods en avant sur FINDINGS";
-  else if (document.body.classList.contains("vue-pro")) t = "FINDINGS Pro : le studio complet, pour 4,99 € par mois";
+  else if (document.body.classList.contains("vue-pro")) t = "FINDINGS Pro : le studio complet, dès 3,33 € par mois";
   else if (!document.body.classList.contains("vue-accueil")) {
     const ar = S.artists.size === 1 && !S.styles.size && !S.moods.size && !S.prod ? [...S.artists][0] : null;
     if (S.q.trim()) { t = `« ${S.q.trim()} » : ${n} prods | FINDINGS`; }
