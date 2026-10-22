@@ -548,68 +548,6 @@ const STUDIO = (() => {
   .fxc.detail.plug .kn.grand .kn-n{font-size:10.5px;color:var(--p-txt)}
   .at-pied{display:flex;justify-content:center;align-items:center;gap:22px;padding-bottom:2px}
   @media(max-width:640px){ .at-centre{grid-template-columns:1fr} .fxc.detail.plug .plug-vis.at-metre{width:100%} .plug-main{grid-template-columns:1fr} .plug-io{display:none} }
-  /* ═══════════ studio en theme clair ═══════════
-     L'interface suit le site ; les plug-ins, eux, gardent leur facade d'appareil. */
-  :root:not([data-theme="dark"]) .daw{--bg:#FFFFFF;--surface:#F4F4F6;--surface-2:#ECECEF;--ink:#1D1D1F;--ink-2:#3A3A3C;--dim:#6E6E73;--dimmer:#98989D;
-    --line:rgba(0,0,0,.14);--line-soft:rgba(0,0,0,.06);--hover:rgba(0,0,0,.05);--thumb:#E5E5EA;--accent-soft:rgba(250,35,59,.1);
-    --barre:linear-gradient(180deg,#FCFCFD,#ECEDF0);--creux:#E2E3E7;--lcd:#E6ECF0;--lcd-ink:#14181C;--lcd-dim:#6A737C;
-    color-scheme:light;border-color:#C7C9CE;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7),0 18px 50px rgba(0,0,0,.12)}
-  :root:not([data-theme="dark"]) .daw-haut{border-bottom-color:#CFD1D6;box-shadow:inset 0 1px 0 #fff}
-  :root:not([data-theme="dark"]) .daw-transport,:root:not([data-theme="dark"]) .daw-mix,:root:not([data-theme="dark"]) .daw-niv,:root:not([data-theme="dark"]) .vu{box-shadow:inset 0 1px 2px rgba(0,0,0,.18),0 1px 0 #fff}
-  :root:not([data-theme="dark"]) .daw-b{color:#3A3B40} :root:not([data-theme="dark"]) .daw-b:hover{background:rgba(0,0,0,.06);color:#111}
-  :root:not([data-theme="dark"]) .daw.joue .daw-b.lire{color:#1E9E57;background:rgba(30,158,87,.12)}
-  :root:not([data-theme="dark"]) .lcd{box-shadow:inset 0 1px 3px rgba(0,0,0,.22),0 1px 0 #fff}
-  :root:not([data-theme="dark"]) .lcd-seg{border-left-color:rgba(0,0,0,.08)}
-  :root:not([data-theme="dark"]) .daw-o,:root:not([data-theme="dark"]) .daw-ms,:root:not([data-theme="dark"]) .daw-fxb,:root:not([data-theme="dark"]) .daw-importer,:root:not([data-theme="dark"]) .ajout-piste button,:root:not([data-theme="dark"]) .dp-act{color:#3A3B40;background:linear-gradient(180deg,#FFFFFF,#E9EAED);box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(0,0,0,.12),0 1px 1px rgba(0,0,0,.08)}
-  :root:not([data-theme="dark"]) .daw-o:hover,:root:not([data-theme="dark"]) .daw-ms:hover,:root:not([data-theme="dark"]) .daw-importer:hover,:root:not([data-theme="dark"]) .ajout-piste button:hover,:root:not([data-theme="dark"]) .dp-act:hover{color:#111;background:linear-gradient(180deg,#FFFFFF,#F1F2F4)}
-  :root:not([data-theme="dark"]) .daw-o:active{background:#E2E3E7;box-shadow:inset 0 1px 2px rgba(0,0,0,.2)}
-  :root:not([data-theme="dark"]) .daw-o[aria-pressed="true"]{color:#D61F35;background:linear-gradient(180deg,#FFF1F3,#FFE0E5);box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(214,31,53,.3)}
-  :root:not([data-theme="dark"]) .daw-o.achat{color:#fff;background:linear-gradient(180deg,#34C77B,#22A15C);box-shadow:0 1px 2px rgba(0,0,0,.15)}
-  :root:not([data-theme="dark"]) .daw-o.pri{color:#fff;background:linear-gradient(180deg,#FF3A50,#E01E36);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 1px 2px rgba(0,0,0,.2)}
-  :root:not([data-theme="dark"]) .daw-sep{background:rgba(0,0,0,.14);box-shadow:1px 0 0 #fff}
-  :root:not([data-theme="dark"]) .daw-ms.m[aria-pressed="true"]{background:linear-gradient(180deg,#5DA2FF,#2F7CF0);color:#fff}
-  :root:not([data-theme="dark"]) .daw-ms.s[aria-pressed="true"]{background:linear-gradient(180deg,#FFD866,#E9B52C);color:#1A1405}
-  :root:not([data-theme="dark"]) .daw-fxb.actif{color:#fff;background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 85%,#fff),var(--pc));box-shadow:0 0 0 1px color-mix(in srgb,var(--pc) 70%,#000),0 1px 1px rgba(0,0,0,.1)}
-  :root:not([data-theme="dark"]) .daw input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--pc,var(--accent)) var(--p,50%),#D3D5DA var(--p,50%));box-shadow:inset 0 1px 1px rgba(0,0,0,.15)}
-  :root:not([data-theme="dark"]) .daw input[type=range]::-moz-range-track{background:#D3D5DA}
-  :root:not([data-theme="dark"]) .daw input[type=range]::-webkit-slider-thumb{background:linear-gradient(180deg,#FFFFFF,#D9DBDF);box-shadow:0 0 0 1px rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.25)}
-  :root:not([data-theme="dark"]) .daw-zone{scrollbar-color:#C4C6CB var(--bg)}
-  :root:not([data-theme="dark"]) .daw-ligne{border-bottom-color:rgba(0,0,0,.08)}
-  :root:not([data-theme="dark"]) .daw-ligne.regle{border-bottom-color:#CFD1D6}
-  :root:not([data-theme="dark"]) .daw-coin,:root:not([data-theme="dark"]) .daw-tete{border-right-color:#D5D7DB;box-shadow:1px 0 0 #fff}
-  :root:not([data-theme="dark"]) .daw-regle{background-image:linear-gradient(to right,rgba(0,0,0,.18) 1px,transparent 1px),var(--barre)}
-  :root:not([data-theme="dark"]) .daw-regle span{color:#5E6168;border-left-color:rgba(0,0,0,.28)}
-  :root:not([data-theme="dark"]) .daw-voie{background-image:linear-gradient(to right,rgba(0,0,0,.09) 1px,transparent 1px),linear-gradient(to right,rgba(0,0,0,.035) 1px,transparent 1px)}
-  :root:not([data-theme="dark"]) .daw-ligne.sel-piste .daw-voie{background-color:rgba(0,0,0,.022)}
-  :root:not([data-theme="dark"]) .daw-ligne.sel-piste .daw-tete{background:#E7E8EC}
-  :root:not([data-theme="dark"]) .vu{background:#DCDEE2}
-  :root:not([data-theme="dark"]) .bloc-prod{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--sc) 14%,transparent) 0 6px,transparent 6px 12px),color-mix(in srgb,var(--sc) 10%,#fff);
-    border-color:color-mix(in srgb,var(--sc) 45%,#fff);color:color-mix(in srgb,var(--sc) 70%,#000);box-shadow:inset 0 14px 0 color-mix(in srgb,var(--sc) 24%,#fff)}
-  :root:not([data-theme="dark"]) .bloc-fichier{background:linear-gradient(180deg,color-mix(in srgb,var(--sc) 85%,#fff) 0 15px,color-mix(in srgb,var(--sc) 20%,#fff) 15px);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--sc) 45%,#fff)}
-  :root:not([data-theme="dark"]) .clip{background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 92%,#fff) 0 15px,color-mix(in srgb,var(--pc) 16%,#fff) 15px);
-    box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pc) 55%,#fff),0 1px 2px rgba(0,0,0,.12)}
-  :root:not([data-theme="dark"]) .clip.sel{box-shadow:inset 0 0 0 1px #1D1D1F,0 0 0 1px #1D1D1F,0 4px 14px rgba(0,0,0,.18)}
-  :root:not([data-theme="dark"]) .daw-curseur{background:#1D1D1F;box-shadow:none}
-  :root:not([data-theme="dark"]) .daw-curseur::before{border-top-color:#1D1D1F}
-  :root:not([data-theme="dark"]) .daw-pan{background:#F4F4F6;border-top-color:#CFD1D6;box-shadow:inset 0 1px 0 #fff}
-  :root:not([data-theme="dark"]) .dp-onglets{border-bottom-color:#D5D7DB}
-  :root:not([data-theme="dark"]) .dp-onglets button[aria-selected="true"]{color:#1D1D1F;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06)}
-  :root:not([data-theme="dark"]) .dp-corps{background:#EEEFF2}
-  :root:not([data-theme="dark"]) .dp-bloc{background:#FFFFFF;border-color:#DDDFE3;box-shadow:0 1px 2px rgba(0,0,0,.05)}
-  :root:not([data-theme="dark"]) .dp-bloc input[type=text],:root:not([data-theme="dark"]) .dp-bloc select{background:#fff;border-color:#CFD1D6;color:#1D1D1F;box-shadow:none}
-  :root:not([data-theme="dark"]) .dp-act.danger{color:#D61F35;background:linear-gradient(180deg,#FFF5F6,#FFE6EA)}
-  :root:not([data-theme="dark"]) .dp-bloc .kn .kn-v{background:#F1F2F4;color:#1D1D1F;box-shadow:inset 0 1px 1px rgba(0,0,0,.12)}
-  :root:not([data-theme="dark"]) .dp-bloc .kn .kn-fond{stroke:#D3D5DA}
-  :root:not([data-theme="dark"]) .rk{background:#E6E7EA;border-color:#D5D7DB;box-shadow:inset 0 1px 2px rgba(0,0,0,.08)}
-  :root:not([data-theme="dark"]) .rk-case{background:linear-gradient(180deg,#FFFFFF,#F2F3F5);box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(0,0,0,.08),0 1px 1px rgba(0,0,0,.05)}
-  :root:not([data-theme="dark"]) .rk-case:hover{background:#fff}
-  :root:not([data-theme="dark"]) .rk-case.ouvert{background:linear-gradient(180deg,color-mix(in srgb,var(--pc,var(--accent)) 12%,#fff),color-mix(in srgb,var(--pc,var(--accent)) 8%,#F7F7F9));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pc,var(--accent)) 55%,transparent)}
-  :root:not([data-theme="dark"]) .rk-case .fx-on{background:#DCDEE2;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)}
-  :root:not([data-theme="dark"]) .rk-case .fx-on::after{background:#B9BCC2}
-  :root:not([data-theme="dark"]) .rk-case.on .fx-on::after{background:var(--pc,var(--accent));box-shadow:0 0 6px var(--pc,var(--accent)),0 0 2px #fff inset}
-  :root:not([data-theme="dark"]) .daw-poignee i{background:#C4C6CB;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
-  :root:not([data-theme="dark"]) .daw-poignee:hover i,:root:not([data-theme="dark"]) .daw-poignee.tire i{background:#8E9198}
-  
   /* ── l'inspecteur tient dans sa hauteur : colonnes qui defilent chacune, plug-in qui s'adapte ── */
   .daw .dp-corps.rack{overflow:hidden;align-items:stretch;grid-template-rows:minmax(0,1fr)}
   .daw .dp-corps.rack > .dp-bloc{overflow-y:auto;align-self:start;max-height:100%}
@@ -721,6 +659,151 @@ const STUDIO = (() => {
     .lcd-seg.t b{min-width:0}
     .daw-niv{display:none}
   }
+
+  /* ═══════════════════════ LA DA FINDINGS ═══════════════════════
+     Le studio reprend le langage du site (et de la FINDINGS Suite) : surfaces nettes, grands
+     arrondis, pastilles, typo grasse et serree, rouge FINDINGS pour ce qui compte (tete de
+     lecture, enregistrement, action principale), une aura floue dans le coin. Plus de relief
+     gris facon Logic. Les couleurs passent par des jetons, redefinis pour le theme clair. */
+  .daw{--bg:#0E0E10;--surface:#151518;--surface-2:#1C1C20;--ink:#F5F5F7;--ink-2:#D1D1D6;--dim:#9A9AA0;--dimmer:#6E6E75;
+    --line:rgba(255,255,255,.09);--line-soft:rgba(255,255,255,.055);--hover:rgba(255,255,255,.06);--chip:rgba(255,255,255,.07);--chip-h:rgba(255,255,255,.12);
+    --creux:#08080A;--lcd:rgba(255,255,255,.06);--lcd-ink:#F5F5F7;--lcd-dim:#8A8A90;--grille:rgba(255,255,255,.06);--grille-2:rgba(255,255,255,.025);
+    --fr:#FA233B;--fr-soft:rgba(250,35,59,.16);--ombre:0 30px 80px rgba(0,0,0,.5);
+    border-radius:22px;border:1px solid var(--line);background:var(--bg);box-shadow:var(--ombre);isolation:isolate}
+  :root:not([data-theme="dark"]) .daw{--bg:#FFFFFF;--surface:#F5F5F7;--surface-2:#EDEDF0;--ink:#1D1D1F;--ink-2:#3A3A3C;--dim:#6E6E73;--dimmer:#98989D;
+    --line:rgba(0,0,0,.09);--line-soft:rgba(0,0,0,.055);--hover:rgba(0,0,0,.04);--chip:rgba(118,118,128,.12);--chip-h:rgba(118,118,128,.2);
+    --creux:#F0F0F3;--lcd:rgba(118,118,128,.1);--lcd-ink:#1D1D1F;--lcd-dim:#6E6E73;--grille:rgba(0,0,0,.08);--grille-2:rgba(0,0,0,.03);
+    --fr-soft:rgba(250,35,59,.1);--ombre:0 24px 70px rgba(0,0,0,.12);--thumb:#E5E5EA;--on-ink:#fff;color-scheme:light}
+  .daw.inline{border-radius:22px}
+  /* l'aura FINDINGS, derriere la barre du haut */
+  .daw::before{content:"";position:absolute;left:-120px;top:-160px;width:620px;height:340px;z-index:-1;pointer-events:none;filter:blur(60px);opacity:.32;
+    background:radial-gradient(closest-side at 35% 55%,#FA233B,transparent),radial-gradient(closest-side at 75% 45%,#7C5CFF,transparent)}
+  :root:not([data-theme="dark"]) .daw::before{opacity:.16}
+  .daw ::-webkit-scrollbar{width:10px;height:10px} .daw ::-webkit-scrollbar-thumb{background:var(--chip-h);border-radius:999px;border:3px solid transparent;background-clip:padding-box}
+  /* ── barre du haut ── */
+  .daw .daw-haut{background:transparent;border-bottom:1px solid var(--line-soft);box-shadow:none;padding:12px 16px;gap:16px}
+  .daw .daw-id .eyebrow{color:var(--fr);font-size:10px;letter-spacing:.12em}
+  .daw .daw-id b,.daw .daw-titre-champ{font-size:19px;font-weight:800;letter-spacing:-.035em}
+  .daw .daw-titre:hover{background:var(--hover)}
+  .daw .daw-titre-champ{background:var(--surface);border-color:var(--fr);border-radius:8px}
+  .daw .daw-id span.info{font-size:11.5px}
+  /* transport : boutons ronds, lecture en disque plein comme le lecteur du site */
+  .daw .daw-transport{gap:4px;padding:4px;border-radius:999px;background:var(--chip);box-shadow:none}
+  .daw .daw-b{width:34px;height:34px;border-radius:50%;color:var(--ink-2)}
+  .daw .daw-b:hover{background:var(--chip-h);color:var(--ink)}
+  .daw .daw-b.lire{width:40px;height:40px;margin:-3px 2px;background:var(--ink);color:var(--bg);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+  .daw .daw-b.lire:hover{transform:scale(1.05);background:var(--ink);color:var(--bg)}
+  .daw.joue .daw-b.lire{background:var(--ink);color:var(--bg)}
+  .daw .daw-b.rec{color:var(--fr)}
+  .daw .daw-b.rec.on{background:var(--fr);color:#fff;box-shadow:0 0 0 4px var(--fr-soft)}
+  .daw .daw-b.retour[aria-pressed="true"]{color:#3DDCC8;background:rgba(61,220,200,.14)}
+  /* l'afficheur : une pastille nette, chiffres en mono */
+  .daw .lcd{border-radius:16px;background:var(--lcd);box-shadow:none;color:var(--lcd-ink)}
+  .daw .lcd-seg{border-left-color:var(--line-soft);padding:5px 16px}
+  .daw .lcd-seg b{font-size:19px;font-weight:700;letter-spacing:-.03em}
+  .daw .lcd-seg small{font-size:8.5px;letter-spacing:.12em;color:var(--lcd-dim)}
+  .daw .lcd-dec{background:var(--surface)}
+  .daw .daw-niv{width:6px;border-radius:999px;background:var(--chip);box-shadow:none}
+  /* outils : pastilles */
+  .daw .daw-o{height:32px;min-width:32px;padding:0 11px;border-radius:999px;background:var(--chip);color:var(--ink-2);box-shadow:none;font-size:12px;font-weight:650}
+  .daw .daw-o:hover{background:var(--chip-h);color:var(--ink)}
+  .daw .daw-o:active{background:var(--chip-h);box-shadow:none;transform:scale(.97)}
+  .daw .daw-o[aria-pressed="true"]{background:var(--fr-soft);color:var(--fr);box-shadow:none}
+  .daw .daw-o.pri{background:var(--fr);color:#fff;padding:0 15px;box-shadow:0 6px 18px rgba(250,35,59,.3)}
+  .daw .daw-o.pri:hover{background:#E51F35;transform:translateY(-1px)}
+  .daw .daw-o.ia{background:linear-gradient(135deg,#7C5CFF,#3DDCC8);color:#fff;box-shadow:0 6px 18px rgba(124,92,255,.3)}
+  .daw .daw-o.achat{background:#2FB872;color:#fff;box-shadow:0 6px 16px rgba(47,184,114,.28)}
+  .daw .daw-sep{width:1px;height:18px;background:var(--line);box-shadow:none;margin:0 4px}
+  .daw .daw-zoom{color:var(--dim)}
+  .daw .daw-mix{border-radius:999px;background:var(--chip);box-shadow:none}
+  .daw .daw-mix button{border-radius:999px}
+  .daw .daw-mix button[aria-pressed="true"]{background:var(--ink);color:var(--bg);box-shadow:none}
+  /* curseurs : piste fine, pastille ronde */
+  .daw input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:999px;background:linear-gradient(90deg,var(--pc,var(--fr)) var(--p,50%),var(--chip-h) var(--p,50%));box-shadow:none}
+  .daw input[type=range]::-moz-range-track{height:4px;border-radius:999px;background:var(--chip-h)}
+  .daw input[type=range]::-webkit-slider-thumb{width:14px;height:14px;margin-top:-5px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.15),0 2px 6px rgba(0,0,0,.3)}
+  .daw input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.15),0 2px 6px rgba(0,0,0,.3)}
+  /* ── timeline ── */
+  .daw .daw-zone{background:transparent;scrollbar-color:var(--chip-h) transparent}
+  .daw .daw-ligne{border-bottom:1px solid var(--line-soft)}
+  .daw .daw-ligne.regle{border-bottom:1px solid var(--line)}
+  .daw .daw-coin,.daw .daw-tete{background:var(--surface);border-right:1px solid var(--line-soft);box-shadow:none}
+  .daw .daw-coin{background:var(--surface);color:var(--dimmer);font-size:9px;letter-spacing:.12em}
+  .daw .daw-regle{background:var(--surface);background-image:linear-gradient(to right,var(--grille) 1px,transparent 1px);background-size:var(--temps) 6px;background-repeat:repeat-x;background-position:0 100%}
+  .daw .daw-regle span{border-left:1px solid var(--line);color:var(--dim);font-size:10px;font-weight:700}
+  .daw .daw-voie{background-image:linear-gradient(to right,var(--grille) 1px,transparent 1px),linear-gradient(to right,var(--grille-2) 1px,transparent 1px)}
+  .daw .daw-ligne.sel-piste .daw-voie{background-color:var(--hover)}
+  .daw .daw-ligne.sel-piste .daw-tete{background:var(--surface-2)}
+  /* en-tetes de piste : barre de couleur arrondie, boutons en pastilles */
+  .daw .daw-tete::before{left:6px;top:10px;bottom:10px;width:4px;border-radius:999px}
+  .daw .daw-tete{padding:8px 12px 8px 20px}
+  .daw .daw-tete .nom{font-size:12.5px;font-weight:750;letter-spacing:-.01em}
+  .daw .daw-tete .cible{background:var(--fr);box-shadow:0 0 0 3px var(--fr-soft)}
+  .daw .daw-ms,.daw .daw-fxb{height:20px;border-radius:6px;background:var(--chip);color:var(--dim);box-shadow:none;font-weight:800}
+  .daw .daw-ms{width:24px}
+  .daw .daw-ms:hover,.daw .daw-fxb:hover{background:var(--chip-h);color:var(--ink)}
+  .daw .daw-ms.m[aria-pressed="true"]{background:#3B82F6;color:#fff}
+  .daw .daw-ms.s[aria-pressed="true"]{background:#F2C14E;color:#1A1405}
+  .daw .daw-fxb.actif{background:var(--pc);color:#fff}
+  .daw .vu{height:4px;border-radius:999px;background:var(--chip);box-shadow:none}
+  .daw .daw-importer{height:24px;padding:0 11px;border-radius:999px;background:var(--chip);color:var(--ink);box-shadow:none}
+  .daw .daw-importer:hover{background:var(--chip-h)}
+  .daw .ajout-piste button{height:30px;padding:0 14px;border-radius:999px;background:var(--chip);color:var(--ink-2);box-shadow:none}
+  .daw .ajout-piste button:hover{background:var(--chip-h);color:var(--ink)}
+  /* regions : arrondies, couleur franche */
+  .daw .clip{top:6px;bottom:6px;border-radius:10px;
+    background:linear-gradient(180deg,var(--pc) 0 16px,color-mix(in srgb,var(--pc) 24%,var(--bg)) 16px);
+    box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pc) 45%,transparent)}
+  .daw .clip .clip-nom{color:rgba(0,0,0,.8);font-size:10px;font-weight:800;line-height:15px}
+  .daw .clip.sel{box-shadow:0 0 0 2px var(--ink),0 8px 24px rgba(0,0,0,.35)}
+  .daw .clip.enreg{background:linear-gradient(180deg,var(--fr) 0 16px,var(--fr-soft) 16px);box-shadow:inset 0 0 0 1px var(--fr)}
+  .daw .bloc-prod{border-radius:10px;border:1px dashed color-mix(in srgb,var(--sc) 55%,transparent);box-shadow:none;
+    background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--sc) 12%,transparent) 0 6px,transparent 6px 12px),color-mix(in srgb,var(--sc) 10%,var(--bg));color:color-mix(in srgb,var(--sc) 70%,var(--ink))}
+  .daw .bloc-fichier{border-radius:10px;background:linear-gradient(180deg,var(--sc) 0 16px,color-mix(in srgb,var(--sc) 22%,var(--bg)) 16px);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--sc) 45%,transparent)}
+  /* la tete de lecture : rouge FINDINGS */
+  .daw .daw-curseur{width:2px;margin-left:-1px;background:var(--fr);box-shadow:0 0 10px rgba(250,35,59,.55)}
+  .daw .daw-curseur::before{left:-6px;top:-1px;width:14px;height:14px;border:0;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--fr)}
+  .daw.enregistre .daw-curseur{box-shadow:0 0 16px rgba(250,35,59,.8)}
+  /* ── inspecteur ── */
+  .daw .daw-pan{background:transparent;border-top:1px solid var(--line);box-shadow:none}
+  .daw .dp-onglets{background:transparent;border-bottom:1px solid var(--line-soft);padding:8px 14px;gap:2px}
+  .daw .dp-onglets button{height:30px;padding:0 14px;border-radius:999px;font-size:12px;font-weight:650;color:var(--dim)}
+  .daw .dp-onglets button:hover{color:var(--ink);background:var(--hover)}
+  .daw .dp-onglets button[aria-selected="true"]{background:var(--ink);color:var(--bg);box-shadow:none}
+  .daw .dp-onglets .pastille{border-radius:50%}
+  .daw .dp-onglets button[aria-selected="true"] .pastille{box-shadow:0 0 0 2px var(--bg)}
+  .daw .dp-onglets .replier{border-radius:50%;width:30px;height:30px}
+  .daw .dp-corps{background:transparent;gap:12px;padding:12px 14px 14px}
+  .daw .dp-bloc{border-radius:16px;background:var(--surface);border:1px solid var(--line-soft);box-shadow:none;padding:12px}
+  .daw .dp-bloc h4{font-size:9.5px;letter-spacing:.12em;color:var(--dim)}
+  .daw .dp-bloc input[type=text],.daw .dp-bloc select{height:30px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);box-shadow:none}
+  .daw .dp-bloc input[type=text]:focus,.daw .dp-bloc select:focus{outline:2px solid var(--fr);outline-offset:-1px}
+  .daw .dp-act{height:30px;padding:0 13px;border-radius:999px;background:var(--chip);color:var(--ink-2);box-shadow:none;font-weight:650}
+  .daw .dp-act:hover{background:var(--chip-h);color:var(--ink)}
+  .daw .dp-act.danger{background:var(--fr-soft);color:var(--fr)}
+  .daw .dp-act.danger:hover{background:var(--fr);color:#fff}
+  /* boutons rotatifs de l'inspecteur : meme famille que la Suite (arc de couleur, aiguille rouge) */
+  .daw .dp-bloc .kn .kn-fond{stroke:var(--chip-h)}
+  .daw .dp-bloc .kn .kn-cap{fill:var(--surface-2);stroke:var(--line)}
+  .daw .dp-bloc .kn .kn-ind{stroke:var(--fr)}
+  .daw .dp-bloc .kn .kn-grads,.daw .dp-bloc .kn .kn-jupe,.daw .dp-bloc .kn .kn-reflet{display:none}
+  .daw .dp-bloc .kn .kn-v{background:transparent;box-shadow:none;color:var(--ink);font-weight:700}
+  /* la liste des effets */
+  .daw .rk{background:transparent;border:0;box-shadow:none;padding:0;gap:4px}
+  .daw .rk::before{color:var(--dimmer);padding:0 4px 4px}
+  .daw .rk-case{height:34px;border-radius:10px;background:var(--surface);box-shadow:none;border:1px solid var(--line-soft)}
+  .daw .rk-case:hover{background:var(--surface-2)}
+  .daw .rk-case.ouvert{background:var(--surface-2);border-color:color-mix(in srgb,var(--vis,var(--fr)) 45%,transparent);box-shadow:inset 3px 0 0 var(--vis,var(--fr))}
+  .daw .rk-case .fx-on{background:var(--chip);box-shadow:none}
+  .daw .rk-case .fx-on::after{background:var(--dimmer)}
+  .daw .rk-case.on .fx-on::after{background:var(--vis,var(--fr));box-shadow:0 0 8px var(--vis,var(--fr))}
+  .daw .rk-modele{color:var(--ink);font-weight:800;letter-spacing:-.02em}
+  /* poignee, messages */
+  .daw .daw-poignee i{width:42px;height:5px;border-radius:999px;background:var(--chip-h);box-shadow:none}
+  .daw .daw-poignee:hover i,.daw .daw-poignee.tire i{background:var(--dim);width:60px}
+  .daw .daw-msg{top:74px;padding:9px 16px;border-radius:999px;background:var(--ink);color:var(--bg);border:0;font-weight:650;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .daw .daw-exp-menu{border-radius:16px}
+  .daw .daw-exp-menu button{border-radius:10px}
   </style>`);
 
   /* ─────────────────────────── balisage ─────────────────────────── */
