@@ -738,14 +738,57 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 
 /* ─────────── page « Pour les beatmakers » ─────────── */
 #vueOffre{padding-bottom:20px}
+/* hero en deux colonnes : le texte, puis une petite scene (les trois mises en avant, en cartes) */
+#vueOffre .off-hero{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);column-gap:48px;align-items:center}
+.off-hero-txt{display:grid;justify-items:start;gap:16px}
+#vueOffre .off-stats{grid-column:1 / -1}
+.off-scene{position:relative;height:440px;min-width:0;width:100%;justify-self:stretch}
+.sc-aura{position:absolute;inset:8% 4% 10% 8%;border-radius:50%;filter:blur(60px);opacity:.55;pointer-events:none;
+  background:radial-gradient(closest-side at 30% 40%,#FA233B,transparent),radial-gradient(closest-side at 72% 62%,#7C5CFF,transparent),radial-gradient(closest-side at 60% 20%,#F2C14E,transparent)}
+.sc-carte{position:absolute;border-radius:18px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.08);animation:sc-flotte 7s ease-in-out infinite}
+@keyframes sc-flotte{50%{transform:translateY(-8px) rotate(var(--r,0deg))}}
+.sc-une{--r:-3deg;left:4%;top:4%;width:62%;aspect-ratio:16/10;transform:rotate(-3deg);color:#fff;display:flex;flex-direction:column;justify-content:flex-end;
+  background:radial-gradient(60% 80% at 25% 30%,#FF7A3D,transparent 70%),radial-gradient(60% 70% at 80% 70%,#E8263C,transparent 70%),#1A0508}
+.sc-une::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.75))}
+.sc-une .sponso-tag.sur-image{position:absolute;top:12px;left:12px;color:#1A1405;background:#F2C14E;z-index:1}
+.sc-play{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#fff;z-index:1;box-shadow:0 6px 18px rgba(250,35,59,.45)}
+.sc-une-in{position:relative;z-index:1;display:grid;gap:3px;padding:14px 16px}
+.sc-une-in small{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85;display:flex;align-items:center}
+.sc-une-in small .verif{color:#7CC4FF}
+.sc-une-in b{font-size:24px;font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.sc-une-in span{font-size:12px;opacity:.85;display:flex;gap:8px;align-items:center}
+.sc-une-in span i{font-style:normal;padding:1px 7px;border-radius:5px;background:rgba(255,255,255,.18)}
+.sc-profil{--r:4deg;right:0;top:34%;width:56%;transform:rotate(4deg);background:var(--surface);color:var(--ink);animation-delay:-2.5s}
+.sc-ban{height:62px;background:linear-gradient(120deg,#3B9EFF,#7C5CFF 55%,#FA233B)}
+.sc-profil-in{display:flex;align-items:center;gap:10px;padding:0 14px;margin-top:-20px}
+.sc-ava{width:48px;height:48px;border-radius:50%;flex:0 0 auto;background:linear-gradient(135deg,#2A2D33,#5A606B);box-shadow:0 0 0 3px var(--surface)}
+.sc-profil-in div{display:grid;gap:1px;margin-top:18px}
+.sc-profil-in small{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.sc-profil-in b{font-size:17px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center}
+.sc-liens{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px 14px}
+.sc-liens span{font-size:11px;font-weight:650;padding:4px 9px;border-radius:999px;background:var(--hover);border:1px solid var(--line-soft)}
+.sc-ligne{--r:-1.5deg;left:10%;bottom:2%;width:70%;display:flex;align-items:center;gap:12px;padding:10px 14px;transform:rotate(-1.5deg);animation-delay:-4.5s;
+  background:linear-gradient(90deg,rgba(242,193,78,.14),transparent 70%),var(--surface);color:var(--ink);box-shadow:inset 3px 0 0 #E8B03A,0 24px 60px rgba(0,0,0,.3),0 0 0 1px var(--line-soft)}
+.sc-mini,.ap-mini{width:64px;height:40px;border-radius:7px;flex:0 0 auto;background:radial-gradient(70% 90% at 30% 30%,#FF7A3D,transparent 70%),radial-gradient(70% 90% at 80% 70%,#7C5CFF,transparent 70%),#1A0B12}
+.sc-ligne div{display:grid;gap:2px;justify-items:start;min-width:0}
+.sc-ligne b{font-size:14px;font-weight:750}
+.sc-ligne small{font-size:11.5px;color:var(--dim)}
+.sc-nums{margin-left:auto;display:grid;justify-items:center;font:700 14px var(--mono);line-height:1.1}
+.sc-nums i{font-style:normal;font-size:8.5px;color:var(--dimmer);letter-spacing:.06em}
+@media(prefers-reduced-motion:reduce){ .sc-carte{animation:none} }
+/* bande finale */
+#vueOffre .off-fin{padding-top:64px;padding-bottom:8px}
+.off-fin-in{position:relative;overflow:hidden;isolation:isolate;border-radius:var(--r-xl);padding:56px 40px;display:grid;justify-items:center;text-align:center;gap:12px;background:#0B0B0D;color:#fff}
+.off-fin-in .sc-aura{inset:-30% 10% auto;height:120%;opacity:.5;z-index:-1}
+.off-fin-in h2{margin:0;font-size:clamp(28px,4.4vw,48px);font-weight:800;letter-spacing:-.04em;line-height:1.05;max-width:720px}
+.off-fin-in p{margin:0;max-width:520px;font-size:15.5px;line-height:1.5;color:rgba(255,255,255,.75)}
+.off-fin-in .off-cta{justify-content:center}
 /* les marges verticales passent par #vueOffre : .wrap (plus bas) remet le padding a zero */
 #vueOffre .off-hero{padding-top:72px;padding-bottom:40px}
 #vueOffre .off-offres{padding-top:24px;padding-bottom:24px}
 #vueOffre .off-etapes,#vueOffre .off-trouve,#vueOffre .off-faq{padding-top:64px;padding-bottom:8px}
 #vueOffre .off-faq{padding-bottom:40px}
 .off-hero{display:grid;justify-items:start;gap:16px;position:relative}
-.off-hero::before{content:"";position:absolute;inset:-40px 0 auto;height:420px;z-index:-1;pointer-events:none;
-  background:radial-gradient(50% 60% at 15% 20%,rgba(250,35,59,.16),transparent 70%),radial-gradient(40% 50% at 80% 10%,rgba(242,193,78,.12),transparent 70%)}
 .off-hero .eyebrow{color:var(--accent)}
 .off-hero h1{margin:0;max-width:880px;font-size:clamp(34px,6vw,68px);font-weight:800;letter-spacing:-.045em;line-height:1.02}
 .off-lead{margin:0;max-width:640px;font-size:17px;line-height:1.55;color:var(--dim)}
@@ -770,7 +813,7 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .off-carte.pro li::before{background:rgba(59,158,255,.15)} .off-carte.pro li::after{border-color:#3B9EFF}
 .off-apercu{margin-top:auto;padding-top:14px}
 .ap-ligne{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:linear-gradient(90deg,rgba(242,193,78,.1),transparent 70%),var(--surface-2);box-shadow:inset 3px 0 0 #E8B03A,0 0 0 1px var(--line-soft)}
-.ap-ligne img{width:72px;height:44px;border-radius:7px;object-fit:cover;flex:0 0 auto}
+.ap-mini{width:72px;height:44px}
 .ap-ligne div{display:grid;gap:3px;min-width:0;justify-items:start}
 .ap-ligne b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .ap-ligne small{font-size:12px;color:var(--dim)}
@@ -808,6 +851,9 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
   .off-offres,.off-trouve{grid-template-columns:minmax(0,1fr)}
   .off-etapes ol{grid-template-columns:minmax(0,1fr)}
   .off-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #vueOffre .off-hero{grid-template-columns:minmax(0,1fr)}
+  .off-scene{height:380px;margin-top:12px}
+  .off-fin-in{padding:40px 22px}
   #vueOffre .off-hero{padding-top:40px}
   .off-carte{padding:22px}
 }
@@ -2320,10 +2366,30 @@ body.vue-accueil .hcta{display:inline-flex}
 
 <div id="vueOffre" hidden>
   <section class="off-hero wrap">
-    <span class="eyebrow">FINDINGS pour les beatmakers</span>
-    <h1>Fais écouter tes prods aux artistes qui cherchent.</h1>
-    <p class="off-lead">Sur FINDINGS, les rappeurs et les chanteurs trouvent leurs type beats par artiste, style, mood et tempo, puis posent leur voix dessus dans le studio. Chaque écoute passe par ta vidéo YouTube, et chaque clic « Acheter » mène à ta boutique.</p>
-    <div class="off-cta"><span id="offContact"></span><a class="hbtn off-sec" id="offVoir" href="#offOffres">Voir les offres</a></div>
+    <div class="off-hero-txt">
+      <span class="eyebrow">FINDINGS pour les beatmakers</span>
+      <h1>Fais écouter tes prods aux artistes qui cherchent.</h1>
+      <p class="off-lead">Sur FINDINGS, les rappeurs et les chanteurs trouvent leurs type beats par artiste, style, mood et tempo, puis posent leur voix dessus dans le studio. Chaque écoute passe par ta vidéo YouTube, et chaque clic « Acheter » mène à ta boutique.</p>
+      <div class="off-cta"><span id="offContact"></span><a class="hbtn off-sec" id="offVoir" href="#offOffres">Voir les offres</a></div>
+    </div>
+    <div class="off-scene" aria-hidden="true">
+      <span class="sc-aura"></span>
+      <div class="sc-carte sc-une">
+        <span class="sponso-tag sur-image">Sponsorisé</span>
+        <span class="sc-play"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+        <div class="sc-une-in"><small>Ton nom<svg class="verif" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.8l2.4 1.9 3-.3.9 2.9 2.7 1.4-.6 3 1.5 2.6-2.1 2.2.1 3.1-3 .7-1.6 2.6-2.9-1-2.9 1-1.6-2.6-3-.7.1-3.1-2.1-2.2 1.5-2.6-.6-3 2.7-1.4.9-2.9 3 .3z"/><path d="M8.2 12.3l2.5 2.5 5.1-5.3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></small><b>Ta prod</b><span><i>Trap</i>140 BPM · A mineur</span></div>
+      </div>
+      <div class="sc-carte sc-profil">
+        <div class="sc-ban"></div>
+        <div class="sc-profil-in"><span class="sc-ava"></span><div><small>Beatmaker Pro</small><b>Ton nom<svg class="verif" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.8l2.4 1.9 3-.3.9 2.9 2.7 1.4-.6 3 1.5 2.6-2.1 2.2.1 3.1-3 .7-1.6 2.6-2.9-1-2.9 1-1.6-2.6-3-.7.1-3.1-2.1-2.2 1.5-2.6-.6-3 2.7-1.4.9-2.9 3 .3z"/><path d="M8.2 12.3l2.5 2.5 5.1-5.3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></b></div></div>
+        <div class="sc-liens"><span>Instagram ↗</span><span>BeatStars ↗</span><span>Contact ↗</span></div>
+      </div>
+      <div class="sc-carte sc-ligne">
+        <span class="sc-mini"></span>
+        <div><span class="sponso-tag">Sponsorisé</span><b>Ta prod</b><small>par Ton nom</small></div>
+        <span class="sc-nums">140<i>BPM</i></span>
+      </div>
+    </div>
     <div class="off-stats" id="offStats"></div>
   </section>
 
@@ -2374,6 +2440,15 @@ body.vue-accueil .hcta{display:inline-flex}
     <div class="off-recherche">
       <input type="search" id="offQ" placeholder="Ton nom de beatmaker" autocomplete="off" aria-label="Chercher ton nom de beatmaker">
       <div class="off-res" id="offRes"></div>
+    </div>
+  </section>
+
+  <section class="off-fin wrap">
+    <div class="off-fin-in">
+      <span class="sc-aura"></span>
+      <h2>Ta prod mérite d'être entendue.</h2>
+      <p>Une mise en avant, un profil Pro, ou les deux : on regarde ensemble ce qui colle à tes prods.</p>
+      <div class="off-cta" id="offFinCta"><a class="hbtn pri" href="#offOffres">Voir les offres</a></div>
     </div>
   </section>
 
@@ -2673,6 +2748,12 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "Ta prod": ["Your beat", "Tu beat"],
+    "par Ton nom": ["by Your name", "de Tu nombre"],
+    "Ta prod mérite d'être entendue.": ["Your beat deserves to be heard.", "Tu beat merece ser escuchado."],
+    "Une mise en avant, un profil Pro, ou les deux : on regarde ensemble ce qui colle à tes prods.": ["A spotlight, a Pro profile, or both: let's see together what fits your beats.", "Un destacado, un perfil Pro o los dos: vemos juntos lo que encaja con tus beats."],
+    "Instagram ↗": ["Instagram ↗", "Instagram ↗"],
+    "BeatStars ↗": ["BeatStars ↗", "BeatStars ↗"],
     "Enregistre": ["Record", "Graba"],
     "Touche R ou ce bouton : ta voix s'enregistre direct sur la prod. Mets un casque, et active le retour pour t'entendre avec les effets.": ["Press R or this button: your voice records right on the beat. Wear headphones, and turn on monitoring to hear yourself with the effects.", "Pulsa R o este botón: tu voz se graba directamente sobre el beat. Ponte cascos y activa el retorno para oírte con los efectos."],
     "Les effets de chaque piste": ["Each track's effects", "Los efectos de cada pista"],
@@ -3325,6 +3406,7 @@ const I18N = (() => {
     [`^${N} prods? proches$`, m => nb(m[1], ["similar beat", "similar beats"], ["beat parecido", "beats parecidos"])],
     [`^${N} prods? en tout$`, m => nb(m[1], ["beat", "beats"], ["beat", "beats"]) + (L === 0 ? " in total" : " en total")],
     [`^${N} en tout$`, "$1 in total", "$1 en total"],
+    [`^${N} BPM · (.+)$`, m => `${m[1]} BPM · ` + t(m[2])],
     [`^Harmonies créées : (.+)$`, m => (L === 0 ? "Harmonies created: " : "Armonías creadas: ") + m[1]],
     [`^(Harmonies|Doublage) : voix ${N}/${N}…$`, m => (m[1] === "Doublage" ? (L === 0 ? "Doubling" : "Doblaje") : (L === 0 ? "Harmonies" : "Armonías")) + ` : ${L === 0 ? "voice" : "voz"} ${m[2]}/${m[3]}…`],
     // tonalites en lettres : « A mineur » -> « A minor » / « A menor »
@@ -6174,10 +6256,10 @@ function brancherRangees(){
     : "";
   // sans contact (pas encore rempli dans pro.json), « Voir les offres » devient le bouton principal
   if (!c) document.getElementById("offVoir").classList.replace("off-sec", "pri");
-  // l'apercu d'une ligne sponsorisee : une vraie prod recente du catalogue
-  const ex = BEATS.filter(b => b.views > 1000).sort((a, b) => (b.published || "").localeCompare(a.published || ""))[0];
-  if (ex) document.getElementById("offApercuSponso").innerHTML =
-    `<div class="ap-ligne"><img src="https://i.ytimg.com/vi/${ex.id}/mqdefault.jpg" alt="" loading="lazy"><div><span class="sponso-tag">Sponsorisé</span><b translate="no">${esc(ex.title)}</b><small>par ${esc(ex.prod)}</small></div></div>`;
+  else document.getElementById("offFinCta").innerHTML = document.getElementById("offContact").outerHTML.replace('id="offContact"', "");
+  // l'apercu d'une ligne sponsorisee : un exemple fictif (une vraie prod laisserait croire que son beatmaker a paye)
+  document.getElementById("offApercuSponso").innerHTML =
+    `<div class="ap-ligne"><span class="ap-mini"></span><div><span class="sponso-tag">Sponsorisé</span><b>Ta prod</b><small>par Ton nom</small></div></div>`;
   // trouver sa page
   const q = document.getElementById("offQ"), res = document.getElementById("offRes");
   const n = {}; BEATS.forEach(b => n[b.prod] = (n[b.prod] || 0) + 1);
