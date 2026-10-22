@@ -580,6 +580,15 @@ const STUDIO = (() => {
   .gr-aide{margin:0;font-size:10.5px;color:var(--p-dim,#8B9099)}
   .gr-aide b{color:var(--p-txt,#E8EAED);font-weight:650}
   .gr-vide{margin:18px 4px;font-size:12.5px;line-height:1.5;color:var(--p-dim,#8B9099);max-width:460px}
+  .gen-marque{font:800 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:#B79CFF;padding:3px 6px;border-radius:4px;background:rgba(124,92,255,.14)}
+  .gen-bloc{display:grid;gap:7px;margin-top:6px;padding-top:12px;border-top:1px solid var(--line-soft)}
+  .gen-bloc h4{display:flex;align-items:center;gap:8px;margin:0}
+  .gen-bloc .dp-aide{margin:0}
+  .gen-act{width:100%;height:32px;border-radius:8px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#7C5CFF,#3DDCC8);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 1px 2px rgba(0,0,0,.35);transition:filter .15s}
+  .gen-act:hover{filter:brightness(1.1)}
+  .gen-act:disabled{opacity:.55;cursor:progress}
+  .dp-cle{gap:8px}
+  .dp-cle .champ{flex:1 1 0;min-width:0}
   .net-bloc h4{display:flex;align-items:center;gap:8px}
   .net-marque{font:800 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:#7CE38B;padding:3px 6px;border-radius:4px;background:rgba(124,227,139,.12)}
   .net-on{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 13px 0 9px;border-radius:999px;font-size:12px;font-weight:700;color:var(--ink-2);background:rgba(118,118,128,.14);transition:background .15s,color .15s}
@@ -742,6 +751,9 @@ const STUDIO = (() => {
     return ctx;
   };
   const bpm = () => (P && P.bpm) || (prod && prod.bpm) || 120;
+  /* La tonalite fiable du projet : celle lue dans le titre de la prod, sinon celle que le studio
+     a detectee dans la prod importee (ou que l'artiste a choisie a la place). */
+  const cleSure = () => (prod && !estLibre() && prod.keySur && prod.key) || (P && P.cleAuto) || null;
   const tps = () => 60 / bpm();              // un temps
   const mes = () => tps() * 4;               // une mesure (4 temps)
   const duree = () => { let d = 0; try { if (current && current.id === prod.id) d = player.getDuration() || 0; } catch (e) {} return d || (prod && prod.dur) || 180; };
@@ -799,9 +811,10 @@ const STUDIO = (() => {
      departs paralleles : reverb (pre-delai, taille, brillance) et echo (cale sur le tempo,
      ping-pong). Un effet eteint est laisse a l'etat neutre, la chaine ne se reconstruit pas. */
   /* gammes de l'autotune : intervalles depuis la tonique */
-  // noms des notes dans la langue du site (pas par le dictionnaire : « La » ou « Sol » sont aussi des noms d'artistes)
-  const NOTES = { en: ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"], es: ["Do", "Do♯", "Re", "Mi♭", "Mi", "Fa", "Fa♯", "Sol", "La♭", "La", "Si♭", "Si"] }[typeof LANG !== "undefined" ? LANG : "fr"]
-    || ["Do", "Do♯", "Ré", "Mi♭", "Mi", "Fa", "Fa♯", "Sol", "La♭", "La", "Si♭", "Si"];
+  // les notes en lettres, dans toutes les langues : « A mineur », « F♯ majeur » (le langage des prods et des beatmakers)
+  const NOTES = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
+  // une tonalite en toutes lettres : « A mineur », « E♭ majeur »
+  const nomCle = (t, g) => `${NOTES[t]} ${g === "majeur" ? "majeur" : g === "mineur" ? "mineur" : (GAMMES[g] || GAMMES.mineur).nom.toLowerCase()}`;
   const NOTES_EN = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
   const GAMMES = {
     majeur:  { nom: "Majeure", int: [0, 2, 4, 5, 7, 9, 11], suffixe: "" },
@@ -873,10 +886,10 @@ const STUDIO = (() => {
   const resume = (k, v) => ({
     deesser: () => `${v.freq >= 1000 ? (v.freq / 1000).toFixed(1) + " kHz" : v.freq + " Hz"} · ${v.seuil} dB`,
     limit: () => `${v.seuil} dB → ${v.plafond} dB`,
-    autopitch: () => [v.cle === "auto" || v.cle == null ? "tonalité auto" : `${NOTES_EN[+v.cle] || ""}${v.gamme === "majeur" ? "" : "m"}`,
+    autopitch: () => [v.cle === "auto" || v.cle == null ? "tonalité auto" : nomCle(+v.cle || 0, v.gamme === "majeur" ? "majeur" : "mineur"),
       +v.intensite ? ({ naturel: "naturel", marque: "marqué", robot: "robot" }[v.type] || "") + ` ${Math.round(v.intensite)} %` : "sans correction",
       v.effet === "grave" ? "octave grave" : v.effet === "aigu" ? "octave aiguë" : ""].filter(Boolean).join(" · "),
-    autotune: () => [v.type === "libre" ? "sans correction" : v.type === "cle" ? `${NOTES_EN[+v.tonique || 0]}${(GAMMES[v.gamme] || GAMMES.mineur).suffixe}` : v.type === "chroma" ? "chromatique" : "",
+    autotune: () => [v.type === "libre" ? "sans correction" : v.type === "cle" ? nomCle(+v.tonique || 0, v.gamme) : v.type === "chroma" ? "chromatique" : "",
       v.type === "libre" ? "" : `${Math.round(v.vitesse)} ms`, v.demitons ? `${v.demitons > 0 ? "+" : ""}${v.demitons} dt` : ""].filter(Boolean).join(" · "),
     hpf: () => `${Math.round(v.freq)} Hz`,
     eq: () => [v.bas && `${v.bas > 0 ? "+" : ""}${v.bas} graves`, v.mid && `${v.mid > 0 ? "+" : ""}${v.mid} méd.`, v.haut && `${v.haut > 0 ? "+" : ""}${v.haut} aigus`].filter(Boolean).join(" · ") || "à plat",
@@ -1243,7 +1256,7 @@ const STUDIO = (() => {
   function clavierDe(a){
     let base = 4095;
     if (a.type === "cle") base = masqueDe(a.tonique || 0, a.gamme);
-    else if (a.type === "prod") base = prod && prod.keySur ? masqueGamme(prod.key) : 4095;
+    else if (a.type === "prod") base = cleSure() ? masqueGamme(cleSure()) : 4095;
     const touches = a.clavier && a.clavier.length === 12 ? a.clavier : [...Array(12)].map((_, i) => base & (1 << i) ? "1" : "0").join("");
     let masque = 0, libres = 0;
     [...touches].forEach((c, i) => { if (c === "1") masque |= 1 << i; else if (c === "b") libres |= 1 << i; });
@@ -1265,7 +1278,7 @@ const STUDIO = (() => {
     }
     if (ap && ap.on) {
       const i = Math.max(0, Math.min(1, (+ap.intensite || 0) / 100)), st = ap.type || "naturel";
-      const masque = ap.cle === "auto" || ap.cle == null ? (prod && prod.keySur ? masqueGamme(prod.key) : 4095) : masqueDe(+ap.cle, ap.gamme === "majeur" ? "majeur" : "mineur");
+      const masque = ap.cle === "auto" || ap.cle == null ? (cleSure() ? masqueGamme(cleSure()) : 4095) : masqueDe(+ap.cle, ap.gamme === "majeur" ? "majeur" : "mineur");
       // chaque style : [vitesse a 100 %, vitesse a 0 %, humanize, vibrato garde]
       const S = { naturel: [22, 160, .5, .8], marque: [6, 60, .15, .35], robot: [0, 14, 0, 0] }[st] || [22, 160, .5, .8];
       const oct = ap.effet === "grave" ? -12 : ap.effet === "aigu" ? 12 : 0;
@@ -1777,6 +1790,7 @@ const STUDIO = (() => {
       const f = await PRISES_DB.lireFichier(b.id);
       if (f && f.blob) { const buf = await audio().decodeAudioData(await f.blob.arrayBuffer()); fichier = { nom: f.nom, buf, pic: pics(buf) }; }
     } catch (e) { fichier = null; }
+    if (fichier) setTimeout(() => analyserFichier(true), 800);   // les projets d'avant l'analyse s'y mettent a l'ouverture
     construireNoeuds();
     peindreTitre();
     $("dawInfo").textContent = b.id === "libre" ? `${bpm()} BPM · ta prod, tes voix` : `${b.bpmSur ? "" : "~"}${b.bpm} BPM · ${STYLE_NAME[b.style] || b.style} · par ${b.prod}`;
@@ -1900,6 +1914,74 @@ const STUDIO = (() => {
   const modifie = () => { sale = true; reglerTout(); sauver(); outils(); };
   /* Importer sa prod : un fichier audio que le visiteur a sur son appareil (mp3, wav…).
      Il reste dans son navigateur, comme ses prises. */
+  /* ─────────── analyse de la prod importee : tonalite et tempo ───────────
+     Tonalite : chromagramme (energie par classe de note, 55 Hz - 2 kHz, fenetres de 8192
+     points) compare aux profils majeur / mineur de Krumhansl, sur les 24 tonalites.
+     Tempo : flux spectral (attaques) toutes les 11,6 ms, autocorrelation entre 60 et 200 BPM,
+     ponderee autour de 120 ; on garde le pic, puis on le double ou le divise si le double /
+     la moitie colle mieux aux tempos du rap (70-170). */
+  const PROFILS = { majeur: [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88], mineur: [6.33, 2.68, 3.52, 5.38, 2.6, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17] };
+  async function analyserProd(buf){
+    const sr = buf.sampleRate, n = buf.length, mono = new Float32Array(n);
+    for (let c = 0; c < buf.numberOfChannels; c++) { const d = buf.getChannelData(c); for (let i = 0; i < n; i++) mono[i] += d[i] / buf.numberOfChannels; }
+    // au plus 90 s, prises au milieu (les intros sont souvent sans basse ni accords)
+    const lg = Math.min(n, Math.round(90 * sr)), d0 = Math.max(0, Math.floor((n - lg) / 2)), x = mono.subarray(d0, d0 + lg);
+    // 1. chromagramme
+    const N = 8192, chroma = new Float64Array(12), basse = new Float64Array(12), re = new Float32Array(N), im = new Float32Array(N), hz = sr / N;
+    const pc = new Int8Array(N / 2).map((_, k) => { const f = k * hz; return f < 55 || f > 2000 ? -1 : ((Math.round(12 * Math.log2(f / 440)) % 12) + 12 + 9) % 12; });
+    for (let o = 0, f = 0; o + N <= x.length; o += N / 2, f++) {
+      if (f % 25 === 24) await new Promise(r => setTimeout(r, 0));
+      for (let i = 0; i < N; i++) { re[i] = x[o + i] * (.5 - .5 * Math.cos(2 * Math.PI * i / N)); im[i] = 0; }
+      fft(re, im, false);
+      for (let k = 1; k < N / 2; k++) if (pc[k] >= 0) { const m = Math.sqrt(re[k] * re[k] + im[k] * im[k]); chroma[pc[k]] += m; if (k * hz < 260) basse[pc[k]] += m; }
+    }
+    const corr = (a, b) => { const ma = a.reduce((s2, v) => s2 + v, 0) / 12, mb = b.reduce((s2, v) => s2 + v, 0) / 12; let num = 0, da = 0, db = 0;
+      for (let i = 0; i < 12; i++) { num += (a[i] - ma) * (b[i] - mb); da += (a[i] - ma) ** 2; db += (b[i] - mb) ** 2; } return num / Math.sqrt(da * db || 1); };
+    const notes = [];
+    for (const g of ["majeur", "mineur"]) for (let t = 0; t < 12; t++) notes.push({ t, g, r: corr([...chroma], PROFILS[g].map((_, i) => PROFILS[g][(i - t + 12) % 12])) });
+    notes.sort((a, b) => b.r - a.r);
+    /* Une gamme majeure et sa relative mineure (Do / La m) ont les memes notes : le profil les
+       departage mal. La basse tranche : la tonique est la note qu'elle joue le plus. */
+    let meilleure = notes[0];
+    const rel = notes.slice(1, 3).find(n2 => n2.g !== meilleure.g && (meilleure.g === "majeur" ? (meilleure.t + 9) % 12 : (meilleure.t + 3) % 12) === n2.t);
+    if (rel && basse[rel.t] > basse[meilleure.t] * 1.15) meilleure = rel;
+    const ecart = notes.find(n2 => n2 !== meilleure && n2 !== rel), sure = meilleure.r > .5 && (!ecart || meilleure.r - ecart.r > .02);
+    const cle = NOTES_EN[meilleure.t] + (meilleure.g === "mineur" ? "m" : "");
+    // 2. tempo : flux spectral
+    const M = 1024, H = 512, nf = Math.floor((x.length - M) / H), flux = new Float32Array(nf), prec = new Float32Array(M / 2), r2 = new Float32Array(M), i2 = new Float32Array(M);
+    for (let f = 0; f < nf; f++) {
+      if (f % 400 === 399) await new Promise(r => setTimeout(r, 0));
+      const o = f * H; for (let i = 0; i < M; i++) { r2[i] = x[o + i] * (.5 - .5 * Math.cos(2 * Math.PI * i / M)); i2[i] = 0; }
+      fft(r2, i2, false); let fl = 0;
+      for (let k = 1; k < M / 2; k++) { const m = Math.log1p(100 * Math.hypot(r2[k], i2[k])), dlt = m - prec[k]; if (dlt > 0) fl += dlt; prec[k] = m; }
+      flux[f] = fl;
+    }
+    // on retire la tendance lente (moyenne glissante d'une seconde)
+    const fps = sr / H, w = Math.round(fps), on = new Float32Array(nf); let som = 0;
+    for (let f = 0; f < nf; f++) { som += flux[f] - (f >= w ? flux[f - w] : 0); on[f] = Math.max(0, flux[f] - som / Math.min(f + 1, w)); }
+    const score = bpmT => { const lag = 60 * fps / bpmT, l0 = Math.floor(lag), fr = lag - l0; let s2 = 0;
+      for (let f = l0 + 1; f < nf; f++) s2 += on[f] * (on[f - l0] * (1 - fr) + on[f - l0 - 1] * fr); return s2; };
+    let best = 120, bs = -1;
+    for (let b = 60; b <= 200; b += .5) { const v = score(b) * Math.exp(-.5 * (Math.log2(b / 120) / .9) ** 2); if (v > bs) { bs = v; best = b; } }
+    // le double ou la moitie, si leur pulsation est presque aussi nette (le rap vit entre 70 et 170)
+    for (const k of [2, .5]) { const b2 = best * k; if (b2 >= 70 && b2 <= 170 && (best < 70 || best > 170) && score(b2) > score(best) * .6) best = b2; }
+    // affinage au dixieme autour du pic
+    let fin = best, fs = score(best); for (let b = best - .6; b <= best + .6; b += .1) { const v = score(b); if (v > fs) { fs = v; fin = b; } }
+    return { cle, cleSure: sure, bpm: Math.round(fin), notes: [meilleure, ...notes.filter(n2 => n2 !== meilleure).slice(0, 2)].map(n2 => NOTES_EN[n2.t] + (n2.g === "mineur" ? "m" : "")) };
+  }
+  // une fois par prod importee : tonalite et tempo dans le projet, tant que l'artiste ne les a pas changes
+  async function analyserFichier(silencieux){
+    if (!fichier || !P || P.analyseFichier === fichier.nom) return;
+    try {
+      const r = await analyserProd(fichier.buf);
+      P.analyseFichier = fichier.nom;
+      if (!P.cleChoisie) P.cleAuto = r.cle;
+      if (!P.bpmChoisi && (estLibre() || !(prod && prod.bpmSur))) P.bpm = r.bpm;
+      reglerTout(); entete(); dessiner(); sauver(); if (onglet === "projet") panneau();
+      const lc = lireCle(r.cle);
+      if (!silencieux) message(`Prod analysée : ${lc ? nomCle(lc.tonique, lc.gamme) : r.cle} · ${r.bpm} BPM`);
+    } catch (e) { console.warn("analyse de la prod", e); }
+  }
   async function importer(file){
     if (!file || !P) return;
     if (!/^audio\//.test(file.type) && !/\.(mp3|wav|m4a|aac|ogg|flac|aiff?)$/i.test(file.name)) { message("Choisis un fichier audio (mp3, wav, m4a…)"); return; }
@@ -1915,13 +1997,15 @@ const STUDIO = (() => {
     construireNoeuds(); dessiner(); inspecteur(); outils(); sauver();
     peindreTitre();
     message(estLibre() ? "Prod importée : touche R pour enregistrer dessus" : "Prod importée : fais glisser sa région pour la caler sur tes voix si besoin");
+    P.analyseFichier = null; P.cleChoisie = false; P.bpmChoisi = false;
+    setTimeout(() => analyserFichier(false), 400);
   }
   const tempsBeatYT = () => { try { return memeProd() ? lireBeat() : posArret; } catch (e) { return 0; } };
   async function retirerFichier(){
     if (!fichier) return;
     arreterInterne();
     try { await PRISES_DB.supprFichier(P.prod); } catch (e) {}
-    fichier = null; construireNoeuds(); dessiner(); inspecteur(); outils();
+    fichier = null; if (P) { delete P.cleAuto; P.analyseFichier = null; } construireNoeuds(); dessiner(); inspecteur(); outils();
     message("Retour à la version YouTube");
   }
 
@@ -2188,6 +2272,13 @@ const STUDIO = (() => {
           <label class="champ">Préréglage<select id="dpPreset">${presets}</select></label>
           <div class="ligne">${bouton("piste.vol", "Volume", 0, 1.5, .01, "x", p.vol, 1)}${bouton("piste.pan", "Panoramique", -1, 1, .01, "pan", p.pan, 0)}</div>
           <label class="dp-auto" title="Amène le niveau des prises à la référence des préréglages (-20 dBFS), que tu aies chanté près ou loin du micro"><input type="checkbox" id="dpAuto"${p.gainAuto !== false ? " checked" : ""}>Niveau d'entrée auto<b>${p.gainAuto === false ? "—" : (trimAuto(p) > 0 ? "+" : "") + trimAuto(p) + " dB"}</b></label>
+          <div class="gen-bloc">
+            <h4><span class="gen-marque" translate="no">FINDINGS Voices</span></h4>
+            <p class="dp-aide">Des voix créées à partir des prises de cette piste, sur de nouvelles pistes.</p>
+            <label class="champ">Harmonies<select id="dpHarmo">${Object.entries(HARMONIES).map(([c, [n]]) => `<option value="${c}">${n}</option>`).join("")}</select></label>
+            <button class="gen-act" data-act="harmonies">Créer les harmonies</button>
+            <button class="gen-act" data-act="doubler">Doubler la voix</button>
+          </div>
           ${P.pistes.length > 1 ? '<button class="dp-act danger" id="dpSupprPiste">Supprimer la piste</button>' : ""}
         </div>
         <div class="rk" role="list">${FX.map(f => { const v = p.fx[f.k]; return `
@@ -2264,14 +2355,19 @@ const STUDIO = (() => {
           <h4>Prod</h4>
           ${fichier ? `<p class="dp-aide">Prod importée : <b>${esc(fichier.nom)}</b>. Fais glisser sa région pour la caler.</p><button class="dp-act danger" data-act="retirer">Revenir à la version YouTube</button>`
             : `<p class="dp-aide">${estLibre() ? "Aucune prod pour l'instant." : "Le son vient du lecteur YouTube."} Importe le fichier de la prod pour une synchro parfaite et un export avec la prod.</p><label class="dp-act" style="display:inline-grid;place-items:center;cursor:pointer">↥ Importer ma prod<input type="file" data-act="import" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.aif,.aiff" hidden></label>`}
-          ${estLibre() ? `<label class="champ">Tempo<input type="text" id="dpBpm" inputmode="numeric" value="${bpm()}"></label>` : ""}
+          ${fichier ? `<div class="ligne dp-cle">
+            <label class="champ">Tonalité<select id="dpCle" translate="no">${["", ...NOTES_EN.flatMap(n => [n + "m", n])].map(c => `<option value="${c}"${(P.cleAuto || "") === c ? " selected" : ""}>${c ? nomCle(NOTES_EN.indexOf(c.replace(/m$/, "")), c.endsWith("m") ? "mineur" : "majeur") : "Inconnue"}</option>`).join("")}</select></label>
+            <label class="champ">Tempo<input type="text" id="dpBpm" inputmode="numeric" value="${bpm()}"></label>
+          </div><p class="dp-aide">${P.analyseFichier ? (P.cleChoisie || P.bpmChoisi ? "Réglés à la main." : "Détectés dans ta prod : Auto-Pitch, Tune Pro et la grille s'y calent.") : "Analyse de la prod…"}</p>`
+          : estLibre() ? `<label class="champ">Tempo<input type="text" id="dpBpm" inputmode="numeric" value="${bpm()}"></label>` : ""}
         </div>
         <div class="dp-bloc" style="width:300px">
           <h4>Raccourcis</h4>
           <p class="dp-aide"><b>Espace</b> lecture · <b>R</b> enregistrer · <b>S</b> couper · <b>D</b> dupliquer · <b>Suppr</b> supprimer · <b>⌘Z</b> annuler · <b>←/→</b> un temps (Maj : une mesure) · <b>Entrée</b> début</p>
         </div>`;
       $("dpNomProjet").addEventListener("change", e => { const v = e.target.value.trim(); if (!v || v === titreParDefaut()) delete P.nom; else P.nom = v; peindreTitre(); sauverNom(); message("Projet renommé"); });
-      if ($("dpBpm")) $("dpBpm").addEventListener("change", e => { const v = Math.round(+e.target.value); if (v >= 50 && v <= 220) { P.bpm = v; reglerTout(); sauver(); dessiner(); entete(); } else e.target.value = bpm(); });
+      if ($("dpBpm")) $("dpBpm").addEventListener("change", e => { const v = Math.round(+e.target.value); if (v >= 50 && v <= 220) { P.bpm = v; P.bpmChoisi = true; reglerTout(); sauver(); dessiner(); entete(); } else e.target.value = bpm(); });
+      if ($("dpCle")) $("dpCle").addEventListener("change", e => { P.cleAuto = e.target.value || null; P.cleChoisie = true; reglerTout(); sauver(); entete(); panneau(); message(P.cleAuto ? `Tonalité du projet : ${nomCle(lireCle(P.cleAuto).tonique, lireCle(P.cleAuto).gamme)}` : "Tonalité inconnue : la correction devient chromatique"); });
     }
   }
   // chaque rendu du panneau remet a jour les curseurs et relance l'ecran du plug-in ouvert
@@ -2283,7 +2379,7 @@ const STUDIO = (() => {
      correction, un gros bouton Vitesse, Humanize et Tolerance de part et d'autre. */
   function corpsAutotune(f, v){
     const par = c => { const d = f.p.find(x => x[0] === c); return bouton(`fx.autotune.${c}`, d[1], d[2], d[3], d[4], d[5], v[c], d[6]); };
-    const cleProd = lireCle(prod && prod.key), auto = v.type === "prod";
+    const cleProd = lireCle(cleSure() || (prod && prod.key)), auto = v.type === "prod";
     const valGamme = v.type === "chroma" ? "chroma" : v.type === "libre" ? "libre" : auto ? (cleProd ? cleProd.gamme : "chroma") : v.gamme;
     const opt = (val, lib, sel) => `<option value="${val}"${sel ? " selected" : ""}>${esc(lib)}</option>`;
     const coche = v.formant !== false;
@@ -2312,7 +2408,7 @@ const STUDIO = (() => {
     return `<div class="at-art">${onglets}
       <div class="at-menus">
         <label class="plug-menu">Tonalité<select data-atsel="cle" translate="no">
-          ${opt("auto", cleProd && prod.keySur ? `Auto · ${NOTES[cleProd.tonique]} ${GAMMES[cleProd.gamme].nom.toLowerCase()}` : "Auto · prod", auto)}
+          ${opt("auto", cleProd && cleSure() ? `Auto · ${nomCle(cleProd.tonique, cleProd.gamme)}` : "Auto · prod", auto)}
           ${NOTES.map((n, i) => opt(String(i), n, !auto && String(v.tonique) === String(i))).join("")}</select></label>
         <label class="plug-menu">Gamme<select data-atsel="gamme">
           ${Object.entries(GAMMES).map(([c, g]) => opt(c, g.nom, valGamme === c)).join("")}${opt("chroma", "Chromatique", valGamme === "chroma")}${opt("libre", "Aucune (pitch seul)", valGamme === "libre")}</select></label>
@@ -2328,13 +2424,13 @@ const STUDIO = (() => {
   }
   /* Auto-Pitch, la version simple : tonalite, un gros bouton Intensite, le style et l'effet. */
   function corpsAutoPitch(f, v){
-    const cleProd = lireCle(prod && prod.key), auto = v.cle === "auto" || v.cle == null;
+    const cleProd = lireCle(cleSure() || (prod && prod.key)), auto = v.cle === "auto" || v.cle == null;
     const opt = (val, lib, sel) => `<option value="${val}"${sel ? " selected" : ""}>${esc(lib)}</option>`;
     const d = f.p.find(x => x[0] === "intensite");
     return `<div class="at-art ap-art">
       <div class="at-menus">
         <label class="plug-menu">Tonalité<select data-fxmenu="autopitch.cle" translate="no">
-          ${opt("auto", cleProd && prod.keySur ? `Auto · ${NOTES[cleProd.tonique]} ${GAMMES[cleProd.gamme].nom.toLowerCase()}` : "Auto · prod", auto)}
+          ${opt("auto", cleProd && cleSure() ? `Auto · ${nomCle(cleProd.tonique, cleProd.gamme)}` : "Auto · prod", auto)}
           ${NOTES.map((n, i) => opt(String(i), n, !auto && String(v.cle) === String(i))).join("")}</select></label>
         ${auto ? "" : `<label class="plug-menu">Gamme<select data-fxmenu="autopitch.gamme">${opt("mineur", "Mineure", v.gamme !== "majeur")}${opt("majeur", "Majeure", v.gamme === "majeur")}</select></label>`}
       </div>
@@ -2696,6 +2792,8 @@ const STUDIO = (() => {
     const a = e.target.closest("[data-act]")?.dataset.act;
     if (a === "couper") couper(); else if (a === "dupliquer") dupliquer(); else if (a === "supprimer") supprimer();
     else if (a === "normaliser") normaliser();
+    else if (a === "harmonies") genererVoix(pisteCible(), $("dpHarmo").value);
+    else if (a === "doubler") genererVoix(pisteCible(), "doubler");
     else if (a === "netOn" || a === "netPiste") {
       const k = regionSel(); if (!k) return;
       memoriser();
@@ -2714,7 +2812,7 @@ const STUDIO = (() => {
     if (t.dataset.fxtype || t.dataset.fxdiv) {
       memoriser(); const k = t.dataset.fxtype || t.dataset.fxdiv; p.fx[k][t.dataset.fxtype ? "type" : "division"] = t.value;
       // passer en « Choisir la tonalite » part de celle de la prod quand on la connait
-      if (k === "autotune" && t.value === "cle" && !p.fx.autotune.cleChoisie) { const c = lireCle(prod && prod.key); if (c) Object.assign(p.fx.autotune, { tonique: String(c.tonique), gamme: c.gamme }); }
+      if (k === "autotune" && t.value === "cle" && !p.fx.autotune.cleChoisie) { const c = lireCle(cleSure() || (prod && prod.key)); if (c) Object.assign(p.fx.autotune, { tonique: String(c.tonique), gamme: c.gamme }); }
       if (FX.find(f => f.k === k).menus) { p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; }
     }
     else if (t.dataset.grclip != null) { grClip = t.value; panneau(); return; }
@@ -2727,14 +2825,14 @@ const STUDIO = (() => {
         if (val === "chroma" || val === "libre") a.type = val;
         else {
           // une gamme precise : la tonalite devient fixe (celle de la prod si on etait en auto)
-          if (a.type === "prod") { const c = lireCle(prod && prod.key); if (c) a.tonique = String(c.tonique); }
+          if (a.type === "prod") { const c = lireCle(cleSure() || (prod && prod.key)); if (c) a.tonique = String(c.tonique); }
           a.gamme = val; a.type = "cle";
         }
       }
       p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return;
     }
     else if (t.dataset.fxmenu) { const [k, c] = t.dataset.fxmenu.split("."); memoriser(); p.fx[k][c] = t.value;
-      if (c === "cle" && t.value !== "auto") { const cp = lireCle(prod && prod.key); if (cp && !p.fx[k].cleChoisie) p.fx[k].gamme = cp.gamme; }
+      if (c === "cle" && t.value !== "auto") { const cp = lireCle(cleSure() || (prod && prod.key)); if (cp && !p.fx[k].cleChoisie) p.fx[k].gamme = cp.gamme; }
       if (c === "tonique" || c === "gamme" || c === "cle") { p.fx[k].cleChoisie = true; p.fx[k].clavier = ""; p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; } }
     else if (t.dataset.fxcase) { const [k, c] = t.dataset.fxcase.split("."); memoriser(); p.fx[k][c] = t.checked; }
     else if (t.dataset.act === "import") { importer(t.files[0]); return; }
@@ -2826,7 +2924,7 @@ const STUDIO = (() => {
     const ach = $("dawAcheter"), url = prod && !estLibre() && prod.buy;
     ach.hidden = !url; if (url) ach.href = url;
     $("dawBpm").textContent = `${bpm()}`;
-    $("dawCle").textContent = prod && prod.key && !estLibre() ? `${prod.keySur ? "" : "~"}${prod.key}` : "—";
+    $("dawCle").textContent = cleSure() || (prod && prod.key && !estLibre() ? `~${prod.key}` : "—");
   }
 
 
@@ -3105,6 +3203,91 @@ const STUDIO = (() => {
   }
   /* Le fichier commence a 0:00 de la prod : on le pose au debut de la prod dans n'importe
      quel logiciel et tout tombe en place, effets compris. La prod n'y est pas. */
+  /* ─────────── voix generees : harmonies et doublage ───────────
+     Chacune devient une vraie prise (WAV dans la base du navigateur), posee sur une nouvelle
+     piste aux memes endroits que l'originale : on la regle, la coupe ou la supprime comme
+     n'importe quelle voix. */
+  async function nouvellePrise(buf, t0){
+    const id = "g" + nid() + nid();
+    try { await PRISES_DB.ajouter({ id, prod: P.prod, t0, dur: buf.duration, lat: 0, cree: Date.now(), mime: "audio/wav", blob: wav(buf) }); } catch (e) {}
+    BUF.set(id, buf); PIC.set(id, pics(buf));
+    return id;
+  }
+  /* Harmonie : chaque note chantee est deplacee de « deg » degres DANS LA GAMME (une tierce =
+     2 degres, une quinte = 4), ou de « demi » demi-tons fixes (octave). La note d'arrivee est
+     juste ; les inflexions de la voix (attaques, glisses) suivent. Entre deux notes, le
+     decalage de la precedente est tenu, puis lisse sur 25 ms. */
+  function courbeHarmonie(an, masque, deg, demi){
+    const n = an.m.length, c = new Float32Array(n), ok = m => !masque || masque === 4095 || (masque & (1 << (((m % 12) + 12) % 12)));
+    let prec = demi || 0, i = 0;
+    for (const no of an.notes) {
+      for (; i < no.a; i++) c[i] = prec;
+      let d = demi;
+      if (d == null) {
+        // la note de depart dans la gamme, puis « deg » degres plus haut ou plus bas
+        let base = Math.round(no.m); for (let e = 0; e <= 2 && !ok(base); e++) base = ok(Math.round(no.m) + e) ? Math.round(no.m) + e : Math.round(no.m) - e - 1;
+        let cible = base, pas = deg > 0 ? 1 : -1, reste = Math.abs(deg);
+        while (reste > 0) { cible += pas; if (ok(cible)) reste--; if (Math.abs(cible - base) > 14) break; }
+        d = cible - no.m;
+      }
+      for (; i < no.b; i++) c[i] = d;
+      prec = d;
+    }
+    for (; i < n; i++) c[i] = prec;
+    const k = 1 - Math.exp(-1 / Math.max(.5, .025 * an.sr / an.hop));
+    for (let j = 1; j < n; j++) c[j] = c[j - 1] + (c[j] - c[j - 1]) * k;
+    for (let j = n - 2; j >= 0; j--) c[j] = c[j + 1] + (c[j] - c[j + 1]) * k;
+    return c;
+  }
+  // doublage : la voix relue avec un retard qui derive lentement (timing humain, quelques cents de hauteur)
+  function doubler(buf, graine){
+    const sr = buf.sampleRate, n = buf.length, x = buf.getChannelData(0), y = new Float32Array(n);
+    let g = graine; const rnd = () => (g = (g * 16807) % 2147483647) / 2147483647;
+    const base = (.012 + rnd() * .01) * sr, a1 = .005 * sr, f1 = .06 + rnd() * .06, p1 = rnd() * 6.28, a2 = .0009 * sr, f2 = .6 + rnd() * .5, p2 = rnd() * 6.28;
+    const fa = .15 + rnd() * .2, pa = rnd() * 6.28;
+    for (let i = 0; i < n; i++) {
+      const t = i / sr, d = base + a1 * Math.sin(2 * Math.PI * f1 * t + p1) + a2 * Math.sin(2 * Math.PI * f2 * t + p2), pos = i - d, i0 = Math.floor(pos), fr = pos - i0;
+      const v = i0 >= 0 && i0 + 1 < n ? x[i0] + (x[i0 + 1] - x[i0]) * fr : 0;
+      y[i] = v * (1 + .1 * Math.sin(2 * Math.PI * fa * t + pa));   // ±1 dB, la voix ne chante pas deux fois au meme volume
+    }
+    const out = new AudioBuffer({ numberOfChannels: 1, length: n, sampleRate: sr }); out.copyToChannel(y, 0); return out;
+  }
+  const HARMONIES = { "+3": ["Tierce au-dessus", [[2]]], "-3": ["Tierce en dessous", [[-2]]], "+5": ["Quinte au-dessus", [[4]]], "-8": ["Octave en dessous", [[null, -12]]], "+8": ["Octave au-dessus", [[null, 12]]], accord: ["Accord (tierce + quinte)", [[2], [4]]] };
+  async function genererVoix(p, mode){
+    const ks = P.clips.filter(k => k.piste === p.id);
+    if (!ks.length) { message("Cette piste n'a pas encore de prise"); return; }
+    const btns = pan.querySelectorAll("[data-act=harmonies],[data-act=doubler]"); btns.forEach(b => { b.disabled = true; b.classList.add("calcul"); });
+    const avant = instantane();
+    try {
+      const ids = [...new Set(ks.map(k => k.prise))], i0 = P.pistes.indexOf(p);
+      const cle = cleSure(), masque = cle ? masqueGamme(cle) : clavierDe(p.fx.autotune).masque || 4095;
+      // [nom de la piste, fabrique d'une prise, panoramique, volume]
+      let voies;
+      if (mode === "doubler") voies = [["Doublage G", id => doubler(bufDe(id), 1234 + id.length), -.7, .5], ["Doublage D", id => doubler(bufDe(id), 98765 + id.length * 7), .7, .5]];
+      else { const [nom, ints] = HARMONIES[mode] || HARMONIES["+3"];
+        voies = ints.map(([deg, demi], j) => [ints.length > 1 ? (j ? "Harmonie quinte" : "Harmonie tierce") : `Harmonie · ${nom.toLowerCase()}`, async id => { const an = await analyserHauteur(id); return an ? decalerHauteur(bufDe(id), courbeHarmonie(an, masque, deg, demi), an) : null; }, ints.length > 1 ? (j ? .45 : -.45) : (deg > 0 || demi > 0 ? .3 : -.3), .55]); }
+      const nouvelles = [];
+      for (const [vi, [nom, fab, pn, vol]] of voies.entries()) {
+        message(`${mode === "doubler" ? "Doublage" : "Harmonies"} : voix ${vi + 1}/${voies.length}…`);
+        const map = new Map();
+        for (const id of ids) { const b = await fab(id); if (b) map.set(id, await nouvellePrise(b, ks.find(k => k.prise === id).start)); }
+        const np = nouvellePiste(P.pistes.length); np.nom = nom; appliquerPreset(np, "backs");
+        if (mode === "doubler") { np.fx.chorus.on = false; np.fx.reverb.mix = 14; }
+        if (p.fx.autopitch && p.fx.autopitch.on && mode === "doubler") np.fx.autopitch = { ...p.fx.autopitch };
+        np.pan = pn; np.vol = vol; np.preset = "perso";
+        // un leger retard different par voix : deux chanteurs ne partent jamais ensemble
+        const dec = mode === "doubler" ? 0 : .008 + vi * .006;
+        ks.forEach(k => { if (map.has(k.prise)) P.clips.push({ ...k, id: nid(), piste: np.id, prise: map.get(k.prise), start: k.start + dec }); });
+        nouvelles.push(np);
+      }
+      P.pistes.splice(i0 + 1, 0, ...nouvelles);
+      memoriser(avant);
+      construireNoeuds(); dessiner(); panneau(); sauver();
+      message(mode === "doubler" ? "Doublage créé : deux voix, à gauche et à droite" : `Harmonies créées : ${nouvelles.map(x => x.nom).join(", ")}${cle ? "" : " (tonalité inconnue : gamme de Tune Pro)"}`);
+    } catch (e) { console.warn(e); message("La création des voix a échoué"); }
+    btns.forEach(b => { b.disabled = false; b.classList.remove("calcul"); });
+  }
+
   /* ─────────── Mix auto ───────────
      Pour chaque piste : son role (lead, doublage/backs, ad-libs, intro), deduit du nom puis du
      placement (une piste qui chante en meme temps que le lead le double) ; si la voix est
@@ -3448,7 +3631,7 @@ const STUDIO = (() => {
     },
     ouvrir,
     // pour les bancs d'essai (outils/) : l'etat interne, en lecture
-    diag(){ return { P, BUF, BUF_PROC, PITCH, SIGN, grZones }; }
+    diag(){ return { P, BUF, BUF_PROC, PITCH, SIGN, grZones, analyserProd }; }
   };
 })();
 
