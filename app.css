@@ -697,17 +697,101 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .sortie .sponso-tag.sur-image{position:absolute;top:12px;left:12px;color:#1A1405;background:#F2C14E}
 .sortie.une .raison .verif{color:#7CC4FF}
 
+/* ─────────── page FINDINGS Pro ───────────
+   Meme gabarit que la page beatmakers ; les outils y portent la signature de la Suite
+   (chassis sombre, aura de leur couleur, monogramme en contour). */
+.pro-bientot{opacity:.75;cursor:default;pointer-events:none}
+.pro-beta{display:flex;align-items:center;gap:10px;margin:2px 0 0;font-size:13.5px;color:var(--dim)}
+.pro-beta b{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#1A1405;background:#F2C14E;padding:3px 8px;border-radius:999px}
+.sc-aura.pro{background:radial-gradient(closest-side at 30% 40%,#3DDCC8,transparent),radial-gradient(closest-side at 72% 62%,#7C5CFF,transparent),radial-gradient(closest-side at 55% 20%,#FA233B,transparent)}
+.sc-plug{position:absolute;overflow:hidden;isolation:isolate;border-radius:18px;background:#0B0C0E;color:#F5F5F7;padding:14px;box-shadow:0 24px 60px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08);animation:sc-flotte 7s ease-in-out infinite}
+.pro-aura{position:absolute;left:-60px;top:-80px;width:280px;height:200px;z-index:-1;border-radius:50%;filter:blur(40px);opacity:.55;pointer-events:none;
+  background:radial-gradient(closest-side at 40% 50%,var(--vis),transparent),radial-gradient(closest-side at 80% 45%,var(--vis2),transparent)}
+.sp-tete{display:flex;align-items:center;gap:10px}
+.sp-tete i{width:26px;height:15px;border-radius:999px;background:#FA233B;position:relative;flex:0 0 auto;box-shadow:0 0 10px rgba(250,35,59,.5)}
+.sp-tete i::after{content:"";position:absolute;right:2px;top:2px;width:11px;height:11px;border-radius:50%;background:#fff}
+.sp-tete span{display:grid;gap:1px}
+.sp-tete small{font:800 9px/1 var(--sans);letter-spacing:-.01em;color:#fff;opacity:.9}
+.sp-tete b{font:800 17px/1 var(--sans);letter-spacing:-.04em;color:var(--vis)}
+.sp-tete em{margin-left:auto;font:800 30px/1 var(--sans);font-style:normal;letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1px color-mix(in srgb,var(--vis) 60%,transparent)}
+.sc-plug.p1{--r:-3deg;left:2%;top:4%;width:64%;height:44%;transform:rotate(-3deg)}
+.sp-notes{position:relative;height:calc(100% - 34px);margin-top:10px;border-radius:10px;background:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1.2px) 0 0/10px 10px,#070809}
+.sp-notes span{position:absolute;height:9px;border-radius:5px;background:color-mix(in srgb,var(--vis) 70%,transparent);box-shadow:0 0 0 1px var(--vis);animation:sp-cale 3.2s ease-in-out infinite}
+.sp-notes span:nth-child(2){animation-delay:-.6s} .sp-notes span:nth-child(3){animation-delay:-1.2s} .sp-notes span:nth-child(4){animation-delay:-1.8s} .sp-notes span:nth-child(5){animation-delay:-2.4s}
+/* Tune Pro : les notes chantees un peu fausses se calent sur la grille, une tete de lecture balaie */
+@keyframes sp-cale{0%,15%{transform:translateY(-5px);filter:saturate(.4);opacity:.6}45%,85%{transform:none;filter:none;opacity:1}100%{transform:translateY(-5px);filter:saturate(.4);opacity:.6}}
+.sp-notes::after{content:"";position:absolute;top:6px;bottom:6px;left:0;width:2px;border-radius:2px;background:#FA233B;box-shadow:0 0 8px #FA233B;animation:sp-tete 3.2s linear infinite}
+@keyframes sp-tete{from{left:2%}to{left:97%}}
+.sc-plug.p2{--r:3.5deg;right:0;top:30%;width:52%;transform:rotate(3.5deg);animation-delay:-2.5s}
+.sp-roles{display:grid;gap:9px;margin-top:12px}
+.sp-roles span{display:grid;grid-template-columns:52px 1fr;align-items:center;gap:8px;font-size:11px;font-weight:650;color:rgba(255,255,255,.7)}
+.sp-roles b{height:6px;border-radius:999px;background:linear-gradient(90deg,var(--vis),var(--vis2));transform-origin:left;animation:sp-niveau 1.8s ease-in-out infinite alternate}
+.sp-roles span:nth-child(2) b{animation-duration:1.4s;animation-delay:-.5s} .sp-roles span:nth-child(3) b{animation-duration:2.2s;animation-delay:-1s}
+@keyframes sp-niveau{from{transform:scaleX(.72)}to{transform:scaleX(1)}}
+.sc-plug.p3{--r:-1.5deg;left:12%;bottom:2%;width:50%;transform:rotate(-1.5deg);animation-delay:-4.5s}
+.sp-accord{display:flex;gap:8px;margin-top:12px}
+.sp-accord span{flex:1;height:42px;border-radius:10px;display:grid;place-items:center;font:800 18px var(--sans);color:#0B0C0E;background:linear-gradient(160deg,var(--vis),var(--vis2))}
+.sp-accord span{animation:sp-accord 2.4s ease-in-out infinite}
+.sp-accord span:nth-child(2){animation-delay:.25s} .sp-accord span:nth-child(3){animation-delay:.5s}
+@keyframes sp-accord{0%,100%{opacity:.55;transform:none}20%{opacity:1;transform:translateY(-4px);box-shadow:0 8px 18px color-mix(in srgb,var(--vis) 45%,transparent)}45%{opacity:.8;transform:none}}
+:is(#vuePro) .pro-suite,:is(#vuePro) .pro-compare{padding-top:64px;padding-bottom:8px}
+.pro-suite h2,.pro-compare h2{margin:0 0 6px;font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.03em}
+.pro-sous{margin:0 0 20px;color:var(--dim);font-size:15px}
+.pro-grille{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pro-carte{position:relative;overflow:hidden;isolation:isolate;display:grid;align-content:start;gap:6px;min-height:200px;padding:22px;border-radius:20px;background:#0B0C0E;color:#F5F5F7;
+  border:1px solid rgba(255,255,255,.08);box-shadow:var(--sh-2);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.pro-carte:hover{transform:translateY(-3px)}
+.pro-carte .pro-aura{width:320px;height:220px;opacity:.5}
+.pro-mono{position:absolute;right:16px;top:12px;font:800 52px/1 var(--sans);letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1.2px color-mix(in srgb,var(--vis) 55%,transparent)}
+.pro-marque{font:800 10.5px/1 var(--sans);letter-spacing:-.01em;color:#fff;opacity:.9}
+.pro-carte h3{margin:0;font:800 24px/1.05 var(--sans);letter-spacing:-.04em;color:var(--vis)}
+.pro-carte p{margin:auto 0 0;padding-top:28px;font-size:14px;line-height:1.5;color:rgba(255,255,255,.72)}
+.pro-table{border-radius:20px;overflow:hidden;border:1px solid var(--line-soft);background:var(--surface)}
+.pro-table table{width:100%;border-collapse:collapse}
+.pro-table th,.pro-table td{padding:14px 18px;text-align:center;border-bottom:1px solid var(--line-soft);font-size:14px}
+.pro-table tbody tr:last-child th,.pro-table tbody tr:last-child td{border-bottom:0}
+.pro-table th[scope=row]{text-align:left;font-weight:600}
+.pro-table thead th{font-size:16px;font-weight:800;letter-spacing:-.02em;vertical-align:bottom}
+.pro-table thead small{display:block;font-size:12px;font-weight:600;color:var(--dim);letter-spacing:0;margin-top:2px}
+.pro-table .pro-col{color:var(--accent)}
+.pro-table td:last-child{background:rgba(250,35,59,.05)}
+.pro-table td svg{color:var(--accent);vertical-align:middle}
+.pro-table td:nth-child(2) svg{color:var(--ink)}
+.pro-non{color:var(--dimmer)}
+@media(max-width:900px){ .pro-grille{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media(max-width:600px){
+  .pro-grille{grid-template-columns:minmax(0,1fr)}
+  .pro-table th,.pro-table td{padding:11px 10px;font-size:13px}
+  .sc-plug.p1{width:80%} .sc-plug.p2{width:66%;top:40%} .sc-plug.p3{width:62%}
+}
+
 /* ─────────── page « Pour les beatmakers » ─────────── */
-#vueOffre{padding-bottom:20px}
+#vueOffre,#vuePro{padding-bottom:20px}
 /* hero en deux colonnes : le texte, puis une petite scene (les trois mises en avant, en cartes) */
-#vueOffre .off-hero{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);column-gap:48px;align-items:center}
+:is(#vueOffre,#vuePro) .off-hero{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);column-gap:48px;align-items:center}
 .off-hero-txt{display:grid;justify-items:start;gap:16px}
-#vueOffre .off-stats{grid-column:1 / -1}
+:is(#vueOffre,#vuePro) .off-stats{grid-column:1 / -1}
 .off-scene{position:relative;height:440px;min-width:0;width:100%;justify-self:stretch}
 .sc-aura{position:absolute;inset:8% 4% 10% 8%;border-radius:50%;filter:blur(60px);opacity:.55;pointer-events:none;
   background:radial-gradient(closest-side at 30% 40%,#FA233B,transparent),radial-gradient(closest-side at 72% 62%,#7C5CFF,transparent),radial-gradient(closest-side at 60% 20%,#F2C14E,transparent)}
-.sc-carte{position:absolute;border-radius:18px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.08);animation:sc-flotte 7s ease-in-out infinite}
-@keyframes sc-flotte{50%{transform:translateY(-8px) rotate(var(--r,0deg))}}
+.sc-carte{position:absolute;border-radius:18px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.08);animation:sc-flotte 6s ease-in-out infinite}
+/* les cartes flottent et basculent, chacune a son rythme ; elles suivent aussi la souris en
+   profondeur (--mx / --my poses par le script, --z = la profondeur de chaque carte) */
+@keyframes sc-flotte{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-16px) rotate(calc(var(--r,0deg) + 1.4deg))}}
+.sc-carte,.sc-plug{translate:calc(var(--mx,0) * var(--z,14px)) calc(var(--my,0) * var(--z,14px));transition:translate .5s cubic-bezier(.2,.8,.2,1)}
+.sc-une,.sc-plug.p1{--z:22px;animation-duration:6.5s}
+.sc-profil,.sc-plug.p2{--z:-16px;animation-duration:5.4s}
+.sc-ligne,.sc-plug.p3{--z:30px;animation-duration:7.2s}
+.sc-aura{animation:sc-aura 9s ease-in-out infinite alternate}
+@keyframes sc-aura{to{transform:scale(1.12) rotate(14deg)}}
+/* page beatmakers : le bouton lecture pulse, un reflet passe sur la ligne sponsorisee, la banniere ondule */
+.sc-play{animation:sc-pulse 2s ease-out infinite}
+@keyframes sc-pulse{0%{box-shadow:0 6px 18px rgba(250,35,59,.45),0 0 0 0 rgba(250,35,59,.55)}70%,100%{box-shadow:0 6px 18px rgba(250,35,59,.45),0 0 0 14px rgba(250,35,59,0)}}
+.sc-ligne{overflow:hidden}
+.sc-ligne::after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:35%;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.18),transparent);animation:sc-reflet 3.6s ease-in-out infinite}
+@keyframes sc-reflet{0%,40%{left:-40%}100%{left:120%}}
+.sc-ban{background-size:200% 100%;animation:sc-ban 8s ease-in-out infinite alternate}
+@keyframes sc-ban{to{background-position:100% 0}}
 .sc-une{--r:-3deg;left:4%;top:4%;width:62%;aspect-ratio:16/10;transform:rotate(-3deg);color:#fff;display:flex;flex-direction:column;justify-content:flex-end;
   background:radial-gradient(60% 80% at 25% 30%,#FF7A3D,transparent 70%),radial-gradient(60% 70% at 80% 70%,#E8263C,transparent 70%),#1A0508}
 .sc-une::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.75))}
@@ -736,19 +820,19 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .sc-ligne small{font-size:11.5px;color:var(--dim)}
 .sc-nums{margin-left:auto;display:grid;justify-items:center;font:700 14px var(--mono);line-height:1.1}
 .sc-nums i{font-style:normal;font-size:8.5px;color:var(--dimmer);letter-spacing:.06em}
-@media(prefers-reduced-motion:reduce){ .sc-carte{animation:none} }
+@media(prefers-reduced-motion:reduce){ .sc-carte,.sc-plug,.sc-aura,.sc-play,.sc-ligne::after,.sc-ban,.sp-notes span,.sp-notes::after,.sp-roles b,.sp-accord span{animation:none} .sc-carte,.sc-plug{translate:none} }
 /* bande finale */
-#vueOffre .off-fin{padding-top:64px;padding-bottom:8px}
+:is(#vueOffre,#vuePro) .off-fin{padding-top:64px;padding-bottom:8px}
 .off-fin-in{position:relative;overflow:hidden;isolation:isolate;border-radius:var(--r-xl);padding:56px 40px;display:grid;justify-items:center;text-align:center;gap:12px;background:#0B0B0D;color:#fff}
 .off-fin-in .sc-aura{inset:-30% 10% auto;height:120%;opacity:.5;z-index:-1}
 .off-fin-in h2{margin:0;font-size:clamp(28px,4.4vw,48px);font-weight:800;letter-spacing:-.04em;line-height:1.05;max-width:720px}
 .off-fin-in p{margin:0;max-width:520px;font-size:15.5px;line-height:1.5;color:rgba(255,255,255,.75)}
 .off-fin-in .off-cta{justify-content:center}
 /* les marges verticales passent par #vueOffre : .wrap (plus bas) remet le padding a zero */
-#vueOffre .off-hero{padding-top:72px;padding-bottom:40px}
-#vueOffre .off-offres{padding-top:24px;padding-bottom:24px}
-#vueOffre .off-etapes,#vueOffre .off-trouve,#vueOffre .off-faq{padding-top:64px;padding-bottom:8px}
-#vueOffre .off-faq{padding-bottom:40px}
+:is(#vueOffre,#vuePro) .off-hero{padding-top:72px;padding-bottom:40px}
+:is(#vueOffre,#vuePro) .off-offres{padding-top:24px;padding-bottom:24px}
+:is(#vueOffre,#vuePro) .off-etapes,:is(#vueOffre,#vuePro) .off-trouve,:is(#vueOffre,#vuePro) .off-faq{padding-top:64px;padding-bottom:8px}
+:is(#vueOffre,#vuePro) .off-faq{padding-bottom:40px}
 .off-hero{display:grid;justify-items:start;gap:16px;position:relative}
 .off-hero .eyebrow{color:var(--accent)}
 .off-hero h1{margin:0;max-width:880px;font-size:clamp(34px,6vw,68px);font-weight:800;letter-spacing:-.045em;line-height:1.02}
@@ -801,7 +885,7 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .off-res b{font-size:14px}
 .off-res small{margin-left:auto;font-size:12px;color:var(--dim)}
 .off-res p{margin:6px 2px;font-size:13.5px;color:var(--dim);line-height:1.5}
-#vueOffre .off-faq{max-width:860px}
+:is(#vueOffre,#vuePro) .off-faq{max-width:860px}
 .off-faq details{border-bottom:1px solid var(--line-soft)}
 .off-faq summary{cursor:pointer;list-style:none;padding:18px 32px 18px 0;font-size:16px;font-weight:700;position:relative}
 .off-faq summary::-webkit-details-marker{display:none}
@@ -812,7 +896,7 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
   .off-offres,.off-trouve{grid-template-columns:minmax(0,1fr)}
   .off-etapes ol{grid-template-columns:minmax(0,1fr)}
   .off-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-  #vueOffre .off-hero{grid-template-columns:minmax(0,1fr)}
+  :is(#vueOffre,#vuePro) .off-hero{grid-template-columns:minmax(0,1fr)}
   .off-scene{height:430px;margin-top:12px}
   .sc-une{width:78%;left:0;top:0}
   .sc-une-in b{font-size:20px}
@@ -820,7 +904,7 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
   .sc-liens span:nth-child(3){display:none}
   .sc-ligne{width:88%;left:2%;bottom:0}
   .off-fin-in{padding:40px 22px}
-  #vueOffre .off-hero{padding-top:40px}
+  :is(#vueOffre,#vuePro) .off-hero{padding-top:40px}
   .off-carte{padding:22px}
 }
 .profil .cibles-t{font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.6);align-self:center;margin-right:2px}

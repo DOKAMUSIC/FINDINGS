@@ -61,6 +61,49 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "FINDINGS Pro": ["FINDINGS Pro", "FINDINGS Pro"],
+    "Le studio complet, pour 4,99 € par mois.": ["The full studio, for €4.99 a month.", "El estudio completo, por 4,99 € al mes."],
+    "L'autotune complet, le mix en un clic, une voix propre, des harmonies justes et un master prêt pour les plateformes. Tout ce qu'il faut pour sortir un son, dans ton navigateur.": ["The full autotune, one-click mixing, a clean voice, in-tune harmonies and a master ready for streaming platforms. Everything you need to release a track, in your browser.", "El autotune completo, la mezcla en un clic, una voz limpia, armonías afinadas y un máster listo para las plataformas. Todo lo que necesitas para sacar un tema, en tu navegador."],
+    "Bientôt disponible": ["Coming soon", "Muy pronto"],
+    "Essayer le studio": ["Try the studio", "Probar el estudio"],
+    "Bêta": ["Beta", "Beta"],
+    "Tous les outils Pro sont ouverts en ce moment : profites-en.": ["All Pro tools are open right now: make the most of it.", "Todas las herramientas Pro están abiertas ahora mismo: aprovecha."],
+    "La FINDINGS Suite Pro": ["The FINDINGS Pro Suite", "La FINDINGS Suite Pro"],
+    "Six outils pensés pour la voix, au même endroit que tes prods.": ["Six tools built for vocals, in the same place as your beats.", "Seis herramientas pensadas para la voz, en el mismo sitio que tus beats."],
+    "L'autotune complet : vitesse, humanize, vibrato, timbre, et la retouche note par note dans le mode graphique.": ["The full autotune: speed, humanize, vibrato, timbre, and note-by-note editing in graph mode.", "El autotune completo: velocidad, humanize, vibrato, timbre y el retoque nota a nota en el modo gráfico."],
+    "Le studio écoute tes voix et règle chaque piste sur la prod : lead, backs et ad-libs, en un clic.": ["The studio listens to your vocals and sets each track against the beat: lead, backs and ad-libs, in one click.", "El estudio escucha tus voces y ajusta cada pista al beat: lead, coros y ad-libs, en un clic."],
+    "Souffle, ventilation, bruit de la pièce : retirés, sans toucher à ta voix.": ["Hiss, fans, room noise: removed, without touching your voice.", "Soplido, ventilación, ruido de la habitación: eliminados, sin tocar tu voz."],
+    "Harmonies auto": ["Auto harmonies", "Armonías auto"],
+    "Tierce, quinte, octave ou accord, toujours justes dans la tonalité de la prod.": ["Third, fifth, octave or chord, always in tune with the beat's key.", "Tercera, quinta, octava o acorde, siempre afinados en la tonalidad del beat."],
+    "Doubleur de voix": ["Voice doubler", "Doblador de voz"],
+    "Deux voix décalées comme une vraie double prise, une à gauche, une à droite.": ["Two voices offset like a real double take, one left, one right.", "Dos voces desfasadas como una doble toma real, una a la izquierda, otra a la derecha."],
+    "Mastering et pistes": ["Mastering and tracks", "Mastering y pistas"],
+    "Un master au niveau des plateformes (-14 LUFS), ou chaque piste en WAV séparé pour ton ingé son.": ["A master at streaming level (-14 LUFS), or each track as a separate WAV for your engineer.", "Un máster al nivel de las plataformas (-14 LUFS), o cada pista en WAV separado para tu ingeniero."],
+    "Gratuit ou Pro": ["Free or Pro", "Gratis o Pro"],
+    "Gratuit": ["Free", "Gratis"],
+    "Pro": ["Pro", "Pro"],
+    "0 €": ["€0", "0 €"],
+    "4,99 € / mois": ["€4.99 / month", "4,99 € / mes"],
+    "Recherche, écoute, likes, suivis": ["Search, listening, likes, follows", "Búsqueda, escucha, likes, seguidos"],
+    "Studio : pistes, enregistrement, édition": ["Studio: tracks, recording, editing", "Estudio: pistas, grabación, edición"],
+    "Effets de base : égaliseur, compresseur, de-esser, saturation, réverb, écho, limiteur…": ["Basic effects: EQ, compressor, de-esser, saturation, reverb, echo, limiter…", "Efectos básicos: ecualizador, compresor, de-esser, saturación, reverb, eco, limitador…"],
+    "Export WAV : mix ou voix seule": ["WAV export: mix or vocals only", "Exportación WAV: mezcla o solo voz"],
+    "Tune Pro : l'autotune complet et le mode graphique": ["Tune Pro: the full autotune and graph mode", "Tune Pro: el autotune completo y el modo gráfico"],
+    "FINDINGS Voices : harmonies et doubleur": ["FINDINGS Voices: harmonies and doubler", "FINDINGS Voices: armonías y doblador"],
+    "Mastering auto et pistes séparées": ["Auto mastering and separate tracks", "Mastering auto y pistas separadas"],
+    "Inclus": ["Included", "Incluido"],
+    "Non inclus": ["Not included", "No incluido"],
+    "Ton prochain son mérite le son pro.": ["Your next track deserves the pro sound.", "Tu próximo tema merece el sonido pro."],
+    "Pendant la bêta, tout est ouvert : enregistre, mixe, masterise, et dis-nous ce que tu en penses.": ["During the beta, everything is open: record, mix, master, and tell us what you think.", "Durante la beta todo está abierto: graba, mezcla, masteriza y cuéntanos qué te parece."],
+    "Qu'est-ce qui reste gratuit ?": ["What stays free?", "¿Qué sigue siendo gratis?"],
+    "La recherche et l'écoute des prods, le studio (pistes, enregistrement, édition), Auto-Pitch, les effets de base et l'export WAV. De quoi enregistrer et sortir une maquette sans payer.": ["Searching and listening to beats, the studio (tracks, recording, editing), Auto-Pitch, basic effects and WAV export. Enough to record and release a demo without paying.", "La búsqueda y escucha de beats, el estudio (pistas, grabación, edición), Auto-Pitch, los efectos básicos y la exportación WAV. Suficiente para grabar y sacar una maqueta sin pagar."],
+    "Pourquoi les outils Pro marchent-ils déjà ?": ["Why do the Pro tools already work?", "¿Por qué ya funcionan las herramientas Pro?"],
+    "Le studio est en bêta : tout est ouvert pour que tu l'essaies. Les outils Pro passeront en abonnement au lancement.": ["The studio is in beta: everything is open for you to try. The Pro tools will move to a subscription at launch.", "El estudio está en beta: todo está abierto para que lo pruebes. Las herramientas Pro pasarán a suscripción en el lanzamiento."],
+    "Où sont mes projets ?": ["Where are my projects?", "¿Dónde están mis proyectos?"],
+    "Dans ton navigateur, sur ton appareil : tes prises et tes projets ne partent sur aucun serveur.": ["In your browser, on your device: your takes and projects don't go to any server.", "En tu navegador, en tu dispositivo: tus tomas y proyectos no van a ningún servidor."],
+    "C'est quoi la différence entre Auto-Pitch et Tune Pro ?": ["What's the difference between Auto-Pitch and Tune Pro?", "¿Cuál es la diferencia entre Auto-Pitch y Tune Pro?"],
+    "Auto-Pitch remet la voix juste en trois réglages. Tune Pro est l'autotune complet : tous les réglages, le vibrato, le timbre, et le mode graphique pour corriger chaque note à la main.": ["Auto-Pitch puts the voice in tune with three settings. Tune Pro is the full autotune: every setting, vibrato, timbre, and graph mode to fix each note by hand.", "Auto-Pitch afina la voz con tres ajustes. Tune Pro es el autotune completo: todos los ajustes, el vibrato, el timbre y el modo gráfico para corregir cada nota a mano."],
+    "FINDINGS Pro : le studio complet, pour 4,99 € par mois": ["FINDINGS Pro: the full studio, for €4.99 a month", "FINDINGS Pro: el estudio completo, por 4,99 € al mes"],
     "Ta prod": ["Your beat", "Tu beat"],
     "par Ton nom": ["by Your name", "de Tu nombre"],
     "Ta prod mérite d'être entendue.": ["Your beat deserves to be heard.", "Tu beat merece ser escuchado."],
@@ -719,6 +762,8 @@ const I18N = (() => {
     [`^${N} prods? proches$`, m => nb(m[1], ["similar beat", "similar beats"], ["beat parecido", "beats parecidos"])],
     [`^${N} prods? en tout$`, m => nb(m[1], ["beat", "beats"], ["beat", "beats"]) + (L === 0 ? " in total" : " en total")],
     [`^${N} en tout$`, "$1 in total", "$1 en total"],
+    [`^(.+) : outil Pro, ouvert pendant la bêta$`, m => t(m[1]) + (L === 0 ? ": Pro tool, open during the beta" : ": herramienta Pro, abierta durante la beta")],
+    [`^(.+) fait partie de FINDINGS Pro$`, m => t(m[1]) + (L === 0 ? " is part of FINDINGS Pro" : " forma parte de FINDINGS Pro")],
     [`^${N} BPM · (.+)$`, m => `${m[1]} BPM · ` + t(m[2])],
     [`^Harmonies créées : (.+)$`, m => (L === 0 ? "Harmonies created: " : "Armonías creadas: ") + m[1]],
     [`^(Harmonies|Doublage) : voix ${N}/${N}…$`, m => (m[1] === "Doublage" ? (L === 0 ? "Doubling" : "Doblaje") : (L === 0 ? "Harmonies" : "Armonías")) + ` : ${L === 0 ? "voice" : "voz"} ${m[2]}/${m[3]}…`],
@@ -1382,13 +1427,14 @@ function lireAdresse(u){
   const url = new URL(u, document.baseURI);
   const p = new URLSearchParams(url.search);
   const rel = url.pathname.startsWith(BASE) ? decodeURIComponent(url.pathname.slice(BASE.length)) : "";
-  const m = /^(artiste|style|beatmaker|studio|pour-les-beatmakers)\/?([^/]*)\/?/.exec(rel);
+  const m = /^(artiste|style|beatmaker|studio|pour-les-beatmakers|pro)\/?([^/]*)\/?/.exec(rel);
   if (m) {
     if (m[1] === "artiste" && m[2]) p.set("artist", m[2]);
     if (m[1] === "style" && m[2]) p.set("style", m[2]);
     if (m[1] === "beatmaker" && m[2]) p.set("prod", SLUG_PROD.get(m[2]) || m[2]);
     if (m[1] === "studio") p.set("studio", "1");
     if (m[1] === "pour-les-beatmakers") p.set("offre", "1");
+    if (m[1] === "pro") p.set("pro", "1");
   }
   return p;
 }
@@ -1397,6 +1443,7 @@ function faireAdresse(p){
   const cles = [...p.keys()].filter(k => k !== "vue");
   if (p.get("studio") === "1") return `${BASE}studio/${p.get("beat") ? "?beat=" + encodeURIComponent(p.get("beat")) : ""}`;
   if (p.get("offre") === "1") return `${BASE}pour-les-beatmakers/`;
+  if (p.get("pro") === "1") return `${BASE}pro/`;
   if (cles.length === 1) {
     if (cles[0] === "artist") return lienArtiste(p.get("artist"));
     if (cles[0] === "style") return lienStyle(p.get("style"));
@@ -1411,6 +1458,7 @@ function majTitre(){
   let t = "FINDINGS : type beats à écouter et studio pour poser ta topline", d = null;
   if (document.body.classList.contains("vue-studio")) t = "Studio en ligne : pose ta topline sur une prod | FINDINGS";
   else if (document.body.classList.contains("vue-offre")) t = "Pour les beatmakers : mets tes prods en avant sur FINDINGS";
+  else if (document.body.classList.contains("vue-pro")) t = "FINDINGS Pro : le studio complet, pour 4,99 € par mois";
   else if (!document.body.classList.contains("vue-accueil")) {
     const ar = S.artists.size === 1 && !S.styles.size && !S.moods.size && !S.prod ? [...S.artists][0] : null;
     if (S.q.trim()) { t = `« ${S.q.trim()} » : ${n} prods | FINDINGS`; }
@@ -3171,7 +3219,7 @@ const toutesBtn = document.getElementById("toutesBtn");
 /* Hors de la liste des prods (accueil ou studio), la liste est cachee : un bouton de filtre de
    l'en-tete doit l'activer (pas l'inverser) et y emmener. Avant, depuis le studio, ces boutons
    changeaient l'adresse sans rien montrer. */
-const horsListe = () => ["vue-accueil", "vue-studio", "vue-offre"].some(c => document.body.classList.contains(c));
+const horsListe = () => ["vue-accueil", "vue-studio", "vue-offre", "vue-pro"].some(c => document.body.classList.contains(c));
 toutesBtn.addEventListener("click", () => {
   viderFiltres();
   refletFiltres();
@@ -3556,6 +3604,15 @@ function brancherRangees(){
     maj();
   });
 }
+
+/* Les scenes des pages Pro et beatmakers suivent la souris en profondeur. */
+document.querySelectorAll(".off-scene").forEach(sc => {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const hero = sc.closest(".off-hero") || sc;
+  hero.addEventListener("pointermove", e => { const r = hero.getBoundingClientRect();
+    sc.style.setProperty("--mx", ((e.clientX - r.left) / r.width - .5).toFixed(3)); sc.style.setProperty("--my", ((e.clientY - r.top) / r.height - .5).toFixed(3)); });
+  hero.addEventListener("pointerleave", () => { sc.style.setProperty("--mx", 0); sc.style.setProperty("--my", 0); });
+});
 
 /* ============ page « Pour les beatmakers » ============ */
 (function offre(){
@@ -4102,18 +4159,20 @@ const AFFICHES = (() => {
 const vAccueil = document.getElementById("vueAccueil");
 const vProds = document.querySelector("main.shell");
 
-const vStudio = document.getElementById("vueStudio"), vOffre = document.getElementById("vueOffre");
+const vStudio = document.getElementById("vueStudio"), vOffre = document.getElementById("vueOffre"), vPro = document.getElementById("vuePro");
 function montrerVue(nom, pousser = true, params = ""){
-  const studio = nom === "studio", offre = nom === "offre", accueil = !studio && !offre && nom !== "prods";
+  const studio = nom === "studio", offre = nom === "offre", pro = nom === "pro", accueil = !studio && !offre && !pro && nom !== "prods";
   vAccueil.hidden = !accueil;
-  vProds.hidden = accueil || studio || offre;
+  vProds.hidden = accueil || studio || offre || pro;
   vStudio.hidden = !studio;
   vOffre.hidden = !offre;
+  vPro.hidden = !pro;
   document.body.classList.toggle("vue-accueil", accueil);
   document.body.classList.toggle("vue-studio", studio);
   document.body.classList.toggle("vue-offre", offre);
+  document.body.classList.toggle("vue-pro", pro);
   if (pousser) {
-    const u = new URL(params || (studio ? "studio/" : offre ? "pour-les-beatmakers/" : "?vue=prods"), document.baseURI);
+    const u = new URL(params || (studio ? "studio/" : offre ? "pour-les-beatmakers/" : pro ? "pro/" : "?vue=prods"), document.baseURI);
     const url = accueil ? BASE : u.pathname + u.search;
     if (url !== location.pathname + location.search) history.pushState({ vue: nom }, "", url);
   }
@@ -4186,6 +4245,7 @@ addEventListener("popstate", () => {
   const p = lireAdresse(location.href);
   if (p.get("studio") === "1") { montrerVue("studio", false); return; }
   if (p.get("offre") === "1") { montrerVue("offre", false); return; }
+  if (p.get("pro") === "1") { montrerVue("pro", false); return; }
   appliquerParams(p);
   montrerVue(p.toString() ? "prods" : "accueil", false);
 });
@@ -4275,11 +4335,11 @@ function appliquerParams(p, reprendreLecture = false){
    d'une recherche ou d'une prod, c'est le catalogue. */
 (function demarrer(){
   const p = lireAdresse(location.href);
-  const versStudio = p.get("studio") === "1", versOffre = p.get("offre") === "1";
-  const versProds = !versStudio && !versOffre && (p.get("vue") === "prods" || ["style","sort","q","mood","likes","play","artist","historique","pourtoi","proche","nouveau","prod","suivis","toplines"].some(k => p.get(k)));
+  const versStudio = p.get("studio") === "1", versOffre = p.get("offre") === "1", versPro = p.get("pro") === "1";
+  const versProds = !versStudio && !versOffre && !versPro && (p.get("vue") === "prods" || ["style","sort","q","mood","likes","play","artist","historique","pourtoi","proche","nouveau","prod","suivis","toplines"].some(k => p.get(k)));
   document.getElementById("seoPre")?.remove();   // le contenu pre-rendu cede la place a l'application
   appliquerParams(p, true);
-  const vue = versStudio ? "studio" : versOffre ? "offre" : versProds ? "prods" : "accueil";
+  const vue = versStudio ? "studio" : versOffre ? "offre" : versPro ? "pro" : versProds ? "prods" : "accueil";
   history.replaceState({ vue }, "", location.pathname + location.search);
   // le studio (studio.js) se charge apres ce script : on le monte une fois pret
   if (versStudio) { montrerVue("studio", false); }

@@ -604,6 +604,10 @@ const STUDIO = (() => {
   .gr-aide{margin:0;font-size:10.5px;color:var(--p-dim,#8B9099)}
   .gr-aide b{color:var(--p-txt,#E8EAED);font-weight:650}
   .gr-vide{margin:18px 4px;font-size:12.5px;line-height:1.5;color:var(--p-dim,#8B9099);max-width:460px}
+  .badge-pro{display:inline-flex;align-items:center;height:15px;padding:0 5px;margin-left:6px;border-radius:4px;vertical-align:1px;
+    font:800 8.5px/1 var(--sans);letter-spacing:.08em;color:#1A1405;background:linear-gradient(135deg,#F2C14E,#FFD97A);box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+  .daw-o .badge-pro{margin-left:2px}
+  .plug-tete .badge-pro{align-self:end;margin:0 0 3px}
   .gen-marque{font:800 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:#B79CFF;padding:3px 6px;border-radius:4px;background:rgba(124,92,255,.14)}
   .gen-bloc{display:grid;gap:7px;margin-top:6px;padding-top:12px;border-top:1px solid var(--line-soft)}
   .gen-bloc h4{display:flex;align-items:center;gap:8px;margin:0}
@@ -859,7 +863,7 @@ const STUDIO = (() => {
         <span class="daw-mix" id="dawMix" hidden role="group" aria-label="Contenu de l'export">
           <button data-mix="voix" aria-pressed="false">Voix seule</button><button data-mix="tout" aria-pressed="true">Voix + prod</button>
         </span>
-        <button class="daw-o ia" id="dawMixAuto" title="Mix auto : analyse tes voix et règle chaque piste sur la prod, en un clic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 1.9 1.9.8-1.9.8L19 20.4l-.8-1.9-1.9-.8 1.9-.8z"/></svg><span class="lib">Mix auto</span></button>
+        <button class="daw-o ia" id="dawMixAuto" title="Mix auto : analyse tes voix et règle chaque piste sur la prod, en un clic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 1.9 1.9.8-1.9.8L19 20.4l-.8-1.9-1.9-.8 1.9-.8z"/></svg><span class="lib">Mix auto</span><span class="badge-pro" translate="no">PRO</span></button>
         <a class="daw-o achat" id="dawAcheter" hidden target="_blank" rel="noopener" title="Acheter la licence de la prod"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.2l2.3 11h10.8l2-7.5H7"/><circle cx="9.5" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg><span class="lib">Acheter la prod</span></a>
         <button class="daw-o" id="dawPlein" title="Plein écran (F)" aria-label="Plein écran">${I.plein}</button>
         <span class="daw-exp">
@@ -867,8 +871,8 @@ const STUDIO = (() => {
           <div class="daw-exp-menu" id="dawExpMenu" role="menu" hidden>
             <button role="menuitem" data-exp="mix"><b>Mix complet</b><small id="dawExpMixTxt">Voix + prod, en WAV</small></button>
             <button role="menuitem" data-exp="voix"><b>Voix seule</b><small>Toutes les voix mixées, calées sur 0:00 de la prod</small></button>
-            <button role="menuitem" data-exp="stems"><b>Pistes séparées</b><small>Un WAV par piste, effets compris, dans un ZIP</small></button>
-            <label class="exp-master"><input type="checkbox" id="dawMaster"><span><b>Mastering auto</b><small>Pour le mix complet : niveau des plateformes (-14 LUFS), crêtes à -1 dB</small></span></label>
+            <button role="menuitem" data-exp="stems"><b>Pistes séparées<span class="badge-pro" translate="no">PRO</span></b><small>Un WAV par piste, effets compris, dans un ZIP</small></button>
+            <label class="exp-master"><input type="checkbox" id="dawMaster"><span><b>Mastering auto<span class="badge-pro" translate="no">PRO</span></b><small>Pour le mix complet : niveau des plateformes (-14 LUFS), crêtes à -1 dB</small></span></label>
           </div>
         </span>
         <button class="daw-o" id="dawFermer" title="Fermer le studio (Échap)" aria-label="Fermer">${I.fermer}</button>
@@ -991,6 +995,20 @@ const STUDIO = (() => {
   }
   const finProjet = () => Math.max(fichier ? (P.beatStart || 0) + fichier.buf.duration : 0, ...P.clips.map(k => k.start + k.dur), 0);
   let msgMinuteur = 0;
+  /* ─────────── FINDINGS Pro ───────────
+     Les outils pousses (Tune Pro, Mix auto, Nettoyage voix, FINDINGS Voices, mastering, pistes
+     separees) sont Pro. Pendant la beta ils restent ouverts : un rappel, une fois par outil.
+     Au lancement, PRO_BETA passe a false : sans abonnement, l'outil ouvre la page /pro/. */
+  const PRO_BETA = true;
+  const abonnePro = () => { try { return localStorage.getItem("findings.pro") === "actif"; } catch (e) { return false; } };   // remplace par le vrai compte au lancement
+  const PRO_VUS = new Set();
+  function outilPro(nom){
+    if (abonnePro()) return true;
+    if (PRO_BETA) { if (!PRO_VUS.has(nom)) { PRO_VUS.add(nom); setTimeout(() => message(`${nom} : outil Pro, ouvert pendant la bêta`), 50); } return true; }
+    message(`${nom} fait partie de FINDINGS Pro`);
+    if (typeof montrerVue === "function") montrerVue("pro", true);
+    return false;
+  }
   function message(t){ const m = $("dawMsg"); m.textContent = t; m.hidden = false; clearTimeout(msgMinuteur); msgMinuteur = setTimeout(() => m.hidden = true, 3200); }
 
   /* ─────────────────────────── effets ───────────────────────────
@@ -1028,7 +1046,7 @@ const STUDIO = (() => {
        vibrato, timbre, clavier). Les deux pilotent le meme processeur : une piste n'en a qu'un. */
     { k: "autopitch", modele: "Auto-Pitch", nom: "Justesse auto", types: [["naturel", "Naturel"], ["marque", "Marqué"], ["robot", "Robot"]],
       p: [["intensite", "Intensité", 0, 100, 1, "%", 60]] },
-    { k: "autotune", modele: "Tune Pro", nom: "Autotune", types: [["prod", "Tonalité de la prod", "Prod"], ["cle", "Choisir la tonalité", "Choisir"], ["chroma", "Chromatique", "Chroma"], ["libre", "Sans correction", "Libre"]],
+    { k: "autotune", modele: "Tune Pro", nom: "Autotune", pro: true, types: [["prod", "Tonalité de la prod", "Prod"], ["cle", "Choisir la tonalité", "Choisir"], ["chroma", "Chromatique", "Chroma"], ["libre", "Sans correction", "Libre"]],
       // [cle, libelle, options, mode ou le menu apparait (absent = toujours)]
       menus: [["tonique", "Note", NOTES.map((n, i) => [String(i), n]), "cle"], ["gamme", "Gamme", Object.entries(GAMMES).map(([c, g]) => [c, g.nom]), "cle"],
               ["tessiture", "Range", Object.entries(TESSITURES).map(([c, t]) => [c, t.nom])]],
@@ -2461,7 +2479,7 @@ const STUDIO = (() => {
           <div class="ligne">${bouton("piste.vol", "Volume", 0, 1.5, .01, "x", p.vol, 1)}${bouton("piste.pan", "Panoramique", -1, 1, .01, "pan", p.pan, 0)}</div>
           <label class="dp-auto" title="Amène le niveau des prises à la référence des préréglages (-20 dBFS), que tu aies chanté près ou loin du micro"><input type="checkbox" id="dpAuto"${p.gainAuto !== false ? " checked" : ""}>Niveau d'entrée auto<b>${p.gainAuto === false ? "—" : (trimAuto(p) > 0 ? "+" : "") + trimAuto(p) + " dB"}</b></label>
           <div class="gen-bloc">
-            <h4><span class="gen-marque" translate="no">FINDINGS Voices</span></h4>
+            <h4><span class="gen-marque" translate="no">FINDINGS Voices</span><span class="badge-pro" translate="no">PRO</span></h4>
             <p class="dp-aide">Des voix créées à partir des prises de cette piste, sur de nouvelles pistes.</p>
             <label class="champ">Harmonies<select id="dpHarmo">${Object.entries(HARMONIES).map(([c, [n]]) => `<option value="${c}">${n}</option>`).join("")}</select></label>
             <button class="gen-act" data-act="harmonies">Créer les harmonies</button>
@@ -2473,7 +2491,7 @@ const STUDIO = (() => {
           <div class="rk-case${v.on ? " on" : ""}${fxOuvert === f.k ? " ouvert" : ""}" role="listitem" data-ouvrir="${f.k}" data-fx="${f.k}">
             <button class="fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}"></button>
             <i class="rk-num" aria-hidden="true">${String(FX.indexOf(f) + 1).padStart(2, "0")}</i>
-            <span class="txt"><b><em class="rk-modele" translate="no">${esc(f.modele || "")}</em>${esc(f.nom)}</b><small data-resume="${f.k}">${esc(resume(f.k, v))}</small></span>
+            <span class="txt"><b><em class="rk-modele" translate="no">${esc(f.modele || "")}</em>${esc(f.nom)}${f.pro ? `<span class="badge-pro" translate="no">PRO</span>` : ""}</b><small data-resume="${f.k}">${esc(resume(f.k, v))}</small></span>
           </div>`; }).join("")}</div>
         ${(() => { const f = FX.find(x => x.k === fxOuvert), v = p.fx[f.k]; return `
         <section class="fxc detail plug${v.on ? " on" : ""}" data-fx="${f.k}">
@@ -2481,7 +2499,7 @@ const STUDIO = (() => {
           <header class="plug-tete">
             <button class="plug-pwr fx-on" data-fxon="${f.k}" aria-pressed="${v.on}" aria-label="Activer ${esc(f.nom)}" title="Activer / couper"></button>
             <div class="plug-nom" translate="no"><span class="plug-marque">FINDINGS</span><b>${esc(f.modele || f.nom)}</b></div>
-            <span class="plug-fn">${esc(f.nom)}</span>
+            <span class="plug-fn">${esc(f.nom)}</span>${f.pro ? `<span class="badge-pro" translate="no">PRO</span>` : ""}
             <span class="plug-esp"></span>
             <span class="plug-num" aria-hidden="true">${String(FX.indexOf(f) + 1).padStart(2, "0")}</span>
             <button class="plug-i" data-aide aria-label="Aide" title="Aide">i</button>
@@ -2517,7 +2535,7 @@ const STUDIO = (() => {
         </div>
         ${(() => { const nt = (P.prisesFx && P.prisesFx[k.prise] && P.prisesFx[k.prise].net) || {}, on = netActif(nt); return `
         <div class="dp-bloc net-bloc${on ? " on" : ""}" style="width:300px">
-          <h4><span class="net-marque" translate="no">FINDINGS Clean</span>Nettoyage voix</h4>
+          <h4><span class="net-marque" translate="no">FINDINGS Clean</span>Nettoyage voix<span class="badge-pro" translate="no">PRO</span></h4>
           <p class="dp-aide">Retire le souffle, la ventilation et le bruit de la pièce, sans toucher à ta voix. Mesuré sur les passages calmes de la prise.</p>
           <div class="ligne"><button class="net-on" data-act="netOn" aria-pressed="${on}"><i></i>${on ? "Activé" : "Activer"}</button>${bouton("net.force", "Force", 0, 100, 1, "%", nt.force == null ? 50 : nt.force, 50)}</div>
           <label class="dp-auto"><input type="checkbox" data-act="netGraves"${nt.graves !== false ? " checked" : ""}>Couper les grondements graves (sous 70 Hz)</label>
@@ -2734,6 +2752,7 @@ const STUDIO = (() => {
     const cv = e.target.closest('.plug-vis[data-vis="graph"] canvas'); if (!cv) return;
     const { y, z } = zoneGraphe(cv, e); if (!z) return;
     const k = clipGraphe(); if (!k) return;
+    if (!outilPro("Tune Pro")) return;
     e.preventDefault(); cv.setPointerCapture(e.pointerId);
     const f = fxPrise(k.prise, true); if (!f.ret) f.ret = { decal: {}, aplanir: 0, transition: 40 }; if (!f.ret.decal) f.ret.decal = {};
     grDrag = { a: z.a, m: z.m, y0: y, d0: f.ret.decal[z.a] || 0, rang: z.rang, avant: instantane(), prise: k.prise, cv };
@@ -2754,6 +2773,7 @@ const STUDIO = (() => {
   });
   async function actionGraphe(quoi){
     const k = clipGraphe(); if (!k) return;
+    if (!outilPro("Tune Pro")) return;
     const an = await analyserHauteur(k.prise); if (!an) return;
     memoriser();
     const f = fxPrise(k.prise, true); if (!f.ret) f.ret = { decal: {}, aplanir: 0, transition: 40 };
@@ -2976,7 +2996,9 @@ const STUDIO = (() => {
       memoriser(); a.clavier = cl.touches.slice(0, i) + suiv + cl.touches.slice(i + 1); if (a.type === "prod" || a.type === "chroma") a.type = a.type;
       p.preset = "perso"; const n = noeuds.get(p.id); if (n) regler(n, p, soloActif()); sauver(); panneau(); return; }
     const on = e.target.closest("[data-fxon]");
-    if (on) { const p = pisteCible(), k = on.dataset.fxon, f = p.fx[k]; memoriser(); f.on = !f.on;
+    if (on) { const p = pisteCible(), k = on.dataset.fxon, f = p.fx[k];
+      if (!f.on && FX.find(x => x.k === k)?.pro && !outilPro("Tune Pro")) return;
+      memoriser(); f.on = !f.on;
       // un seul correcteur de justesse par piste : Auto-Pitch et Tune Pro se remplacent
       const autre = { autopitch: "autotune", autotune: "autopitch" }[k];
       if (f.on && autre && p.fx[autre] && p.fx[autre].on) { p.fx[autre].on = false; message(k === "autotune" ? "Tune Pro remplace Auto-Pitch sur cette piste" : "Auto-Pitch remplace Tune Pro sur cette piste"); }
@@ -2989,6 +3011,7 @@ const STUDIO = (() => {
     else if (a === "doubler") genererVoix(pisteCible(), "doubler");
     else if (a === "netOn" || a === "netPiste") {
       const k = regionSel(); if (!k) return;
+      if ((a === "netPiste" || !netActif((P.prisesFx[k.prise] || {}).net)) && !outilPro("Nettoyage voix")) return;
       memoriser();
       const f = fxPrise(k.prise, true), base = f.net || { force: 50, graves: true };
       if (a === "netOn") { f.net = { ...base, on: !netActif(f.net) }; planifierRendu(k.prise); message(f.net.on ? "Nettoyage voix activé sur cette prise" : "Nettoyage voix retiré"); }
@@ -3460,6 +3483,7 @@ const STUDIO = (() => {
   async function genererVoix(p, mode){
     const ks = P.clips.filter(k => k.piste === p.id);
     if (!ks.length) { message("Cette piste n'a pas encore de prise"); return; }
+    if (!outilPro("FINDINGS Voices")) return;
     const btns = pan.querySelectorAll("[data-act=harmonies],[data-act=doubler]"); btns.forEach(b => { b.disabled = true; b.classList.add("calcul"); });
     const avant = instantane();
     try {
@@ -3539,6 +3563,7 @@ const STUDIO = (() => {
   }
   async function mixAuto(){
     if (!P || !P.clips.length) { message("Enregistre d'abord une prise : le mix auto règle les voix qui existent"); return; }
+    if (!outilPro("Mix auto")) return;
     const btn = $("dawMixAuto"); btn.disabled = true; btn.classList.add("calcul"); message("Mix auto : écoute de tes voix…");
     try {
       const avant = instantane();
@@ -3664,6 +3689,8 @@ const STUDIO = (() => {
      quel logiciel et tout tombe en place, effets compris. */
   async function exporter(mode = "mix"){
     if (!P || !P.clips.length) return;
+    if (mode === "stems" && !outilPro("Pistes séparées")) return;
+    if (mode === "mix" && fichier && $("dawMaster").checked && !outilPro("Mastering auto")) return;
     const btn = $("dawExport"); btn.disabled = true;
     const titre = propre(estLibre() && fichier ? fichier.nom.replace(/\.[a-z0-9]+$/i, "") : prod.title);
     try {
