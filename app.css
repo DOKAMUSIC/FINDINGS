@@ -813,7 +813,12 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
   .off-etapes ol{grid-template-columns:minmax(0,1fr)}
   .off-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   #vueOffre .off-hero{grid-template-columns:minmax(0,1fr)}
-  .off-scene{height:380px;margin-top:12px}
+  .off-scene{height:430px;margin-top:12px}
+  .sc-une{width:78%;left:0;top:0}
+  .sc-une-in b{font-size:20px}
+  .sc-profil{width:70%;top:40%;right:0}
+  .sc-liens span:nth-child(3){display:none}
+  .sc-ligne{width:88%;left:2%;bottom:0}
   .off-fin-in{padding:40px 22px}
   #vueOffre .off-hero{padding-top:40px}
   .off-carte{padding:22px}
