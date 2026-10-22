@@ -660,6 +660,18 @@ const STUDIO = (() => {
   .gen-act:hover{filter:brightness(1.1)}
   .gen-act:disabled{opacity:.55;cursor:progress}
   .dp-cle{gap:8px}
+  /* guide de premiere visite */
+  .daw-guide{position:fixed;inset:0;z-index:2147483000}
+  .dg-trou{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(5,6,8,.62),0 0 0 2px #FA233B,0 0 24px rgba(250,35,59,.45);transition:all .28s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+  .dg-bulle{position:fixed;display:grid;gap:8px;padding:16px 16px 12px;border-radius:14px;background:#111215;color:#F2F3F5;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 22px 50px rgba(0,0,0,.55);transition:top .28s,left .28s}
+  .dg-n{font:800 22px/1 var(--sans);letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1.2px #FA233B}
+  .dg-n i{font-style:normal;font-size:12px;-webkit-text-stroke:0;color:rgba(255,255,255,.35);margin-left:3px}
+  .dg-bulle b{font:800 17px/1.15 var(--sans);letter-spacing:-.02em}
+  .dg-bulle p{margin:0;font-size:13px;line-height:1.5;color:rgba(255,255,255,.72)}
+  .dg-acts{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+  .dg-passer{font-size:12px;font-weight:600;color:rgba(255,255,255,.5);padding:6px 2px}
+  .dg-passer:hover{color:#fff}
+  .dg-suiv{height:32px;padding:0 16px;border-radius:999px;background:#FA233B;color:#fff;font-size:12.5px;font-weight:700;box-shadow:0 6px 16px rgba(250,35,59,.35)}
   .dp-cle .champ{flex:1 1 0;min-width:0}
   .net-bloc h4{display:flex;align-items:center;gap:8px}
   .net-marque{font:800 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:#7CE38B;padding:3px 6px;border-radius:4px;background:rgba(124,227,139,.12)}
@@ -2438,6 +2450,7 @@ const STUDIO = (() => {
         </div>
         <div class="dp-bloc" style="width:300px">
           <h4>Raccourcis</h4>
+          <button class="dp-act" data-act="guide">Revoir le guide</button>
           <p class="dp-aide"><b>Espace</b> lecture · <b>R</b> enregistrer · <b>S</b> couper · <b>D</b> dupliquer · <b>Suppr</b> supprimer · <b>⌘Z</b> annuler · <b>←/→</b> un temps (Maj : une mesure) · <b>Entrée</b> début</p>
         </div>`;
       $("dpNomProjet").addEventListener("change", e => { const v = e.target.value.trim(); if (!v || v === titreParDefaut()) delete P.nom; else P.nom = v; peindreTitre(); sauverNom(); message("Projet renommé"); });
@@ -2868,6 +2881,7 @@ const STUDIO = (() => {
     if (a === "couper") couper(); else if (a === "dupliquer") dupliquer(); else if (a === "supprimer") supprimer();
     else if (a === "normaliser") normaliser();
     else if (a === "harmonies") genererVoix(pisteCible(), $("dpHarmo").value);
+    else if (a === "guide") guide(true);
     else if (a === "doubler") genererVoix(pisteCible(), "doubler");
     else if (a === "netOn" || a === "netPiste") {
       const k = regionSel(); if (!k) return;
@@ -3560,6 +3574,41 @@ const STUDIO = (() => {
     btn.disabled = false;
   }
 
+  /* ─────────── guide de premiere visite ───────────
+     Quatre bulles, une seule fois (puis « Revoir le guide » dans l'onglet Projet). La cible est
+     eclairee, le reste du studio s'assombrit ; Echap ou « Passer » ferment. */
+  const ETAPES_GUIDE = [
+    ["#dawRec", "Enregistre", "Touche R ou ce bouton : ta voix s'enregistre direct sur la prod. Mets un casque, et active le retour pour t'entendre avec les effets."],
+    [".rk", "Les effets de chaque piste", "Auto-Pitch remet la voix juste en un geste, Tune Pro fait l'autotune complet (jusqu'à la retouche note par note), et toute la FINDINGS Suite suit."],
+    ["#dawMixAuto", "Mix auto", "Un clic : le studio écoute tes voix et règle chaque piste sur la prod, lead, backs et ad-libs. Tout s'annule avec ⌘Z."],
+    ["#dawExport", "Exporte", "Le mix complet en WAV, ta voix seule, les pistes séparées, ou un master prêt pour les plateformes."]
+  ];
+  function guide(force){
+    try { if (!force && localStorage.getItem("findings.studio.guide") === "vu") return; } catch (e) {}
+    document.querySelector(".daw-guide")?.remove();
+    const g = document.createElement("div"); g.className = "daw-guide"; g.innerHTML = '<div class="dg-trou"></div><div class="dg-bulle" role="dialog" aria-live="polite"></div>';
+    document.body.appendChild(g);
+    let i = 0;
+    const fin = () => { g.remove(); removeEventListener("keydown", touche); removeEventListener("resize", placer); try { localStorage.setItem("findings.studio.guide", "vu"); } catch (e) {} };
+    const touche = e => { if (e.key === "Escape") fin(); };
+    function placer(){
+      const [sel, titre, texte] = ETAPES_GUIDE[i], c = el.querySelector(sel) || el, r = c.getBoundingClientRect(), trou = g.firstChild, b = g.lastChild;
+      if (r.top < 70 || r.bottom > innerHeight - 20) { c.scrollIntoView({ block: "center" }); }
+      const q = c.getBoundingClientRect(), m = 6;
+      Object.assign(trou.style, { left: q.left - m + "px", top: q.top - m + "px", width: q.width + 2 * m + "px", height: q.height + 2 * m + "px" });
+      b.innerHTML = `<span class="dg-n">${i + 1}<i>/${ETAPES_GUIDE.length}</i></span><b>${titre}</b><p>${texte}</p>
+        <div class="dg-acts"><button class="dg-passer">${i < ETAPES_GUIDE.length - 1 ? "Passer" : ""}</button><button class="dg-suiv">${i < ETAPES_GUIDE.length - 1 ? "Suivant" : "C'est parti"}</button></div>`;
+      const bw = Math.min(320, innerWidth - 24), dessous = q.bottom + 14 + 190 < innerHeight;
+      b.style.width = bw + "px";
+      b.style.left = Math.max(12, Math.min(innerWidth - bw - 12, q.left + q.width / 2 - bw / 2)) + "px";
+      b.style.top = (dessous ? q.bottom + 14 : Math.max(12, q.top - 14 - b.offsetHeight)) + "px";
+      b.querySelector(".dg-suiv").onclick = () => { if (++i >= ETAPES_GUIDE.length) fin(); else placer(); };
+      b.querySelector(".dg-passer").onclick = fin;
+    }
+    addEventListener("keydown", touche); addEventListener("resize", placer);
+    placer();
+  }
+
   /* ─────────────────────────── ouvrir / fermer ─────────────────────────── */
   async function ouvrir(arg){
     const cible = arg && arg.id ? arg : (arg === true || !current ? LIBRE : current);
@@ -3574,6 +3623,7 @@ const STUDIO = (() => {
     else { dessiner(); inspecteur(); outils(); }
     clearInterval(boucle); boucle = setInterval(moteur, 60);
     suivreCurseur();
+    setTimeout(() => { if (ouvert && !el.hidden) guide(false); }, 900);
     // le curseur visible a l'ouverture
     const hw = grilleEl.querySelector(".daw-tete")?.offsetWidth || 196;
     zone.scrollLeft = Math.max(0, tempsBeat() * zoom - 120);
