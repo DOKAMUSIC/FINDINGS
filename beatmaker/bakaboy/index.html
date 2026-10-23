@@ -53,7 +53,7 @@ if (window.FINDINGS_STATS) {
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="app.css?v=af4f2cd5a6">
+<link rel="stylesheet" href="app.css?v=7b55f13428">
 </head>
 <body>
 
@@ -62,15 +62,14 @@ if (window.FINDINGS_STATS) {
     <a class="brand" href="?vue=accueil" data-vue="accueil" title="Accueil">
       <span class="logo">FINDINGS</span>
     </a>
-    <button class="theme-btn" id="themeBtn" aria-label="Passer en mode sombre" title="Mode sombre">
-      <svg class="lune" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a6.8 6.8 0 0 0 10.7 10.7z"/></svg>
-      <svg class="soleil" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>
-    </button>
 
-    <div class="lang" id="langBox" translate="no">
-      <button class="theme-btn lang-btn" id="langBtn" aria-haspopup="true" aria-expanded="false" aria-label="Langue" title="Langue">FR</button>
-      <div class="lang-menu" id="langMenu" role="menu" hidden></div>
-    </div>
+    <nav class="hnav" aria-label="Navigation">
+      <a href="?vue=prods" data-vue="prods" data-nav="prods">Prods</a>
+      <a href="#vueStyles">Styles</a>
+      <a href="#vueMoods">Moods</a>
+      <a href="#vueArtistes" id="navArtistes" hidden>Artistes</a>
+      <a class="hnav-pro" href="pro/" data-vue="pro" data-nav="pro" translate="no">Pro</a>
+    </nav>
 
     <div class="search">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
@@ -78,42 +77,52 @@ if (window.FINDINGS_STATS) {
       <div class="hot" id="hot"></div>
     </div>
 
-    <nav class="hlinks">
-      <a href="#vueArtistes" id="navArtistes" hidden>Artistes</a>
-      <a href="#vueStyles">Styles</a>
-      <a href="#vueMoods">Moods</a>
-    </nav>
-
     <div class="actions">
-      <a class="studio-cta" id="studioBtn" href="studio/" data-vue="studio" title="Studio : pose ta topline sur une prod, ou importe la tienne" aria-label="Ouvrir le studio"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg><span>Studio</span></a>
-      <a class="pro-cta" href="pro/" data-vue="pro" title="FINDINGS Pro : le studio complet" translate="no">PRO</a>
       <button class="sortie-filtre" id="toutesBtn" hidden aria-label="Toutes les prods" title="Toutes les prods">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
         <span class="sf-t">Toutes les prods</span>
       </button>
-      <div class="seg" role="group" aria-label="Mes prods">
-        <button class="seg-b" id="ptBtn" aria-pressed="false" aria-label="Pour toi : prods choisies d'après tes goûts" title="Pour toi">
+      <div class="mm" id="mmBox">
+        <button class="mm-btn" id="mmBtn" aria-haspopup="menu" aria-expanded="false" title="Ma musique : pour toi, suivis, historique, likes"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg><span class="mm-t" id="mmT">Ma musique</span><span class="mm-n mono" id="mmN" hidden></span><svg class="mm-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="mm-menu" id="mmMenu" role="menu" hidden>
+        <button class="seg-b mm-i" role="menuitemcheckbox" id="ptBtn" aria-pressed="false" aria-label="Pour toi : prods choisies d'après tes goûts" title="Pour toi">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z"/><path d="M19 16l.7 1.8L21.5 18.5l-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/></svg>
           <span class="hist-t">Pour toi</span>
         </button>
-        <button class="seg-b" id="suivisBtn" aria-pressed="false" aria-label="Mes abonnements : artistes et beatmakers suivis" title="Mes abonnements">
+        <button class="seg-b mm-i" role="menuitemcheckbox" id="suivisBtn" aria-pressed="false" aria-label="Mes abonnements : artistes et beatmakers suivis" title="Mes abonnements">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M19 8v6M16 11h6"/></svg>
           <span class="hist-t">Suivis</span>
         </button>
-        <button class="seg-b" id="histBtn" aria-pressed="false" aria-label="Historique d'écoute">
+        <button class="seg-b mm-i" role="menuitemcheckbox" id="histBtn" aria-pressed="false" aria-label="Historique d'écoute">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
           <span class="hist-t">Historique</span>
         </button>
-        <button class="seg-b" id="crateBtn" aria-pressed="false">
+        <button class="seg-b mm-i" role="menuitemcheckbox" id="crateBtn" aria-pressed="false">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.4 4.3 12.7a4.6 4.6 0 0 1 6.4-6.6l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.4 6.6z"/></svg>
-          Prods likés <span class="mono" id="crateN">0</span>
+          <span class="hist-t">Prods likées</span><span class="mono" id="crateN">0</span>
         </button>
       </div>
+      </div>
+      <div class="reg" id="regBox">
+        <button class="reg-btn" id="regBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Réglages" title="Réglages"><svg class="ico-reg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><svg class="ico-menu" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+        <div class="reg-menu" id="regMenu" hidden>
+          <nav class="reg-nav" aria-label="Navigation">
+            <a href="?vue=prods" data-vue="prods">Prods</a>
+            <a href="#vueStyles">Styles</a>
+            <a href="#vueMoods">Moods</a>
+            <a href="#vueArtistes">Artistes</a>
+            <a class="hnav-pro" href="pro/" data-vue="pro" translate="no">FINDINGS Pro</a>
+          </nav>
+          <button class="reg-ligne" id="themeBtn" aria-label="Passer en mode sombre" title="Mode sombre"><svg class="lune" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a6.8 6.8 0 0 0 10.7 10.7z"/></svg><svg class="soleil" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg><span class="t-sombre">Mode sombre</span><span class="t-clair">Mode clair</span></button>
+          <div class="reg-langues" translate="no"><b>Langue</b><div><button data-lang="fr">FR</button><button data-lang="en">EN</button><button data-lang="es">ES</button></div></div>
+          <div class="lang" id="langBox" translate="no">
+      <button class="theme-btn lang-btn" id="langBtn" aria-haspopup="true" aria-expanded="false" aria-label="Langue" title="Langue">FR</button>
+      <div class="lang-menu" id="langMenu" role="menu" hidden></div>
     </div>
-
-    <a class="hcta" href="?vue=prods" data-vue="prods">Les prods
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
-    </a>
+        </div>
+      </div>
+      <a class="studio-cta" id="studioBtn" href="studio/" data-vue="studio" title="Studio : pose ta topline sur une prod, ou importe la tienne" aria-label="Ouvrir le studio"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg><span>Studio</span></a>
+    </div>
   </div>
 </header>
 
@@ -811,7 +820,7 @@ if (window.FINDINGS_STATS) {
 
 <div class="dosmenu" id="dosMenu" hidden role="menu"></div>
 <script src="catalog.js?v=8f44a2c763" defer></script>
-<script src="app.js?v=c7ed41b4ed" defer></script>
+<script src="app.js?v=e3ff71f870" defer></script>
 <script src="studio.js?v=214c268031" defer></script>
 <script type="module">
 /* ============ la note, en volume ============

@@ -61,6 +61,12 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "Ma musique": ["My music", "Mi música"],
+    "Réglages": ["Settings", "Ajustes"],
+    "Prods": ["Beats", "Beats"],
+    "Navigation": ["Navigation", "Navegación"],
+    "Suggestions": ["Suggestions", "Sugerencias"],
+    "Ma musique : pour toi, suivis, historique, likes": ["My music: for you, following, history, likes", "Mi música: para ti, seguidos, historial, likes"],
     "Je ne connais rien au mixage, c'est pour moi ?": ["I know nothing about mixing, is it for me?", "No sé nada de mezcla, ¿es para mí?"],
     "Oui. Les préréglages donnent un son propre dès la première prise, le Mix auto règle tes pistes en un clic, et un guide te montre le studio à ta première visite. Tu peux tout reprendre à la main quand tu veux.": ["Yes. Presets give a clean sound from the first take, Auto mix sets your tracks in one click, and a guide shows you the studio on your first visit. You can take everything back by hand whenever you want.", "Sí. Los presets dan un sonido limpio desde la primera toma, la Mezcla auto ajusta tus pistas en un clic y una guía te enseña el estudio en tu primera visita. Puedes retomarlo todo a mano cuando quieras."],
     "Il me faut un bon micro ?": ["Do I need a good mic?", "¿Necesito un buen micro?"],
@@ -4394,6 +4400,40 @@ document.addEventListener("click", e => {
   const caler = () => cible.scrollIntoView({ behavior: "instant" });
   [0, 250, 700].forEach(ms => setTimeout(caler, ms));
 });
+
+/* En-tete : les deux menus (« Ma musique », reglages). Un seul ouvert a la fois ; Echap, un
+   clic ailleurs ou un choix les referment. « Ma musique » affiche la vue personnelle active. */
+(function menusEntete(){
+  const paires = [["mmBtn", "mmMenu"], ["regBtn", "regMenu"]].map(([b, m]) => [document.getElementById(b), document.getElementById(m)]).filter(([b, m]) => b && m);
+  const fermer = sauf => paires.forEach(([b, m]) => { if (m !== sauf) { m.hidden = true; b.setAttribute("aria-expanded", "false"); } });
+  paires.forEach(([b, m]) => {
+    b.addEventListener("click", e => { e.stopPropagation(); const ouvrir = m.hidden; fermer(); m.hidden = !ouvrir; b.setAttribute("aria-expanded", String(ouvrir)); });
+    // un choix dans le menu le referme (les boutons gardent leur propre action)
+    m.addEventListener("click", e => { if (e.target.closest("button,a")) setTimeout(() => fermer(), 0); });
+  });
+  document.addEventListener("click", e => { if (!e.target.closest(".mm,.reg")) fermer(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") fermer(); });
+  // langues du menu reglages
+  document.querySelectorAll("#regMenu [data-lang]").forEach(b => {
+    if (!LANGUES[b.dataset.lang]) { b.hidden = true; return; }
+    b.setAttribute("aria-current", String(b.dataset.lang === LANG));
+    b.addEventListener("click", () => { if (b.dataset.lang !== LANG) allerLangue(b.dataset.lang); });
+  });
+  // « Ma musique » : la vue active en titre, le nombre de likes en pastille
+  const mmBtn = document.getElementById("mmBtn"), mmT = document.getElementById("mmT"), mmN = document.getElementById("mmN");
+  const items = ["ptBtn", "suivisBtn", "histBtn", "crateBtn"].map(id => document.getElementById(id)).filter(Boolean);
+  const maj = () => {
+    const actif = items.find(b => b.classList.contains("on"));
+    mmBtn.classList.toggle("on", !!actif);
+    mmT.textContent = actif ? (actif.querySelector(".hist-t")?.textContent || "Ma musique") : "Ma musique";
+    const n = +(document.getElementById("crateN")?.textContent || 0);
+    mmN.hidden = !n; mmN.textContent = n;
+  };
+  const obs = new MutationObserver(maj);
+  items.forEach(b => obs.observe(b, { attributes: true, attributeFilter: ["class"] }));
+  const cn = document.getElementById("crateN"); if (cn) obs.observe(cn, { childList: true, characterData: true, subtree: true });
+  maj();
+})();
 
 /* Pied de page : langue et retour en haut. */
 (function piedDePage(){

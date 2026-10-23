@@ -701,7 +701,6 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .pro-cta{display:inline-flex;align-items:center;height:30px;padding:0 12px;border-radius:999px;flex:0 0 auto;font:800 11.5px/1 var(--sans);letter-spacing:.1em;
   color:#1A1405;background:linear-gradient(135deg,#F2C14E,#FFD97A);box-shadow:0 4px 14px rgba(242,193,78,.3);text-decoration:none;transition:transform .15s,box-shadow .15s}
 .pro-cta:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(242,193,78,.4)}
-body.vue-pro .pro-cta{box-shadow:0 0 0 2px var(--bg),0 0 0 4px #F2C14E}
 .sp-cta{display:flex;flex-wrap:wrap;gap:10px}
 .st-pro{padding-top:8px;padding-bottom:24px}
 .st-pro-in{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;padding:30px 32px;border-radius:24px;background:#0B0B0D;color:#fff}
@@ -2272,4 +2271,87 @@ body.vue-accueil .hcta{display:inline-flex}
 /* petit ecran : le heros porte deja « Toutes les prods », l'en-tete n'a pas la place de le redire */
 @media(max-width:640px){ .hlinks a{display:none} body.vue-accueil .hcta{display:none} }
 
+
+/* ═══════════ l'en-tete, range par role ═══════════
+   Logo · navigation sobre · recherche · « Ma musique » (un menu) · reglages (un menu) · Studio.
+   Seul le Studio est en couleur : c'est l'action principale. Les suggestions de recherche ne
+   s'ouvrent qu'au clic dans le champ. Sous 900 px, la navigation passe dans le menu reglages. */
+.top-in{gap:18px}
+.hnav{display:flex;align-items:center;gap:2px;flex:0 0 auto}
+.hnav a{position:relative;padding:8px 12px;border-radius:999px;font-size:14px;font-weight:600;color:var(--dim);text-decoration:none;transition:color .15s,background .15s}
+.hnav a:hover{color:var(--ink);background:rgba(var(--fg-rgb),.05)}
+body:not(.vue-accueil):not(.vue-studio):not(.vue-offre):not(.vue-pro) .hnav a[data-nav="prods"],body.vue-pro .hnav a[data-nav="pro"]{color:var(--ink)}
+body:not(.vue-accueil):not(.vue-studio):not(.vue-offre):not(.vue-pro) .hnav a[data-nav="prods"]::after,body.vue-pro .hnav a[data-nav="pro"]::after{
+  content:"";position:absolute;left:12px;right:12px;bottom:2px;height:2px;border-radius:2px;background:var(--accent)}
+.hnav-pro{display:inline-flex;align-items:center;gap:6px}
+.hnav-pro::before{content:"";width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#F2C14E,#FFB547);box-shadow:0 0 8px rgba(242,193,78,.6)}
+body.vue-pro .hnav a[data-nav="pro"]::after{background:#F2C14E}
+.top .search{max-width:520px;margin-left:auto}
+body.vue-accueil .top .search{display:none}
+.actions{gap:6px;margin-left:auto}
+body:not(.vue-accueil) .top .search + .actions{margin-left:0}
+/* suggestions : au clic dans le champ vide, en panneau sous la recherche */
+.top .hot{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:60;display:none;flex-wrap:wrap;gap:6px;margin:0;padding:12px;
+  border-radius:16px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-3);-webkit-mask-image:none;mask-image:none;overflow:visible}
+.top .hot::before{content:"Suggestions";flex-basis:100%;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dimmer);margin-bottom:2px}
+.top .search:focus-within input:placeholder-shown ~ .hot{display:flex}
+.top .hot button{font-size:12.5px;padding:5px 11px;background:var(--bg)}
+/* boutons ronds discrets (Ma musique, reglages) */
+.mm,.reg{position:relative;flex:0 0 auto}
+.mm-btn,.reg-btn{display:inline-flex;align-items:center;gap:7px;height:38px;border-radius:999px;color:var(--ink-2);background:transparent;border:1px solid var(--line);transition:background .15s,color .15s,border-color .15s}
+.mm-btn{padding:0 12px 0 13px;font-size:13.5px;font-weight:600}
+.reg-btn{width:38px;justify-content:center}
+.mm-btn:hover,.reg-btn:hover,.mm-btn[aria-expanded="true"],.reg-btn[aria-expanded="true"]{color:var(--ink);background:var(--surface);border-color:var(--line);box-shadow:var(--sh-1)}
+.mm-btn.on{color:#fff;background:var(--accent);border-color:var(--accent)}
+.mm-chev{opacity:.6;transition:transform .2s}
+.mm-btn[aria-expanded="true"] .mm-chev{transform:rotate(180deg)}
+.mm-n{font-size:11px;padding:1px 6px;border-radius:999px;background:rgba(var(--fg-rgb),.08);color:var(--dim)}
+.mm-btn.on .mm-n{background:rgba(255,255,255,.22);color:#fff}
+.ico-menu{display:none}
+/* les menus deroulants */
+.mm-menu,.reg-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:70;min-width:230px;display:grid;gap:2px;padding:6px;
+  border-radius:16px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-3);transform-origin:top right;animation:menu-in .16s ease-out}
+@keyframes menu-in{from{opacity:0;transform:translateY(-4px) scale(.98)}}
+.mm-menu .seg-b{display:flex;width:100%;height:40px;padding:0 12px;border-radius:10px;gap:11px;font-size:14px;font-weight:550;color:var(--ink);justify-content:flex-start}
+.mm-menu .seg-b::before{display:none}
+.mm-menu .seg-b svg{color:var(--dim);flex:0 0 auto}
+.mm-menu .seg-b:hover{background:var(--hover)}
+.mm-menu .seg-b .hist-t{display:inline}
+.mm-menu .seg-b span.mono{margin-left:auto;font-size:11.5px;color:var(--dim)}
+.mm-menu .seg-b.on{background:var(--accent-soft);color:var(--accent)}
+.mm-menu .seg-b.on svg,.mm-menu .seg-b.on span.mono{color:var(--accent)}
+.reg-menu{min-width:240px;padding:8px}
+.reg-nav{display:none;gap:2px;padding-bottom:6px;margin-bottom:4px;border-bottom:1px solid var(--line-soft)}
+.reg-nav a{padding:10px 12px;border-radius:10px;font-size:15px;font-weight:650;color:var(--ink);text-decoration:none}
+.reg-nav a:hover{background:var(--hover)}
+.reg-ligne{display:flex;align-items:center;gap:11px;width:100%;height:42px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:550;color:var(--ink);text-align:left}
+.reg-ligne:hover{background:var(--hover)}
+.reg-ligne svg{grid-area:auto;flex:0 0 auto;transition:none}
+.reg-ligne .soleil,:root[data-theme="dark"] .reg-ligne .lune,.reg-ligne .t-clair,:root[data-theme="dark"] .reg-ligne .t-sombre{display:none}
+:root[data-theme="dark"] .reg-ligne .soleil{display:block;color:#FFD60A;opacity:1;transform:none}
+:root[data-theme="dark"] .reg-ligne .t-clair{display:inline}
+.reg-ligne .lune{opacity:1;transform:none}
+.reg-langues{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px 6px;margin-top:4px;border-top:1px solid var(--line-soft)}
+.reg-langues b{font-size:14px;font-weight:550}
+.reg-langues div{display:flex;padding:3px;border-radius:999px;background:rgba(var(--fg-rgb),.06)}
+.reg-langues button{height:28px;padding:0 11px;border-radius:999px;font-size:12px;font-weight:750;color:var(--dim)}
+.reg-langues button:hover{color:var(--ink)}
+.reg-langues button[aria-current="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--sh-1)}
+#langBox{display:none}
+.top .studio-cta{margin-left:4px}
+/* largeur moyenne : la navigation rejoint le menu reglages, qui devient un menu ☰ */
+@media(max-width:900px){
+  .hnav{display:none}
+  .reg-nav{display:grid}
+  .ico-reg{display:none} .ico-menu{display:block}
+}
+@media(max-width:640px){
+  .top-in{flex-wrap:wrap;gap:10px;padding:10px 14px}
+  .top .search{order:5;flex:1 1 100%;max-width:none;margin:0}
+  body:not(.vue-accueil) .top .search + .actions,body .top .actions{margin-left:auto}
+  .mm-t,.mm-chev{display:none}
+  .mm-btn{width:38px;padding:0;justify-content:center;position:relative}
+  .mm-n{position:absolute;top:-4px;right:-6px;font-size:10px;padding:1px 5px;background:var(--accent);color:#fff}
+  .mm-menu,.reg-menu{position:fixed;left:12px;right:12px;top:calc(var(--hh,64px) + 6px);min-width:0}
+}
 @media(prefers-reduced-motion:reduce){ *{animation-duration:.01ms !important;transition-duration:.01ms !important} }
