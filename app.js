@@ -61,6 +61,50 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "En savoir plus": ["Learn more", "Saber más"],
+    "Quand t'en servir": ["When to use it", "Cuándo usarlo"],
+    "Inclus dans FINDINGS Pro · 6,90 € / mois": ["Included in FINDINGS Pro · €6.90 / month", "Incluido en FINDINGS Pro · 6,90 € / mes"],
+    "L'essayer dans le studio": ["Try it in the studio", "Probarlo en el estudio"],
+    "L'autotune complet, jusqu'à la note près.": ["The full autotune, down to the note.", "El autotune completo, nota a nota."],
+    "Vitesse de correction : de l'effet robot franc (0 ms) à une correction qu'on n'entend pas.": ["Correction speed: from the hard robot effect (0 ms) to correction you can't hear.", "Velocidad de corrección: del efecto robot franco (0 ms) a una corrección que no se oye."],
+    "Humanize et tolérance : les notes tenues respirent, les petites approximations restent naturelles.": ["Humanize and tolerance: held notes breathe, small imperfections stay natural.", "Humanize y tolerancia: las notas largas respiran, las pequeñas imprecisiones siguen naturales."],
+    "Vibrato gardé, effacé ou ajouté, et timbre de la voix plus grave ou plus clair, sans changer la note.": ["Vibrato kept, removed or added, and a darker or brighter voice timbre, without changing the note.", "Vibrato conservado, eliminado o añadido, y timbre de voz más grave o más claro, sin cambiar la nota."],
+    "Clavier des notes visées : choisis les notes à viser, à laisser libres ou à retirer.": ["Target-note keyboard: choose which notes to target, leave free or remove.", "Teclado de notas objetivo: elige las notas a apuntar, dejar libres o quitar."],
+    "Mode graphique : chaque note de ta prise s'affiche, tu la glisses à la bonne hauteur, ou tu cales tout sur la gamme en un clic.": ["Graph mode: every note of your take shows up, drag it to the right pitch, or snap everything to the scale in one click.", "Modo gráfico: cada nota de tu toma aparece, la arrastras a la altura correcta o ajustas todo a la escala en un clic."],
+    "Pour l'effet autotune assumé des refrains trap, ou pour corriger une seule note fausse sans toucher au reste de la prise.": ["For the bold autotune effect of trap hooks, or to fix a single off note without touching the rest of the take.", "Para el efecto autotune marcado de los estribillos trap, o para corregir una sola nota desafinada sin tocar el resto de la toma."],
+    "Un clic, et tes voix sonnent comme un morceau.": ["One click, and your vocals sound like a track.", "Un clic, y tus voces suenan como un tema."],
+    "Reconnaît le rôle de chaque piste : lead, backs, ad-libs, intro.": ["Recognises each track's role: lead, backs, ad-libs, intro.", "Reconoce el papel de cada pista: lead, coros, ad-libs, intro."],
+    "Devine si la voix est chantée ou rappée, et active Auto-Pitch quand il faut.": ["Works out whether the voice is sung or rapped, and turns on Auto-Pitch when needed.", "Adivina si la voz está cantada o rapeada, y activa Auto-Pitch cuando hace falta."],
+    "Mesure le timbre de chaque voix (boue, nasal, présence, air, sifflantes) et corrige l'égaliseur et le de-esser.": ["Measures each voice's timbre (mud, nasal, presence, air, sibilance) and corrects the EQ and de-esser.", "Mide el timbre de cada voz (barro, nasal, presencia, aire, sibilantes) y corrige el ecualizador y el de-esser."],
+    "Règle la compression, les volumes et le placement gauche / droite, puis cale le niveau de ta prod importée.": ["Sets compression, volumes and left / right placement, then matches the level of your imported beat.", "Ajusta la compresión, los volúmenes y la posición izquierda / derecha, y cuadra el nivel de tu beat importado."],
+    "Tout s'annule d'un ⌘Z : tu gardes la main.": ["Everything undoes with ⌘Z: you stay in control.", "Todo se deshace con ⌘Z: sigues al mando."],
+    "Quand tu as posé tes voix et que tu veux un mix propre tout de suite, pour écouter, partager ou continuer à la main.": ["When your vocals are down and you want a clean mix right away, to listen, share or keep working by hand.", "Cuando has grabado tus voces y quieres una mezcla limpia ya, para escuchar, compartir o seguir a mano."],
+    "Une voix propre, même enregistrée dans ta chambre.": ["A clean voice, even recorded in your bedroom.", "Una voz limpia, aunque la hayas grabado en tu cuarto."],
+    "Mesure le bruit de fond dans les passages calmes de ta prise.": ["Measures the background noise in the quiet parts of your take.", "Mide el ruido de fondo en las partes tranquilas de tu toma."],
+    "Retire le souffle, la ventilation et le bruit de la pièce, fréquence par fréquence, sans toucher à ta voix.": ["Removes hiss, fans and room noise, frequency by frequency, without touching your voice.", "Quita el soplido, la ventilación y el ruido de la habitación, frecuencia a frecuencia, sin tocar tu voz."],
+    "Coupe les grondements sous 70 Hz : pied de micro, trafic, clim.": ["Cuts rumble below 70 Hz: mic stand, traffic, air conditioning.", "Corta los retumbos por debajo de 70 Hz: pie de micro, tráfico, aire acondicionado."],
+    "Force réglable, par prise ou pour toute la piste en un clic.": ["Adjustable strength, per take or for the whole track in one click.", "Fuerza ajustable, por toma o para toda la pista en un clic."],
+    "Avant le mix, sur les prises faites au téléphone, avec un micro d'entrée de gamme ou dans une pièce bruyante.": ["Before mixing, on takes recorded on a phone, with an entry-level mic or in a noisy room.", "Antes de mezclar, en tomas grabadas con el móvil, con un micro básico o en una habitación ruidosa."],
+    "Des chœurs justes, sans avoir à les chanter.": ["In-tune backing vocals, without having to sing them.", "Coros afinados, sin tener que cantarlos."],
+    "Tierce au-dessus ou en dessous, quinte, octave, ou accord complet (tierce + quinte).": ["Third above or below, fifth, octave, or a full chord (third + fifth).", "Tercera arriba o abajo, quinta, octava o acorde completo (tercera + quinta)."],
+    "Toujours dans la tonalité de la prod : lue dans le titre, ou détectée dans ta prod importée.": ["Always in the beat's key: read from the title, or detected in your imported beat.", "Siempre en la tonalidad del beat: leída en el título o detectada en tu beat importado."],
+    "Les harmonies suivent les inflexions de ta voix, attaques et glissés compris.": ["The harmonies follow your voice's inflections, attacks and slides included.", "Las armonías siguen las inflexiones de tu voz, ataques y deslizamientos incluidos."],
+    "Elles arrivent sur de nouvelles pistes, à gauche et à droite, réglables comme n'importe quelle voix.": ["They land on new tracks, left and right, adjustable like any other vocal.", "Llegan en pistas nuevas, a izquierda y derecha, ajustables como cualquier voz."],
+    "Pour épaissir un refrain, un hook ou une fin de phrase, sans refaire dix prises.": ["To thicken a chorus, a hook or the end of a line, without redoing ten takes.", "Para engordar un estribillo, un hook o un final de frase, sin repetir diez tomas."],
+    "L'épaisseur d'une double prise, en un clic.": ["The thickness of a double take, in one click.", "El grosor de una doble toma, en un clic."],
+    "Deux copies de ta voix, avec de micro-décalages de temps et de hauteur, comme deux prises chantées à la suite.": ["Two copies of your voice, with tiny timing and pitch offsets, like two takes sung one after the other.", "Dos copias de tu voz, con micro desfases de tiempo y de altura, como dos tomas cantadas seguidas."],
+    "Une à gauche, une à droite : le refrain s'ouvre en stéréo.": ["One left, one right: the chorus opens up in stereo.", "Una a la izquierda, otra a la derecha: el estribillo se abre en estéreo."],
+    "Elles gardent la justesse d'Auto-Pitch si ta piste l'utilise.": ["They keep Auto-Pitch's tuning if your track uses it.", "Conservan la afinación de Auto-Pitch si tu pista lo usa."],
+    "Deux nouvelles pistes, que tu montes ou baisses à ton goût.": ["Two new tracks, which you turn up or down to taste.", "Dos pistas nuevas, que subes o bajas a tu gusto."],
+    "Sur les refrains et les hooks, là où une seule voix sonne trop mince.": ["On choruses and hooks, where a single voice sounds too thin.", "En estribillos y hooks, donde una sola voz suena demasiado fina."],
+    "Prêt pour les plateformes, ou pour ton ingé son.": ["Ready for streaming platforms, or for your engineer.", "Listo para las plataformas, o para tu ingeniero."],
+    "Mastering auto : la sonie de ton mix est mesurée (norme BS.1770), puis ramenée à -14 LUFS, le niveau des plateformes de streaming.": ["Auto mastering: your mix's loudness is measured (BS.1770 standard), then brought to -14 LUFS, the streaming platforms' level.", "Mastering auto: la sonoridad de tu mezcla se mide (norma BS.1770) y se lleva a -14 LUFS, el nivel de las plataformas de streaming."],
+    "Un limiteur garde les crêtes sous -1 dB : pas de saturation à l'écoute.": ["A limiter keeps peaks under -1 dB: no distortion on playback.", "Un limitador mantiene los picos por debajo de -1 dB: sin saturación al escuchar."],
+    "Pistes séparées : un WAV par piste, effets compris, plus la prod, dans un ZIP.": ["Separate tracks: one WAV per track, effects included, plus the beat, in a ZIP.", "Pistas separadas: un WAV por pista, con efectos, más el beat, en un ZIP."],
+    "Tout est calé sur 0:00 de la prod : il suffit de poser les fichiers au début dans n'importe quel logiciel.": ["Everything is aligned to 0:00 of the beat: just drop the files at the start in any software.", "Todo está alineado en el 0:00 del beat: basta con poner los archivos al principio en cualquier programa."],
+    "Pour sortir ta maquette sur les plateformes, ou l'envoyer à quelqu'un qui la finira.": ["To release your demo on streaming platforms, or send it to someone who will finish it.", "Para sacar tu maqueta en las plataformas, o enviarla a alguien que la termine."],
+    "La · Do · Mi : l'accord de la mineur, sous ta voix": ["A · C · E: the A minor chord, under your voice", "La · Do · Mi: el acorde de la menor, bajo tu voz"],
+    "dB crête": ["dB peak", "dB pico"],
     "Découvrir FINDINGS Pro": ["Discover FINDINGS Pro", "Descubrir FINDINGS Pro"],
     "FINDINGS Pro : le studio complet": ["FINDINGS Pro: the full studio", "FINDINGS Pro: el estudio completo"],
     "Enregistre ta voix direct sur la prod, corrige la justesse avec Auto-Pitch ou Tune Pro, nettoie le bruit et lance le mix auto. Tu peux aussi importer ta propre prod. Gratuit et sans compte ; les outils Pro sont ouverts pendant la bêta.": ["Record your voice right on the beat, fix the pitch with Auto-Pitch or Tune Pro, clean the noise and run the auto mix. You can also import your own beat. Free, no account; Pro tools are open during the beta.", "Graba tu voz directamente sobre el beat, corrige la afinación con Auto-Pitch o Tune Pro, limpia el ruido y lanza la mezcla auto. También puedes importar tu propio beat. Gratis y sin cuenta; las herramientas Pro están abiertas durante la beta."],
@@ -3639,6 +3683,50 @@ document.querySelectorAll(".off-scene").forEach(sc => {
     sc.style.setProperty("--mx", ((e.clientX - r.left) / r.width - .5).toFixed(3)); sc.style.setProperty("--my", ((e.clientY - r.top) / r.height - .5).toFixed(3)); });
   hero.addEventListener("pointerleave", () => { sc.style.setProperty("--mx", 0); sc.style.setProperty("--my", 0); });
 });
+
+/* ============ page Pro : la fiche de chaque outil ============
+   Un clic sur une carte de la Suite ouvre sa fiche : ce que l'outil fait, quand s'en servir,
+   une petite demo animee, et les deux suites logiques (l'essayer, voir les prix). */
+const PRO_OUTILS = {"TP": {"nom": "Tune Pro", "c": ["#3DDCC8", "#5B7CFF"], "accroche": "L'autotune complet, jusqu'à la note près.", "points": ["Vitesse de correction : de l'effet robot franc (0 ms) à une correction qu'on n'entend pas.", "Humanize et tolérance : les notes tenues respirent, les petites approximations restent naturelles.", "Vibrato gardé, effacé ou ajouté, et timbre de la voix plus grave ou plus clair, sans changer la note.", "Clavier des notes visées : choisis les notes à viser, à laisser libres ou à retirer.", "Mode graphique : chaque note de ta prise s'affiche, tu la glisses à la bonne hauteur, ou tu cales tout sur la gamme en un clic."], "quand": "Pour l'effet autotune assumé des refrains trap, ou pour corriger une seule note fausse sans toucher au reste de la prise.", "demo": "notes"}, "MX": {"nom": "Mix auto", "c": ["#7C5CFF", "#3DDCC8"], "accroche": "Un clic, et tes voix sonnent comme un morceau.", "points": ["Reconnaît le rôle de chaque piste : lead, backs, ad-libs, intro.", "Devine si la voix est chantée ou rappée, et active Auto-Pitch quand il faut.", "Mesure le timbre de chaque voix (boue, nasal, présence, air, sifflantes) et corrige l'égaliseur et le de-esser.", "Règle la compression, les volumes et le placement gauche / droite, puis cale le niveau de ta prod importée.", "Tout s'annule d'un ⌘Z : tu gardes la main."], "quand": "Quand tu as posé tes voix et que tu veux un mix propre tout de suite, pour écouter, partager ou continuer à la main.", "demo": "roles"}, "NV": {"nom": "Nettoyage voix", "c": ["#7CE38B", "#2FB8A0"], "accroche": "Une voix propre, même enregistrée dans ta chambre.", "points": ["Mesure le bruit de fond dans les passages calmes de ta prise.", "Retire le souffle, la ventilation et le bruit de la pièce, fréquence par fréquence, sans toucher à ta voix.", "Coupe les grondements sous 70 Hz : pied de micro, trafic, clim.", "Force réglable, par prise ou pour toute la piste en un clic."], "quand": "Avant le mix, sur les prises faites au téléphone, avec un micro d'entrée de gamme ou dans une pièce bruyante.", "demo": "propre"}, "HM": {"nom": "Harmonies auto", "c": ["#B79CFF", "#FF4D7E"], "accroche": "Des chœurs justes, sans avoir à les chanter.", "points": ["Tierce au-dessus ou en dessous, quinte, octave, ou accord complet (tierce + quinte).", "Toujours dans la tonalité de la prod : lue dans le titre, ou détectée dans ta prod importée.", "Les harmonies suivent les inflexions de ta voix, attaques et glissés compris.", "Elles arrivent sur de nouvelles pistes, à gauche et à droite, réglables comme n'importe quelle voix."], "quand": "Pour épaissir un refrain, un hook ou une fin de phrase, sans refaire dix prises.", "demo": "accord"}, "DB": {"nom": "Doubleur de voix", "c": ["#8FB8FF", "#A78BFA"], "accroche": "L'épaisseur d'une double prise, en un clic.", "points": ["Deux copies de ta voix, avec de micro-décalages de temps et de hauteur, comme deux prises chantées à la suite.", "Une à gauche, une à droite : le refrain s'ouvre en stéréo.", "Elles gardent la justesse d'Auto-Pitch si ta piste l'utilise.", "Deux nouvelles pistes, que tu montes ou baisses à ton goût."], "quand": "Sur les refrains et les hooks, là où une seule voix sonne trop mince.", "demo": "double"}, "MS": {"nom": "Mastering et pistes", "c": ["#FFD25E", "#FF8A4C"], "accroche": "Prêt pour les plateformes, ou pour ton ingé son.", "points": ["Mastering auto : la sonie de ton mix est mesurée (norme BS.1770), puis ramenée à -14 LUFS, le niveau des plateformes de streaming.", "Un limiteur garde les crêtes sous -1 dB : pas de saturation à l'écoute.", "Pistes séparées : un WAV par piste, effets compris, plus la prod, dans un ZIP.", "Tout est calé sur 0:00 de la prod : il suffit de poser les fichiers au début dans n'importe quel logiciel."], "quand": "Pour sortir ta maquette sur les plateformes, ou l'envoyer à quelqu'un qui la finira.", "demo": "niveau"}};
+(function fichesPro(){
+  const fiche = document.getElementById("proFiche"); if (!fiche) return;
+  let derniere = null;
+  const DEMOS = {
+    notes: () => '<div class="pfd-notes">' + [[6,62,18],[27,42,16],[46,24,20],[69,36,14],[86,58,10]].map(([x,y,w], i) => `<span style="left:${x}%;top:${y}%;width:${w}%;animation-delay:${-i * .6}s"></span>`).join("") + '</div>',
+    roles: () => '<div class="pfd-roles">' + [["Lead", 92], ["Backs", 62], ["Ad-libs", 68], ["Prod", 80]].map(([n, w], i) => `<span>${n}<b style="width:${w}%;animation-delay:${-i * .4}s"></b></span>`).join("") + '</div>',
+    propre: () => '<div class="pfd-onde">' + Array.from({ length: 48 }, (_, i) => { const v = .25 + .75 * Math.abs(Math.sin(i * .37) * Math.sin(i * .11 + 1)); return `<i style="--h:${(v * 100).toFixed(0)}%;--d:${(i * .03).toFixed(2)}s"></i>`; }).join("") + '</div>',
+    accord: () => '<div class="pfd-accord"><span>A</span><span>C</span><span>E</span></div><div class="pfd-legende">La · Do · Mi : l\'accord de la mineur, sous ta voix</div>',
+    double: () => '<div class="pfd-double">' + ["g", "c", "d"].map(c => `<div class="pfd-voie ${c}">` + Array.from({ length: 32 }, (_, i) => `<i style="--h:${(25 + 70 * Math.abs(Math.sin(i * .5))).toFixed(0)}%"></i>`).join("") + '</div>').join("") + '</div>',
+    niveau: () => '<div class="pfd-niveau"><div class="pfd-jauge"><i></i></div><div class="pfd-chiffres"><b>-14</b><span>LUFS</span><b>-1,0</b><span>dB crête</span></div></div>'
+  };
+  function ouvrir(cle){
+    const o = PRO_OUTILS[cle]; if (!o) return;
+    derniere = document.activeElement;
+    fiche.style.setProperty("--vis", o.c[0]); fiche.style.setProperty("--vis2", o.c[1]);
+    document.getElementById("pfNom").textContent = o.nom;
+    document.getElementById("pfAccroche").textContent = o.accroche;
+    document.getElementById("pfPoints").innerHTML = o.points.map(t => `<li>${esc(t)}</li>`).join("");
+    document.getElementById("pfQuand").textContent = o.quand;
+    document.getElementById("pfDemo").innerHTML = DEMOS[o.demo] ? DEMOS[o.demo]() : "";
+    fiche.hidden = false; document.body.classList.add("fiche-ouverte");
+    requestAnimationFrame(() => fiche.classList.add("on"));
+    fiche.querySelector(".pf-x").focus({ preventScroll: true });
+  }
+  function fermer(){
+    fiche.classList.remove("on"); document.body.classList.remove("fiche-ouverte");
+    setTimeout(() => { fiche.hidden = true; }, 200);
+    if (derniere && derniere.focus) derniere.focus({ preventScroll: true });
+  }
+  document.addEventListener("click", e => {
+    const c = e.target.closest(".pro-carte[data-outil]"); if (c) { ouvrir(c.dataset.outil); return; }
+    if (!fiche.hidden && e.target.closest("[data-pf-fermer]")) fermer();
+  });
+  document.addEventListener("keydown", e => {
+    const c = e.target.closest && e.target.closest(".pro-carte[data-outil]");
+    if (c && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); ouvrir(c.dataset.outil); }
+    if (e.key === "Escape" && !fiche.hidden) fermer();
+  });
+})();
 
 /* ============ page « Pour les beatmakers » ============ */
 (function offre(){
