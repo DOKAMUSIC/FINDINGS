@@ -2125,7 +2125,6 @@ function majEntete(res){
     `${res.length - 1} prods proches · style, tempo, tonalité et artistes en commun`;
   const pa = document.getElementById("playall");
   pa.hidden = !res.length;
-  document.getElementById("surprise").hidden = res.length < 3;   // un tirage parmi deux prods n'a rien d'une surprise
   document.getElementById("playallN").textContent = res.length > 1 ? `Lire les ${res.length}` : "Tout lire";
 }
 
@@ -3326,7 +3325,7 @@ let t;
 /* Le bouton qui a lance la lecture garde l'anneau de chargement jusqu'au demarrage. */
 let boutonLance = null;
 document.addEventListener("click", e => {
-  const b = e.target.closest("#playall,#profLire,#surprise,#surpriseAcc,.v-lire");
+  const b = e.target.closest("#playall,#profLire,.v-lire");
   if (!b) return;
   boutonLance?.classList.remove("lance"); b.classList.add("lance"); boutonLance = b;
 }, true);
@@ -3459,23 +3458,6 @@ document.getElementById("sorts").addEventListener("click", e => {
 document.getElementById("playall").addEventListener("click", () => {
   if (LAST.length) playFrom(LAST, 0);
 });
-/* « Surprends-moi » : une prod tiree au hasard, de preference jamais ecoutee, puis une
-   file de 40 autres tirees pareil — « suivant » continue la surprise. Dans le catalogue
-   il respecte les filtres affiches ; depuis l'accueil il puise dans tout le catalogue. */
-function surprendre(source){
-  const pool = source.filter(b => !DEAD.has(b.id) && b.id !== current?.id);
-  const neufs = pool.filter(b => !VU.has(b.id));
-  const base = neufs.length ? neufs : pool;
-  if (!base.length) return;
-  const tirage = base.slice();
-  for (let i = tirage.length - 1; i > 0 && i >= tirage.length - 41; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [tirage[i], tirage[j]] = [tirage[j], tirage[i]];
-  }
-  playFrom(tirage.slice(-41).reverse(), 0);
-}
-document.getElementById("surprise").addEventListener("click", () => surprendre(LAST));
-document.getElementById("surpriseAcc").addEventListener("click", () => surprendre(BEATS));
 
 /* pied de page : état réel du catalogue */
 (function footStats(){
