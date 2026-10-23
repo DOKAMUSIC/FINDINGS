@@ -53,7 +53,7 @@ if (window.FINDINGS_STATS) {
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="app.css?v=c0a506aa13">
+<link rel="stylesheet" href="app.css?v=1677b50f49">
 </head>
 <body>
 
@@ -86,6 +86,7 @@ if (window.FINDINGS_STATS) {
 
     <div class="actions">
       <a class="studio-cta" id="studioBtn" href="studio/" data-vue="studio" title="Studio : pose ta topline sur une prod, ou importe la tienne" aria-label="Ouvrir le studio"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg><span>Studio</span></a>
+      <a class="pro-cta" href="pro/" data-vue="pro" title="FINDINGS Pro : le studio complet" translate="no">PRO</a>
       <button class="sortie-filtre" id="toutesBtn" hidden aria-label="Toutes les prods" title="Toutes les prods">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
         <span class="sf-t">Toutes les prods</span>
@@ -249,9 +250,9 @@ if (window.FINDINGS_STATS) {
     <div class="sp-txt">
       <span class="eyebrow">Studio</span>
       <h2>Une prod te plaît ? Pose ta topline dessus.</h2>
-      <p>Enregistre ta voix direct sur la prod, corrige la justesse avec Auto-Pitch ou Tune Pro, nettoie le bruit et lance le mix auto. Tu peux aussi importer ta propre prod. Gratuit, sans compte.</p>
+      <p>Enregistre ta voix direct sur la prod, corrige la justesse avec Auto-Pitch ou Tune Pro, nettoie le bruit et lance le mix auto. Tu peux aussi importer ta propre prod. Gratuit et sans compte ; les outils Pro sont ouverts pendant la bêta.</p>
     </div>
-    <a class="hbtn pri" href="studio/" data-vue="studio">Ouvrir le studio</a>
+    <div class="sp-cta"><a class="hbtn pri" href="studio/" data-vue="studio">Ouvrir le studio</a><a class="hbtn off-sec" href="pro/" data-vue="pro">Découvrir FINDINGS Pro</a></div>
   </section>
 
   <section class="sec wrap" id="vueArtistes" hidden>
@@ -308,6 +309,17 @@ if (window.FINDINGS_STATS) {
       <li><b>Effets de studio</b><span>Égaliseur, compresseur, de-esser, réverb, écho, limiteur.</span></li>
       <li><b>Export pro</b><span>WAV, pistes séparées, mastering au niveau des plateformes.</span></li>
     </ul>
+  </section>
+  <section class="wrap st-pro">
+    <div class="st-pro-in">
+      <span class="sc-aura pro"></span>
+      <div>
+        <span class="eyebrow">FINDINGS Pro</span>
+        <h2>Le studio complet, pour 6,90 € par mois.</h2>
+        <p>Tune Pro, Mix auto, Nettoyage voix, harmonies, doubleur, mastering et pistes séparées. Ouverts à tous pendant la bêta.</p>
+      </div>
+      <a class="hbtn pri" href="pro/" data-vue="pro">Découvrir FINDINGS Pro</a>
+    </div>
   </section>
   <section class="wrap st-projets" id="stProjets" hidden>
     <div class="sec-head"><div><h2>Tes projets</h2><p id="stProjetsSub"></p></div></div>
@@ -779,8 +791,8 @@ if (window.FINDINGS_STATS) {
 
 <div class="dosmenu" id="dosMenu" hidden role="menu"></div>
 <script src="catalog.js?v=8f44a2c763" defer></script>
-<script src="app.js?v=4b440a649a" defer></script>
-<script src="studio.js?v=cd5c0b8451" defer></script>
+<script src="app.js?v=abd3f475d8" defer></script>
+<script src="studio.js?v=214c268031" defer></script>
 <script type="module">
 /* ============ la note, en volume ============
    Un vrai maillage extrudé, éclairé et tourné en continu. Si WebGL manque ou si
