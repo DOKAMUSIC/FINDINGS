@@ -1139,15 +1139,6 @@ body.vue-suivis #fbar{display:none}
   transition:.15s;
 }
 .playall:hover{background:#e51f35;box-shadow:var(--sh-2)}
-.surprise{
-  display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:999px;
-  background:var(--surface);border:1px solid var(--line);color:var(--ink-2);
-  font-size:13px;font-weight:560;box-shadow:var(--sh-1);transition:.15s;
-}
-.surprise:hover{box-shadow:var(--sh-2)}
-.surprise svg{transition:transform .35s cubic-bezier(.2,.9,.25,1.4)}
-.surprise:active svg,.hbtn:active svg{transform:rotate(90deg)}
-@media(max-width:640px){ .surprise span{display:none} .surprise{padding:0 10px} }
 
 .head-acts{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0;max-width:100%}
 .sorts{
@@ -2317,14 +2308,18 @@ body.vue-accueil .hcta{display:inline-flex}
    s'ouvrent qu'au clic dans le champ. Sous 900 px, la navigation passe dans le menu reglages. */
 .top-in{gap:18px}
 .hnav{display:flex;align-items:center;gap:2px;flex:0 0 auto}
-.hnav a{position:relative;padding:8px 12px;border-radius:999px;font-size:14px;font-weight:600;color:var(--dim);text-decoration:none;transition:color .15s,background .15s}
-.hnav a:hover{color:var(--ink);background:rgba(var(--fg-rgb),.05)}
+/* le trait rouge sous le lien : il se dessine au survol (de gauche a droite) et reste
+   sous la page affichee. Pas de fond gris : le survol se lit au trait et a la couleur. */
+.hnav a{position:relative;padding:8px 12px;font-size:14px;font-weight:600;color:var(--dim);text-decoration:none;transition:color .15s}
+.hnav a::after{content:"";position:absolute;left:12px;right:12px;bottom:2px;height:2px;border-radius:2px;background:var(--accent);
+  transform:scaleX(0);transform-origin:left;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.hnav a:hover,.hnav a:focus-visible{color:var(--ink)}
+.hnav a:hover::after,.hnav a:focus-visible::after{transform:scaleX(1)}
 body:not(.vue-accueil):not(.vue-studio):not(.vue-offre):not(.vue-pro) .hnav a[data-nav="prods"],body.vue-pro .hnav a[data-nav="pro"]{color:var(--ink)}
-body:not(.vue-accueil):not(.vue-studio):not(.vue-offre):not(.vue-pro) .hnav a[data-nav="prods"]::after,body.vue-pro .hnav a[data-nav="pro"]::after{
-  content:"";position:absolute;left:12px;right:12px;bottom:2px;height:2px;border-radius:2px;background:var(--accent)}
+body:not(.vue-accueil):not(.vue-studio):not(.vue-offre):not(.vue-pro) .hnav a[data-nav="prods"]::after,body.vue-pro .hnav a[data-nav="pro"]::after{transform:scaleX(1)}
+.hnav a.hnav-pro::after{background:#F2C14E}
 .hnav-pro{display:inline-flex;align-items:center;gap:6px}
 .hnav-pro::before{content:"";width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#F2C14E,#FFB547);box-shadow:0 0 8px rgba(242,193,78,.6)}
-body.vue-pro .hnav a[data-nav="pro"]::after{background:#F2C14E}
 .top .search{max-width:520px;margin-left:auto}
 body.vue-accueil .top .search{display:none}
 .actions{gap:6px;margin-left:auto}
@@ -2519,10 +2514,6 @@ body:not(.vue-accueil) .top .search + .actions{margin-left:0}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
         Toutes les prods
       </a>
-      <button class="hbtn ghost" id="surpriseAcc" title="Lance une prod au hasard parmi celles que tu n'as jamais écoutées">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
-        Surprends-moi
-      </button>
     </div>
     <div class="stats" id="stats"></div>
   </div>
@@ -2937,10 +2928,6 @@ body:not(.vue-accueil) .top .search + .actions{margin-left:0}
       <button class="playall" id="playall">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
         <span id="playallN">Tout lire</span>
-      </button>
-      <button class="surprise" id="surprise" title="Une prod au hasard dans cette liste, parmi celles que tu n'as jamais écoutées">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
-        <span>Surprends-moi</span>
       </button>
       <div class="sorts" id="sorts">
         <button data-sort="pertinence" aria-pressed="true">Pertinence</button>
@@ -5273,7 +5260,6 @@ function majEntete(res){
     `${res.length - 1} prods proches · style, tempo, tonalité et artistes en commun`;
   const pa = document.getElementById("playall");
   pa.hidden = !res.length;
-  document.getElementById("surprise").hidden = res.length < 3;   // un tirage parmi deux prods n'a rien d'une surprise
   document.getElementById("playallN").textContent = res.length > 1 ? `Lire les ${res.length}` : "Tout lire";
 }
 
@@ -6474,7 +6460,7 @@ let t;
 /* Le bouton qui a lance la lecture garde l'anneau de chargement jusqu'au demarrage. */
 let boutonLance = null;
 document.addEventListener("click", e => {
-  const b = e.target.closest("#playall,#profLire,#surprise,#surpriseAcc,.v-lire");
+  const b = e.target.closest("#playall,#profLire,.v-lire");
   if (!b) return;
   boutonLance?.classList.remove("lance"); b.classList.add("lance"); boutonLance = b;
 }, true);
@@ -6607,23 +6593,6 @@ document.getElementById("sorts").addEventListener("click", e => {
 document.getElementById("playall").addEventListener("click", () => {
   if (LAST.length) playFrom(LAST, 0);
 });
-/* « Surprends-moi » : une prod tiree au hasard, de preference jamais ecoutee, puis une
-   file de 40 autres tirees pareil — « suivant » continue la surprise. Dans le catalogue
-   il respecte les filtres affiches ; depuis l'accueil il puise dans tout le catalogue. */
-function surprendre(source){
-  const pool = source.filter(b => !DEAD.has(b.id) && b.id !== current?.id);
-  const neufs = pool.filter(b => !VU.has(b.id));
-  const base = neufs.length ? neufs : pool;
-  if (!base.length) return;
-  const tirage = base.slice();
-  for (let i = tirage.length - 1; i > 0 && i >= tirage.length - 41; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [tirage[i], tirage[j]] = [tirage[j], tirage[i]];
-  }
-  playFrom(tirage.slice(-41).reverse(), 0);
-}
-document.getElementById("surprise").addEventListener("click", () => surprendre(LAST));
-document.getElementById("surpriseAcc").addEventListener("click", () => surprendre(BEATS));
 
 /* pied de page : état réel du catalogue */
 (function footStats(){
