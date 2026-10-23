@@ -604,7 +604,13 @@ const STUDIO = (() => {
   .gr-aide{margin:0;font-size:10.5px;color:var(--p-dim,#8B9099)}
   .gr-aide b{color:var(--p-txt,#E8EAED);font-weight:650}
   .gr-vide{margin:18px 4px;font-size:12.5px;line-height:1.5;color:var(--p-dim,#8B9099);max-width:460px}
-  .badge-pro{display:inline-flex;align-items:center;height:15px;padding:0 5px;margin-left:6px;border-radius:4px;vertical-align:1px;
+  .daw .daw-o.pro-o{gap:6px;padding:0 6px 0 12px;background:rgba(242,193,78,.14);color:#F2C14E}
+  .daw .daw-o.pro-o b{font:800 9.5px/1 var(--sans);letter-spacing:.08em;padding:4px 6px;border-radius:999px;color:#1A1405;background:linear-gradient(135deg,#F2C14E,#FFD97A)}
+  .daw .daw-o.pro-o:hover{background:rgba(242,193,78,.24);color:#FFD97A}
+  :root:not([data-theme="dark"]) .daw .daw-o.pro-o{color:#9A6B00;background:rgba(242,193,78,.2)}
+  .daw .daw-msg.lien{cursor:pointer;pointer-events:auto}
+  .daw-msg .msg-lien{margin-left:6px;color:#F2C14E;font-weight:800}
+  .badge-pro{cursor:pointer;display:inline-flex;align-items:center;height:15px;padding:0 5px;margin-left:6px;border-radius:4px;vertical-align:1px;
     font:800 8.5px/1 var(--sans);letter-spacing:.08em;color:#1A1405;background:linear-gradient(135deg,#F2C14E,#FFD97A);box-shadow:0 0 0 1px rgba(0,0,0,.08)}
   .daw-o .badge-pro{margin-left:2px}
   .plug-tete .badge-pro{align-self:end;margin:0 0 3px}
@@ -865,6 +871,7 @@ const STUDIO = (() => {
         </span>
         <button class="daw-o ia" id="dawMixAuto" title="Mix auto : analyse tes voix et règle chaque piste sur la prod, en un clic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 1.9 1.9.8-1.9.8L19 20.4l-.8-1.9-1.9-.8 1.9-.8z"/></svg><span class="lib">Mix auto</span><span class="badge-pro" translate="no">PRO</span></button>
         <a class="daw-o achat" id="dawAcheter" hidden target="_blank" rel="noopener" title="Acheter la licence de la prod"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.2l2.3 11h10.8l2-7.5H7"/><circle cx="9.5" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg><span class="lib">Acheter la prod</span></a>
+        <button class="daw-o pro-o" id="dawPro" title="FINDINGS Pro : le studio complet"><span class="lib">Passer Pro</span><b translate="no">PRO</b></button>
         <button class="daw-o" id="dawPlein" title="Plein écran (F)" aria-label="Plein écran">${I.plein}</button>
         <span class="daw-exp">
           <button class="daw-o pri" id="dawExport" title="Exporter" aria-haspopup="true" aria-expanded="false">${I.export}<span class="lib">Exporter</span></button>
@@ -1002,14 +1009,18 @@ const STUDIO = (() => {
   const PRO_BETA = true;
   const abonnePro = () => { try { return localStorage.getItem("findings.pro") === "actif"; } catch (e) { return false; } };   // remplace par le vrai compte au lancement
   const PRO_VUS = new Set();
+  const allerPro = () => { if (typeof montrerVue === "function") montrerVue("pro", true); };
   function outilPro(nom){
     if (abonnePro()) return true;
-    if (PRO_BETA) { if (!PRO_VUS.has(nom)) { PRO_VUS.add(nom); setTimeout(() => message(`${nom} : outil Pro, ouvert pendant la bêta`), 50); } return true; }
+    if (PRO_BETA) { if (!PRO_VUS.has(nom)) { PRO_VUS.add(nom); setTimeout(() => message(`${nom} : outil Pro, ouvert pendant la bêta`, allerPro), 50); } return true; }
     message(`${nom} fait partie de FINDINGS Pro`);
     if (typeof montrerVue === "function") montrerVue("pro", true);
     return false;
   }
-  function message(t){ const m = $("dawMsg"); m.textContent = t; m.hidden = false; clearTimeout(msgMinuteur); msgMinuteur = setTimeout(() => m.hidden = true, 3200); }
+  // un message ; avec une action, il devient cliquable (« Découvrir → ») et reste un peu plus longtemps
+  function message(t, action){ const m = $("dawMsg"); m.textContent = t; m.hidden = false; m.onclick = null; m.classList.toggle("lien", !!action);
+    if (action) { m.insertAdjacentHTML("beforeend", ' <b class="msg-lien">Découvrir →</b>'); m.onclick = () => { m.hidden = true; action(); }; }
+    clearTimeout(msgMinuteur); msgMinuteur = setTimeout(() => m.hidden = true, action ? 6000 : 3200); }
 
   /* ─────────────────────────── effets ───────────────────────────
      Chaque piste a sa chaine complete, dans cet ordre : coupe-bas → egaliseur 3 bandes →
@@ -2978,6 +2989,7 @@ const STUDIO = (() => {
   pan.addEventListener("pointerup", () => { if (eqDrag) { eqDrag = null; sauver(); } });
   pan.addEventListener("click", e => {
     const o = e.target.closest("[data-onglet]"); if (o) { onglet = o.dataset.onglet; pan.classList.remove("ferme"); panneau(); return; }
+    if (e.target.closest(".badge-pro") && !e.target.closest("button.daw-o")) { e.stopPropagation(); allerPro(); return; }
     const av = e.target.closest("[data-atvue]"); if (av) { atVue = av.dataset.atvue; panneau(); return; }
     const gr = e.target.closest("[data-gr]"); if (gr) { actionGraphe(gr.dataset.gr); return; }
     if (e.target.closest("#dawReplier")) { pan.classList.toggle("ferme"); setTimeout(() => { dessiner(); visualiser(); }, 50); return; }
@@ -3840,6 +3852,7 @@ const STUDIO = (() => {
   menuExp.addEventListener("click", e => { const b = e.target.closest("[data-exp]"); if (!b) return; fermerExp(); exporter(b.dataset.exp); });
   document.addEventListener("click", e => { if (!menuExp.hidden && !e.target.closest(".daw-exp")) fermerExp(); });
   $("dawMixAuto").onclick = mixAuto;
+  $("dawPro").onclick = allerPro;
   $("dawFermer").onclick = fermer;
   $("dawZoom").addEventListener("input", e => {
     const t = tempsBeat(), avant = t * zoom - zone.scrollLeft;

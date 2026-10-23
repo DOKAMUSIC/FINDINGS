@@ -736,6 +736,18 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
 .sortie .sponso-tag.sur-image{position:absolute;top:12px;left:12px;color:#1A1405;background:#F2C14E}
 .sortie.une .raison .verif{color:#7CC4FF}
 
+/* les portes d'entree vers FINDINGS Pro : la pastille de l'en-tete, le bandeau de la page Studio */
+.pro-cta{display:inline-flex;align-items:center;height:30px;padding:0 12px;border-radius:999px;flex:0 0 auto;font:800 11.5px/1 var(--sans);letter-spacing:.1em;
+  color:#1A1405;background:linear-gradient(135deg,#F2C14E,#FFD97A);box-shadow:0 4px 14px rgba(242,193,78,.3);text-decoration:none;transition:transform .15s,box-shadow .15s}
+.pro-cta:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(242,193,78,.4)}
+body.vue-pro .pro-cta{box-shadow:0 0 0 2px var(--bg),0 0 0 4px #F2C14E}
+.sp-cta{display:flex;flex-wrap:wrap;gap:10px}
+.st-pro{padding-top:8px;padding-bottom:24px}
+.st-pro-in{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;padding:30px 32px;border-radius:24px;background:#0B0B0D;color:#fff}
+.st-pro-in .sc-aura{inset:-60% 30% -60% -10%;z-index:-1;opacity:.45}
+.st-pro-in .eyebrow{color:#F2C14E}
+.st-pro-in h2{margin:6px 0 6px;font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.035em}
+.st-pro-in p{margin:0;max-width:600px;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72)}
 /* ─────────── page FINDINGS Pro ───────────
    Meme gabarit que la page beatmakers ; les outils y portent la signature de la Suite
    (chassis sombre, aura de leur couleur, monogramme en contour). */
@@ -794,7 +806,10 @@ body.np-on .fbar::before{left:calc(-1 * var(--fbx,0px));transform:none}
   border:1px solid rgba(255,255,255,.08);box-shadow:var(--sh-2);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
 .pro-carte:hover{transform:translateY(-3px)}
 .pro-carte .pro-aura{width:320px;height:220px;opacity:.5}
-.pro-mono{position:absolute;right:16px;top:12px;font:800 52px/1 var(--sans);letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1.2px color-mix(in srgb,var(--vis) 55%,transparent)}
+/* monogramme plein (un contour dessinait les traits interieurs des lettres qui se chevauchent) */
+.pro-mono{position:absolute;right:16px;top:10px;font:800 56px/1 var(--sans);letter-spacing:-.05em;color:transparent;opacity:.32;
+  background:linear-gradient(135deg,var(--vis),var(--vis2));-webkit-background-clip:text;background-clip:text;transition:opacity .25s}
+.pro-carte:hover .pro-mono{opacity:.55}
 .pro-marque{font:800 10.5px/1 var(--sans);letter-spacing:-.01em;color:#fff;opacity:.9}
 .pro-carte h3{margin:0;font:800 24px/1.05 var(--sans);letter-spacing:-.04em;color:var(--vis)}
 .pro-carte p{margin:auto 0 0;padding-top:28px;font-size:14px;line-height:1.5;color:rgba(255,255,255,.72)}
@@ -1284,8 +1299,8 @@ body:has(.bar.up) .foot-in{padding-bottom:calc(var(--bar-h) + 44px)}
   transition:color .18s,opacity .18s,transform .22s cubic-bezier(.2,.8,.2,1);
 }
 .foot-col [hidden]{display:none}
-/* survol : le lien avance et une fleche rouge sort, le titre de la colonne s'allume,
-   les voisins s'effacent un peu pour que l'oeil suive la souris */
+/* survol : le lien avance et une fleche rouge sort, le titre de la colonne s'allume ;
+   les autres liens ne bougent pas (les griser faisait croire qu'ils etaient indisponibles) */
 .foot-col a::after,.foot-col button::after{
   content:"";width:12px;height:12px;flex:0 0 auto;background:var(--accent);opacity:0;transform:translateX(-6px);
   transition:opacity .18s,transform .22s cubic-bezier(.2,.8,.2,1);
@@ -1296,7 +1311,6 @@ body:has(.bar.up) .foot-in{padding-bottom:calc(var(--bar-h) + 44px)}
 .foot-col button[aria-current="true"]::after{display:none}
 @media(hover:hover){
   .foot-col:hover b{color:var(--accent)}
-  .foot-col:hover > a:not(:hover),.foot-col:hover > button:not(:hover){opacity:.55}
   .foot-col a:hover,.foot-col button:hover{color:var(--ink);transform:translateX(4px)}
   .foot-col a:hover::after,.foot-col button:hover::after{opacity:1;transform:none}
 }
@@ -2237,6 +2251,7 @@ body.vue-accueil .hcta{display:inline-flex}
 
     <div class="actions">
       <a class="studio-cta" id="studioBtn" href="studio/" data-vue="studio" title="Studio : pose ta topline sur une prod, ou importe la tienne" aria-label="Ouvrir le studio"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg><span>Studio</span></a>
+      <a class="pro-cta" href="pro/" data-vue="pro" title="FINDINGS Pro : le studio complet" translate="no">PRO</a>
       <button class="sortie-filtre" id="toutesBtn" hidden aria-label="Toutes les prods" title="Toutes les prods">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
         <span class="sf-t">Toutes les prods</span>
@@ -2400,9 +2415,9 @@ body.vue-accueil .hcta{display:inline-flex}
     <div class="sp-txt">
       <span class="eyebrow">Studio</span>
       <h2>Une prod te plaît ? Pose ta topline dessus.</h2>
-      <p>Enregistre ta voix direct sur la prod, corrige la justesse avec Auto-Pitch ou Tune Pro, nettoie le bruit et lance le mix auto. Tu peux aussi importer ta propre prod. Gratuit, sans compte.</p>
+      <p>Enregistre ta voix direct sur la prod, corrige la justesse avec Auto-Pitch ou Tune Pro, nettoie le bruit et lance le mix auto. Tu peux aussi importer ta propre prod. Gratuit et sans compte ; les outils Pro sont ouverts pendant la bêta.</p>
     </div>
-    <a class="hbtn pri" href="studio/" data-vue="studio">Ouvrir le studio</a>
+    <div class="sp-cta"><a class="hbtn pri" href="studio/" data-vue="studio">Ouvrir le studio</a><a class="hbtn off-sec" href="pro/" data-vue="pro">Découvrir FINDINGS Pro</a></div>
   </section>
 
   <section class="sec wrap" id="vueArtistes" hidden>
@@ -2459,6 +2474,17 @@ body.vue-accueil .hcta{display:inline-flex}
       <li><b>Effets de studio</b><span>Égaliseur, compresseur, de-esser, réverb, écho, limiteur.</span></li>
       <li><b>Export pro</b><span>WAV, pistes séparées, mastering au niveau des plateformes.</span></li>
     </ul>
+  </section>
+  <section class="wrap st-pro">
+    <div class="st-pro-in">
+      <span class="sc-aura pro"></span>
+      <div>
+        <span class="eyebrow">FINDINGS Pro</span>
+        <h2>Le studio complet, pour 6,90 € par mois.</h2>
+        <p>Tune Pro, Mix auto, Nettoyage voix, harmonies, doubleur, mastering et pistes séparées. Ouverts à tous pendant la bêta.</p>
+      </div>
+      <a class="hbtn pri" href="pro/" data-vue="pro">Découvrir FINDINGS Pro</a>
+    </div>
   </section>
   <section class="wrap st-projets" id="stProjets" hidden>
     <div class="sec-head"><div><h2>Tes projets</h2><p id="stProjetsSub"></p></div></div>
@@ -2943,6 +2969,12 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "Découvrir FINDINGS Pro": ["Discover FINDINGS Pro", "Descubrir FINDINGS Pro"],
+    "FINDINGS Pro : le studio complet": ["FINDINGS Pro: the full studio", "FINDINGS Pro: el estudio completo"],
+    "Enregistre ta voix direct sur la prod, corrige la justesse avec Auto-Pitch ou Tune Pro, nettoie le bruit et lance le mix auto. Tu peux aussi importer ta propre prod. Gratuit et sans compte ; les outils Pro sont ouverts pendant la bêta.": ["Record your voice right on the beat, fix the pitch with Auto-Pitch or Tune Pro, clean the noise and run the auto mix. You can also import your own beat. Free, no account; Pro tools are open during the beta.", "Graba tu voz directamente sobre el beat, corrige la afinación con Auto-Pitch o Tune Pro, limpia el ruido y lanza la mezcla auto. También puedes importar tu propio beat. Gratis y sin cuenta; las herramientas Pro están abiertas durante la beta."],
+    "Tune Pro, Mix auto, Nettoyage voix, harmonies, doubleur, mastering et pistes séparées. Ouverts à tous pendant la bêta.": ["Tune Pro, Auto mix, Voice cleaner, harmonies, doubler, mastering and separate tracks. Open to everyone during the beta.", "Tune Pro, Mezcla auto, Limpieza de voz, armonías, doblador, mastering y pistas separadas. Abiertos a todos durante la beta."],
+    "Passer Pro": ["Go Pro", "Pásate a Pro"],
+    "Découvrir →": ["Discover →", "Descubrir →"],
     "Les prix": ["Pricing", "Precios"],
     "Un abonnement, tous les outils Pro. Au mois ou à l'année.": ["One subscription, every Pro tool. Monthly or yearly.", "Una suscripción, todas las herramientas Pro. Al mes o al año."],
     "4,58 € par mois": ["€4.58 a month", "4,58 € al mes"],
