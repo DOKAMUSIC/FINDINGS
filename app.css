@@ -1559,24 +1559,6 @@ body.yt-charge #profLire.lance::before{width:20px;height:20px;border-width:2.6px
    Portée depuis l'ancienne page d'accueil. Le lecteur, lui, est celui du
    catalogue : il n'y en a plus qu'un dans le document. */
 /* ─────────── barre du haut ─────────── */
-.hnav{
-  position:sticky;top:0;z-index:30;
-  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  border-bottom:1px solid var(--line-soft);
-  padding-top:env(safe-area-inset-top,0px);
-}
-.hnav-in{
-  max-width:1220px;margin:0 auto;padding:11px 22px;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-}
-.hnav .mark{font-size:17px;font-weight:800;letter-spacing:-.03em}
-.hnav .links{display:flex;align-items:center;gap:6px}
-.hnav .links a{
-  padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--dim);transition:.15s;
-}
-.hnav .links a:hover{color:var(--ink);background:rgba(var(--fg-rgb),.05)}
-.hnav .links a.cta{background:var(--ink);color:var(--on-ink);font-weight:590}
-.hnav .links a.cta:hover{color:var(--on-ink);background:color-mix(in srgb,var(--ink) 88%,var(--bg))}
 
 /* ─────────── héros ─────────── */
 .hero{
@@ -2268,19 +2250,19 @@ body.vue-accueil .hcta{display:inline-flex}
    Seul le Studio est en couleur : c'est l'action principale. Les suggestions de recherche ne
    s'ouvrent qu'au clic dans le champ. Sous 900 px, la navigation passe dans le menu reglages. */
 .top-in{gap:18px}
-.hnav{display:flex;align-items:center;gap:2px;flex:0 0 auto}
+.tnav{display:flex;align-items:center;gap:2px;flex:0 0 auto}
 /* Le survol utilise la ligne grise du bas de l'en-tete : sous le lien, elle devient rouge
    (de gauche a droite). Les liens occupent toute la hauteur de l'en-tete pour que leur trait
    tombe exactement sur cette ligne, au lieu d'en ajouter une autre au-dessus. */
-.hnav{align-self:stretch;align-items:stretch;margin:-12px 0}
-.hnav a{position:relative;display:flex;align-items:center;padding:0 12px;font-size:14px;font-weight:600;color:var(--dim);text-decoration:none;transition:color .15s}
-.hnav a::after{content:"";position:absolute;left:8px;right:8px;bottom:-2px;height:2px;background:var(--accent);
+.tnav{align-self:stretch;align-items:stretch;margin:-12px 0}
+.tnav a{position:relative;display:flex;align-items:center;padding:0 12px;font-size:14px;font-weight:600;color:var(--dim);text-decoration:none;transition:color .15s}
+.tnav a::after{content:"";position:absolute;left:8px;right:8px;bottom:-2px;height:2px;background:var(--accent);
   transform:scaleX(0);transform-origin:left;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
-.hnav a:hover,.hnav a:focus-visible{color:var(--ink)}
-.hnav a:hover::after,.hnav a:focus-visible::after{transform:scaleX(1)}
-body:not(.vue-accueil):not(.vue-studio):not(.vue-offre):not(.vue-pro) .hnav a[data-nav="prods"],body.vue-pro .hnav a[data-nav="pro"]{color:var(--ink)}
-body:not(.vue-accueil):not(.vue-studio):not(.vue-offre):not(.vue-pro) .hnav a[data-nav="prods"]::after,body.vue-pro .hnav a[data-nav="pro"]::after{transform:scaleX(1)}
-.hnav a.hnav-pro::after{background:#F2C14E}
+.tnav a:hover,.tnav a:focus-visible{color:var(--ink)}
+.tnav a:hover::after,.tnav a:focus-visible::after{transform:scaleX(1)}
+body:not(.vue-accueil):not(.vue-studio):not(.vue-offre):not(.vue-pro) .tnav a[data-nav="prods"],body.vue-pro .tnav a[data-nav="pro"]{color:var(--ink)}
+body:not(.vue-accueil):not(.vue-studio):not(.vue-offre):not(.vue-pro) .tnav a[data-nav="prods"]::after,body.vue-pro .tnav a[data-nav="pro"]::after{transform:scaleX(1)}
+.tnav a.hnav-pro::after{background:#F2C14E}
 .hnav-pro{display:inline-flex;align-items:center;gap:6px}
 .hnav-pro::before{content:"";width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#F2C14E,#FFB547);box-shadow:0 0 8px rgba(242,193,78,.6)}
 .top .search{max-width:520px;margin-left:auto}
@@ -2338,7 +2320,7 @@ body:not(.vue-accueil) .top .search + .actions{margin-left:0}
 .top .studio-cta{margin-left:4px}
 /* largeur moyenne : la navigation rejoint le menu reglages, qui devient un menu ☰ */
 @media(max-width:900px){
-  .hnav{display:none}
+  .tnav{display:none}
   .reg-nav{display:grid}
   .ico-reg{display:none} .ico-menu{display:block}
 }
