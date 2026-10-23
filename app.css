@@ -786,6 +786,31 @@ body.vue-pro .pro-cta{box-shadow:0 0 0 2px var(--bg),0 0 0 4px #F2C14E}
 .pro-table td svg{color:var(--accent);vertical-align:middle}
 .pro-table td:nth-child(2) svg{color:var(--ink)}
 .pro-non{color:var(--dimmer)}
+/* pourquoi passer Pro, et la soiree en quatre etapes */
+:is(#vuePro) .pro-pourquoi,:is(#vuePro) .pro-soiree{padding-top:64px;padding-bottom:8px}
+.pro-pourquoi h2,.pro-soiree h2{margin:0 0 20px;font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.03em}
+.pq-grille{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.pq-grille article{display:grid;align-content:start;gap:8px;padding:22px;border-radius:20px;background:var(--surface);border:1px solid var(--line-soft)}
+.pq-ico{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;color:#fff;margin-bottom:6px;background:linear-gradient(135deg,#FA233B,#7C5CFF);box-shadow:0 8px 20px rgba(250,35,59,.25)}
+.pq-grille article:nth-child(2) .pq-ico{background:linear-gradient(135deg,#7C5CFF,#3DDCC8)}
+.pq-grille article:nth-child(3) .pq-ico{background:linear-gradient(135deg,#3DDCC8,#7CE38B)}
+.pq-grille article:nth-child(4) .pq-ico{background:linear-gradient(135deg,#F2C14E,#FF8A4C)}
+.pq-grille h3{margin:0;font-size:17px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.pq-grille p{margin:0;font-size:14px;line-height:1.5;color:var(--dim)}
+.ps-etapes{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;counter-reset:ps;position:relative}
+.ps-etapes li{counter-increment:ps;position:relative;display:grid;align-content:start;gap:6px;padding:22px;border-radius:20px;background:var(--surface);border:1px solid var(--line-soft)}
+.ps-etapes li::before{content:counter(ps,decimal-leading-zero);font:800 34px/1 var(--sans);letter-spacing:-.05em;color:transparent;background:linear-gradient(135deg,#FA233B,#7C5CFF);-webkit-background-clip:text;background-clip:text;margin-bottom:6px}
+.ps-etapes b{font-size:16px;font-weight:800;letter-spacing:-.02em}
+.ps-etapes span{font-size:14px;line-height:1.5;color:var(--dim)}
+.ps-etapes em{font-style:normal;font-weight:700;color:var(--ink)}
+/* fiche : ce qu'on gagne avec Pro */
+.pf-vs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.pf-vs div{display:grid;gap:4px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);font-size:13px;line-height:1.45;color:rgba(255,255,255,.6)}
+.pf-vs b{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.pf-vs .pro{background:linear-gradient(135deg,color-mix(in srgb,var(--vis) 16%,transparent),color-mix(in srgb,var(--vis2) 10%,transparent));color:#fff;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--vis) 40%,transparent)}
+.pf-vs .pro b{color:var(--vis)}
+@media(max-width:900px){ .pq-grille,.ps-etapes{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media(max-width:560px){ .pq-grille,.ps-etapes{grid-template-columns:minmax(0,1fr)} .pf-vs{grid-template-columns:minmax(0,1fr)} }
 .pro-carte{cursor:pointer}
 .pro-carte:focus-visible{outline:2px solid var(--vis);outline-offset:3px}
 .pro-plus{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:12.5px;font-weight:700;color:var(--vis);transition:gap .2s}

@@ -53,7 +53,7 @@ if (window.FINDINGS_STATS) {
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="app.css?v=6e700135b6">
+<link rel="stylesheet" href="app.css?v=af4f2cd5a6">
 </head>
 <body>
 
@@ -347,6 +347,26 @@ if (window.FINDINGS_STATS) {
     </div>
   </section>
 
+  <section class="pro-pourquoi wrap">
+    <h2>Pourquoi passer Pro</h2>
+    <div class="pq-grille">
+      <article><span class="pq-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><h3>Sonne fini, pas maquette</h3><p>Tune Pro, le Mix auto et le mastering donnent à ta voix le rendu d'un morceau terminé, prêt à partager ou à sortir.</p></article>
+      <article><span class="pq-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 1.9 1.9.8-1.9.8L19 20.4l-.8-1.9-1.9-.8 1.9-.8z"/></svg></span><h3>Une soirée de réglages, en un clic</h3><p>Le Mix auto et le Nettoyage voix font en quelques secondes ce qui demande des heures d'oreille et de boutons.</p></article>
+      <article><span class="pq-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 14h3M8 17h6"/></svg></span><h3>Tout au même endroit</h3><p>La prod, ta voix, le mix et le master, dans ton navigateur : pas de logiciel à installer, pas de plugin à acheter un par un.</p></article>
+      <article><span class="pq-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7.5A6 6 0 1 0 17 16.5"/><path d="M4 10.5h9M4 13.5h9"/></svg></span><h3>Environ 1,60 € par semaine</h3><p>6,90 € par mois, ou 4,58 € par mois avec l'annuel. Le prix de quelques cafés, pour tous les outils Pro.</p></article>
+    </div>
+  </section>
+
+  <section class="pro-soiree wrap">
+    <h2>Une soirée, un son fini</h2>
+    <ol class="ps-etapes">
+      <li><b>Choisis ta prod</b><span>Parmi les type beats du site, ou importe la tienne : la tonalité et le tempo sont détectés.</span></li>
+      <li><b>Enregistre</b><span>Pose tes voix, puis corrige-les avec <em>Tune Pro</em> et nettoie-les avec <em>Nettoyage voix</em>.</span></li>
+      <li><b>Mixe</b><span>Ajoute des chœurs avec <em>Harmonies</em> et <em>Doubleur</em>, puis lance le <em>Mix auto</em>.</span></li>
+      <li><b>Sors-le</b><span>Exporte un <em>master</em> au niveau des plateformes, ou les <em>pistes séparées</em> pour ton ingé son.</span></li>
+    </ol>
+  </section>
+
   <section class="pro-suite wrap">
     <h2>La FINDINGS Suite Pro</h2>
     <p class="pro-sous">Six outils pensés pour la voix, au même endroit que tes prods.</p>
@@ -392,6 +412,7 @@ if (window.FINDINGS_STATS) {
         <p class="pf-accroche" id="pfAccroche"></p>
         <ul class="pf-points" id="pfPoints"></ul>
         <p class="pf-quand"><b>Quand t'en servir</b><span id="pfQuand"></span></p>
+        <div class="pf-vs"><div><b>Gratuit</b><span id="pfGratuit"></span></div><div class="pro"><b>Avec Pro</b><span id="pfAvecPro"></span></div></div>
       </div>
       <div class="pf-demo" id="pfDemo" aria-hidden="true"></div>
     </div>
@@ -794,7 +815,7 @@ if (window.FINDINGS_STATS) {
 
 <div class="dosmenu" id="dosMenu" hidden role="menu"></div>
 <script src="catalog.js?v=8f44a2c763" defer></script>
-<script src="app.js?v=aa908405ff" defer></script>
+<script src="app.js?v=ba5756bc63" defer></script>
 <script src="studio.js?v=214c268031" defer></script>
 <script type="module">
 /* ============ la note, en volume ============
