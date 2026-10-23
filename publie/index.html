@@ -825,6 +825,31 @@ body.vue-pro .pro-cta{box-shadow:0 0 0 2px var(--bg),0 0 0 4px #F2C14E}
 .pro-table td svg{color:var(--accent);vertical-align:middle}
 .pro-table td:nth-child(2) svg{color:var(--ink)}
 .pro-non{color:var(--dimmer)}
+/* pourquoi passer Pro, et la soiree en quatre etapes */
+:is(#vuePro) .pro-pourquoi,:is(#vuePro) .pro-soiree{padding-top:64px;padding-bottom:8px}
+.pro-pourquoi h2,.pro-soiree h2{margin:0 0 20px;font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.03em}
+.pq-grille{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.pq-grille article{display:grid;align-content:start;gap:8px;padding:22px;border-radius:20px;background:var(--surface);border:1px solid var(--line-soft)}
+.pq-ico{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;color:#fff;margin-bottom:6px;background:linear-gradient(135deg,#FA233B,#7C5CFF);box-shadow:0 8px 20px rgba(250,35,59,.25)}
+.pq-grille article:nth-child(2) .pq-ico{background:linear-gradient(135deg,#7C5CFF,#3DDCC8)}
+.pq-grille article:nth-child(3) .pq-ico{background:linear-gradient(135deg,#3DDCC8,#7CE38B)}
+.pq-grille article:nth-child(4) .pq-ico{background:linear-gradient(135deg,#F2C14E,#FF8A4C)}
+.pq-grille h3{margin:0;font-size:17px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.pq-grille p{margin:0;font-size:14px;line-height:1.5;color:var(--dim)}
+.ps-etapes{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;counter-reset:ps;position:relative}
+.ps-etapes li{counter-increment:ps;position:relative;display:grid;align-content:start;gap:6px;padding:22px;border-radius:20px;background:var(--surface);border:1px solid var(--line-soft)}
+.ps-etapes li::before{content:counter(ps,decimal-leading-zero);font:800 34px/1 var(--sans);letter-spacing:-.05em;color:transparent;background:linear-gradient(135deg,#FA233B,#7C5CFF);-webkit-background-clip:text;background-clip:text;margin-bottom:6px}
+.ps-etapes b{font-size:16px;font-weight:800;letter-spacing:-.02em}
+.ps-etapes span{font-size:14px;line-height:1.5;color:var(--dim)}
+.ps-etapes em{font-style:normal;font-weight:700;color:var(--ink)}
+/* fiche : ce qu'on gagne avec Pro */
+.pf-vs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.pf-vs div{display:grid;gap:4px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);font-size:13px;line-height:1.45;color:rgba(255,255,255,.6)}
+.pf-vs b{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.pf-vs .pro{background:linear-gradient(135deg,color-mix(in srgb,var(--vis) 16%,transparent),color-mix(in srgb,var(--vis2) 10%,transparent));color:#fff;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--vis) 40%,transparent)}
+.pf-vs .pro b{color:var(--vis)}
+@media(max-width:900px){ .pq-grille,.ps-etapes{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media(max-width:560px){ .pq-grille,.ps-etapes{grid-template-columns:minmax(0,1fr)} .pf-vs{grid-template-columns:minmax(0,1fr)} }
 .pro-carte{cursor:pointer}
 .pro-carte:focus-visible{outline:2px solid var(--vis);outline-offset:3px}
 .pro-plus{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:12.5px;font-weight:700;color:var(--vis);transition:gap .2s}
@@ -2581,6 +2606,26 @@ body.vue-accueil .hcta{display:inline-flex}
     </div>
   </section>
 
+  <section class="pro-pourquoi wrap">
+    <h2>Pourquoi passer Pro</h2>
+    <div class="pq-grille">
+      <article><span class="pq-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><h3>Sonne fini, pas maquette</h3><p>Tune Pro, le Mix auto et le mastering donnent à ta voix le rendu d'un morceau terminé, prêt à partager ou à sortir.</p></article>
+      <article><span class="pq-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 1.9 1.9.8-1.9.8L19 20.4l-.8-1.9-1.9-.8 1.9-.8z"/></svg></span><h3>Une soirée de réglages, en un clic</h3><p>Le Mix auto et le Nettoyage voix font en quelques secondes ce qui demande des heures d'oreille et de boutons.</p></article>
+      <article><span class="pq-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 14h3M8 17h6"/></svg></span><h3>Tout au même endroit</h3><p>La prod, ta voix, le mix et le master, dans ton navigateur : pas de logiciel à installer, pas de plugin à acheter un par un.</p></article>
+      <article><span class="pq-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7.5A6 6 0 1 0 17 16.5"/><path d="M4 10.5h9M4 13.5h9"/></svg></span><h3>Environ 1,60 € par semaine</h3><p>6,90 € par mois, ou 4,58 € par mois avec l'annuel. Le prix de quelques cafés, pour tous les outils Pro.</p></article>
+    </div>
+  </section>
+
+  <section class="pro-soiree wrap">
+    <h2>Une soirée, un son fini</h2>
+    <ol class="ps-etapes">
+      <li><b>Choisis ta prod</b><span>Parmi les type beats du site, ou importe la tienne : la tonalité et le tempo sont détectés.</span></li>
+      <li><b>Enregistre</b><span>Pose tes voix, puis corrige-les avec <em>Tune Pro</em> et nettoie-les avec <em>Nettoyage voix</em>.</span></li>
+      <li><b>Mixe</b><span>Ajoute des chœurs avec <em>Harmonies</em> et <em>Doubleur</em>, puis lance le <em>Mix auto</em>.</span></li>
+      <li><b>Sors-le</b><span>Exporte un <em>master</em> au niveau des plateformes, ou les <em>pistes séparées</em> pour ton ingé son.</span></li>
+    </ol>
+  </section>
+
   <section class="pro-suite wrap">
     <h2>La FINDINGS Suite Pro</h2>
     <p class="pro-sous">Six outils pensés pour la voix, au même endroit que tes prods.</p>
@@ -2626,6 +2671,7 @@ body.vue-accueil .hcta{display:inline-flex}
         <p class="pf-accroche" id="pfAccroche"></p>
         <ul class="pf-points" id="pfPoints"></ul>
         <p class="pf-quand"><b>Quand t'en servir</b><span id="pfQuand"></span></p>
+        <div class="pf-vs"><div><b>Gratuit</b><span id="pfGratuit"></span></div><div class="pro"><b>Avec Pro</b><span id="pfAvecPro"></span></div></div>
       </div>
       <div class="pf-demo" id="pfDemo" aria-hidden="true"></div>
     </div>
@@ -3059,6 +3105,43 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "Pourquoi passer Pro": ["Why go Pro", "Por qué pasarte a Pro"],
+    "Sonne fini, pas maquette": ["Sounds finished, not like a demo", "Suena terminado, no a maqueta"],
+    "Tune Pro, le Mix auto et le mastering donnent à ta voix le rendu d'un morceau terminé, prêt à partager ou à sortir.": ["Tune Pro, Auto mix and mastering give your voice the sound of a finished track, ready to share or release.", "Tune Pro, la Mezcla auto y el mastering dan a tu voz el sonido de un tema terminado, listo para compartir o publicar."],
+    "Une soirée de réglages, en un clic": ["An evening of tweaking, in one click", "Una noche de ajustes, en un clic"],
+    "Le Mix auto et le Nettoyage voix font en quelques secondes ce qui demande des heures d'oreille et de boutons.": ["Auto mix and Voice cleaner do in seconds what takes hours of listening and knob-turning.", "La Mezcla auto y la Limpieza de voz hacen en segundos lo que pide horas de oído y botones."],
+    "Tout au même endroit": ["Everything in one place", "Todo en el mismo sitio"],
+    "La prod, ta voix, le mix et le master, dans ton navigateur : pas de logiciel à installer, pas de plugin à acheter un par un.": ["The beat, your voice, the mix and the master, in your browser: no software to install, no plugins to buy one by one.", "El beat, tu voz, la mezcla y el máster, en tu navegador: sin programas que instalar ni plugins que comprar uno a uno."],
+    "Environ 1,60 € par semaine": ["About €1.60 a week", "Unos 1,60 € a la semana"],
+    "6,90 € par mois, ou 4,58 € par mois avec l'annuel. Le prix de quelques cafés, pour tous les outils Pro.": ["€6.90 a month, or €4.58 a month with the yearly plan. The price of a few coffees, for every Pro tool.", "6,90 € al mes, o 4,58 € al mes con el anual. El precio de unos cafés, por todas las herramientas Pro."],
+    "Une soirée, un son fini": ["One evening, one finished track", "Una noche, un tema terminado"],
+    "Choisis ta prod": ["Pick your beat", "Elige tu beat"],
+    "Parmi les type beats du site, ou importe la tienne : la tonalité et le tempo sont détectés.": ["From the site's type beats, or import your own: key and tempo are detected.", "Entre los type beats del sitio, o importa el tuyo: se detectan la tonalidad y el tempo."],
+    "Pose tes voix, puis corrige-les avec": ["Lay down your vocals, then fix them with", "Graba tus voces y corrígelas con"],
+    "et nettoie-les avec": ["and clean them with", "y límpialas con"],
+    "Mixe": ["Mix", "Mezcla"],
+    "Ajoute des chœurs avec": ["Add backing vocals with", "Añade coros con"],
+    "et": ["and", "y"],
+    ", puis lance le": [", then run the", ", y lanza la"],
+    "Sors-le": ["Release it", "Publícalo"],
+    "Exporte un": ["Export a", "Exporta un"],
+    "au niveau des plateformes, ou les": ["at streaming level, or the", "al nivel de las plataformas, o las"],
+    "pour ton ingé son.": ["for your engineer.", "para tu ingeniero."],
+    "master": ["master", "máster"],
+    "pistes séparées": ["separate tracks", "pistas separadas"],
+    "Avec Pro": ["With Pro", "Con Pro"],
+    "Auto-Pitch : la justesse en trois réglages.": ["Auto-Pitch: tuning in three settings.", "Auto-Pitch: la afinación en tres ajustes."],
+    "Tune Pro : chaque réglage, et chaque note corrigée à la main.": ["Tune Pro: every setting, and every note fixed by hand.", "Tune Pro: todos los ajustes, y cada nota corregida a mano."],
+    "Tu règles toi-même chaque piste : égaliseur, compresseur, volumes.": ["You set every track yourself: EQ, compressor, volumes.", "Ajustas tú cada pista: ecualizador, compresor, volúmenes."],
+    "Un clic : toutes les pistes réglées sur la prod, et ses niveaux calés.": ["One click: every track set against the beat, levels matched.", "Un clic: todas las pistas ajustadas al beat, y sus niveles cuadrados."],
+    "Le coupe-bas retire les grondements, pas le souffle ni le bruit de la pièce.": ["The low cut removes rumble, not hiss or room noise.", "El corte de graves quita los retumbos, no el soplido ni el ruido de la habitación."],
+    "Souffle, ventilation et bruit de la pièce retirés, sans toucher à ta voix.": ["Hiss, fans and room noise removed, without touching your voice.", "Soplido, ventilación y ruido de la habitación eliminados, sin tocar tu voz."],
+    "Tu chantes chaque harmonie, prise par prise, et tu vérifies qu'elle est juste.": ["You sing every harmony, take by take, and check it's in tune.", "Cantas cada armonía, toma a toma, y compruebas que está afinada."],
+    "Les harmonies se créent seules, justes dans la tonalité de la prod.": ["Harmonies create themselves, in tune with the beat's key.", "Las armonías se crean solas, afinadas en la tonalidad del beat."],
+    "L'effet Doubleur élargit ta voix.": ["The Doubler effect widens your voice.", "El efecto Doblador ensancha tu voz."],
+    "Deux vraies voix décalées, comme une double prise chantée.": ["Two real offset voices, like a sung double take.", "Dos voces reales desfasadas, como una doble toma cantada."],
+    "Export WAV du mix ou de la voix seule, sans mastering.": ["WAV export of the mix or vocals only, without mastering.", "Exportación WAV de la mezcla o solo la voz, sin mastering."],
+    "Un master au niveau des plateformes, et chaque piste à part.": ["A master at streaming level, and every track separately.", "Un máster al nivel de las plataformas, y cada pista por separado."],
     "En savoir plus": ["Learn more", "Saber más"],
     "Quand t'en servir": ["When to use it", "Cuándo usarlo"],
     "Inclus dans FINDINGS Pro · 6,90 € / mois": ["Included in FINDINGS Pro · €6.90 / month", "Incluido en FINDINGS Pro · 6,90 € / mes"],
@@ -6685,7 +6768,7 @@ document.querySelectorAll(".off-scene").forEach(sc => {
 /* ============ page Pro : la fiche de chaque outil ============
    Un clic sur une carte de la Suite ouvre sa fiche : ce que l'outil fait, quand s'en servir,
    une petite demo animee, et les deux suites logiques (l'essayer, voir les prix). */
-const PRO_OUTILS = {"TP": {"nom": "Tune Pro", "c": ["#3DDCC8", "#5B7CFF"], "accroche": "L'autotune complet, jusqu'à la note près.", "points": ["Vitesse de correction : de l'effet robot franc (0 ms) à une correction qu'on n'entend pas.", "Humanize et tolérance : les notes tenues respirent, les petites approximations restent naturelles.", "Vibrato gardé, effacé ou ajouté, et timbre de la voix plus grave ou plus clair, sans changer la note.", "Clavier des notes visées : choisis les notes à viser, à laisser libres ou à retirer.", "Mode graphique : chaque note de ta prise s'affiche, tu la glisses à la bonne hauteur, ou tu cales tout sur la gamme en un clic."], "quand": "Pour l'effet autotune assumé des refrains trap, ou pour corriger une seule note fausse sans toucher au reste de la prise.", "demo": "notes"}, "MX": {"nom": "Mix auto", "c": ["#7C5CFF", "#3DDCC8"], "accroche": "Un clic, et tes voix sonnent comme un morceau.", "points": ["Reconnaît le rôle de chaque piste : lead, backs, ad-libs, intro.", "Devine si la voix est chantée ou rappée, et active Auto-Pitch quand il faut.", "Mesure le timbre de chaque voix (boue, nasal, présence, air, sifflantes) et corrige l'égaliseur et le de-esser.", "Règle la compression, les volumes et le placement gauche / droite, puis cale le niveau de ta prod importée.", "Tout s'annule d'un ⌘Z : tu gardes la main."], "quand": "Quand tu as posé tes voix et que tu veux un mix propre tout de suite, pour écouter, partager ou continuer à la main.", "demo": "roles"}, "NV": {"nom": "Nettoyage voix", "c": ["#7CE38B", "#2FB8A0"], "accroche": "Une voix propre, même enregistrée dans ta chambre.", "points": ["Mesure le bruit de fond dans les passages calmes de ta prise.", "Retire le souffle, la ventilation et le bruit de la pièce, fréquence par fréquence, sans toucher à ta voix.", "Coupe les grondements sous 70 Hz : pied de micro, trafic, clim.", "Force réglable, par prise ou pour toute la piste en un clic."], "quand": "Avant le mix, sur les prises faites au téléphone, avec un micro d'entrée de gamme ou dans une pièce bruyante.", "demo": "propre"}, "HM": {"nom": "Harmonies auto", "c": ["#B79CFF", "#FF4D7E"], "accroche": "Des chœurs justes, sans avoir à les chanter.", "points": ["Tierce au-dessus ou en dessous, quinte, octave, ou accord complet (tierce + quinte).", "Toujours dans la tonalité de la prod : lue dans le titre, ou détectée dans ta prod importée.", "Les harmonies suivent les inflexions de ta voix, attaques et glissés compris.", "Elles arrivent sur de nouvelles pistes, à gauche et à droite, réglables comme n'importe quelle voix."], "quand": "Pour épaissir un refrain, un hook ou une fin de phrase, sans refaire dix prises.", "demo": "accord"}, "DB": {"nom": "Doubleur de voix", "c": ["#8FB8FF", "#A78BFA"], "accroche": "L'épaisseur d'une double prise, en un clic.", "points": ["Deux copies de ta voix, avec de micro-décalages de temps et de hauteur, comme deux prises chantées à la suite.", "Une à gauche, une à droite : le refrain s'ouvre en stéréo.", "Elles gardent la justesse d'Auto-Pitch si ta piste l'utilise.", "Deux nouvelles pistes, que tu montes ou baisses à ton goût."], "quand": "Sur les refrains et les hooks, là où une seule voix sonne trop mince.", "demo": "double"}, "MS": {"nom": "Mastering et pistes", "c": ["#FFD25E", "#FF8A4C"], "accroche": "Prêt pour les plateformes, ou pour ton ingé son.", "points": ["Mastering auto : la sonie de ton mix est mesurée (norme BS.1770), puis ramenée à -14 LUFS, le niveau des plateformes de streaming.", "Un limiteur garde les crêtes sous -1 dB : pas de saturation à l'écoute.", "Pistes séparées : un WAV par piste, effets compris, plus la prod, dans un ZIP.", "Tout est calé sur 0:00 de la prod : il suffit de poser les fichiers au début dans n'importe quel logiciel."], "quand": "Pour sortir ta maquette sur les plateformes, ou l'envoyer à quelqu'un qui la finira.", "demo": "niveau"}};
+const PRO_OUTILS = {"TP": {"nom": "Tune Pro", "c": ["#3DDCC8", "#5B7CFF"], "accroche": "L'autotune complet, jusqu'à la note près.", "points": ["Vitesse de correction : de l'effet robot franc (0 ms) à une correction qu'on n'entend pas.", "Humanize et tolérance : les notes tenues respirent, les petites approximations restent naturelles.", "Vibrato gardé, effacé ou ajouté, et timbre de la voix plus grave ou plus clair, sans changer la note.", "Clavier des notes visées : choisis les notes à viser, à laisser libres ou à retirer.", "Mode graphique : chaque note de ta prise s'affiche, tu la glisses à la bonne hauteur, ou tu cales tout sur la gamme en un clic."], "quand": "Pour l'effet autotune assumé des refrains trap, ou pour corriger une seule note fausse sans toucher au reste de la prise.", "demo": "notes", "gratuit": "Auto-Pitch : la justesse en trois réglages.", "pro": "Tune Pro : chaque réglage, et chaque note corrigée à la main."}, "MX": {"nom": "Mix auto", "c": ["#7C5CFF", "#3DDCC8"], "accroche": "Un clic, et tes voix sonnent comme un morceau.", "points": ["Reconnaît le rôle de chaque piste : lead, backs, ad-libs, intro.", "Devine si la voix est chantée ou rappée, et active Auto-Pitch quand il faut.", "Mesure le timbre de chaque voix (boue, nasal, présence, air, sifflantes) et corrige l'égaliseur et le de-esser.", "Règle la compression, les volumes et le placement gauche / droite, puis cale le niveau de ta prod importée.", "Tout s'annule d'un ⌘Z : tu gardes la main."], "quand": "Quand tu as posé tes voix et que tu veux un mix propre tout de suite, pour écouter, partager ou continuer à la main.", "demo": "roles", "gratuit": "Tu règles toi-même chaque piste : égaliseur, compresseur, volumes.", "pro": "Un clic : toutes les pistes réglées sur la prod, et ses niveaux calés."}, "NV": {"nom": "Nettoyage voix", "c": ["#7CE38B", "#2FB8A0"], "accroche": "Une voix propre, même enregistrée dans ta chambre.", "points": ["Mesure le bruit de fond dans les passages calmes de ta prise.", "Retire le souffle, la ventilation et le bruit de la pièce, fréquence par fréquence, sans toucher à ta voix.", "Coupe les grondements sous 70 Hz : pied de micro, trafic, clim.", "Force réglable, par prise ou pour toute la piste en un clic."], "quand": "Avant le mix, sur les prises faites au téléphone, avec un micro d'entrée de gamme ou dans une pièce bruyante.", "demo": "propre", "gratuit": "Le coupe-bas retire les grondements, pas le souffle ni le bruit de la pièce.", "pro": "Souffle, ventilation et bruit de la pièce retirés, sans toucher à ta voix."}, "HM": {"nom": "Harmonies auto", "c": ["#B79CFF", "#FF4D7E"], "accroche": "Des chœurs justes, sans avoir à les chanter.", "points": ["Tierce au-dessus ou en dessous, quinte, octave, ou accord complet (tierce + quinte).", "Toujours dans la tonalité de la prod : lue dans le titre, ou détectée dans ta prod importée.", "Les harmonies suivent les inflexions de ta voix, attaques et glissés compris.", "Elles arrivent sur de nouvelles pistes, à gauche et à droite, réglables comme n'importe quelle voix."], "quand": "Pour épaissir un refrain, un hook ou une fin de phrase, sans refaire dix prises.", "demo": "accord", "gratuit": "Tu chantes chaque harmonie, prise par prise, et tu vérifies qu'elle est juste.", "pro": "Les harmonies se créent seules, justes dans la tonalité de la prod."}, "DB": {"nom": "Doubleur de voix", "c": ["#8FB8FF", "#A78BFA"], "accroche": "L'épaisseur d'une double prise, en un clic.", "points": ["Deux copies de ta voix, avec de micro-décalages de temps et de hauteur, comme deux prises chantées à la suite.", "Une à gauche, une à droite : le refrain s'ouvre en stéréo.", "Elles gardent la justesse d'Auto-Pitch si ta piste l'utilise.", "Deux nouvelles pistes, que tu montes ou baisses à ton goût."], "quand": "Sur les refrains et les hooks, là où une seule voix sonne trop mince.", "demo": "double", "gratuit": "L'effet Doubleur élargit ta voix.", "pro": "Deux vraies voix décalées, comme une double prise chantée."}, "MS": {"nom": "Mastering et pistes", "c": ["#FFD25E", "#FF8A4C"], "accroche": "Prêt pour les plateformes, ou pour ton ingé son.", "points": ["Mastering auto : la sonie de ton mix est mesurée (norme BS.1770), puis ramenée à -14 LUFS, le niveau des plateformes de streaming.", "Un limiteur garde les crêtes sous -1 dB : pas de saturation à l'écoute.", "Pistes séparées : un WAV par piste, effets compris, plus la prod, dans un ZIP.", "Tout est calé sur 0:00 de la prod : il suffit de poser les fichiers au début dans n'importe quel logiciel."], "quand": "Pour sortir ta maquette sur les plateformes, ou l'envoyer à quelqu'un qui la finira.", "demo": "niveau", "gratuit": "Export WAV du mix ou de la voix seule, sans mastering.", "pro": "Un master au niveau des plateformes, et chaque piste à part."}};
 (function fichesPro(){
   const fiche = document.getElementById("proFiche"); if (!fiche) return;
   let derniere = null;
@@ -6705,6 +6788,8 @@ const PRO_OUTILS = {"TP": {"nom": "Tune Pro", "c": ["#3DDCC8", "#5B7CFF"], "accr
     document.getElementById("pfAccroche").textContent = o.accroche;
     document.getElementById("pfPoints").innerHTML = o.points.map(t => `<li>${esc(t)}</li>`).join("");
     document.getElementById("pfQuand").textContent = o.quand;
+    document.getElementById("pfGratuit").textContent = o.gratuit || "";
+    document.getElementById("pfAvecPro").textContent = o.pro || "";
     document.getElementById("pfDemo").innerHTML = DEMOS[o.demo] ? DEMOS[o.demo]() : "";
     fiche.hidden = false; document.body.classList.add("fiche-ouverte");
     requestAnimationFrame(() => fiche.classList.add("on"));
