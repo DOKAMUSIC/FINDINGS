@@ -848,53 +848,176 @@ try {
   const camera = new THREE.PerspectiveCamera(38, 1, .1, 100);
   camera.position.set(0, 0, 6.4);
 
-  /* — lumières : une clé franche, deux rasants colorés pour le côté vitrine — */
-  scene.add(new THREE.AmbientLight(0xffffff, .62));
-  const key = new THREE.DirectionalLight(0xffffff, 2.1); key.position.set(3.2, 5, 4.5); scene.add(key);
-  const rimA = new THREE.DirectionalLight(0x0A84FF, 1.5); rimA.position.set(-5, -1.5, 2.5); scene.add(rimA);
-  const rimB = new THREE.DirectionalLight(0xFF9F0A, 1.6); rimB.position.set(3.5, -2.5, -4); scene.add(rimB);
+  /* — un studio photo pour les reflets : une piece sombre, une boite a lumiere blanche en haut,
+     deux panneaux aux couleurs de l'aura (rouge, violet) et un filet turquoise. Le verre les
+     reflete : c'est ce qui le fait paraitre vrai, et aux couleurs de FINDINGS. — */
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const studio = new THREE.Scene();
+  studio.add(new THREE.Mesh(new THREE.SphereGeometry(12, 32, 16), new THREE.MeshBasicMaterial({ color: 0x0b0b0e, side: THREE.BackSide })));
+  const panneau = (w, h, couleur, force, x, y, z) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(couleur).multiplyScalar(force), side: THREE.DoubleSide }));
+    m.position.set(x, y, z); m.lookAt(0, 0, 0); studio.add(m); };
+  panneau(6, 3, 0xffffff, 6, 2, 7, 4);        // boite a lumiere, en haut
+  panneau(3, 6, 0xFA233B, 4, -7, 0, 2);       // rouge, a gauche
+  panneau(3, 6, 0x7C5CFF, 3.5, 7, -1, 1);     // violet, a droite
+  panneau(5, 1, 0x3DDCC8, 2.5, 0, -6, 3);     // filet turquoise, en bas
+  panneau(4, 4, 0xffffff, 1.4, 0, 1, 9);      // face : un remplissage doux
+  scene.environment = pmrem.fromScene(studio, .03).texture;
+  scene.add(new THREE.AmbientLight(0xffffff, .25));
+  const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(3, 5, 5); scene.add(key);
 
-  const material = new THREE.MeshPhysicalMaterial({
-    color: 0xFA233B, metalness: .28, roughness: .22,
-    clearcoat: 1, clearcoatRoughness: .12, reflectivity: .7
+  /* — la silhouette d'un seul tenant : la tete, la hampe et le crochet sont dessines sur une
+     image invisible, puis on en suit le contour exterieur (un seul trace, sans jointure),
+     adouci, et on l'extrude d'un bloc. — */
+  function silhouette(){
+    const N = 512, X0 = -1.55, Y1 = 2.05, U = N / 3.7;           // repere : 3,7 unites sur 512 px
+    const c = document.createElement("canvas"); c.width = c.height = N;
+    const g = c.getContext("2d"); g.fillStyle = "#000";
+    const px = x => (x - X0) * U, py = y => (Y1 - y) * U;
+    g.beginPath(); g.ellipse(px(-.62), py(-1.05), .74 * U, .56 * U, .32, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.roundRect(px(.02), py(1.9), .3 * U, 3.05 * U, .13 * U); g.fill();
+    // le crochet part de l'interieur de la hampe : pas d'encoche a la jonction
+    const f = (x, y) => [px(.3 + x), py(1.9 + y)];
+    g.beginPath(); g.moveTo(...f(-.14, 0)); g.lineTo(...f(0, 0)); g.bezierCurveTo(...f(1.0, -.2), ...f(1.26, -.95), ...f(.56, -1.8));
+    g.bezierCurveTo(...f(1.0, -1.06), ...f(.72, -.64), ...f(0, -.6)); g.lineTo(...f(-.14, -.6)); g.closePath(); g.fill();
+    const d = g.getImageData(0, 0, N, N).data, plein = (x, y) => x >= 0 && y >= 0 && x < N && y < N && d[(y * N + x) * 4 + 3] > 127;
+    // suivi de contour (voisinage de Moore), dans le sens des aiguilles d'une montre
+    const D = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
+    let sx = -1, sy = -1;
+    for (let y = 0; y < N && sx < 0; y++) for (let x = 0; x < N; x++) if (plein(x, y)) { sx = x; sy = y; break; }
+    const pts = []; let cx = sx, cy = sy, dir = 4;
+    for (let pas = 0; pas < N * 16; pas++) {
+      pts.push([cx, cy]);
+      let trouve = false;
+      for (let i = 1; i <= 8; i++) { const k = (dir + i) % 8, nx = cx + D[k][0], ny = cy + D[k][1];
+        if (plein(nx, ny)) { const pk = (dir + i - 1) % 8, bx = cx + D[pk][0] - nx, by = cy + D[pk][1] - ny;
+          dir = D.findIndex(v => v[0] === bx && v[1] === by); cx = nx; cy = ny; trouve = true; break; } }
+      if (!trouve || (cx === sx && cy === sy && pts.length > 8)) break;
+    }
+    // un point sur trois, puis deux passes de lissage (Chaikin) : des courbes, plus des marches
+    let q = pts.filter((_, i) => i % 3 === 0).map(([x, y]) => [x / U + X0, Y1 - y / U]);
+    for (let it = 0; it < 2; it++) { const r = []; for (let i = 0; i < q.length; i++) { const a = q[i], b = q[(i + 1) % q.length];
+      r.push([a[0] * .75 + b[0] * .25, a[1] * .75 + b[1] * .25], [a[0] * .25 + b[0] * .75, a[1] * .25 + b[1] * .75]); } q = r; }
+    // l'image sert aussi a savoir si un point est dans la note (bien plus vite qu'un calcul sur le contour)
+    q.dedans = (x, y) => plein(Math.round((x - X0) * U), Math.round((Y1 - y) * U));
+    return q;
+  }
+
+  /* — le volume : une note gonflee, comme du verre souffle. Le contour est repris a pas
+     regulier, l'interieur est seme de points, le tout est triangule (Delaunay), puis chaque
+     point est souleve selon sa distance au bord : un bord arrondi, un dos bombe. Les reflets
+     glissent sur ces courbes ; sur une face plate, ils ne bougeraient pas. — */
+  function volume(contour){
+    const PAS = .026, R = .3, T = .25;
+    // contour a pas regulier
+    const bord = []; let reste = 0;
+    for (let i = 0; i < contour.length; i++) { const a = contour[i], b = contour[(i + 1) % contour.length];
+      const l = Math.hypot(b[0] - a[0], b[1] - a[1]); let u = reste;
+      while (u < l) { bord.push([a[0] + (b[0] - a[0]) * u / l, a[1] + (b[1] - a[1]) * u / l]); u += PAS; }
+      reste = u - l; }
+    const nb = bord.length, dedans = contour.dedans;
+    const dansPoly = (x, y) => { let c = false; for (let i = 0, j = nb - 1; i < nb; j = i++) { const [xi, yi] = bord[i], [xj, yj] = bord[j];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+    // distance au bord : les points du contour sont ranges par cases, on cherche de proche en proche
+    const CB = .1, casesBord = new Map();
+    bord.forEach(([x, y]) => { const k = Math.floor(x / CB) + "," + Math.floor(y / CB); (casesBord.get(k) || casesBord.set(k, []).get(k)).push([x, y]); });
+    const distBord = (x, y) => { const i = Math.floor(x / CB), j = Math.floor(y / CB); let m = 1e9;
+      for (let r = 0; r < 12; r++) {
+        for (let a = -r; a <= r; a++) for (let b = -r; b <= r; b++) { if (Math.max(Math.abs(a), Math.abs(b)) !== r) continue;
+          for (const [u, v] of casesBord.get((i + a) + "," + (j + b)) || []) m = Math.min(m, (u - x) ** 2 + (v - y) ** 2); }
+        if (m < (r * CB) ** 2) break;
+      }
+      return Math.sqrt(m); };
+    // l'interieur : des anneaux paralleles au bord (un arrondi regulier, sans stries), puis une
+    // grille au coeur. Un point trop pres d'un autre est ecarte.
+    const P = bord.map(p => [p[0], p[1], 0]); let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9, aire = 0;
+    for (let i = 0; i < nb; i++) { const [x, y] = bord[i], [x2, y2] = bord[(i + 1) % nb]; aire += x * y2 - x2 * y;
+      x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+    const sens = aire > 0 ? 1 : -1, C = .02, cases = new Map();
+    const libre = (x, y, r) => { const i = Math.floor(x / C), j = Math.floor(y / C);
+      for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (const [u, v] of cases.get((i + a) + "," + (j + b)) || []) if ((u - x) ** 2 + (v - y) ** 2 < r * r) return false;
+      return true; };
+    const range = (x, y) => { const k = Math.floor(x / C) + "," + Math.floor(y / C); (cases.get(k) || cases.set(k, []).get(k)).push([x, y]); };
+    const pose = (x, y, d) => { P.push([x, y, d]); range(x, y); };
+    bord.forEach(([x, y]) => range(x, y));                   // le bord compte pour l'espacement
+    for (const dk of [.012, .035, .065, .1, .145, .2, .26]) {
+      const pas = Math.max(1, Math.round(dk / .07));
+      for (let i = 0; i < nb; i += pas) {
+        const a = bord[(i - 1 + nb) % nb], b = bord[(i + 1) % nb], tx = b[0] - a[0], ty = b[1] - a[1], l = Math.hypot(tx, ty);
+        const x = bord[i][0] - sens * ty / l * dk, y = bord[i][1] + sens * tx / l * dk;
+        if (!dedans(x, y)) continue;
+        const d = distBord(x, y);
+        if (Math.abs(d - dk) < dk * .25 + .004 && libre(x, y, PAS * .55)) pose(x, y, d);
+      }
+    }
+    const G = .06;
+    for (let j = 0, y = y0; y < y1; y += G * .866, j++) for (let x = x0 + (j % 2) * G / 2; x < x1; x += G)
+      if (dedans(x, y)) { const d = distBord(x, y); if (d > .29 && libre(x, y, G * .6)) pose(x, y, d); }
+    // Delaunay (Bowyer-Watson)
+    const n = P.length, S = 50; P.push([-S, -S, 0], [S, -S, 0], [0, S, 0]);
+    const cercle = (a, b, c) => { const [ax, ay] = P[a], [bx, by] = P[b], [cx, cy] = P[c], d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
+      const ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) / d;
+      const uy = ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) / d;
+      return [a, b, c, ux, uy, (ax - ux) ** 2 + (ay - uy) ** 2]; };
+    let tris = [cercle(n, n + 1, n + 2)];
+    for (let i = 0; i < n; i++) {
+      const [px, py] = P[i], garde = [], aretes = new Map();
+      for (const t of tris) {
+        if ((px - t[3]) ** 2 + (py - t[4]) ** 2 < t[5]) {
+          for (const [u, v] of [[t[0], t[1]], [t[1], t[2]], [t[2], t[0]]]) { const k = u < v ? u * 65536 + v : v * 65536 + u;
+            aretes.set(k, aretes.has(k) ? null : [u, v]); }
+        } else garde.push(t);
+      }
+      for (const e of aretes.values()) if (e) garde.push(cercle(e[0], e[1], i));
+      tris = garde;
+    }
+    // on garde les triangles de la note, tournes vers l'avant. Un triangle qui touche un point
+    // interieur est dedans ; seuls ceux poses sur le bord seul (creux entre crochet et hampe,
+    // pointe du crochet) sont verifies sur le contour.
+    const faces = [];
+    for (const [a, b, c] of tris) {
+      if (a >= n || b >= n || c >= n) continue;
+      const surBord = a < nb && b < nb && c < nb;
+      const gx = (P[a][0] + P[b][0] + P[c][0]) / 3, gy = (P[a][1] + P[b][1] + P[c][1]) / 3;
+      if (surBord && !dansPoly(gx, gy)) continue;
+      const aire = (P[b][0] - P[a][0]) * (P[c][1] - P[a][1]) - (P[c][0] - P[a][0]) * (P[b][1] - P[a][1]);
+      const f = aire > 0 ? [a, b, c] : [a, c, b];
+      // pose sur le bord seul, il n'aurait aucune epaisseur : on le coupe en trois autour de son centre, souleve
+      if (surBord) { const m = P.length; P.push([gx, gy, distBord(gx, gy)]);
+        faces.push([f[0], f[1], m], [f[1], f[2], m], [f[2], f[0], m]); }
+      else faces.push(f);
+    }
+    const nTot = P.length;
+    // hauteur : un arrondi de rayon R au bord, puis un leger bombe
+    const haut = d => T * Math.sqrt(1 - (1 - Math.min(d, R) / R) ** 2) + .1 * Math.max(0, Math.min(d - R, .3));
+    const hMax = haut(.6);
+    // sommets : le bord (partage par l'avant et l'arriere), puis l'avant, puis l'arriere
+    const pos = [], col = [], idxAvant = [], idxArr = [];
+    const clair = new THREE.Color(0xFF5468), fonce = new THREE.Color(0xA00B24), cc = new THREE.Color();
+    const ajoute = (x, y, z, h) => { pos.push(x, y, z); cc.copy(clair).lerp(fonce, Math.min(1, h / hMax)); col.push(cc.r, cc.g, cc.b); return pos.length / 3 - 1; };
+    for (let i = 0; i < nb; i++) { const v = ajoute(P[i][0], P[i][1], 0, 0); idxAvant[i] = idxArr[i] = v; }
+    for (let i = nb; i < nTot; i++) { if (i >= n && i < n + 3) continue; const h = haut(P[i][2]); idxAvant[i] = ajoute(P[i][0], P[i][1], h, h); }
+    for (let i = nb; i < nTot; i++) { if (i >= n && i < n + 3) continue; const h = haut(P[i][2]); idxArr[i] = ajoute(P[i][0], P[i][1], -h, h); }
+    const index = [];
+    for (const [a, b, c] of faces) { index.push(idxAvant[a], idxAvant[b], idxAvant[c]); index.push(idxArr[a], idxArr[c], idxArr[b]); }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+    g.setIndex(index); g.computeVertexNormals(); g.center();
+    return g;
+  }
+  const geo = volume(silhouette());
+
+  /* — le verre : un rouge profond au coeur, plus clair la ou il s'amincit (comme une piece de
+     verre eclairee), tres lisse, avec un vernis qui prend les reflets colores du studio. — */
+  const verre = new THREE.MeshPhysicalMaterial({
+    vertexColors: true, metalness: 0, roughness: .1, clearcoat: 1, clearcoatRoughness: .03,
+    envMapIntensity: 1.5, specularIntensity: 1, iridescence: .3, iridescenceIOR: 1.3,
+    sheen: .35, sheenRoughness: .35, sheenColor: new THREE.Color(0xFFB3C1),
+    emissive: new THREE.Color(0x5A0412), emissiveIntensity: 1
   });
-  const extrude = { depth:.34, bevelEnabled:true, bevelThickness:.07, bevelSize:.07, bevelSegments:4, curveSegments:32 };
-
   const group = new THREE.Group();
-
-  // tête : une ellipse, inclinée comme sur une partition
-  const headShape = new THREE.Shape();
-  headShape.absellipse(0, 0, .74, .56, 0, Math.PI*2, false, 0);
-  const head = new THREE.Mesh(new THREE.ExtrudeGeometry(headShape, extrude), material);
-  head.rotation.z = -.32;
-  head.position.set(-.62, -1.05, 0);
-  group.add(head);
-
-  // hampe : une barre aux angles arrondis
-  const stemShape = new THREE.Shape();
-  (function rounded(s, x, y, w, h, r){
-    s.moveTo(x+r, y);
-    s.lineTo(x+w-r, y); s.quadraticCurveTo(x+w, y, x+w, y+r);
-    s.lineTo(x+w, y+h-r); s.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-    s.lineTo(x+r, y+h); s.quadraticCurveTo(x, y+h, x, y+h-r);
-    s.lineTo(x, y+r); s.quadraticCurveTo(x, y, x+r, y);
-  })(stemShape, 0, 0, .3, 3.05, .13);
-  const stem = new THREE.Mesh(new THREE.ExtrudeGeometry(stemShape, extrude), material);
-  stem.position.set(.02, -1.15, 0);
-  group.add(stem);
-
-  // crochet : une virgule pleine qui part du haut de la hampe
-  const flagShape = new THREE.Shape();
-  flagShape.moveTo(0, 0);
-  flagShape.bezierCurveTo(.98, -.18, 1.24, -.92, .54, -1.78);
-  flagShape.bezierCurveTo(1.14, -1.00, .88, -.46, 0, -.42);
-  flagShape.lineTo(0, 0);
-  const flag = new THREE.Mesh(new THREE.ExtrudeGeometry(flagShape, extrude), material);
-  flag.position.set(.3, 1.9, 0);
-  group.add(flag);
-
-  group.position.y = -.1;
-  group.scale.setScalar(.98);
+  group.add(new THREE.Mesh(geo, verre));
+  group.rotation.z = -.04;
   scene.add(group);
 
   /* Taille : on la relit a chaque image. Ouvert sur la liste des prods, l'accueil est
@@ -940,20 +1063,38 @@ try {
   new ResizeObserver(() => relancer()).observe(canvas);
   document.addEventListener("visibilitychange", relancer);
 
-  const t0 = performance.now();
+  /* Le tempo de la prod en cours : la note bat a chaque temps (on connait le BPM ; le son,
+     lui, passe par le lecteur YouTube et n'est pas lisible). Sans lecture, elle respire. */
+  function battement(){
+    try {
+      if (typeof current === "undefined" || !current || typeof S === "undefined" || S.paused || !current.bpm) return 0;
+      const tps = (typeof player !== "undefined" && player && player.getCurrentTime) ? player.getCurrentTime() : performance.now() / 1000;
+      const phase = (tps * current.bpm / 60) % 1;
+      return Math.exp(-phase * 7);
+    } catch (e) { return 0; }
+  }
+  let t0 = 0, pouls = 0;
+  const easeBack = x => 1 + 2.4 * Math.pow(x - 1, 3) + 1.4 * Math.pow(x - 1, 2);
   function frame(now){
     boucle = 0;
     if (perdu || document.hidden || !visible || !size()) return;   // relance par les observateurs
+    if (!t0) t0 = now;
     const t = (now - t0) / 1000;
     mx += (tx - mx) * .06;
     my += (ty - my) * .06;
     if (REDUCED) {
       group.rotation.set(-.06, -.35, .04);
     } else {
-      group.rotation.y = Math.sin(t * .42) * .46 + mx * .36;
+      // entree : la note arrive en tournant, en 1,4 s
+      const e = Math.min(1, t / 1.4), arrivee = easeBack(e);
+      const defile = Math.min(1.2, scrollY / 600);
+      pouls += (battement() - pouls) * .35;
+      group.scale.setScalar((.62 + .38 * arrivee) * (1 + pouls * .045));
+      group.rotation.y = (1 - e) * -1.6 + Math.sin(t * .42) * .42 + mx * .36 + defile * .9;
       group.rotation.x = -.06 + Math.sin(t * .63) * .07 + my * .22;
-      group.rotation.z = Math.sin(t * .31) * .05;
-      group.position.y = -.1 + Math.sin(t * .85) * .10;
+      group.rotation.z = -.04 + Math.sin(t * .31) * .05;
+      group.position.y = Math.sin(t * .85) * .1;
+      verre.emissiveIntensity = 1 + pouls * 1.6;
     }
     renderer.render(scene, camera);
     if (!canvas.classList.contains("on")) {
