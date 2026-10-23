@@ -825,6 +825,75 @@ body.vue-pro .pro-cta{box-shadow:0 0 0 2px var(--bg),0 0 0 4px #F2C14E}
 .pro-table td svg{color:var(--accent);vertical-align:middle}
 .pro-table td:nth-child(2) svg{color:var(--ink)}
 .pro-non{color:var(--dimmer)}
+.pro-carte{cursor:pointer}
+.pro-carte:focus-visible{outline:2px solid var(--vis);outline-offset:3px}
+.pro-plus{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:12.5px;font-weight:700;color:var(--vis);transition:gap .2s}
+.pro-carte:hover .pro-plus{gap:10px}
+/* la fiche d'un outil : chassis de la Suite, aura de l'outil, demo animee a droite */
+.pro-fiche{position:fixed;inset:0;z-index:2147482000;display:grid;place-items:center;padding:20px}
+.pro-fiche[hidden]{display:none}
+.pf-fond{position:absolute;inset:0;background:rgba(5,6,8,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .2s}
+.pf-boite{position:relative;overflow:hidden;isolation:isolate;width:min(880px,100%);max-height:calc(100vh - 40px);overflow-y:auto;border-radius:26px;background:#0B0C0E;color:#F5F5F7;
+  box-shadow:0 40px 100px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.08);opacity:0;transform:translateY(18px) scale(.97);transition:opacity .22s,transform .3s cubic-bezier(.2,.8,.2,1)}
+.pro-fiche.on .pf-fond{opacity:1}
+.pro-fiche.on .pf-boite{opacity:1;transform:none}
+.pf-boite .pro-aura{left:-120px;top:-140px;width:560px;height:380px;opacity:.5;filter:blur(60px)}
+.pf-x{position:absolute;top:16px;right:16px;z-index:2;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.1);transition:background .15s}
+.pf-x:hover{background:rgba(255,255,255,.2)}
+.pf-corps{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:30px;padding:34px 34px 10px}
+.pf-txt{display:grid;align-content:start;gap:8px}
+.pf-txt h3{margin:0;font:800 40px/1 var(--sans);letter-spacing:-.045em;color:var(--vis)}
+.pf-accroche{margin:4px 0 10px;font-size:18px;font-weight:650;letter-spacing:-.01em;line-height:1.35}
+.pf-points{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.pf-points li{position:relative;padding-left:24px;font-size:14px;line-height:1.5;color:rgba(255,255,255,.8)}
+.pf-points li::before{content:"";position:absolute;left:2px;top:6px;width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,var(--vis),var(--vis2))}
+.pf-quand{margin:14px 0 0;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.05);display:grid;gap:4px;font-size:14px;line-height:1.5;color:rgba(255,255,255,.78)}
+.pf-quand b{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--vis)}
+.pf-demo{position:relative;align-self:center;min-height:240px;border-radius:18px;padding:18px;display:grid;align-content:center;gap:12px;
+  background:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1.2px) 0 0/12px 12px,#070809;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.pf-pied{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:18px 34px 26px;margin-top:16px;border-top:1px solid rgba(255,255,255,.07)}
+.pf-inclus{display:inline-flex;align-items:center;gap:10px;font-size:14px;font-weight:650;color:rgba(255,255,255,.85)}
+.badge-pro-site{font:800 10px/1 var(--sans);letter-spacing:.1em;padding:5px 8px;border-radius:999px;color:#1A1405;background:linear-gradient(135deg,#F2C14E,#FFD97A)}
+.pf-acts{display:flex;gap:10px;flex-wrap:wrap}
+.pf-acts .hbtn.off-sec{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.12)}
+body.fiche-ouverte{overflow:hidden}
+/* demos */
+.pfd-notes{position:relative;height:200px}
+.pfd-notes span{position:absolute;height:12px;border-radius:6px;background:color-mix(in srgb,var(--vis) 70%,transparent);box-shadow:0 0 0 1px var(--vis);animation:sp-cale 3.2s ease-in-out infinite}
+.pfd-notes::after{content:"";position:absolute;top:0;bottom:0;left:0;width:2px;border-radius:2px;background:#FA233B;box-shadow:0 0 10px #FA233B;animation:sp-tete 3.2s linear infinite}
+.pfd-roles{display:grid;gap:16px}
+.pfd-roles span{display:grid;grid-template-columns:64px 1fr;align-items:center;gap:12px;font-size:13px;font-weight:650;color:rgba(255,255,255,.75)}
+.pfd-roles b{height:8px;border-radius:999px;background:linear-gradient(90deg,var(--vis),var(--vis2));transform-origin:left;animation:sp-niveau 1.8s ease-in-out infinite alternate}
+.pfd-onde{display:flex;align-items:center;gap:3px;height:180px}
+.pfd-onde i{flex:1;height:var(--h);border-radius:2px;background:linear-gradient(180deg,var(--vis),var(--vis2));position:relative;animation:pfd-propre 3.6s ease-in-out infinite;animation-delay:var(--d)}
+@keyframes pfd-propre{0%,30%{box-shadow:0 0 0 0 transparent;filter:none;opacity:1;background:linear-gradient(180deg,#8A8F98,#5A5F68)}55%,100%{opacity:1}}
+.pfd-onde::before{content:"";position:absolute;left:18px;right:18px;top:50%;height:44px;margin-top:-22px;border-radius:8px;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 2px,transparent 2px 5px);animation:pfd-souffle 3.6s ease-in-out infinite;pointer-events:none}
+@keyframes pfd-souffle{0%,30%{opacity:1}55%,100%{opacity:0}}
+.pfd-accord{display:flex;gap:10px}
+.pfd-accord span{flex:1;height:110px;border-radius:14px;display:grid;place-items:center;font:800 32px var(--sans);color:#0B0C0E;background:linear-gradient(160deg,var(--vis),var(--vis2));animation:sp-accord 2.4s ease-in-out infinite}
+.pfd-accord span:nth-child(2){animation-delay:.25s} .pfd-accord span:nth-child(3){animation-delay:.5s}
+.pfd-legende{font-size:12px;color:rgba(255,255,255,.55);text-align:center}
+.pfd-double{display:grid;gap:10px}
+.pfd-voie{display:flex;align-items:center;gap:2px;height:52px}
+.pfd-voie i{flex:1;height:var(--h);border-radius:2px;background:linear-gradient(180deg,var(--vis),var(--vis2))}
+.pfd-voie.g{opacity:.55;animation:pfd-g 3s ease-in-out infinite} .pfd-voie.d{opacity:.55;animation:pfd-d 3s ease-in-out infinite}
+@keyframes pfd-g{50%{transform:translateX(-5px)}} @keyframes pfd-d{50%{transform:translateX(5px)}}
+.pfd-niveau{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:22px}
+.pfd-jauge{position:relative;width:26px;height:190px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+.pfd-jauge i{position:absolute;left:0;right:0;bottom:0;height:72%;background:linear-gradient(0deg,#3DDC84,#E5D84C 70%,var(--vis2));animation:pfd-jauge 2.4s ease-in-out infinite alternate;
+  -webkit-mask:repeating-linear-gradient(0deg,#000 0 5px,transparent 5px 7px);mask:repeating-linear-gradient(0deg,#000 0 5px,transparent 5px 7px)}
+@keyframes pfd-jauge{from{height:58%}to{height:78%}}
+.pfd-chiffres{display:grid;grid-template-columns:auto 1fr;align-items:baseline;gap:4px 10px}
+.pfd-chiffres b{font:800 38px/1 var(--sans);letter-spacing:-.04em;color:var(--vis)}
+.pfd-chiffres span{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+@media(prefers-reduced-motion:reduce){ .pfd-notes span,.pfd-notes::after,.pfd-roles b,.pfd-onde i,.pfd-onde::before,.pfd-accord span,.pfd-voie,.pfd-jauge i{animation:none} }
+@media(max-width:760px){
+  .pf-corps{grid-template-columns:minmax(0,1fr);padding:26px 22px 6px;gap:18px}
+  .pf-txt h3{font-size:32px}
+  .pf-demo{min-height:180px} .pfd-notes{height:150px} .pfd-onde{height:130px} .pfd-jauge{height:140px}
+  .pf-pied{padding:16px 22px 22px}
+}
 @media(max-width:900px){ .pro-grille{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media(max-width:600px){
   .pro-grille{grid-template-columns:minmax(0,1fr)}
@@ -2516,12 +2585,12 @@ body.vue-accueil .hcta{display:inline-flex}
     <h2>La FINDINGS Suite Pro</h2>
     <p class="pro-sous">Six outils pensés pour la voix, au même endroit que tes prods.</p>
     <div class="pro-grille">
-      <article class="pro-carte" style="--vis:#3DDCC8;--vis2:#5B7CFF"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">TP</span><span class="pro-marque">FINDINGS</span><h3>Tune Pro</h3><p>L'autotune complet : vitesse, humanize, vibrato, timbre, et la retouche note par note dans le mode graphique.</p></article>
-      <article class="pro-carte" style="--vis:#7C5CFF;--vis2:#3DDCC8"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">MX</span><span class="pro-marque">FINDINGS</span><h3>Mix auto</h3><p>Le studio écoute tes voix et règle chaque piste sur la prod : lead, backs et ad-libs, en un clic.</p></article>
-      <article class="pro-carte" style="--vis:#7CE38B;--vis2:#2FB8A0"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">NV</span><span class="pro-marque">FINDINGS</span><h3>Nettoyage voix</h3><p>Souffle, ventilation, bruit de la pièce : retirés, sans toucher à ta voix.</p></article>
-      <article class="pro-carte" style="--vis:#B79CFF;--vis2:#FF4D7E"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">HM</span><span class="pro-marque">FINDINGS</span><h3>Harmonies auto</h3><p>Tierce, quinte, octave ou accord, toujours justes dans la tonalité de la prod.</p></article>
-      <article class="pro-carte" style="--vis:#8FB8FF;--vis2:#A78BFA"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">DB</span><span class="pro-marque">FINDINGS</span><h3>Doubleur de voix</h3><p>Deux voix décalées comme une vraie double prise, une à gauche, une à droite.</p></article>
-      <article class="pro-carte" style="--vis:#FFD25E;--vis2:#FF8A4C"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">MS</span><span class="pro-marque">FINDINGS</span><h3>Mastering et pistes</h3><p>Un master au niveau des plateformes (-14 LUFS), ou chaque piste en WAV séparé pour ton ingé son.</p></article>
+      <article class="pro-carte" data-outil="TP" role="button" tabindex="0" aria-haspopup="dialog" style="--vis:#3DDCC8;--vis2:#5B7CFF"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">TP</span><span class="pro-marque">FINDINGS</span><h3>Tune Pro</h3><p>L'autotune complet : vitesse, humanize, vibrato, timbre, et la retouche note par note dans le mode graphique.</p><span class="pro-plus">En savoir plus<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg></span></article>
+      <article class="pro-carte" data-outil="MX" role="button" tabindex="0" aria-haspopup="dialog" style="--vis:#7C5CFF;--vis2:#3DDCC8"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">MX</span><span class="pro-marque">FINDINGS</span><h3>Mix auto</h3><p>Le studio écoute tes voix et règle chaque piste sur la prod : lead, backs et ad-libs, en un clic.</p><span class="pro-plus">En savoir plus<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg></span></article>
+      <article class="pro-carte" data-outil="NV" role="button" tabindex="0" aria-haspopup="dialog" style="--vis:#7CE38B;--vis2:#2FB8A0"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">NV</span><span class="pro-marque">FINDINGS</span><h3>Nettoyage voix</h3><p>Souffle, ventilation, bruit de la pièce : retirés, sans toucher à ta voix.</p><span class="pro-plus">En savoir plus<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg></span></article>
+      <article class="pro-carte" data-outil="HM" role="button" tabindex="0" aria-haspopup="dialog" style="--vis:#B79CFF;--vis2:#FF4D7E"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">HM</span><span class="pro-marque">FINDINGS</span><h3>Harmonies auto</h3><p>Tierce, quinte, octave ou accord, toujours justes dans la tonalité de la prod.</p><span class="pro-plus">En savoir plus<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg></span></article>
+      <article class="pro-carte" data-outil="DB" role="button" tabindex="0" aria-haspopup="dialog" style="--vis:#8FB8FF;--vis2:#A78BFA"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">DB</span><span class="pro-marque">FINDINGS</span><h3>Doubleur de voix</h3><p>Deux voix décalées comme une vraie double prise, une à gauche, une à droite.</p><span class="pro-plus">En savoir plus<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg></span></article>
+      <article class="pro-carte" data-outil="MS" role="button" tabindex="0" aria-haspopup="dialog" style="--vis:#FFD25E;--vis2:#FF8A4C"><span class="pro-aura"></span><span class="pro-mono" aria-hidden="true">MS</span><span class="pro-marque">FINDINGS</span><h3>Mastering et pistes</h3><p>Un master au niveau des plateformes (-14 LUFS), ou chaque piste en WAV séparé pour ton ingé son.</p><span class="pro-plus">En savoir plus<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m12 5 7 7-7 7"/></svg></span></article>
     </div>
   </section>
 
@@ -2545,6 +2614,27 @@ body.vue-accueil .hcta{display:inline-flex}
     </div>
   </section>
 
+<div class="pro-fiche" id="proFiche" role="dialog" aria-modal="true" aria-labelledby="pfNom" hidden>
+  <div class="pf-fond" data-pf-fermer></div>
+  <article class="pf-boite">
+    <span class="pro-aura"></span>
+    <button class="pf-x" data-pf-fermer aria-label="Fermer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div class="pf-corps">
+      <div class="pf-txt">
+        <span class="pro-marque">FINDINGS</span>
+        <h3 id="pfNom"></h3>
+        <p class="pf-accroche" id="pfAccroche"></p>
+        <ul class="pf-points" id="pfPoints"></ul>
+        <p class="pf-quand"><b>Quand t'en servir</b><span id="pfQuand"></span></p>
+      </div>
+      <div class="pf-demo" id="pfDemo" aria-hidden="true"></div>
+    </div>
+    <div class="pf-pied">
+      <span class="pf-inclus"><span class="badge-pro-site">PRO</span>Inclus dans FINDINGS Pro · 6,90 € / mois</span>
+      <div class="pf-acts"><a class="hbtn off-sec" href="#proPrix" data-pf-fermer>Voir les prix</a><a class="hbtn pri" href="studio/" data-vue="studio" data-pf-fermer>L'essayer dans le studio</a></div>
+    </div>
+  </article>
+</div>
   <section class="pro-compare wrap">
     <h2>Gratuit ou Pro</h2>
     <div class="pro-table">
@@ -2969,6 +3059,50 @@ const I18N = (() => {
     "Langue": ["Language", "Idioma"],
     "Parcourir FINDINGS": ["Browse FINDINGS", "Explorar FINDINGS"],
     "Écouter ce mood": ["Listen to this mood", "Escuchar este mood"],
+    "En savoir plus": ["Learn more", "Saber más"],
+    "Quand t'en servir": ["When to use it", "Cuándo usarlo"],
+    "Inclus dans FINDINGS Pro · 6,90 € / mois": ["Included in FINDINGS Pro · €6.90 / month", "Incluido en FINDINGS Pro · 6,90 € / mes"],
+    "L'essayer dans le studio": ["Try it in the studio", "Probarlo en el estudio"],
+    "L'autotune complet, jusqu'à la note près.": ["The full autotune, down to the note.", "El autotune completo, nota a nota."],
+    "Vitesse de correction : de l'effet robot franc (0 ms) à une correction qu'on n'entend pas.": ["Correction speed: from the hard robot effect (0 ms) to correction you can't hear.", "Velocidad de corrección: del efecto robot franco (0 ms) a una corrección que no se oye."],
+    "Humanize et tolérance : les notes tenues respirent, les petites approximations restent naturelles.": ["Humanize and tolerance: held notes breathe, small imperfections stay natural.", "Humanize y tolerancia: las notas largas respiran, las pequeñas imprecisiones siguen naturales."],
+    "Vibrato gardé, effacé ou ajouté, et timbre de la voix plus grave ou plus clair, sans changer la note.": ["Vibrato kept, removed or added, and a darker or brighter voice timbre, without changing the note.", "Vibrato conservado, eliminado o añadido, y timbre de voz más grave o más claro, sin cambiar la nota."],
+    "Clavier des notes visées : choisis les notes à viser, à laisser libres ou à retirer.": ["Target-note keyboard: choose which notes to target, leave free or remove.", "Teclado de notas objetivo: elige las notas a apuntar, dejar libres o quitar."],
+    "Mode graphique : chaque note de ta prise s'affiche, tu la glisses à la bonne hauteur, ou tu cales tout sur la gamme en un clic.": ["Graph mode: every note of your take shows up, drag it to the right pitch, or snap everything to the scale in one click.", "Modo gráfico: cada nota de tu toma aparece, la arrastras a la altura correcta o ajustas todo a la escala en un clic."],
+    "Pour l'effet autotune assumé des refrains trap, ou pour corriger une seule note fausse sans toucher au reste de la prise.": ["For the bold autotune effect of trap hooks, or to fix a single off note without touching the rest of the take.", "Para el efecto autotune marcado de los estribillos trap, o para corregir una sola nota desafinada sin tocar el resto de la toma."],
+    "Un clic, et tes voix sonnent comme un morceau.": ["One click, and your vocals sound like a track.", "Un clic, y tus voces suenan como un tema."],
+    "Reconnaît le rôle de chaque piste : lead, backs, ad-libs, intro.": ["Recognises each track's role: lead, backs, ad-libs, intro.", "Reconoce el papel de cada pista: lead, coros, ad-libs, intro."],
+    "Devine si la voix est chantée ou rappée, et active Auto-Pitch quand il faut.": ["Works out whether the voice is sung or rapped, and turns on Auto-Pitch when needed.", "Adivina si la voz está cantada o rapeada, y activa Auto-Pitch cuando hace falta."],
+    "Mesure le timbre de chaque voix (boue, nasal, présence, air, sifflantes) et corrige l'égaliseur et le de-esser.": ["Measures each voice's timbre (mud, nasal, presence, air, sibilance) and corrects the EQ and de-esser.", "Mide el timbre de cada voz (barro, nasal, presencia, aire, sibilantes) y corrige el ecualizador y el de-esser."],
+    "Règle la compression, les volumes et le placement gauche / droite, puis cale le niveau de ta prod importée.": ["Sets compression, volumes and left / right placement, then matches the level of your imported beat.", "Ajusta la compresión, los volúmenes y la posición izquierda / derecha, y cuadra el nivel de tu beat importado."],
+    "Tout s'annule d'un ⌘Z : tu gardes la main.": ["Everything undoes with ⌘Z: you stay in control.", "Todo se deshace con ⌘Z: sigues al mando."],
+    "Quand tu as posé tes voix et que tu veux un mix propre tout de suite, pour écouter, partager ou continuer à la main.": ["When your vocals are down and you want a clean mix right away, to listen, share or keep working by hand.", "Cuando has grabado tus voces y quieres una mezcla limpia ya, para escuchar, compartir o seguir a mano."],
+    "Une voix propre, même enregistrée dans ta chambre.": ["A clean voice, even recorded in your bedroom.", "Una voz limpia, aunque la hayas grabado en tu cuarto."],
+    "Mesure le bruit de fond dans les passages calmes de ta prise.": ["Measures the background noise in the quiet parts of your take.", "Mide el ruido de fondo en las partes tranquilas de tu toma."],
+    "Retire le souffle, la ventilation et le bruit de la pièce, fréquence par fréquence, sans toucher à ta voix.": ["Removes hiss, fans and room noise, frequency by frequency, without touching your voice.", "Quita el soplido, la ventilación y el ruido de la habitación, frecuencia a frecuencia, sin tocar tu voz."],
+    "Coupe les grondements sous 70 Hz : pied de micro, trafic, clim.": ["Cuts rumble below 70 Hz: mic stand, traffic, air conditioning.", "Corta los retumbos por debajo de 70 Hz: pie de micro, tráfico, aire acondicionado."],
+    "Force réglable, par prise ou pour toute la piste en un clic.": ["Adjustable strength, per take or for the whole track in one click.", "Fuerza ajustable, por toma o para toda la pista en un clic."],
+    "Avant le mix, sur les prises faites au téléphone, avec un micro d'entrée de gamme ou dans une pièce bruyante.": ["Before mixing, on takes recorded on a phone, with an entry-level mic or in a noisy room.", "Antes de mezclar, en tomas grabadas con el móvil, con un micro básico o en una habitación ruidosa."],
+    "Des chœurs justes, sans avoir à les chanter.": ["In-tune backing vocals, without having to sing them.", "Coros afinados, sin tener que cantarlos."],
+    "Tierce au-dessus ou en dessous, quinte, octave, ou accord complet (tierce + quinte).": ["Third above or below, fifth, octave, or a full chord (third + fifth).", "Tercera arriba o abajo, quinta, octava o acorde completo (tercera + quinta)."],
+    "Toujours dans la tonalité de la prod : lue dans le titre, ou détectée dans ta prod importée.": ["Always in the beat's key: read from the title, or detected in your imported beat.", "Siempre en la tonalidad del beat: leída en el título o detectada en tu beat importado."],
+    "Les harmonies suivent les inflexions de ta voix, attaques et glissés compris.": ["The harmonies follow your voice's inflections, attacks and slides included.", "Las armonías siguen las inflexiones de tu voz, ataques y deslizamientos incluidos."],
+    "Elles arrivent sur de nouvelles pistes, à gauche et à droite, réglables comme n'importe quelle voix.": ["They land on new tracks, left and right, adjustable like any other vocal.", "Llegan en pistas nuevas, a izquierda y derecha, ajustables como cualquier voz."],
+    "Pour épaissir un refrain, un hook ou une fin de phrase, sans refaire dix prises.": ["To thicken a chorus, a hook or the end of a line, without redoing ten takes.", "Para engordar un estribillo, un hook o un final de frase, sin repetir diez tomas."],
+    "L'épaisseur d'une double prise, en un clic.": ["The thickness of a double take, in one click.", "El grosor de una doble toma, en un clic."],
+    "Deux copies de ta voix, avec de micro-décalages de temps et de hauteur, comme deux prises chantées à la suite.": ["Two copies of your voice, with tiny timing and pitch offsets, like two takes sung one after the other.", "Dos copias de tu voz, con micro desfases de tiempo y de altura, como dos tomas cantadas seguidas."],
+    "Une à gauche, une à droite : le refrain s'ouvre en stéréo.": ["One left, one right: the chorus opens up in stereo.", "Una a la izquierda, otra a la derecha: el estribillo se abre en estéreo."],
+    "Elles gardent la justesse d'Auto-Pitch si ta piste l'utilise.": ["They keep Auto-Pitch's tuning if your track uses it.", "Conservan la afinación de Auto-Pitch si tu pista lo usa."],
+    "Deux nouvelles pistes, que tu montes ou baisses à ton goût.": ["Two new tracks, which you turn up or down to taste.", "Dos pistas nuevas, que subes o bajas a tu gusto."],
+    "Sur les refrains et les hooks, là où une seule voix sonne trop mince.": ["On choruses and hooks, where a single voice sounds too thin.", "En estribillos y hooks, donde una sola voz suena demasiado fina."],
+    "Prêt pour les plateformes, ou pour ton ingé son.": ["Ready for streaming platforms, or for your engineer.", "Listo para las plataformas, o para tu ingeniero."],
+    "Mastering auto : la sonie de ton mix est mesurée (norme BS.1770), puis ramenée à -14 LUFS, le niveau des plateformes de streaming.": ["Auto mastering: your mix's loudness is measured (BS.1770 standard), then brought to -14 LUFS, the streaming platforms' level.", "Mastering auto: la sonoridad de tu mezcla se mide (norma BS.1770) y se lleva a -14 LUFS, el nivel de las plataformas de streaming."],
+    "Un limiteur garde les crêtes sous -1 dB : pas de saturation à l'écoute.": ["A limiter keeps peaks under -1 dB: no distortion on playback.", "Un limitador mantiene los picos por debajo de -1 dB: sin saturación al escuchar."],
+    "Pistes séparées : un WAV par piste, effets compris, plus la prod, dans un ZIP.": ["Separate tracks: one WAV per track, effects included, plus the beat, in a ZIP.", "Pistas separadas: un WAV por pista, con efectos, más el beat, en un ZIP."],
+    "Tout est calé sur 0:00 de la prod : il suffit de poser les fichiers au début dans n'importe quel logiciel.": ["Everything is aligned to 0:00 of the beat: just drop the files at the start in any software.", "Todo está alineado en el 0:00 del beat: basta con poner los archivos al principio en cualquier programa."],
+    "Pour sortir ta maquette sur les plateformes, ou l'envoyer à quelqu'un qui la finira.": ["To release your demo on streaming platforms, or send it to someone who will finish it.", "Para sacar tu maqueta en las plataformas, o enviarla a alguien que la termine."],
+    "La · Do · Mi : l'accord de la mineur, sous ta voix": ["A · C · E: the A minor chord, under your voice", "La · Do · Mi: el acorde de la menor, bajo tu voz"],
+    "dB crête": ["dB peak", "dB pico"],
     "Découvrir FINDINGS Pro": ["Discover FINDINGS Pro", "Descubrir FINDINGS Pro"],
     "FINDINGS Pro : le studio complet": ["FINDINGS Pro: the full studio", "FINDINGS Pro: el estudio completo"],
     "Enregistre ta voix direct sur la prod, corrige la justesse avec Auto-Pitch ou Tune Pro, nettoie le bruit et lance le mix auto. Tu peux aussi importer ta propre prod. Gratuit et sans compte ; les outils Pro sont ouverts pendant la bêta.": ["Record your voice right on the beat, fix the pitch with Auto-Pitch or Tune Pro, clean the noise and run the auto mix. You can also import your own beat. Free, no account; Pro tools are open during the beta.", "Graba tu voz directamente sobre el beat, corrige la afinación con Auto-Pitch o Tune Pro, limpia el ruido y lanza la mezcla auto. También puedes importar tu propio beat. Gratis y sin cuenta; las herramientas Pro están abiertas durante la beta."],
@@ -6547,6 +6681,50 @@ document.querySelectorAll(".off-scene").forEach(sc => {
     sc.style.setProperty("--mx", ((e.clientX - r.left) / r.width - .5).toFixed(3)); sc.style.setProperty("--my", ((e.clientY - r.top) / r.height - .5).toFixed(3)); });
   hero.addEventListener("pointerleave", () => { sc.style.setProperty("--mx", 0); sc.style.setProperty("--my", 0); });
 });
+
+/* ============ page Pro : la fiche de chaque outil ============
+   Un clic sur une carte de la Suite ouvre sa fiche : ce que l'outil fait, quand s'en servir,
+   une petite demo animee, et les deux suites logiques (l'essayer, voir les prix). */
+const PRO_OUTILS = {"TP": {"nom": "Tune Pro", "c": ["#3DDCC8", "#5B7CFF"], "accroche": "L'autotune complet, jusqu'à la note près.", "points": ["Vitesse de correction : de l'effet robot franc (0 ms) à une correction qu'on n'entend pas.", "Humanize et tolérance : les notes tenues respirent, les petites approximations restent naturelles.", "Vibrato gardé, effacé ou ajouté, et timbre de la voix plus grave ou plus clair, sans changer la note.", "Clavier des notes visées : choisis les notes à viser, à laisser libres ou à retirer.", "Mode graphique : chaque note de ta prise s'affiche, tu la glisses à la bonne hauteur, ou tu cales tout sur la gamme en un clic."], "quand": "Pour l'effet autotune assumé des refrains trap, ou pour corriger une seule note fausse sans toucher au reste de la prise.", "demo": "notes"}, "MX": {"nom": "Mix auto", "c": ["#7C5CFF", "#3DDCC8"], "accroche": "Un clic, et tes voix sonnent comme un morceau.", "points": ["Reconnaît le rôle de chaque piste : lead, backs, ad-libs, intro.", "Devine si la voix est chantée ou rappée, et active Auto-Pitch quand il faut.", "Mesure le timbre de chaque voix (boue, nasal, présence, air, sifflantes) et corrige l'égaliseur et le de-esser.", "Règle la compression, les volumes et le placement gauche / droite, puis cale le niveau de ta prod importée.", "Tout s'annule d'un ⌘Z : tu gardes la main."], "quand": "Quand tu as posé tes voix et que tu veux un mix propre tout de suite, pour écouter, partager ou continuer à la main.", "demo": "roles"}, "NV": {"nom": "Nettoyage voix", "c": ["#7CE38B", "#2FB8A0"], "accroche": "Une voix propre, même enregistrée dans ta chambre.", "points": ["Mesure le bruit de fond dans les passages calmes de ta prise.", "Retire le souffle, la ventilation et le bruit de la pièce, fréquence par fréquence, sans toucher à ta voix.", "Coupe les grondements sous 70 Hz : pied de micro, trafic, clim.", "Force réglable, par prise ou pour toute la piste en un clic."], "quand": "Avant le mix, sur les prises faites au téléphone, avec un micro d'entrée de gamme ou dans une pièce bruyante.", "demo": "propre"}, "HM": {"nom": "Harmonies auto", "c": ["#B79CFF", "#FF4D7E"], "accroche": "Des chœurs justes, sans avoir à les chanter.", "points": ["Tierce au-dessus ou en dessous, quinte, octave, ou accord complet (tierce + quinte).", "Toujours dans la tonalité de la prod : lue dans le titre, ou détectée dans ta prod importée.", "Les harmonies suivent les inflexions de ta voix, attaques et glissés compris.", "Elles arrivent sur de nouvelles pistes, à gauche et à droite, réglables comme n'importe quelle voix."], "quand": "Pour épaissir un refrain, un hook ou une fin de phrase, sans refaire dix prises.", "demo": "accord"}, "DB": {"nom": "Doubleur de voix", "c": ["#8FB8FF", "#A78BFA"], "accroche": "L'épaisseur d'une double prise, en un clic.", "points": ["Deux copies de ta voix, avec de micro-décalages de temps et de hauteur, comme deux prises chantées à la suite.", "Une à gauche, une à droite : le refrain s'ouvre en stéréo.", "Elles gardent la justesse d'Auto-Pitch si ta piste l'utilise.", "Deux nouvelles pistes, que tu montes ou baisses à ton goût."], "quand": "Sur les refrains et les hooks, là où une seule voix sonne trop mince.", "demo": "double"}, "MS": {"nom": "Mastering et pistes", "c": ["#FFD25E", "#FF8A4C"], "accroche": "Prêt pour les plateformes, ou pour ton ingé son.", "points": ["Mastering auto : la sonie de ton mix est mesurée (norme BS.1770), puis ramenée à -14 LUFS, le niveau des plateformes de streaming.", "Un limiteur garde les crêtes sous -1 dB : pas de saturation à l'écoute.", "Pistes séparées : un WAV par piste, effets compris, plus la prod, dans un ZIP.", "Tout est calé sur 0:00 de la prod : il suffit de poser les fichiers au début dans n'importe quel logiciel."], "quand": "Pour sortir ta maquette sur les plateformes, ou l'envoyer à quelqu'un qui la finira.", "demo": "niveau"}};
+(function fichesPro(){
+  const fiche = document.getElementById("proFiche"); if (!fiche) return;
+  let derniere = null;
+  const DEMOS = {
+    notes: () => '<div class="pfd-notes">' + [[6,62,18],[27,42,16],[46,24,20],[69,36,14],[86,58,10]].map(([x,y,w], i) => `<span style="left:${x}%;top:${y}%;width:${w}%;animation-delay:${-i * .6}s"></span>`).join("") + '</div>',
+    roles: () => '<div class="pfd-roles">' + [["Lead", 92], ["Backs", 62], ["Ad-libs", 68], ["Prod", 80]].map(([n, w], i) => `<span>${n}<b style="width:${w}%;animation-delay:${-i * .4}s"></b></span>`).join("") + '</div>',
+    propre: () => '<div class="pfd-onde">' + Array.from({ length: 48 }, (_, i) => { const v = .25 + .75 * Math.abs(Math.sin(i * .37) * Math.sin(i * .11 + 1)); return `<i style="--h:${(v * 100).toFixed(0)}%;--d:${(i * .03).toFixed(2)}s"></i>`; }).join("") + '</div>',
+    accord: () => '<div class="pfd-accord"><span>A</span><span>C</span><span>E</span></div><div class="pfd-legende">La · Do · Mi : l\'accord de la mineur, sous ta voix</div>',
+    double: () => '<div class="pfd-double">' + ["g", "c", "d"].map(c => `<div class="pfd-voie ${c}">` + Array.from({ length: 32 }, (_, i) => `<i style="--h:${(25 + 70 * Math.abs(Math.sin(i * .5))).toFixed(0)}%"></i>`).join("") + '</div>').join("") + '</div>',
+    niveau: () => '<div class="pfd-niveau"><div class="pfd-jauge"><i></i></div><div class="pfd-chiffres"><b>-14</b><span>LUFS</span><b>-1,0</b><span>dB crête</span></div></div>'
+  };
+  function ouvrir(cle){
+    const o = PRO_OUTILS[cle]; if (!o) return;
+    derniere = document.activeElement;
+    fiche.style.setProperty("--vis", o.c[0]); fiche.style.setProperty("--vis2", o.c[1]);
+    document.getElementById("pfNom").textContent = o.nom;
+    document.getElementById("pfAccroche").textContent = o.accroche;
+    document.getElementById("pfPoints").innerHTML = o.points.map(t => `<li>${esc(t)}</li>`).join("");
+    document.getElementById("pfQuand").textContent = o.quand;
+    document.getElementById("pfDemo").innerHTML = DEMOS[o.demo] ? DEMOS[o.demo]() : "";
+    fiche.hidden = false; document.body.classList.add("fiche-ouverte");
+    requestAnimationFrame(() => fiche.classList.add("on"));
+    fiche.querySelector(".pf-x").focus({ preventScroll: true });
+  }
+  function fermer(){
+    fiche.classList.remove("on"); document.body.classList.remove("fiche-ouverte");
+    setTimeout(() => { fiche.hidden = true; }, 200);
+    if (derniere && derniere.focus) derniere.focus({ preventScroll: true });
+  }
+  document.addEventListener("click", e => {
+    const c = e.target.closest(".pro-carte[data-outil]"); if (c) { ouvrir(c.dataset.outil); return; }
+    if (!fiche.hidden && e.target.closest("[data-pf-fermer]")) fermer();
+  });
+  document.addEventListener("keydown", e => {
+    const c = e.target.closest && e.target.closest(".pro-carte[data-outil]");
+    if (c && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); ouvrir(c.dataset.outil); }
+    if (e.key === "Escape" && !fiche.hidden) fermer();
+  });
+})();
 
 /* ============ page « Pour les beatmakers » ============ */
 (function offre(){
