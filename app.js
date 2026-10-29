@@ -733,6 +733,18 @@ const I18N = (() => {
     "Retour casque avec effets": ["Headphone monitoring with effects", "Retorno en auriculares con efectos"],
     "Retour casque activé : tu t'entendras avec les effets pendant la prise (mets un casque)": ["Headphone monitoring on: you'll hear yourself with the effects while recording (wear headphones)", "Retorno activado: te escucharás con los efectos mientras grabas (usa auriculares)"],
     "Retour casque coupé": ["Headphone monitoring off", "Retorno desactivado"],
+    "Entrée audio": ["Audio input", "Entrada de audio"],
+    "Entrée audio : choisir le micro ou la carte son": ["Audio input: choose the mic or audio interface", "Entrada de audio: elige el micro o la tarjeta de sonido"],
+    "Choisir l'entrée audio": ["Choose the audio input", "Elegir la entrada de audio"],
+    "Par défaut du système": ["System default", "Predeterminada del sistema"],
+    "Celle choisie dans les réglages de ton ordinateur": ["The one set in your computer's settings", "La elegida en los ajustes de tu ordenador"],
+    "Afficher mes entrées": ["Show my inputs", "Mostrar mis entradas"],
+    "Le navigateur montre le nom des micros et cartes son une fois le micro autorisé": ["The browser shows mic and audio interface names once the mic is allowed", "El navegador muestra el nombre de los micros y tarjetas de sonido una vez autorizado el micro"],
+    "Aucune entrée trouvée. Branche un micro ou une carte son.": ["No input found. Plug in a mic or an audio interface.", "No se encontró ninguna entrada. Conecta un micro o una tarjeta de sonido."],
+    "Parle ou chante : la barre doit bouger, sans toucher le rouge.": ["Talk or sing: the bar should move without hitting the red.", "Habla o canta: la barra debe moverse sin tocar el rojo."],
+    "Arrête la prise pour changer d'entrée": ["Stop recording to change input", "Detén la toma para cambiar de entrada"],
+    "L'entrée choisie n'est plus branchée : enregistrement sur l'entrée par défaut": ["The chosen input is unplugged: recording on the default input", "La entrada elegida ya no está conectada: grabando en la entrada predeterminada"],
+    "Entrée sans nom": ["Unnamed input", "Entrada sin nombre"],
     "Acheter la prod": ["Buy the beat", "Comprar el beat"],
     "Acheter la prod sur BeatStars": ["Buy the beat on BeatStars", "Comprar el beat en BeatStars"],
     "Acheter la prod sur Airbit": ["Buy the beat on Airbit", "Comprar el beat en Airbit"],
@@ -974,6 +986,8 @@ const I18N = (() => {
     [`^Voir les ${N} autres styles$`, "See $1 more styles", "Ver $1 estilos más"],
     [`^Lire les ${N}$`, "Play all $1", "Reproducir los $1"],
     [`^Lire (.+)$`, "Play $1", "Reproducir $1"],
+    [`^Entrée audio : (.+)$`, m => (L === 0 ? "Audio input: " : "Entrada de audio: ") + (m[1] === "par défaut du système" ? (L === 0 ? "system default" : "predeterminada del sistema") : m[1])],
+    [`^(.+) : ${N} type beats à écouter$`, m => L === 0 ? `${m[1]}: ${m[2]} type beats to listen to` : `${m[1]}: ${m[2]} type beats para escuchar`],
     [`^Retour casque : (\\d+) ms de latence(.*)$`, m => (L === 0 ? `Headphone monitoring: ${m[1]} ms latency` : `Retorno: ${m[1]} ms de latencia`) + (m[2] ? (L === 0 ? " — slight delay may be audible" : " — puede notarse un ligero retraso") : "")],
     [`^Acheter la prod sur (.+)$`, "Buy the beat on $1", "Comprar el beat en $1"],
     [`^Acheter la prod (.+)$`, "Buy the beat $1", "Comprar el beat $1"],
@@ -1604,6 +1618,7 @@ function majTitre(){
     if (S.q.trim()) { t = `« ${S.q.trim()} » : ${n} prods | FINDINGS`; }
     else if (S.prod) { t = `${S.prod} : ${n} type beats à écouter | FINDINGS`; d = `Les ${n} prods de ${S.prod} sur FINDINGS, à écouter direct.`; }
     else if (ar) { t = `${ARTIST_NAME[ar] || ar} type beat : ${n} prods à écouter | FINDINGS`; d = `Les meilleurs type beats ${ARTIST_NAME[ar] || ar} du moment : ${n} prods récentes à écouter direct, par ${new Set(LAST.map(b => b.prod)).size} beatmakers.`; }
+    else if (S.styles.size && S.moods.size && !S.artists.size) { t = `${[...S.styles].map(k => STYLE_NAME[k]).join(" + ")} · ${[...S.moods].join(" + ")} : ${n} type beats à écouter | FINDINGS`; }
     else if (S.styles.size > 1 && !S.moods.size && !S.artists.size) { t = `${[...S.styles].map(k => STYLE_NAME[k]).join(" + ")} : ${n} type beats à écouter | FINDINGS`; }
     else if (S.styles.size === 1 && !S.moods.size && !S.artists.size) { const st = STYLE_NAME[[...S.styles][0]]; t = `${st} type beat : ${n} prods à écouter | FINDINGS`; d = `${n} type beats ${st} récents à écouter direct sur FINDINGS.`; }
     else t = `${document.getElementById("resTitle")?.textContent || "Les prods"} | FINDINGS`;
@@ -1685,22 +1700,28 @@ const LIVE_STYLES = STYLES.filter(([k]) => STYLE_N[k] > 0).sort((a,b) => STYLE_N
    comptes des likes (et du dossier ouvert). Ailleurs, le catalogue entier. */
 let PORTEE = null, porteeCle = "";
 function calculerPortee(){
-  const cle = S.crateOnly ? `${[...CRATE].join(",")}|${S.dossier || ""}|${S.dossier && dossier(S.dossier) ? dossier(S.dossier).ids.size : ""}` : "";
+  const croise = S.styles.size || S.moods.size;
+  const cle = (S.crateOnly ? `${[...CRATE].join(",")}|${S.dossier || ""}|${S.dossier && dossier(S.dossier) ? dossier(S.dossier).ids.size : ""}` : "")
+    + `#${[...S.styles].join(",")}#${[...S.moods].join(",")}`;
   if (cle === porteeCle) return false;
   porteeCle = cle;
-  if (!S.crateOnly) { PORTEE = null; return true; }
-  const d = S.dossier && dossier(S.dossier);
-  const base = BEATS.filter(b => CRATE.has(b.id) && (!d || d.ids.has(b.id)));
-  PORTEE = { style: {}, artist: {}, mood: {} };
+  if (!S.crateOnly && !croise) { PORTEE = null; return true; }
+  const d = S.crateOnly && S.dossier && dossier(S.dossier);
+  const base = S.crateOnly ? BEATS.filter(b => CRATE.has(b.id) && (!d || d.ids.has(b.id))) : BEATS;
+  PORTEE = { style: {}, artist: {}, mood: {}, likes: S.crateOnly };
+  /* Style et mood se croisent : les styles se comptent dans le mood choisi, les moods dans
+     les styles choisis. Chaque menu ne propose ainsi que ce qui donne encore des prods. */
+  const okStyle = b => !S.styles.size || S.styles.has(b.style);
+  const okMood = b => !S.moods.size || b.moods.some(m => S.moods.has(m));
   base.forEach(b => {
-    PORTEE.style[b.style] = (PORTEE.style[b.style] || 0) + 1;
+    if (okMood(b)) PORTEE.style[b.style] = (PORTEE.style[b.style] || 0) + 1;
+    if (okStyle(b)) b.moods.forEach(m => PORTEE.mood[m] = (PORTEE.mood[m] || 0) + 1);
     b.artists.forEach(a => PORTEE.artist[a] = (PORTEE.artist[a] || 0) + 1);
-    b.moods.forEach(m => PORTEE.mood[m] = (PORTEE.mood[m] || 0) + 1);
   });
   return true;
 }
 const nStyle = k => PORTEE ? (PORTEE.style[k] || 0) : STYLE_N[k];
-const nArtiste = id => PORTEE ? (PORTEE.artist[id] || 0) : ARTIST_N[id];
+const nArtiste = id => PORTEE && PORTEE.likes ? (PORTEE.artist[id] || 0) : ARTIST_N[id];
 const nMood = m => PORTEE ? (PORTEE.mood[m] || 0) : MOOD_N[m];
 // garde ce qui a des prods dans la portee, et ce qui est choisi (pour pouvoir le retirer)
 const dansPortee = (n, choisi) => n > 0 || choisi;
@@ -3283,12 +3304,15 @@ elStyles.addEventListener("click", e => {
   /* Les styles se cumulent (trap + jersey) : un clic ajoute ce style a ceux deja choisis,
      ou le retire s'il l'etait. Les autres filtres restent exclusifs, comme avant. */
   const garde = [...S.styles].filter(x => x !== k), ajoute = !S.styles.has(k);
-  choisirFiltre(() => { garde.forEach(x => S.styles.add(x)); if (ajoute) S.styles.add(k); }, false);
+  const moods = [...S.moods];                      // le mood choisi reste : trap + melancolique
+  choisirFiltre(() => { garde.forEach(x => S.styles.add(x)); if (ajoute) S.styles.add(k); moods.forEach(m => S.moods.add(m)); }, false);
 });
 elMoods.addEventListener("click", e => {
   const btn = e.target.closest("[data-mood]"); if(!btn) return;
   const k = btn.dataset.mood;
-  choisirFiltre(() => S.moods.add(k), S.moods.has(k));
+  // le mood se croise avec les styles choisis ; un second clic le retire, les styles restent
+  const styles = [...S.styles], ajoute = !S.moods.has(k);
+  choisirFiltre(() => { styles.forEach(x => S.styles.add(x)); if (ajoute) S.moods.add(k); }, false);
 });
 document.getElementById("hot").addEventListener("click", e => {
   const b = e.target.closest("[data-hot]"); if(!b) return;
@@ -3563,7 +3587,7 @@ function renderArtistChips(){
   const q = norm(artQ.value.trim());
   const liste = parPortee(LIVE_ARTISTS, a => nArtiste(a.id))
     .filter(a => dansPortee(nArtiste(a.id), S.artists.has(a.id)) && (!q || norm(a.name).includes(q)));
-  document.getElementById("artN").textContent = PORTEE
+  document.getElementById("artN").textContent = PORTEE && PORTEE.likes
     ? `${Object.keys(PORTEE.artist).filter(id => ARTIST_NAME[id]).length} dans tes likes` : `${LIVE_ARTISTS.length} artistes`;
   elArtistes.innerHTML = liste.map(a =>
     `<button class="chip${photoArtiste(a.id) ? " avec-ph" : ""}" data-artist="${esc(a.id)}" aria-pressed="${S.artists.has(a.id)}" style="--c:${cssVar(a.style)}">${photoArtiste(a.id)
