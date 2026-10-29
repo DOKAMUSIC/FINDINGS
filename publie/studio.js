@@ -208,6 +208,13 @@ const STUDIO = (() => {
   .daw-entree-menu .ent-autoriser{margin-top:4px;border-top:1px solid rgba(255,255,255,.07);border-radius:0 0 7px 7px}
   :root:not([data-theme="dark"]) .daw-entree-menu .ent-autoriser{border-top-color:rgba(0,0,0,.08)}
   .daw-b.entree.choisie{color:#3DDCC8}
+  .daw-entree-menu .ent-niveau{display:grid;gap:6px;margin-top:4px;padding:10px 10px 6px;border-top:1px solid rgba(255,255,255,.07)}
+  .daw-entree-menu .ent-niveau small{font-size:11px;color:#8B9099;line-height:1.35}
+  .daw-entree-menu .ent-barre{display:block;height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+  .daw-entree-menu .ent-barre i{display:block;height:100%;background:linear-gradient(90deg,#3DDCC8 0 68%,#FFD60A 84%,#FA233B);clip-path:inset(0 100% 0 0)}
+  .daw-entree-menu .ent-barre.sature{box-shadow:0 0 0 1.5px #FA233B}
+  :root:not([data-theme="dark"]) .daw-entree-menu .ent-niveau{border-top-color:rgba(0,0,0,.08)}
+  :root:not([data-theme="dark"]) .daw-entree-menu .ent-barre{background:rgba(0,0,0,.08)}
   :root:not([data-theme="dark"]) .exp-master{color:#1D1D1F;border-top-color:rgba(0,0,0,.08)}
   .daw-mix{display:flex;padding:2px;border-radius:6px;background:var(--creux);box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
   .daw-mix[hidden]{display:none}
@@ -3375,6 +3382,38 @@ const STUDIO = (() => {
     entree = id || "";
     try { entree ? localStorage.setItem("findings.studio.entree", entree) : localStorage.removeItem("findings.studio.entree"); } catch (e) {}
   }
+  /* Essai de l'entree : menu ouvert, on ecoute l'entree choisie et une barre montre son
+     niveau (vert, jaune, rouge si ca sature). Coupe des que le menu se ferme ou qu'une prise part. */
+  let essai = null, essaiN = 0;
+  function couperEssai(){
+    essaiN++;
+    if (!essai) return;
+    cancelAnimationFrame(essai.boucle);
+    try { essai.src.disconnect(); } catch (e) {}
+    essai.flux.getTracks().forEach(t => t.stop());
+    essai = null;
+  }
+  async function testerEntree(){
+    couperEssai();
+    const n = essaiN, menu = $("dawEntreeMenu");
+    if (rec || !menu || menu.hidden || !$("dawEntreeNiv")) return;
+    let flux; try { flux = await ouvrirMicro(); } catch (e) { return; }
+    if (n !== essaiN || rec || menu.hidden) { flux.getTracks().forEach(t => t.stop()); return; }
+    const c = audio(); try { await c.resume(); } catch (e) {}
+    const an = c.createAnalyser(); an.fftSize = 1024;
+    const src = c.createMediaStreamSource(flux); src.connect(an);
+    const d = new Float32Array(an.fftSize);
+    essai = { flux, src, boucle: 0 };
+    (function tour(){
+      const i = $("dawEntreeNiv"); if (!essai || !i || rec) return couperEssai();
+      an.getFloatTimeDomainData(d); let s = 0, pic = 0; for (const x of d) { s += x * x; pic = Math.max(pic, Math.abs(x)); }
+      // montee immediate, retombee douce : la barre se lit sans clignoter
+      const v = essai.v = Math.max(clamp((20 * Math.log10(Math.sqrt(s / d.length) + 1e-6) + 60) / 60, 0, 1), (essai.v || 0) * .92);
+      i.style.clipPath = `inset(0 ${((1 - v) * 100).toFixed(1)}% 0 0)`;
+      i.parentElement.classList.toggle("sature", pic > .98);
+      essai.boucle = requestAnimationFrame(tour);
+    })();
+  }
   async function listerEntrees(){
     try { return (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "audioinput"); } catch (e) { return []; }
   }
@@ -3384,6 +3423,7 @@ const STUDIO = (() => {
     if (!horlogeInterne() && (!memeProd() || PLAIN || !playerReady)) { message("Lance la prod dans le lecteur pour enregistrer"); return; }
     if (!navigator.mediaDevices || !window.MediaRecorder) { message("Ce navigateur ne permet pas d'enregistrer le micro"); return; }
     let flux;
+    couperEssai(); $("dawEntreeMenu").hidden = true; $("dawEntree").setAttribute("aria-expanded", "false");
     try { flux = await ouvrirMicro(); }
     catch (e) { message(e && e.name === "NotAllowedError" ? "Micro refusé : autorise-le dans les réglages du navigateur" : "Aucun micro trouvé"); return; }
     const c = audio(); await c.resume();
@@ -3884,7 +3924,7 @@ const STUDIO = (() => {
   $("dawRefaire").onclick = retablir;
   $("dawGrille").onclick = () => { grille = !grille; outils(); };
   const menuEnt = $("dawEntreeMenu"), btnEnt = $("dawEntree");
-  const fermerEnt = () => { menuEnt.hidden = true; btnEnt.setAttribute("aria-expanded", "false"); };
+  const fermerEnt = () => { menuEnt.hidden = true; btnEnt.setAttribute("aria-expanded", "false"); couperEssai(); };
   // les entrees « default » et « communications » de Chrome doublent une vraie entree : on les cache
   const nomEntree = d => d.label ? d.label.replace(/\s*\([0-9a-f]{4}:[0-9a-f]{4}\)\s*$/i, "") : "Entrée sans nom";
   async function peindreEntrees(){
@@ -3900,27 +3940,29 @@ const STUDIO = (() => {
       h += `<button role="menuitemradio" aria-checked="${!entree}" data-entree=""><b>Par défaut du système</b><small>${defaut && defaut.label ? esc(nomEntree(defaut).replace(/^(Default|Par défaut)\s*-\s*/i, "")) : "Celle choisie dans les réglages de ton ordinateur"}</small></button>`;
       if (nommees) for (const d of vraies) h += `<button role="menuitemradio" aria-checked="${d.deviceId === entree}" data-entree="${esc(d.deviceId)}"><b translate="no">${esc(nomEntree(d))}</b></button>`;
       else h += '<button class="ent-autoriser" data-autoriser><b>Afficher mes entrées</b><small>Le navigateur montre le nom des micros et cartes son une fois le micro autorisé</small></button>';
+      if (nommees) h += '<div class="ent-niveau"><span class="ent-barre"><i id="dawEntreeNiv"></i></span><small>Parle ou chante : la barre doit bouger, sans toucher le rouge.</small></div>';
     }
     menuEnt.innerHTML = h;
   }
   btnEnt.onclick = async e => { e.stopPropagation();
     if (!menuEnt.hidden) return fermerEnt();
     if (!navigator.mediaDevices) { message("Ce navigateur ne permet pas d'enregistrer le micro"); return; }
-    await peindreEntrees(); menuEnt.hidden = false; btnEnt.setAttribute("aria-expanded", "true"); };
+    await peindreEntrees(); menuEnt.hidden = false; btnEnt.setAttribute("aria-expanded", "true"); testerEntree(); };
   menuEnt.addEventListener("click", async e => {
     e.stopPropagation();
     if (e.target.closest("[data-autoriser]")) {
       try { const f = await navigator.mediaDevices.getUserMedia({ audio: true }); f.getTracks().forEach(t => t.stop()); }
       catch (err) { message(err && err.name === "NotAllowedError" ? "Micro refusé : autorise-le dans les réglages du navigateur" : "Aucun micro trouvé"); return; }
-      return peindreEntrees();
+      await peindreEntrees(); return testerEntree();
     }
     const b = e.target.closest("[data-entree]"); if (!b) return;
     if (rec) { message("Arrête la prise pour changer d'entrée"); return; }
-    choisirEntree(b.dataset.entree); fermerEnt(); await peindreEntrees();
+    // le menu reste ouvert : la barre de niveau passe aussitot sur la nouvelle entree
+    choisirEntree(b.dataset.entree); await peindreEntrees(); testerEntree();
     message("Entrée audio : " + (b.dataset.entree ? b.querySelector("b").textContent : "par défaut du système"));
   });
   document.addEventListener("click", e => { if (!menuEnt.hidden && !e.target.closest(".daw-entree")) fermerEnt(); });
-  navigator.mediaDevices && navigator.mediaDevices.addEventListener && navigator.mediaDevices.addEventListener("devicechange", () => { if (!menuEnt.hidden) peindreEntrees(); });
+  navigator.mediaDevices && navigator.mediaDevices.addEventListener && navigator.mediaDevices.addEventListener("devicechange", async () => { if (!menuEnt.hidden) { await peindreEntrees(); testerEntree(); } });
   const menuExp = $("dawExpMenu");
   const fermerExp = () => { menuExp.hidden = true; $("dawExport").setAttribute("aria-expanded", "false"); };
   $("dawExport").onclick = e => { e.stopPropagation();
