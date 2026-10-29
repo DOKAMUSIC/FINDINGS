@@ -507,6 +507,7 @@ const I18N = (() => {
     "Chercher un style": ["Search for a style", "Buscar un estilo"],
     "Aucun artiste de la liste ne correspond.": ["No artist in the list matches.", "Ningún artista de la lista coincide."],
     "Aucun style ne correspond.": ["No style matches.", "Ningún estilo coincide."],
+    "Choisis un 2ᵉ style pour les mélanger, trap + jersey par exemple.": ["Pick a 2nd style to mix them, trap + jersey for example.", "Elige un 2.º estilo para mezclarlos, trap + jersey por ejemplo."],
     "Aucune prod ne correspond.": ["No beat matches.", "Ningún beat coincide."],
     "BPM minimum": ["Minimum BPM", "BPM mínimo"],
     "BPM maximum": ["Maximum BPM", "BPM máximo"],
@@ -1585,10 +1586,10 @@ function faireAdresse(p){
   if (p.get("pro") === "1") return `${BASE}pro/`;
   if (cles.length === 1) {
     if (cles[0] === "artist") return lienArtiste(p.get("artist"));
-    if (cles[0] === "style") return lienStyle(p.get("style"));
+    if (cles[0] === "style" && !p.get("style").includes(",")) return lienStyle(p.get("style"));
     if (cles[0] === "prod" && PROD_SLUG.has(p.get("prod"))) return lienProd(p.get("prod"));
   }
-  const qs = p.toString();
+  const qs = p.toString().replace(/%2C/g, ",");          // style=trap,jersey reste lisible
   return BASE + (qs ? "?" + qs : "?vue=prods");
 }
 /* Titre et description de la page, pour l'onglet et pour Google (qui execute la page). */
@@ -1603,6 +1604,7 @@ function majTitre(){
     if (S.q.trim()) { t = `« ${S.q.trim()} » : ${n} prods | FINDINGS`; }
     else if (S.prod) { t = `${S.prod} : ${n} type beats à écouter | FINDINGS`; d = `Les ${n} prods de ${S.prod} sur FINDINGS, à écouter direct.`; }
     else if (ar) { t = `${ARTIST_NAME[ar] || ar} type beat : ${n} prods à écouter | FINDINGS`; d = `Les meilleurs type beats ${ARTIST_NAME[ar] || ar} du moment : ${n} prods récentes à écouter direct, par ${new Set(LAST.map(b => b.prod)).size} beatmakers.`; }
+    else if (S.styles.size > 1 && !S.moods.size && !S.artists.size) { t = `${[...S.styles].map(k => STYLE_NAME[k]).join(" + ")} : ${n} type beats à écouter | FINDINGS`; }
     else if (S.styles.size === 1 && !S.moods.size && !S.artists.size) { const st = STYLE_NAME[[...S.styles][0]]; t = `${st} type beat : ${n} prods à écouter | FINDINGS`; d = `${n} type beats ${st} récents à écouter direct sur FINDINGS.`; }
     else t = `${document.getElementById("resTitle")?.textContent || "Les prods"} | FINDINGS`;
   }
@@ -1721,9 +1723,13 @@ function renderStyleChips(){
   const q = champ ? norm(champ.value.trim()) : "";
   const liste = parPortee(LIVE_STYLES, ([k]) => nStyle(k))
     .filter(([k, label]) => dansPortee(nStyle(k), S.styles.has(k)) && (!q || norm(label + " " + k).includes(q)));
+  // les styles choisis passent en tete : on voit d'un coup ce qui est coche
+  liste.sort((a, b) => S.styles.has(b[0]) - S.styles.has(a[0]));
   elStyles.innerHTML = liste.map(chipHTML).join("");
   const vide = document.getElementById("styleVide");
   if (vide) vide.hidden = !!liste.length;
+  const astuce = document.getElementById("styleAstuce");
+  if (astuce) astuce.hidden = S.styles.size !== 1 || !!q;
 }
 renderStyleChips();
 
@@ -3236,7 +3242,7 @@ function majAdresse(){
   if (document.body.classList.contains("vue-accueil")) return;
   const p = new URLSearchParams();
   if (S.artists.size) p.set("artist", [...S.artists][0]);
-  if (S.styles.size) p.set("style", [...S.styles][0]);
+  if (S.styles.size) p.set("style", [...S.styles].join(","));
   if (S.moods.size)  p.set("mood",  [...S.moods][0]);
   if (S.crateOnly)   p.set("likes", "1");
   if (S.crateOnly && S.dossier) p.set("dossier", S.dossier);
@@ -3274,7 +3280,10 @@ elStyles.addEventListener("click", e => {
   const btn = e.target.closest("[data-style]"); if(!btn) return;
   const k = btn.dataset.style;
   document.getElementById("styleQ").value = "";   // le menu rouvre sur la liste complete
-  choisirFiltre(() => S.styles.add(k), S.styles.has(k));
+  /* Les styles se cumulent (trap + jersey) : un clic ajoute ce style a ceux deja choisis,
+     ou le retire s'il l'etait. Les autres filtres restent exclusifs, comme avant. */
+  const garde = [...S.styles].filter(x => x !== k), ajoute = !S.styles.has(k);
+  choisirFiltre(() => { garde.forEach(x => S.styles.add(x)); if (ajoute) S.styles.add(k); }, false);
 });
 elMoods.addEventListener("click", e => {
   const btn = e.target.closest("[data-mood]"); if(!btn) return;
@@ -3499,7 +3508,8 @@ function majBarre(){
   ph.hidden = !url;
   tA.classList.toggle("a-photo", !!url);
   if (url) { const petit = url.replace("1000x1000", "56x56"); if (ph.getAttribute("src") !== petit) ph.src = petit; }
-  poserTrig("trigStyle", st ? STYLE_NAME[st] : "Style", st ? cssVar(st) : null, st);
+  const noms = [...S.styles].map(k => STYLE_NAME[k]);
+  poserTrig("trigStyle", !st ? "Style" : noms.length > 2 ? `${noms[0]} +${noms.length - 1}` : noms.join(" + "), st ? cssVar(st) : null, st);
   poserTrig("trigMood",  mo || "Mood", mo ? MOOD_TEINTE[mo] : null, mo);
   const bornes = S.bpm[0] > BMIN || S.bpm[1] < BMAX;
   const lib = bornes ? `${S.bpm[0]}–${S.bpm[1]} BPM${S.bpmSur ? " · vérifié" : ""}`
@@ -4491,7 +4501,7 @@ function appliquerParams(p, reprendreLecture = false){
   viderFiltres();
   document.getElementById("q").value = q || "";
   S.q = q || "";
-  if (style && STYLE_NAME[style]) S.styles.add(style);
+  if (style) style.split(",").forEach(k => { if (STYLE_NAME[k]) S.styles.add(k); });
   if (sort && ["pertinence","recent","bpm"].includes(sort)) {
     S.sort = sort;
     document.querySelectorAll("#sorts button").forEach(x => x.setAttribute("aria-pressed", x.dataset.sort === sort));
