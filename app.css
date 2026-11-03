@@ -1059,6 +1059,7 @@ body.vue-profil #resTitle,body.vue-profil #resSub,body.vue-profil #suivreBtn,bod
 .dos.suivi{padding:0 13px 0 6px;gap:7px}
 .dos.suivi img{width:22px;height:22px;margin:0;border-radius:50%;object-fit:cover}
 .dos.suivi i{width:22px;height:22px;border-radius:50%;background:var(--line)}
+.dos.suivi i.pastille-style{width:12px;height:12px;margin:0 2px;background:var(--c)}
 a.dos-act{display:inline-flex;align-items:center}
 /* abonnements : les filtres du catalogue n'ont pas de sens ici (ils faisaient quitter la
    page) — il ne reste que les onglets par personne et « Jamais écoutées » */

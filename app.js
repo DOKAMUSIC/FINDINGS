@@ -734,6 +734,7 @@ const I18N = (() => {
     "Retour casque activé : tu t'entendras avec les effets pendant la prise (mets un casque)": ["Headphone monitoring on: you'll hear yourself with the effects while recording (wear headphones)", "Retorno activado: te escucharás con los efectos mientras grabas (usa auriculares)"],
     "Retour casque coupé": ["Headphone monitoring off", "Retorno desactivado"],
     "Entrée audio": ["Audio input", "Entrada de audio"],
+    "Ses nouvelles prods remonteront dans ton accueil": ["Their new beats will show up on your home page", "Sus nuevos beats aparecerán en tu inicio"],
     "Entrée audio : choisir le micro ou la carte son": ["Audio input: choose the mic or audio interface", "Entrada de audio: elige el micro o la tarjeta de sonido"],
     "Choisir l'entrée audio": ["Choose the audio input", "Elegir la entrada de audio"],
     "Par défaut du système": ["System default", "Predeterminada del sistema"],
@@ -1005,6 +1006,10 @@ const I18N = (() => {
     [`^Supprimer le projet « (.+) » \\? Ses ${N} prises? et la prod importée seront effacées de cet appareil\\.$`, "Delete project “$1”? Its $2 take(s) and the imported beat will be erased from this device.", "¿Eliminar el proyecto «$1»? Sus $2 toma(s) y el beat importado se borrarán de este dispositivo."],
     [`^sur « (.+) »$`, "on “$1”", "sobre «$1»"],
     [`^Ouvrir le studio sur la prod en cours : (.+)$`, "Open the studio on the current beat: $1", "Abrir el estudio con el beat actual: $1"],
+    [`^Suivre le style (.+) : ses nouvelles prods remontent dans l'accueil$`, "Follow the $1 style: its new beats show up on the home page", "Seguir el estilo $1: sus nuevos beats aparecen en el inicio"],
+    [`^Ne plus suivre le style (.+)$`, "Unfollow the $1 style", "Dejar de seguir el estilo $1"],
+    [`^Tu suis le style (.+)$`, "You follow the $1 style", "Sigues el estilo $1"],
+    [`^Tu suis (.+)$`, "You follow $1", "Sigues a $1"],
     [`^Suivre (.+) : ses nouvelles prods remontent dans l'accueil$`, "Follow $1: their new beats show up on the home page", "Seguir a $1: sus nuevos beats aparecen en el inicio"],
     [`^Ne plus suivre (.+)$`, "Unfollow $1", "Dejar de seguir a $1"],
     [`^Parce que tu écoutes beaucoup de (.+)$`, m => (L === 0 ? "Because you listen to a lot of " : "Porque escuchas mucho ") + t(m[1])],
@@ -1346,18 +1351,21 @@ let NOUVEAUX = new Set(), VISITE_PREC = 0;
    On suit un artiste vise (« Hamza type beat ») ou un beatmaker. Comme les likes, la
    liste vit dans le navigateur du visiteur. */
 const SUIVIS_KEY = "findings.suivis";
-const SUIVIS = { artists: new Set(), prods: new Set() };
+/* On suit un artiste, un beatmaker ou un style entier (trap, jersey…) : ses nouvelles prods
+   remontent dans l'accueil et dans « Suivis ». */
+const SUIVIS = { artists: new Set(), prods: new Set(), styles: new Set() };
 try {
   const r = JSON.parse(localStorage.getItem(SUIVIS_KEY) || "{}");
   (r.artists || []).forEach(a => SUIVIS.artists.add(a));
   (r.prods || []).forEach(p => SUIVIS.prods.add(p));
+  (r.styles || []).forEach(k => STYLE_NAME[k] && SUIVIS.styles.add(k));
 } catch (e) {}
 const saveSuivis = () => {
-  try { localStorage.setItem(SUIVIS_KEY, JSON.stringify({ artists: [...SUIVIS.artists], prods: [...SUIVIS.prods] })); } catch (e) {}
+  try { localStorage.setItem(SUIVIS_KEY, JSON.stringify({ artists: [...SUIVIS.artists], prods: [...SUIVIS.prods], styles: [...SUIVIS.styles] })); } catch (e) {}
   try { npEtat(); } catch (e) {}   // le bouton Suivre du panneau « En lecture »
 };
-const estSuivie = b => SUIVIS.prods.has(b.prod) || b.artists.some(a => SUIVIS.artists.has(a));
-const nbSuivis = () => SUIVIS.artists.size + SUIVIS.prods.size;
+const estSuivie = b => SUIVIS.prods.has(b.prod) || SUIVIS.styles.has(b.style) || b.artists.some(a => SUIVIS.artists.has(a));
+const nbSuivis = () => SUIVIS.artists.size + SUIVIS.prods.size + SUIVIS.styles.size;
 /* Une seule etiquette « nouveau », qui veut dire « nouveau pour toi » : arrivee depuis ta
    derniere visite. Pour un premier passage, faute de point de comparaison, elle garde son
    ancien sens : ajoutee au catalogue ces trois derniers jours. */
@@ -1696,7 +1704,7 @@ function filtered(){
     if(S.depuis && !NOUVEAUX.has(b.id)) return false;
     if(S.prod && b.prod !== S.prod) return false;
     if(S.suivis && !estSuivie(b)) return false;
-    if(S.suivis && S.qui && !(S.qui[0] === "a" ? b.artists.includes(S.qui.slice(2)) : b.prod === S.qui.slice(2))) return false;
+    if(S.suivis && S.qui && !(S.qui[0] === "a" ? b.artists.includes(S.qui.slice(2)) : S.qui[0] === "s" ? b.style === S.qui.slice(2) : b.prod === S.qui.slice(2))) return false;
     // sans effet dans l'historique, qui n'est fait que de prods deja ecoutees
     if(S.neuf && !S.historyOnly && !S.crateOnly && VU.has(b.id)) return false;
     if(S.artists.size && !b.artists.some(a => S.artists.has(a))) return false;
@@ -2052,7 +2060,14 @@ function placerVideo(){
   const v = `url("https://i.ytimg.com/vi/${current.id}/mqdefault.jpg")`;
   if (npVignette !== v) { npVignette = v; vidPlace.style.backgroundImage = v; }
   const b = bar.getBoundingClientRect(), c = cover.getBoundingClientRect(), p = elNP.getBoundingClientRect();
-  const haut = Math.max(0, p.top + 1 - c.top), bas = Math.max(0, c.bottom - (p.bottom - 1));
+  /* le haut visible : sous le panneau, mais aussi sous l'en-tete et sous la bande floue de la
+     barre de filtres quand elle est collee (elle traverse tout l'ecran ; en bas de page, le
+     panneau remonte dessous et la video debordait par-dessus) */
+  // « collee » se lit sur la position, pas sur la classe : celle-ci n'est posee qu'a l'image suivante
+  const fb = document.getElementById("fbar"), hb = document.querySelector(".top").getBoundingClientRect().bottom;
+  const fr = fb && fb.getClientRects().length ? fb.getBoundingClientRect() : null;
+  const plafond = Math.max(hb, fr && scrollY > 0 && fr.top <= hb + 0.5 ? fr.bottom : 0);
+  const haut = Math.max(0, Math.max(p.top + 1, plafond) - c.top), bas = Math.max(0, c.bottom - (p.bottom - 1));
   // le cadre ne couvre que la partie visible de la pochette ; la video y est decalee
   const vue = Math.max(0, c.height - haut - bas);
   vidWrap.style.left = (c.left - b.left - bar.clientLeft) + "px";
@@ -3038,7 +3053,7 @@ async function partagerPage(){
    sauf le message, qui dit ce qui vient de se passer. */
 const MOINS_ANIM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let toastMinuteur = 0;
-function feterSuivi(btn, nom, photo){
+function feterSuivi(btn, nom, photo, etiquette){
   if (!MOINS_ANIM && btn) {
     btn.classList.remove("suivi-pop"); void btn.offsetWidth; btn.classList.add("suivi-pop");
     const r = btn.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
@@ -3064,7 +3079,7 @@ function feterSuivi(btn, nom, photo){
   t.className = "suivi-toast";
   t.setAttribute("role", "status");
   t.innerHTML = (photo ? `<img src="${esc(photo)}" alt="" referrerpolicy="no-referrer">` : `<span class="ini">${esc((nom[0] || "?").toUpperCase())}</span>`) +
-    `<span>Tu suis ${esc(nom)}<small>Ses nouvelles prods remonteront dans ton accueil</small></span>`;
+    `<span>Tu suis ${esc(etiquette || nom)}<small>Ses nouvelles prods remonteront dans ton accueil</small></span>`;
   document.body.appendChild(t);
   requestAnimationFrame(() => t.classList.add("on"));
   clearTimeout(toastMinuteur);
@@ -3100,6 +3115,10 @@ function cibleSuivi(){
     const id = [...S.artists][0];
     return { type: "artists", id, nom: ARTIST_NAME[id] || id };
   }
+  if (S.styles.size === 1 && !S.artists.size && !S.moods.size && !S.crateOnly && !S.suivis) {
+    const id = [...S.styles][0];
+    return { type: "styles", id, nom: STYLE_NAME[id] || id, etiquette: `le style ${STYLE_NAME[id] || id}` };
+  }
   return null;
 }
 function majSuivre(){
@@ -3112,7 +3131,7 @@ function majSuivre(){
   btn.innerHTML = on
     ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>Suivi'
     : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Suivre';
-  btn.title = on ? `Ne plus suivre ${c.nom}` : `Suivre ${c.nom} : ses nouvelles prods remontent dans l'accueil`;
+  btn.title = on ? `Ne plus suivre ${c.etiquette || c.nom}` : `Suivre ${c.etiquette || c.nom} : ses nouvelles prods remontent dans l'accueil`;
 }
 document.getElementById("suivreBtn").addEventListener("click", () => {
   const c = cibleSuivi(); if (!c) return;
@@ -3122,7 +3141,7 @@ document.getElementById("suivreBtn").addEventListener("click", () => {
   saveSuivis();
   versionGout++;
   majSuivre();
-  if (suit) feterSuivi(document.getElementById("suivreBtn"), c.nom, c.type === "prods" ? avatarDe(c.id) : photoArtiste(c.id));
+  if (suit) feterSuivi(document.getElementById("suivreBtn"), c.nom, c.type === "prods" ? avatarDe(c.id) : c.type === "styles" ? "" : photoArtiste(c.id), c.etiquette);
 });
 
 /* ---- dossiers : la rangee de pastilles ---- */
@@ -3137,16 +3156,18 @@ function majDossiers(){
     const qui = [...SUIVIS.artists].map(id => ({ k: "a:" + id, nom: ARTIST_NAME[id] || id, img: photoArtiste(id),
                   n: BEATS.filter(b => b.artists.includes(id)).length, href: lienArtiste(id) }))
       .concat([...SUIVIS.prods].map(p => ({ k: "p:" + p, nom: p, img: avatarDe(p),
-                  n: BEATS.filter(b => b.prod === p).length, href: lienProd(p) })));
+                  n: BEATS.filter(b => b.prod === p).length, href: lienProd(p) })))
+      .concat([...SUIVIS.styles].map(k => ({ k: "s:" + k, nom: STYLE_NAME[k] || k, img: "", c: cssVar(k),
+                  n: BEATS.filter(b => b.style === k).length, href: lienStyle(k) })));
     if (S.qui && !qui.some(x => x.k === S.qui)) S.qui = null;
     const total = BEATS.filter(estSuivie).length, choisi = qui.find(x => x.k === S.qui);
     elDos.innerHTML =
       `<button class="dos" data-qui="" aria-pressed="${!S.qui}">Tout <span>${total}</span></button>` +
       qui.map(x => `<button class="dos suivi" data-qui="${esc(x.k)}" aria-pressed="${S.qui === x.k}">` +
-        (x.img ? `<img src="${esc(x.img)}" alt="" referrerpolicy="no-referrer">` : "<i></i>") +
+        (x.img ? `<img src="${esc(x.img)}" alt="" referrerpolicy="no-referrer">` : x.c ? `<i class="pastille-style" style="--c:${x.c}"></i>` : "<i></i>") +
         `${esc(x.nom)} <span>${x.n}</span></button>`).join("") +
       (choisi ? `<a class="dos-act" href="${choisi.href}" data-vue="prods">Voir la page →</a>` +
-        `<button class="dos-act danger" data-unf="${choisi.k[0] === "a" ? "artists" : "prods"}" data-id="${esc(choisi.k.slice(2))}">Ne plus suivre</button>` : "") +
+        `<button class="dos-act danger" data-unf="${{ a: "artists", s: "styles" }[choisi.k[0]] || "prods"}" data-id="${esc(choisi.k.slice(2))}">Ne plus suivre</button>` : "") +
       // le seul reglage utile ici : la barre de filtres est masquee
       `<button class="dos-act dos-neuf" data-neuf aria-pressed="${S.neuf}" title="N'afficher que les prods jamais écoutées">` +
         `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c6.5 0 10 8 10 8a17.6 17.6 0 0 1-2.2 3.2M6.6 6.6C3.9 8.4 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2M2 2l20 20"/></svg>Jamais écoutées</button>`;
@@ -4090,7 +4111,8 @@ function majSuivis(){
   // un avatar rond par personne suivie : la photo, sinon l'initiale sur la couleur de son style
   const rond = (img, nom, coul) => `<span class="rond" style="--c:${coul}">${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : esc((nom.replace(/^prod\.?\s*/i, "")[0] || "?").toUpperCase())}</span>`;
   const avatars = [...SUIVIS.artists].map(id => `<a class="avatar" href="${lienArtiste(id)}" data-vue="prods">${rond(photoArtiste(id).replace("1000x1000", "250x250"), ARTIST_NAME[id] || id, `var(--s-${ARTIST_STYLE[id]})`)}<span class="nm">${esc(ARTIST_NAME[id] || id)}</span></a>`)
-    .concat([...SUIVIS.prods].map(p => { const b = BEATS.find(x => x.prod === p); return `<a class="avatar" href="${lienProd(p)}" data-vue="prods">${rond(avatarDe(p), p, b ? `var(--s-${b.style})` : "var(--thumb)")}<span class="nm">${esc(p)}</span></a>`; }));
+    .concat([...SUIVIS.prods].map(p => { const b = BEATS.find(x => x.prod === p); return `<a class="avatar" href="${lienProd(p)}" data-vue="prods">${rond(avatarDe(p), p, b ? `var(--s-${b.style})` : "var(--thumb)")}<span class="nm">${esc(p)}</span></a>`; }))
+    .concat([...SUIVIS.styles].map(k => `<a class="avatar" href="${lienStyle(k)}" data-vue="prods">${rond("", STYLE_NAME[k] || k, cssVar(k))}<span class="nm">${esc(STYLE_NAME[k] || k)}</span></a>`));
   document.getElementById("suivisChips").innerHTML = avatars.join("");
   document.getElementById("suiviswall").innerHTML = SUIVIES.slice(0, 6).map(b => ligneProd(b, 0, NOUVEAUX.has(b.id) ? '<span class="new">nouveau</span>' : fmtAge(b.days))).join("");
   brancherRangees();
