@@ -118,7 +118,7 @@ const STYLES = [
   { key:"trapsoul", label:"Trap soul", color:"#B65C9B", bpm:[70,86], keys:["Am","Bbm","Cm","Ebm","Fm","G#m"],
     q:["trapsoul type beat 2026","bryson tiller type beat"], fr:[] },
   { key:"pop", label:"Pop", color:"#FFB3C1", bpm:[95,120], keys:["C","D","F","G","Am","Em"],
-    q:["pop type beat 2026","pop rnb type beat"], fr:["instru pop urbaine 2026"] },
+    q:["pop type beat 2026","pop rnb type beat","acoustic pop type beat","dance pop type beat 2026","pop guitar type beat"], fr:["instru pop urbaine 2026","instru pop 2026"] },
 
   /* — Afrique — */
   { key:"afro", label:"Afro", color:"#2FBF71", bpm:[98,110], keys:["Am","Cm","Dm","Fm","Gm","Bm","F#m"],
@@ -145,6 +145,9 @@ const STYLES = [
     q:["corridos tumbados type beat 2026","sierreño type beat","corrido bélico type beat"], fr:[] },
   { key:"dembow", label:"Dembow", color:"#E0533D", bpm:[112,124], keys:["Am","Cm","Dm","Fm","Gm"],
     q:["dembow type beat 2026"], fr:[] },
+  // le reparto cubain (cubaton) : ajoute le 3 novembre 2026
+  { key:"reparto", label:"Reparto", color:"#00B4D8", bpm:[90,105], keys:["Am","Cm","Dm","Fm","Gm"],
+    q:["reparto type beat","reparto cubano instrumental","cubaton type beat","reparto beat 2026"], fr:[] },
   { key:"bailefunk", label:"Baile funk", color:"#00D084", bpm:[128,136], keys:["Am","Cm","Dm","Fm","Gm"],
     q:["baile funk type beat 2026","funk brasileiro type beat"], fr:[] },
 
@@ -205,7 +208,7 @@ const ARTISTS_BY_STYLE = {
   boombap:    [{ n:"Joey Bada$$", a:["joey badass"] },"J. Cole",{ n:"Nas", no:["lil nas"] },"Westside Gunn","Alpha Wann","Nekfeu"],
   jazzrap:    ["Nujabes","MF DOOM","Earl Sweatshirt","Kendrick Lamar"],
   lofi:       ["Mac Miller","Joji","J Dilla"],
-  soul:       ["Kanye West","Freddie Gibbs","Conway The Machine"],
+  soul:       [{ n:"Kanye West", a:["kanye"] },"Freddie Gibbs","Conway The Machine"],
   westcoast:  ["YG","Nipsey Hussle","Snoop Dogg","Dr. Dre"],
   detroit:    ["Babyface Ray","Veeze","Tee Grizzley","BabyTron"],
   memphis:    ["Three 6 Mafia","Key Glock","Pooh Shiesty","Young Dolph"],
@@ -214,9 +217,9 @@ const ARTISTS_BY_STYLE = {
   newjazz:    ["Ken Carson","Destroy Lonely","Homixide Gang"],
   rage:       ["Playboi Carti","Yeat","Trippie Redd","Lancey Foux"],
   phonk:      ["DVRST","Ghostface Playa","Soudiere"],
-  emorap:     ["Lil Peep","Juice WRLD",{ n:"XXXTENTACION", a:["xxxtentacion","xxx"] },"The Kid LAROI","iann dior"],
+  emorap:     ["Lil Peep","Juice WRLD",{ n:"XXXTENTACION", a:["xxxtentacion","xxx"] },{ n:"The Kid LAROI", a:["kid laroi"] },"iann dior"],
   hyperpop:   ["Glaive","Ericdoa","100 gecs"],
-  rnb:        ["SZA","Brent Faiyaz","Daniel Caesar","Summer Walker","The Weeknd"],
+  rnb:        ["SZA","Brent Faiyaz","Daniel Caesar","Summer Walker",{ n:"The Weeknd", a:["weeknd"] }],
   trapsoul:   ["Bryson Tiller","PARTYNEXTDOOR","6LACK","Drake","Tory Lanez"],
   pop:        ["Billie Eilish","Justin Bieber","Dua Lipa","Aya Nakamura"],
   afro:       ["Burna Boy","Wizkid","Rema","Asake","Tiakola","Tayc"],
@@ -226,9 +229,9 @@ const ARTISTS_BY_STYLE = {
   dancehall:  ["Vybz Kartel","Popcaan","Skillibeng","Shenseea","Masicka"],
   shatta:     [{ n:"Kalash", no:["kalash criminel"] },"Meryl","Maureen"],
   kompa:      [{ n:"Joé Dwèt Filé", a:["joe dwet file"] }],
-  reggaeton:  ["Bad Bunny","Tainy","J Balvin","Feid","Karol G","Rauw Alejandro","Myke Towers"],
+  reggaeton:  ["Bad Bunny","Tainy","J Balvin","Feid","Karol G",{ n:"Rauw Alejandro", a:["rauw"] },"Myke Towers"],
   latintrap:  ["Anuel AA",{ n:"Eladio Carrión", a:["eladio carrion"] },"Arcángel","Ozuna"],
-  dembow:     ["El Alfa","Rochy RD","Tokischa"],
+  dembow:     [{ n:"El Alfa", a:["alfa"] },"Rochy RD","Tokischa"],
   bailefunk:  ["Anitta","MC Ryan SP","MC Cabelinho"],
   jersey:     ["Bandmanrill","Lil Uzi Vert"],
   grime:      ["Skepta","Stormzy","JME","Kano"],
@@ -239,7 +242,7 @@ const ARTISTS_BY_STYLE = {
   trapmetal:  ["Ghostemane","Scarlxrd","Bones"],
   synthwave:  ["Kavinsky"],
   dnb:        ["Nia Archives","Chase & Status"],
-  afroswing:  ["J Hus","Kojo Funds","NSG"],
+  afroswing:  [{ n:"J Hus", a:["jhus"] },"Kojo Funds","NSG"],
   gqom:       ["DJ Lag","Babes Wodumo"],
   ndombolo:   ["Fally Ipupa","Ferre Gola",{ n:"Innoss'B", a:["innossb","innoss b"] }],
   tarraxo:    ["C4 Pedro","Kaysha"],
@@ -261,7 +264,7 @@ const ARTISTS_FR = {
   trap:      ["Jul","Naps","Leto","Niska","Lacrim","Dinos","Vald","Koba LaD",{ n:"Heuss l'Enfoiré", a:["heuss"] },"Kaaris","Maes","Jok'Air","Alonzo","Mister You","Imen Es","Sadek","Lefa","Gradur","Soso Maness","TIF","Danyl","Ino Casablanca","Zamdane"],
   drill:     ["Ziak","4Keus"],
   cloud:     ["PNL","Laylow",{ n:"Roméo Elvis", no:["romeo santos"] }],
-  boombap:   ["Orelsan","Rohff","Rim'K","Isha",{ n:"Caballero & JeanJass", a:["caballero jeanjass"] }],
+  boombap:   ["Orelsan","Rohff","Rim'K","Isha",{ n:"Caballero & JeanJass", a:["caballero jeanjass","jeanjass","caballero"] }],
   jazzrap:   ["Oxmo Puccino"],
   pop:       ["Lomepal",{ n:"GIMS", a:["maitre gims"] },{ n:"Videoclub", a:["video club"] }],
   afro:      ["Soolking","Dadju","Franglish","Naza","Vegedream",{ n:"Theodora", a:["théodora"] }],
@@ -270,21 +273,70 @@ const ARTISTS_FR = {
   plugg:     ["55ASKY"]
 };
 const ARTISTS_LATINO = {
-  reggaeton: ["Daddy Yankee","Don Omar",{ n:"Wisin & Yandel", a:["wisin yandel"] },"Nicky Jam","Maluma","Sech","Jhay Cortez","Lunay","Quevedo","Ryan Castro","Blessd","Kapo","Manuel Turizo","Chencho Corleone",{ n:"Zion & Lennox", a:["zion lennox"] },"De La Ghetto","Dalex","Justin Quiles","Becky G","Natti Natasha","Young Miko","Ovy on the Drums","María Becerra","Gonzy"],
-  latintrap: ["Duki","Bizarrap","Khea","Trueno","Neo Pistea","Wos","Paulo Londra","Nicki Nicole","Cazzu","Ysy A","Tiago PZK","Lit Killah","Milo J","Pailita","Pablo Chill-E","Brray","Bryant Myers",{ n:"Álvaro Díaz", a:["alvaro diaz"] },{ n:"Ñengo Flow", a:["nengo flow"] },"Morad",{ n:"Beny Jr", a:["benyjr","beny junior"] },"Rels B","Bejo","Kaydy Cain","Gera MX"],
-  corridos:  ["Peso Pluma","Junior H","Natanael Cano","Fuerza Regida","Eslabon Armado","Gabito Ballesteros","Tito Double P","Luis R Conriquez","Chino Pacas","Iván Cornejo","Netón Vega","Óscar Maydon","Grupo Frontera","Yahritza y Su Esencia"],
+  reggaeton: ["Daddy Yankee","Don Omar",{ n:"Wisin & Yandel", a:["wisin yandel"] },"Nicky Jam","Maluma","Sech",{ n:"Jhay Cortez", a:["jhayco"] },"Lunay","Quevedo","Ryan Castro","Blessd","Kapo","Manuel Turizo","Chencho Corleone",{ n:"Zion & Lennox", a:["zion lennox"] },"De La Ghetto","Dalex","Justin Quiles","Becky G","Natti Natasha","Young Miko","Ovy on the Drums","María Becerra","Gonzy"],
+  latintrap: ["Duki","Bizarrap","Khea","Trueno","Neo Pistea","Wos","Paulo Londra","Nicki Nicole","Cazzu",{ n:"Ysy A", a:["ysy"] },"Tiago PZK","Lit Killah","Milo J","Pailita","Pablo Chill-E","Brray","Bryant Myers",{ n:"Álvaro Díaz", a:["alvaro diaz"] },{ n:"Ñengo Flow", a:["nengo flow"] },"Morad",{ n:"Beny Jr", a:["benyjr","beny junior"] },"Rels B","Bejo","Kaydy Cain","Gera MX"],
+  corridos:  [{ n:"Peso Pluma", a:["pesopluma"] },"Junior H","Natanael Cano","Fuerza Regida","Eslabon Armado","Gabito Ballesteros","Tito Double P","Luis R Conriquez","Chino Pacas","Iván Cornejo","Netón Vega","Óscar Maydon","Grupo Frontera","Yahritza y Su Esencia"],
   pop:       ["Rosalía","C. Tangana","Shakira","Camilo","Emilia"],
   dembow:    ["Yailin La Más Viral","Chimbala","Lápiz Conciente","Mozart La Para","Ceky Viciny"],
   bachata:   ["Grupo Extra","Luis Vargas","Raulin Rodriguez","Anthony Santos"],
-  cumbia:    ["Los Ángeles Azules","Kumbia Kings"]
+  cumbia:    [{ n:"Los Ángeles Azules", a:["angeles azules"] },"Kumbia Kings"]
 };
-for (const extra of [ARTISTS_FR, ARTISTS_LATINO])
+/* Ajout du 3 novembre 2026 : les artistes deja cites au moins 3 fois dans les titres du
+   catalogue sans avoir de page, et des noms pop. Ecartes : les genres (« 90s », « indie »),
+   les mots courants (« Chip », « Game », « Mora »), les bouts de noms deja presents et les
+   producteurs seuls (Alchemist, Metro Boomin…). */
+const ARTISTS_AJOUTS = {
+  pop:        ["Taylor Swift","Ariana Grande","Olivia Rodrigo","Sabrina Carpenter","Harry Styles","Ed Sheeran","Bruno Mars","Post Malone","Lady Gaga","Rihanna","Doja Cat","Tate McRae","Chappell Roan","Selena Gomez",{ n:"Beyoncé", a:["beyonce"] },"Angèle","Stromae","Romsii",{ n:"Adèle Castillon", a:["adele castillon"] },"Danny Ocean",{ n:"Luísa Sonza", a:["luisa sonza"] },"Judeline","Rusowsky","Népal",{ n:"Pharrell", a:["pharrell williams"] },"ARTEMAS"],
+  trap:       ["Don Toliver","L2B","Vacra","Timar","Lesram","Guy2Bezbar","Niaks","Jolagreen23","Missan","Young Thug","Kodak Black","Guizmo",
+               // deux « Karmen » francais sur Deezer : celui des featurings avec Jok'air, TIF, PLK
+               { n:"Karmen", dz:323625 }],
+  drill:      ["Rvfleuze","Nemzzz",{ n:"Mous-K", a:["mous k"] },"Timal","Osirus Jack","Lil Tjay","Loski","K-Trap"],
+  sexydrill:  ["Mdot 59","Kreep","22Gz","Bay Swag","Chow Lee","Lil Yachty"],
+  boombap:    [{ n:"Saïf", a:["saif"] },{ n:"Limsa d'Aulnay", a:["limsa"] },"Mobb Deep","Ben Plg","Georgio","50 Cent"],
+  jazzrap:    ["Isaiah Rashad",{ n:"Sainté", a:["sainte"] },"JID","Aaron May"],
+  soul:       ["Benny The Butcher","Larry June"],
+  westcoast:  ["Shoreline Mafia","Tyga","Eminem","Nate Dogg"],
+  detroit:    ["YN Jay"],
+  memphis:    ["BIG30"],
+  cloud:      ["comehelpglo","Lucki","Sickboyrari"],
+  plugg:      ["Young Nudy",{ n:"Fève", a:["feve"] },"jaydes"],
+  newjazz:    ["Lil Tecca"],
+  rage:       ["Slayr","Fimiguerrero","Nine Vicious"],
+  phonk:      ["Freddie Dredd","DJ Smokey"],
+  emorap:     ["Rylo Rodriguez","MGK",{ n:"NBA YoungBoy", a:["youngboy never broke again"] }],
+  lofi:       ["Powfu"],
+  jerk:       ["EsDeeKid"],
+  trapmetal:  [{ n:"$uicideboy$", a:["suicideboys","suicideboy"] },"Night Lovell","1nonly"],
+  rnb:        ["Frank Ocean","Kehlani","Giveon","RnBoi","Odeal","KWN","Sailorr","Dijon"],
+  trapsoul:   ["Chris Brown"],
+  sadpiano:   ["Toosii","Sofiane Pamart"],
+  afro:       ["Keblack","Rsko","Chily","Bouss","Dystinct","Blaqbonez","Davido","Olamide","Shallipopi","Lynda","MHD"],
+  alte:       ["Victony","Mavo"],
+  afroswing:  ["Gwamz","Fola"],
+  amapiano:   ["Seyi Vibez","Shoday","Tyler ICU","Kelvin Momo"],
+  dancehall:  ["Sean Paul","Jada Kingdom"],
+  shatta:     ["1T1",{ n:"Miimii KDS", a:["miimii"] },"Blaiz Fayah",{ n:"N'Ken", a:["nken"] }],
+  ndombolo:   ["Mauvais Djo"],
+  reggaeton:  [{ n:"Beéle", a:["beele"] },"Cris MJ","Omar Courtz","FloyyMenor",{ n:"Lenny Tavárez", a:["lenny tavarez"] },"Jere Klein","Jay Wheeler","Alleh","ROA","Maisak","Farruko",{ n:"Héctor el Father", a:["hector el father"] }],
+  latintrap:  ["Santa Fe Klan","Yung Beef","Alejo","Fanta Rosario","Mafia del Amor",{ n:"Alemán", a:["aleman"] },"C.R.O",{ n:"Hades 66", a:["hades66"] },"Craneo","Yovngchimi","Gotay","Baby Gang"],
+  corridos:   ["Omar Camacho","Victor Mendivil","Grupo Firme","Regulo Molina"],
+  dembow:     ["Ronny GTA","Donaty"],
+  bailefunk:  ["Tz da Coronel","MC IG","Oruam","Veigh","Alee",{ n:"Brandão", a:["brandao"] },"Orochi","MC GP",{ n:"MC Negão Original", a:["mc negao original"] }],
+  jersey:     ["Jenn Carter","Zeddy Will","OT7 Quanny"],
+  crunk:      ["TyBando","Soulja Boy"],
+  grime:      ["Dave","AJ Tracey"],
+  desi:       ["Shubh","Navaan Sandhu"],
+  kpop:       ["ILLIT","ATEEZ","JENNIE"],
+  bachata:    ["Marc Anthony"],
+  reparto:    ["Bebeshito","El Chulo","Chocolate MC","El Taiger","Lenier","El Micha",{ n:"Yomil y El Dany", a:["yomil"] },"Dany Ome"]
+};
+for (const extra of [ARTISTS_FR, ARTISTS_LATINO, ARTISTS_AJOUTS])
   for (const [style, liste] of Object.entries(extra)) (ARTISTS_BY_STYLE[style] = ARTISTS_BY_STYLE[style] || []).push(...liste);
 
 const ARTISTS = Object.entries(ARTISTS_BY_STYLE).flatMap(([style, liste]) =>
   liste.map(x => {
     const o = typeof x === "string" ? { n:x } : x;
-    return { id: slug(o.n), name: o.n, style,
+    return { id: slug(o.n), name: o.n, style, dz: o.dz,
              forms: [...new Set([o.n, ...(o.a || [])].map(normArt))],
              not: (o.no || []).map(normArt) };
   }));
@@ -346,7 +398,7 @@ const STYLE_DEFAULT_MOODS = {
   cloud:["planant"], plugg:["planant"], newjazz:["planant"], rage:["agressif"], phonk:["agressif"],
   emorap:["mélancolique"], hyperpop:["énergique"], rnb:["sensuel"], trapsoul:["sensuel"], pop:["solaire"],
   afro:["solaire"], afrohouse:["énergique"], amapiano:["chill"], alte:["planant"], dancehall:["solaire"],
-  shatta:["énergique"], kompa:["sensuel"], reggaeton:["solaire"], latintrap:["agressif"], corridos:["mélancolique"], dembow:["énergique"],
+  shatta:["énergique"], kompa:["sensuel"], reggaeton:["solaire"], latintrap:["agressif"], corridos:["mélancolique"], dembow:["énergique"], reparto:["festif"],
   bailefunk:["énergique"], jersey:["énergique"], grime:["agressif"], ukgarage:["énergique"], club:["énergique"],
   driftphonk:["agressif"], jerk:["énergique"], crunk:["agressif"],
   trapmetal:["agressif"], sadpiano:["mélancolique"], synthwave:["planant"], dnb:["énergique"],
@@ -440,7 +492,7 @@ type beat beats instru instrumental prod rap music vibe vibes freestyle guitar p
 uk ny us fr usa english french brazilian latino african x and the
 trap drill boom bap boombap jazz jazzy lofi lo-fi soul west coast detroit memphis flint cloud plugg
 pluggnb rage opium phonk hyperpop digicore rnb r&b trapsoul pop afro afrobeat afrobeats house
-amapiano alte alté dancehall shatta bouyon kompa gouyad zouk reggaeton perreo latin dembow baile
+amapiano alte alté dancehall shatta bouyon kompa gouyad zouk reggaeton perreo latin dembow reparto cubaton cubano baile
 funk jersey philly club grime garage step oriental arabic rai raï drift sped up
 afroswing driftphonk jerk crunk tarraxo bachata salsa cumbia guaracha gqom ndombolo kizomba
 desi punjabi kpop korean gospel worship country synthwave retrowave hyperpop digicore
@@ -759,7 +811,11 @@ function writeCatalog(cat) {
     for (const u of Object.keys(cat.chans)) if (!utiles.has(u)) delete cat.chans[u];
   }
   cat.styles = STYLES.map(({ key, label, color }) => ({ key, label, color }));
-  cat.artists = ARTISTS.map(({ id, name, style }) => ({ id, name, style }));
+  // les autres formes du nom (« Rauw » pour Rauw Alejandro) : la page relie aussi ces etiquettes au profil
+  cat.artists = ARTISTS.map(({ id, name, style, forms }) => {
+    const alias = forms.filter(f => f !== normArt(name));
+    return alias.length ? { id, name, style, alias } : { id, name, style };
+  });
   cat.maxAgeMonths = MAX_AGE_MONTHS;
   cat.artistMaxAgeMonths = ARTIST_MAX_AGE_MONTHS;
   cat.artistMin = MIN_PER_ARTIST;
@@ -899,8 +955,9 @@ async function enrichirArtistes(cat) {
   for (const a of a_faire) {
     const t = new Date().toISOString().slice(0, 10);
     try {
-      const r = await fetch(`https://api.deezer.com/search/artist?q=${encodeURIComponent(a.name)}&limit=25`, { signal: AbortSignal.timeout(15000) });
-      const d = (await r.json()).data || [];
+      // fiche Deezer fixee a la main (homonymes de meme notoriete) : on la lit directement
+      const r = await fetch(a.dz ? `https://api.deezer.com/artist/${a.dz}` : `https://api.deezer.com/search/artist?q=${encodeURIComponent(a.name)}&limit=25`, { signal: AbortSignal.timeout(15000) });
+      const j = await r.json(), d = a.dz ? (j && j.id ? [j] : []) : (j.data || []);
       const bons = d.filter(x => a.forms.includes(normArt(x.name)) && x.nb_fan >= 1000 && !/\/\/\d+x\d+/.test(x.picture_xl || "//0x0"));
       bons.sort((x, y) => y.nb_fan - x.nb_fan);
       if (!bons.length) throw new Error("introuvable");
@@ -923,7 +980,7 @@ async function enrichirArtistes(cat) {
    MusicBrainz. Rafraichi tous les 60 jours. */
 const MB_UA = "FINDINGS/1.0 (https://dokamusic.github.io/FINDINGS/)";
 const GENRE_ATTENDU = st =>
-  /reggaeton|latintrap|dembow|corridos|bachata|cumbia|salsa/.test(st) ? /latin|reggaeton|urbano|regional/i
+  /reggaeton|latintrap|dembow|reparto|corridos|bachata|cumbia|salsa/.test(st) ? /latin|reggaeton|urbano|regional/i
   : /afro|amapiano|ndombolo|kompa|bouyon|zouk/.test(st) ? /afro|monde|world|african|pop/i
   : /pop/.test(st) ? /pop/i
   : /rnb|soul/.test(st) ? /r&b|soul/i

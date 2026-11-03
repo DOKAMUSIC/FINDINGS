@@ -19,6 +19,7 @@ if (window.FINDINGS_STATS) {
 }
 </script>
 <link rel="preconnect" href="https://i.ytimg.com">
+<link rel="preconnect" href="https://www.youtube.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
@@ -451,7 +452,12 @@ body.yt-charge .np-lire .ic::before{content:"";width:14px;height:14px;border-rad
   position:absolute;bottom:auto;right:auto;aspect-ratio:auto;z-index:1;
   border-radius:12px;box-shadow:none;transition:none;cursor:pointer;
 }
-.vid.dans-np iframe{width:100%;height:100%;margin:0}
+/* rognee par son cadre (overflow), pas par clip-path : Safari ne rogne pas une iframe avec
+   clip-path, et la video debordait sur l'en-tete quand le panneau defilait */
+.vid.dans-np{overflow:hidden}
+.vid.dans-np iframe{width:100%;height:var(--vh-np,100%);margin:0;position:relative;top:var(--vh-dec,0)}
+/* sous l'en-tete (z-index 40) : les menus Ma musique et Reglages passent devant la video */
+body.np-video .bar{z-index:35}
 .vid.dans-np .zoom{display:none}
 .vid-place{display:none}
 body.np-video .vid-place{
@@ -1520,10 +1526,10 @@ body:has(.bar.up) .foot-in{padding-bottom:calc(var(--bar-h) + 44px)}
 .tbtn.big{position:relative}
 .tbtn.big svg{transition:opacity .15s}
 body.yt-charge .tbtn.big svg{opacity:0}
-body.yt-charge .tbtn.big::after,body.yt-charge .row.playing .play .glyph::after,body.yt-charge .tile.playing .go::after{
+/* seulement le gros bouton du lecteur : les vignettes des listes et des tuiles ne tournent plus */
+body.yt-charge .tbtn.big::after{
   content:"";position:absolute;inset:0;margin:auto;width:18px;height:18px;border-radius:50%;
   border:2.4px solid currentColor;border-right-color:transparent;animation:yt-tourne .7s linear infinite}
-body.yt-charge .row.playing .play .glyph svg,body.yt-charge .tile.playing .go svg{opacity:0}
 .row .play .glyph,.tile .go{position:relative}
 @keyframes yt-tourne{to{transform:rotate(360deg)}}
 /* le bouton sur lequel on a clique pour lancer (Lire les N, Lire d'un profil, Surprends-moi)
@@ -4272,6 +4278,21 @@ const MOOD_TEINTE = {
 const DAY = 86400000;
 const since = d => d ? Math.max(0, (Date.now() - new Date(d + "T12:00:00Z")) / DAY) : 9999;
 
+/* Une prod likee peut sortir du catalogue (trop vieille, trop vue) : le like garde une copie
+   de sa fiche dans le navigateur, et la prod reste dans les likes, toujours jouable. Les
+   likes d'avant cette copie n'ont que leur identifiant : une fiche d'attente, completee par
+   YouTube juste apres le chargement (voir completerSorties). */
+const FICHES_KEY = "findings.crate.fiches";
+let FICHES = {};
+try { FICHES = JSON.parse(localStorage.getItem(FICHES_KEY) || "{}") || {}; } catch (e) {}
+{
+  let likes = [];
+  try { likes = JSON.parse(localStorage.getItem("findings.crate") || "[]"); } catch (e) {}
+  const dans = new Set(CAT.beats.map(b => b.id));
+  for (const id of Array.isArray(likes) ? likes : []) if (id && !dans.has(id))
+    CAT.beats.push({ title: "Prod likée", prod: "", style: "trap", dur: 0, views: 0, bpm: 140, key: "", moods: [], refs: [], est: ["bpm", "key"],
+                     ...(FICHES[id] || { attente: true }), id, sorti: true });
+}
 const BEATS = CAT.beats.map(b => ({
   ...b,
   days: since(b.published),
@@ -4402,6 +4423,9 @@ BEATS.forEach(b => b._h = haystack(b));
    entendues. Tout se calcule ici, dans le navigateur : rien ne part vers un serveur, et
    c'est aussi pourquoi le profil ne suit pas d'un appareil a l'autre. */
 const BY_ID = new Map(BEATS.map(b => [b.id, b]));
+const ficheDe = b => ({ title: b.title, prod: b.prod, style: b.style, dur: b.dur, views: b.views, published: b.published, bpm: b.bpm,
+  key: b.key, moods: b.moods, refs: b.refs, fr: b.fr, chan: b.chan, buy: b.buy, est: b.est, artists: b.artists });
+const saveFiches = () => { try { localStorage.setItem(FICHES_KEY, JSON.stringify(FICHES)); } catch (e) {} };
 /* ============ FINDINGS Pro ============
    Les prods sponsorisees et les profils Pro des beatmakers (pro.json, ecrit dans le catalogue
    par build.mjs). Les dates sont reverifiees ici : une offre finie disparait meme si le site
@@ -4684,7 +4708,9 @@ const lienArtiste = id => `${BASE}artiste/${encodeURIComponent(id)}/`;
 /* Un nom tel qu'il est ecrit dans un titre (« HAMZA », « A$AP Rocky », « Saïf ») ramene a
    une forme comparable : la meme que l'ingestion (ingest.mjs, normArt). */
 const cleNom = t => norm(String(t || "")).replace(/\$/g, "s").replace(/[^a-z0-9]+/g, " ").trim();
-const ARTISTE_PAR_NOM = new Map(LIVE_ARTISTS.map(a => [cleNom(a.name), a.id]));
+// les formes courtes (« RAUW », « JHAYCO ») menent aussi au profil ; un vrai nom l'emporte sur une forme courte
+const ARTISTE_PAR_NOM = new Map([...LIVE_ARTISTS.flatMap(a => (a.alias || []).map(x => [cleNom(x), a.id])),
+                                 ...LIVE_ARTISTS.map(a => [cleNom(a.name), a.id])]);
 /* L'artiste du site que designe une etiquette de prod : son nom exact, sinon l'un des
    artistes deja rattaches a cette prod dont le nom contient l'etiquette (« Heuss » pour
    « Heuss l'Enfoiré »). Rien sinon : l'etiquette lance alors une recherche. */
@@ -4755,7 +4781,31 @@ function mesurer(evenement){
   } catch (e) {}
 }
 window.addEventListener("load", () => setTimeout(() => mesurer(), 500));
-window.addEventListener("load", () => setTimeout(chargerChans, 30));   // profils des chaines, apres l'affichage
+window.addEventListener("load", () => setTimeout(chargerChans, 30));
+/* Copie des fiches des likes deja la (likes d'avant la copie), et fiches d'attente
+   completees par YouTube : titre, chaine, style devine dans le titre. */
+async function completerSorties(){
+  let change = false;
+  for (const id of CRATE) if (BY_ID.has(id) && !FICHES[id] && !BY_ID.get(id).attente) { FICHES[id] = ficheDe(BY_ID.get(id)); change = true; }
+  for (const id of Object.keys(FICHES)) if (!CRATE.has(id)) { delete FICHES[id]; change = true; }
+  if (change) saveFiches();
+  const attente = BEATS.filter(b => b.attente && CRATE.has(b.id));
+  for (const b of attente) {
+    try {
+      const r = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent("https://www.youtube.com/watch?v=" + b.id)}&format=json`);
+      if (!r.ok) continue;
+      const o = await r.json(), t = norm(o.title || "");
+      b.title = o.title || b.title; b.prod = o.author_name || ""; b.chan = o.author_url || "";
+      const st = STYLES.find(([k, label]) => t.includes(norm(label)) || t.includes(norm(k)));
+      if (st) b.style = st[0];
+      const bpm = /(\d{2,3})\s*bpm/i.exec(o.title || ""); if (bpm) b.bpm = +bpm[1];
+      delete b.attente; b._h = haystack(b);
+      FICHES[b.id] = ficheDe(b); change = true;
+    } catch (e) {}
+  }
+  if (attente.length && change) { saveFiches(); majLikes(); if (S.crateOnly) render(); }
+}
+window.addEventListener("load", () => setTimeout(completerSorties, 800));   // profils des chaines, apres l'affichage
 
 /* ============ filtrage ============ */
 function filtered(){
@@ -4763,6 +4813,7 @@ function filtered(){
   const terms = q ? q.split(/\s+/) : [];
   let out = BEATS.filter(b => {
     if(S.crateOnly && !CRATE.has(b.id)) return false;
+    if(b.sorti && !S.crateOnly && !S.historyOnly) return false;     // sortie du catalogue : seulement dans les likes
     if(S.toplines && !TOPLINE_N.has(b.id)) return false;
     if(S.crateOnly && S.dossier && !dossier(S.dossier)?.ids.has(b.id)) return false;
     if(S.historyOnly && !HIST_POS.has(b.id)) return false;
@@ -5128,12 +5179,16 @@ function placerVideo(){
   if (npVignette !== v) { npVignette = v; vidPlace.style.backgroundImage = v; }
   const b = bar.getBoundingClientRect(), c = cover.getBoundingClientRect(), p = elNP.getBoundingClientRect();
   const haut = Math.max(0, p.top + 1 - c.top), bas = Math.max(0, c.bottom - (p.bottom - 1));
+  // le cadre ne couvre que la partie visible de la pochette ; la video y est decalee
+  const vue = Math.max(0, c.height - haut - bas);
   vidWrap.style.left = (c.left - b.left - bar.clientLeft) + "px";
-  vidWrap.style.top = (c.top - b.top - bar.clientTop) + "px";
+  vidWrap.style.top = (c.top + haut - b.top - bar.clientTop) + "px";
   vidWrap.style.width = c.width + "px";
-  vidWrap.style.height = c.height + "px";
-  vidWrap.style.clipPath = haut || bas ? `inset(${haut}px 0 ${bas}px 0)` : "";
-  vidWrap.style.visibility = haut + bas >= c.height - 1 ? "hidden" : "";
+  vidWrap.style.height = vue + "px";
+  vidWrap.style.setProperty("--vh-np", c.height + "px");
+  vidWrap.style.setProperty("--vh-dec", -haut + "px");
+  vidWrap.style.borderRadius = `${haut ? 0 : 12}px ${haut ? 0 : 12}px ${bas ? 0 : 12}px ${bas ? 0 : 12}px`;
+  vidWrap.style.visibility = vue <= 1 ? "hidden" : "";
 }
 /* Une image tout de suite, puis quelques-unes le temps des animations (montee du
    lecteur, entree du panneau). */
@@ -5481,18 +5536,23 @@ const ICON_PAUSE = '<rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="1
 })();
 window.onYouTubeIframeAPIReady = () => {
   apiReady = true;
-  if (pendingId) { const id = pendingId; pendingId = null; mount(id); }
+  if (pendingId) { const id = pendingId; pendingId = null; mount(id); return; }
+  /* Lecteur prechauffe : monte a vide des que la page est au repos. Le premier clic
+     n'a plus a charger l'iframe et le lecteur YouTube (~1 Mo) : il ne reste que la prod.
+     Pas en mode economie de donnees. */
+  const repos = window.requestIdleCallback || (f => setTimeout(f, 1200));
+  repos(() => { if (!player && !PLAIN && !(navigator.connection && navigator.connection.saveData)) mount(null); }, { timeout: 2500 });
 };
 
 function mount(id){
   if (PLAIN) return mountPlain(id);
   playerReady = false;
   player = new YT.Player("ytplayer", {
-    width:"100%", height:"100%", videoId:id,
+    width:"100%", height:"100%", ...(id ? { videoId: id } : {}),
     // controls:0 retire la barre du lecteur, disablekb:1 ses raccourcis clavier,
     // fs:0 son bouton plein écran : il ne reste que l'image
-    playerVars:{ autoplay:1, rel:0, modestbranding:1, playsinline:1, iv_load_policy:3,
-                 controls:0, disablekb:1, fs:0, start: debut(id) },
+    playerVars:{ autoplay: id ? 1 : 0, rel:0, modestbranding:1, playsinline:1, iv_load_policy:3,
+                 controls:0, disablekb:1, fs:0, start: id ? debut(id) : 0 },
     events:{
       onReady: e => {
         playerReady = true;
@@ -5504,6 +5564,7 @@ function mount(id){
           armWatchdog(id); startTick();
           return;
         }
+        if (!id) return;          // prechauffe : rien a jouer tant qu'on n'a pas clique
         if (repriseT > 0) e.target.seekTo(repriseT, true);
         // on ne relance pas ce qui était en pause au moment de quitter la page
         if (repriseT > 0 && !repriseJoue) { e.target.pauseVideo(); S.paused = true; tgIcon.innerHTML = ICON_PLAY; }
@@ -5515,7 +5576,7 @@ function mount(id){
       onError: onError
     }
   });
-  armWatchdog(id);
+  if (id) armWatchdog(id);
 }
 
 /* Intégration simple : c'est YouTube qui affiche ses propres commandes dans la
@@ -5564,6 +5625,7 @@ function armWatchdog(id){
 }
 
 function onState(e){
+  if (!current) return;      // lecteur prechauffe, encore vide
   // le bouton tourne pendant le chargement et le buffering, et seulement la
   if (e.data === YT.PlayerState.BUFFERING) document.body.classList.add("yt-charge");
   else if ([YT.PlayerState.PLAYING, YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.CUED].includes(e.data)) document.body.classList.remove("yt-charge");
@@ -5920,6 +5982,8 @@ function basculerLike(b, source){
   const like = !CRATE.has(b.id);
   like ? CRATE.add(b.id) : CRATE.delete(b.id);
   saveCrate();
+  if (like) FICHES[b.id] = ficheDe(b); else delete FICHES[b.id];
+  saveFiches();
   if (like) mesurer("like");
   if (!like && DOSSIERS.some(d => d.ids.delete(b.id))) saveDossiers();
   if (like) proposerDossier(b);
