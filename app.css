@@ -412,7 +412,12 @@ body.yt-charge .np-lire .ic::before{content:"";width:14px;height:14px;border-rad
   position:absolute;bottom:auto;right:auto;aspect-ratio:auto;z-index:1;
   border-radius:12px;box-shadow:none;transition:none;cursor:pointer;
 }
-.vid.dans-np iframe{width:100%;height:100%;margin:0}
+/* rognee par son cadre (overflow), pas par clip-path : Safari ne rogne pas une iframe avec
+   clip-path, et la video debordait sur l'en-tete quand le panneau defilait */
+.vid.dans-np{overflow:hidden}
+.vid.dans-np iframe{width:100%;height:var(--vh-np,100%);margin:0;position:relative;top:var(--vh-dec,0)}
+/* sous l'en-tete (z-index 40) : les menus Ma musique et Reglages passent devant la video */
+body.np-video .bar{z-index:35}
 .vid.dans-np .zoom{display:none}
 .vid-place{display:none}
 body.np-video .vid-place{
@@ -1481,10 +1486,10 @@ body:has(.bar.up) .foot-in{padding-bottom:calc(var(--bar-h) + 44px)}
 .tbtn.big{position:relative}
 .tbtn.big svg{transition:opacity .15s}
 body.yt-charge .tbtn.big svg{opacity:0}
-body.yt-charge .tbtn.big::after,body.yt-charge .row.playing .play .glyph::after,body.yt-charge .tile.playing .go::after{
+/* seulement le gros bouton du lecteur : les vignettes des listes et des tuiles ne tournent plus */
+body.yt-charge .tbtn.big::after{
   content:"";position:absolute;inset:0;margin:auto;width:18px;height:18px;border-radius:50%;
   border:2.4px solid currentColor;border-right-color:transparent;animation:yt-tourne .7s linear infinite}
-body.yt-charge .row.playing .play .glyph svg,body.yt-charge .tile.playing .go svg{opacity:0}
 .row .play .glyph,.tile .go{position:relative}
 @keyframes yt-tourne{to{transform:rotate(360deg)}}
 /* le bouton sur lequel on a clique pour lancer (Lire les N, Lire d'un profil, Surprends-moi)
