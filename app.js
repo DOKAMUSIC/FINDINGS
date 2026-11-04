@@ -2165,7 +2165,7 @@ function rowHTML(b){
         ${S.crateOnly && saved ? (dans => `<button class="icon${dans?" dans":""}" data-act="dossier" aria-label="Ranger dans un dossier" title="Ranger dans un dossier">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="${dans?"currentColor":"none"}" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
         </button>`)(DOSSIERS.some(d => d.ids.has(b.id))) : ""}
-        ${b.buy ? `<button class="icon acheter" data-act="buy" aria-label="Acheter la prod ${esc(b.title)}" title="Acheter la prod${boutique(b.buy) ? " sur " + boutique(b.buy) : ""}">${ICO_PANIER}</button>` : ""}
+        ${b.buy ? `<button class="icon acheter" data-act="buy" aria-label="Acheter la prod ${esc(b.title)}" title="Acheter la prod${boutique(b.buy) ? " sur " + boutique(b.buy) : ""}">${ICO_PANIER}</button>` : '<span class="icon vide" aria-hidden="true"></span>'}
         <button class="icon" data-act="proche" aria-label="Prods similaires à ${esc(b.title)}" title="Prods similaires">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="5"/><circle cx="15" cy="15" r="5"/></svg>
         </button>
@@ -4441,8 +4441,15 @@ const vAccueil = document.getElementById("vueAccueil");
 const vProds = document.querySelector("main.shell");
 
 const vStudio = document.getElementById("vueStudio"), vOffre = document.getElementById("vueOffre"), vPro = document.getElementById("vuePro");
+let finArrivee = 0;
 function montrerVue(nom, pousser = true, params = ""){
   const studio = nom === "studio", offre = nom === "offre", pro = nom === "pro", accueil = !studio && !offre && !pro && nom !== "prods";
+  // de l'accueil vers la liste : la liste monte, le panneau de droite glisse (voir arrivee-prods)
+  if (nom === "prods" && document.body.classList.contains("vue-accueil")) {
+    document.body.classList.remove("arrivee-prods"); void document.body.offsetWidth;
+    document.body.classList.add("arrivee-prods");
+    clearTimeout(finArrivee); finArrivee = setTimeout(() => document.body.classList.remove("arrivee-prods"), 900);
+  }
   vAccueil.hidden = !accueil;
   vProds.hidden = accueil || studio || offre || pro;
   vStudio.hidden = !studio;
