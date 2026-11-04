@@ -282,7 +282,16 @@ ul{margin:0;padding:0;list-style:none}
   body.np-on .row .num.pop .k{display:block}
   body.np-on .row .num.pop{min-width:42px}
 }
-@keyframes np-entre{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+@keyframes np-entre{from{opacity:0;transform:translateX(var(--np-dx,14px))}to{opacity:1;transform:none}}
+/* De l'accueil vers la liste : la liste monte du bas, le panneau « En lecture » glisse
+   depuis la droite, un poil apres. */
+body.arrivee-prods .shell > section{animation:liste-monte .62s cubic-bezier(.16,.84,.24,1) both}
+/* meme animation que l'entree normale, plus ample : en retirant la classe, l'animation ne repart pas */
+body.arrivee-prods.np-on .np{--np-dx:72px;animation-duration:.7s;animation-delay:.08s;animation-timing-function:cubic-bezier(.16,.84,.24,1);animation-fill-mode:both}
+@keyframes liste-monte{from{opacity:0;transform:translateY(56px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){
+  body.arrivee-prods .shell > section{animation:none}
+}
 .np{--c:var(--accent)}
 .np::before{
   display:none;content:"";position:absolute;left:0;right:0;top:0;height:300px;z-index:-1;pointer-events:none;
@@ -401,6 +410,8 @@ body.yt-charge .np-lire .ic::before{content:"";width:14px;height:14px;border-rad
 .np-acheter small{font-weight:600;opacity:.85}
 .row .icon.acheter{color:#2FBF71}
 .row .icon.acheter:hover{color:#fff;background:#2FBF71}
+/* sans lien d'achat, la place du panier reste vide : les colonnes BPM, vues et age restent alignees */
+.row .icon.vide{pointer-events:none}
 .np-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 .np-tag{font-size:11.5px;font-weight:590;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2)}
 .np-tag.st{border-color:transparent;color:color-mix(in srgb,var(--c) 60%,var(--ink));background:color-mix(in srgb,var(--c) 14%,var(--surface))}
@@ -5292,7 +5303,7 @@ function rowHTML(b){
         ${S.crateOnly && saved ? (dans => `<button class="icon${dans?" dans":""}" data-act="dossier" aria-label="Ranger dans un dossier" title="Ranger dans un dossier">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="${dans?"currentColor":"none"}" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
         </button>`)(DOSSIERS.some(d => d.ids.has(b.id))) : ""}
-        ${b.buy ? `<button class="icon acheter" data-act="buy" aria-label="Acheter la prod ${esc(b.title)}" title="Acheter la prod${boutique(b.buy) ? " sur " + boutique(b.buy) : ""}">${ICO_PANIER}</button>` : ""}
+        ${b.buy ? `<button class="icon acheter" data-act="buy" aria-label="Acheter la prod ${esc(b.title)}" title="Acheter la prod${boutique(b.buy) ? " sur " + boutique(b.buy) : ""}">${ICO_PANIER}</button>` : '<span class="icon vide" aria-hidden="true"></span>'}
         <button class="icon" data-act="proche" aria-label="Prods similaires à ${esc(b.title)}" title="Prods similaires">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="5"/><circle cx="15" cy="15" r="5"/></svg>
         </button>
@@ -7568,8 +7579,15 @@ const vAccueil = document.getElementById("vueAccueil");
 const vProds = document.querySelector("main.shell");
 
 const vStudio = document.getElementById("vueStudio"), vOffre = document.getElementById("vueOffre"), vPro = document.getElementById("vuePro");
+let finArrivee = 0;
 function montrerVue(nom, pousser = true, params = ""){
   const studio = nom === "studio", offre = nom === "offre", pro = nom === "pro", accueil = !studio && !offre && !pro && nom !== "prods";
+  // de l'accueil vers la liste : la liste monte, le panneau de droite glisse (voir arrivee-prods)
+  if (nom === "prods" && document.body.classList.contains("vue-accueil")) {
+    document.body.classList.remove("arrivee-prods"); void document.body.offsetWidth;
+    document.body.classList.add("arrivee-prods");
+    clearTimeout(finArrivee); finArrivee = setTimeout(() => document.body.classList.remove("arrivee-prods"), 900);
+  }
   vAccueil.hidden = !accueil;
   vProds.hidden = accueil || studio || offre || pro;
   vStudio.hidden = !studio;
