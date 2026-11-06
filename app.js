@@ -734,6 +734,8 @@ const I18N = (() => {
     "Retour casque activé : tu t'entendras avec les effets pendant la prise (mets un casque)": ["Headphone monitoring on: you'll hear yourself with the effects while recording (wear headphones)", "Retorno activado: te escucharás con los efectos mientras grabas (usa auriculares)"],
     "Retour casque coupé": ["Headphone monitoring off", "Retorno desactivado"],
     "Entrée audio": ["Audio input", "Entrada de audio"],
+    "hors catalogue": ["no longer listed", "fuera del catálogo"],
+    "Cette prod n'est plus dans le catalogue : elle reste dans tes likes": ["This beat left the catalog: it stays in your likes", "Este beat salió del catálogo: sigue en tus likes"],
     "Ses nouvelles prods remonteront dans ton accueil": ["Their new beats will show up on your home page", "Sus nuevos beats aparecerán en tu inicio"],
     "Entrée audio : choisir le micro ou la carte son": ["Audio input: choose the mic or audio interface", "Entrada de audio: elige el micro o la tarjeta de sonido"],
     "Choisir l'entrée audio": ["Choose the audio input", "Elegir la entrada de audio"],
@@ -1169,7 +1171,7 @@ try { FICHES = JSON.parse(localStorage.getItem(FICHES_KEY) || "{}") || {}; } cat
   try { likes = JSON.parse(localStorage.getItem("findings.crate") || "[]"); } catch (e) {}
   const dans = new Set(CAT.beats.map(b => b.id));
   for (const id of Array.isArray(likes) ? likes : []) if (id && !dans.has(id))
-    CAT.beats.push({ title: "Prod likée", prod: "", style: "trap", dur: 0, views: 0, bpm: 140, key: "", moods: [], refs: [], est: ["bpm", "key"],
+    CAT.beats.push({ title: "Prod likée", prod: "", style: "trap", dur: 0, views: 0, bpm: 140, key: "", moods: [], refs: [], est: ["bpm"],
                      ...(FICHES[id] || { attente: true }), id, sorti: true });
 }
 const BEATS = CAT.beats.map(b => ({
@@ -1646,6 +1648,7 @@ function majTitre(){
     if (S.q.trim()) { t = `« ${S.q.trim()} » : ${n} prods | FINDINGS`; }
     else if (S.prod) { t = `${S.prod} : ${n} type beats à écouter | FINDINGS`; d = `Les ${n} prods de ${S.prod} sur FINDINGS, à écouter direct.`; }
     else if (ar) { t = `${ARTIST_NAME[ar] || ar} type beat : ${n} prods à écouter | FINDINGS`; d = `Les meilleurs type beats ${ARTIST_NAME[ar] || ar} du moment : ${n} prods récentes à écouter direct, par ${new Set(LAST.map(b => b.prod)).size} beatmakers.`; }
+    else if (S.artists.size && (S.styles.size || S.moods.size)) { t = `${[[...S.artists].map(a => ARTIST_NAME[a] || a).join(" + "), [...S.styles].map(k => STYLE_NAME[k]).join(" + "), [...S.moods].join(" + ")].filter(Boolean).join(" · ")} : ${n} type beats à écouter | FINDINGS`; }
     else if (S.styles.size && S.moods.size && !S.artists.size) { t = `${[...S.styles].map(k => STYLE_NAME[k]).join(" + ")} · ${[...S.moods].join(" + ")} : ${n} type beats à écouter | FINDINGS`; }
     else if (S.styles.size > 1 && !S.moods.size && !S.artists.size) { t = `${[...S.styles].map(k => STYLE_NAME[k]).join(" + ")} : ${n} type beats à écouter | FINDINGS`; }
     else if (S.styles.size === 1 && !S.moods.size && !S.artists.size) { const st = STYLE_NAME[[...S.styles][0]]; t = `${st} type beat : ${n} prods à écouter | FINDINGS`; d = `${n} type beats ${st} récents à écouter direct sur FINDINGS.`; }
@@ -1753,28 +1756,30 @@ const LIVE_STYLES = STYLES.filter(([k]) => STYLE_N[k] > 0).sort((a,b) => STYLE_N
    comptes des likes (et du dossier ouvert). Ailleurs, le catalogue entier. */
 let PORTEE = null, porteeCle = "";
 function calculerPortee(){
-  const croise = S.styles.size || S.moods.size;
+  const croise = S.styles.size || S.moods.size || S.artists.size;
   const cle = (S.crateOnly ? `${[...CRATE].join(",")}|${S.dossier || ""}|${S.dossier && dossier(S.dossier) ? dossier(S.dossier).ids.size : ""}` : "")
-    + `#${[...S.styles].join(",")}#${[...S.moods].join(",")}`;
+    + `#${[...S.styles].join(",")}#${[...S.moods].join(",")}#${[...S.artists].join(",")}`;
   if (cle === porteeCle) return false;
   porteeCle = cle;
   if (!S.crateOnly && !croise) { PORTEE = null; return true; }
   const d = S.crateOnly && S.dossier && dossier(S.dossier);
-  const base = S.crateOnly ? BEATS.filter(b => CRATE.has(b.id) && (!d || d.ids.has(b.id))) : BEATS;
+  const base = S.crateOnly ? BEATS.filter(b => CRATE.has(b.id) && (!d || d.ids.has(b.id))) : BEATS.filter(b => !b.sorti);
   PORTEE = { style: {}, artist: {}, mood: {}, likes: S.crateOnly };
-  /* Style et mood se croisent : les styles se comptent dans le mood choisi, les moods dans
-     les styles choisis. Chaque menu ne propose ainsi que ce qui donne encore des prods. */
+  /* Style, mood et artiste se croisent : chaque menu se compte dans les choix des deux autres,
+     et ne propose ainsi que ce qui donne encore des prods. */
   const okStyle = b => !S.styles.size || S.styles.has(b.style);
   const okMood = b => !S.moods.size || b.moods.some(m => S.moods.has(m));
+  const okArtiste = b => !S.artists.size || b.artists.some(a => S.artists.has(a));
   base.forEach(b => {
-    if (okMood(b)) PORTEE.style[b.style] = (PORTEE.style[b.style] || 0) + 1;
-    if (okStyle(b)) b.moods.forEach(m => PORTEE.mood[m] = (PORTEE.mood[m] || 0) + 1);
-    b.artists.forEach(a => PORTEE.artist[a] = (PORTEE.artist[a] || 0) + 1);
+    const st = okStyle(b), mo = okMood(b), ar = okArtiste(b);
+    if (mo && ar) PORTEE.style[b.style] = (PORTEE.style[b.style] || 0) + 1;
+    if (st && ar) b.moods.forEach(m => PORTEE.mood[m] = (PORTEE.mood[m] || 0) + 1);
+    if (st && mo) b.artists.forEach(a => PORTEE.artist[a] = (PORTEE.artist[a] || 0) + 1);
   });
   return true;
 }
 const nStyle = k => PORTEE ? (PORTEE.style[k] || 0) : STYLE_N[k];
-const nArtiste = id => PORTEE && PORTEE.likes ? (PORTEE.artist[id] || 0) : ARTIST_N[id];
+const nArtiste = id => PORTEE ? (PORTEE.artist[id] || 0) : ARTIST_N[id];
 const nMood = m => PORTEE ? (PORTEE.mood[m] || 0) : MOOD_N[m];
 // garde ce qui a des prods dans la portee, et ce qui est choisi (pour pouvoir le retirer)
 const dansPortee = (n, choisi) => n > 0 || choisi;
@@ -2147,6 +2152,7 @@ function rowHTML(b){
         <span class="pill">${esc(STYLE_NAME[b.style])}</span>
         ${TOPLINE_N.get(b.id)?`<span class="tl-n" title="Tes prises sur cette prod">🎙 ${TOPLINE_N.get(b.id)}</span>`:""}
         ${estNouvelle(b)?`<span class="new" title="${VISITE_PREC ? "Ajoutée depuis ta dernière visite" : "Ajoutée ces derniers jours"}">nouveau</span>`:""}
+        ${b.sorti?`<span class="hors" title="Cette prod n'est plus dans le catalogue : elle reste dans tes likes">hors catalogue</span>`:""}
         <span class="prod">par <button data-act="prod" title="Toutes les prods de ${esc(b.prod)}"><b>${esc(b.prod)}</b>${verifie(b.prod) ? ICO_VERIF : ""}</button></span>
         ${b.refs.length?`<span class="refs">${b.refs.map(r=>{ const id = artisteDeRef(r, b); return id ? `<a class="ref-art" href="${lienArtiste(id)}" data-vue="prods" title="Page de ${esc(ARTIST_NAME[id])}">${esc(r)}</a>` : `<button data-act="ref" data-ref="${esc(r)}">${esc(r)}</button>`; }).join("")}</span>`:""}
       </div>
@@ -2960,7 +2966,7 @@ list.addEventListener("click", e => {
 const elProfil = document.getElementById("profil");
 let profilPeint = null;
 /* L'artiste dont la liste est affichee seul (sans style ni mood en plus), sinon null. */
-const artisteSeul = () => !S.prod && !S.crateOnly && S.artists.size === 1 && !S.styles.size && !S.moods.size ? [...S.artists][0] : null;
+const artisteSeul = () => !S.prod && !S.crateOnly && S.artists.size === 1 ? [...S.artists][0] : null;   // un style ou un mood en plus : la carte de l'artiste reste
 function majProfil(res){
   const art = artisteSeul();
   const actif = !!(S.prod || art);
@@ -3383,15 +3389,15 @@ elStyles.addEventListener("click", e => {
   /* Les styles se cumulent (trap + jersey) : un clic ajoute ce style a ceux deja choisis,
      ou le retire s'il l'etait. Les autres filtres restent exclusifs, comme avant. */
   const garde = [...S.styles].filter(x => x !== k), ajoute = !S.styles.has(k);
-  const moods = [...S.moods];                      // le mood choisi reste : trap + melancolique
-  choisirFiltre(() => { garde.forEach(x => S.styles.add(x)); if (ajoute) S.styles.add(k); moods.forEach(m => S.moods.add(m)); }, false);
+  const moods = [...S.moods], artistes = [...S.artists];   // mood et artiste restent : Ninho + trap + melancolique
+  choisirFiltre(() => { garde.forEach(x => S.styles.add(x)); if (ajoute) S.styles.add(k); moods.forEach(m => S.moods.add(m)); artistes.forEach(a => S.artists.add(a)); }, false);
 });
 elMoods.addEventListener("click", e => {
   const btn = e.target.closest("[data-mood]"); if(!btn) return;
   const k = btn.dataset.mood;
   // le mood se croise avec les styles choisis ; un second clic le retire, les styles restent
-  const styles = [...S.styles], ajoute = !S.moods.has(k);
-  choisirFiltre(() => { styles.forEach(x => S.styles.add(x)); if (ajoute) S.moods.add(k); }, false);
+  const styles = [...S.styles], artistes = [...S.artists], ajoute = !S.moods.has(k);
+  choisirFiltre(() => { styles.forEach(x => S.styles.add(x)); artistes.forEach(a => S.artists.add(a)); if (ajoute) S.moods.add(k); }, false);
 });
 document.getElementById("hot").addEventListener("click", e => {
   const b = e.target.closest("[data-hot]"); if(!b) return;
@@ -3667,7 +3673,7 @@ function renderArtistChips(){
   const liste = parPortee(LIVE_ARTISTS, a => nArtiste(a.id))
     .filter(a => dansPortee(nArtiste(a.id), S.artists.has(a.id)) && (!q || norm(a.name).includes(q)));
   document.getElementById("artN").textContent = PORTEE && PORTEE.likes
-    ? `${Object.keys(PORTEE.artist).filter(id => ARTIST_NAME[id]).length} dans tes likes` : `${LIVE_ARTISTS.length} artistes`;
+    ? `${Object.keys(PORTEE.artist).filter(id => ARTIST_NAME[id]).length} dans tes likes` : `${PORTEE ? Object.keys(PORTEE.artist).filter(id => ARTIST_NAME[id]).length : LIVE_ARTISTS.length} artistes`;
   elArtistes.innerHTML = liste.map(a =>
     `<button class="chip${photoArtiste(a.id) ? " avec-ph" : ""}" data-artist="${esc(a.id)}" aria-pressed="${S.artists.has(a.id)}" style="--c:${cssVar(a.style)}">${photoArtiste(a.id)
       ? `<img class="ph" src="${esc(photoArtiste(a.id).replace("1000x1000", "56x56"))}" alt="" loading="lazy">` : '<span class="dot"></span>'}${esc(a.name)}<span class="n">${nArtiste(a.id)}</span></button>`).join("");
@@ -3678,11 +3684,12 @@ if (LIVE_ARTISTS.length) {
   document.getElementById("artN").textContent = `${LIVE_ARTISTS.length} artistes`;
   renderArtistChips();
   artQ.addEventListener("input", renderArtistChips);
-  // un artiste a la fois, comme style et mood : choisir remplace, recliquer retire
+  // un artiste a la fois : choisir remplace, recliquer retire ; le style et le mood restent
   elArtistes.addEventListener("click", e => {
     const btn = e.target.closest("[data-artist]"); if (!btn) return;
     const k = btn.dataset.artist;
-    choisirFiltre(() => S.artists.add(k), S.artists.has(k));
+    const styles = [...S.styles], moods = [...S.moods], ajoute = !S.artists.has(k);
+    choisirFiltre(() => { styles.forEach(x => S.styles.add(x)); moods.forEach(m => S.moods.add(m)); if (ajoute) S.artists.add(k); }, false);
     artQ.value = ""; renderArtistChips();
   });
 }

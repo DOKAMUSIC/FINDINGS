@@ -3947,7 +3947,12 @@ const STUDIO = (() => {
   btnEnt.onclick = async e => { e.stopPropagation();
     if (!menuEnt.hidden) return fermerEnt();
     if (!navigator.mediaDevices) { message("Ce navigateur ne permet pas d'enregistrer le micro"); return; }
-    await peindreEntrees(); menuEnt.hidden = false; btnEnt.setAttribute("aria-expanded", "true"); testerEntree(); };
+    await peindreEntrees(); menuEnt.hidden = false; btnEnt.setAttribute("aria-expanded", "true");
+    // sur telephone, le menu ouvert a gauche du bouton sortirait de l'ecran : on le ramene
+    menuEnt.style.left = ""; menuEnt.style.width = Math.min(300, innerWidth - 24) + "px";
+    const hors = menuEnt.getBoundingClientRect().right - (innerWidth - 12);
+    if (hors > 0) menuEnt.style.left = -hors + "px";
+    testerEntree(); };
   menuEnt.addEventListener("click", async e => {
     e.stopPropagation();
     if (e.target.closest("[data-autoriser]")) {
